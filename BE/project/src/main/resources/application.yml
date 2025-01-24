@@ -1,22 +1,3 @@
 spring:
   application:
     name: project
-
-  # 데이터베이스 설정
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/
-    username: ssafy
-    password: ssafy
-
-  # ?? ??
-  logging.level.org.springframework=info
-  logging.level.org.zerock=debug
-  
-  # JPA ??
-  spring.jpa.hibernate.ddl-auto=create
-  spring.jpa.properties.hibernate.format_sql=true
-  spring.jpa.show-sql=true
-  
-  # JWT ??? ??
-  jwt.secret=64461f01e1af406da538b9c48d801ce59142452199ff112fb5404c8e7e98e3ff
