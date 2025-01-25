@@ -33,3 +33,10 @@ logging:
     org:
       springframework: info
     com.ssafy.project: debug
+
+jwt:
+  secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
+  access-token:
+    expire-time: 1800000 # 30분
+  refresh-token:
+    expire-time: 259200000 # 3일
