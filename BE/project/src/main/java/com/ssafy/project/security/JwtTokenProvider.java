@@ -113,7 +113,7 @@ public class JwtTokenProvider {
     }
 
     /// JWT 토큰 복호화 (Claim 가져오기)
-    private Claims parseClaims(String token) {
+    public Claims parseClaims(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
