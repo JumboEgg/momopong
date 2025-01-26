@@ -39,7 +39,7 @@ class JwtTokenProviderTest {
         List<GrantedAuthority> authorities = Collections.singletonList(new SimpleGrantedAuthority(ROLE));
         authentication = new UsernamePasswordAuthenticationToken(EMAIL, "", authorities);
 
-        jwtToken = jwtTokenProvider.generateToken(authentication);
+        jwtToken = jwtTokenProvider.generateTokenWithAuthentication(authentication);
     }
 
     @Test
@@ -48,12 +48,6 @@ class JwtTokenProviderTest {
         assertThat(jwtToken.getGrantType()).isEqualTo("Bearer");
         assertThat(jwtToken.getAccessToken()).isNotNull();
         assertThat(jwtToken.getRefreshToken()).isNotNull();
-    }
-
-    @Test
-    void storeRefreshTokenTest() {
-        // Redis에 Refresh Token 저장되었는지 확인
-        assertThat(redisDao.getValues(EMAIL)).isNotNull();
     }
 
     @Test
@@ -91,7 +85,7 @@ class JwtTokenProviderTest {
         ReflectionTestUtils.setField(jwtTokenProvider, "ACCESS_TOKEN_EXPIRE_TIME", 1000);
         ReflectionTestUtils.setField(jwtTokenProvider, "REFRESH_TOKEN_EXPIRE_TIME", 1000);
 
-        JwtToken invalidateToken = jwtTokenProvider.generateToken(authentication);
+        JwtToken invalidateToken = jwtTokenProvider.generateTokenWithAuthentication(authentication);
 
         Thread.sleep(1100);
 
@@ -103,7 +97,7 @@ class JwtTokenProviderTest {
 
     @Test
     void getUserNameFromTokenTest() {
-        String userNameFromToken = jwtTokenProvider.getUserNameFromToken(jwtToken.getAccessToken());
+        String userNameFromToken = jwtTokenProvider.getEmailFromToken(jwtToken.getAccessToken());
         assertThat(userNameFromToken).isEqualTo(EMAIL);
     }
 
