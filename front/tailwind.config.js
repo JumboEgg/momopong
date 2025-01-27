@@ -1,9 +1,11 @@
 export default {
   content: [
-    './src/**/*.{html,js,jsx,ts,tsx}', // Tailwind가 적용될 파일 경로
+    './src/app/**/*.{js,ts,jsx,tsx.mdx}',
+    './src/pages/**/*.{js,ts,jsx,tsx.mdx}',
+    './src/components/**/*.{js,ts,jsx,tsx.mdx}',
   ],
   theme: {
     extend: {},
-  },
-  plugins: [],
+    plugins: [],
+  }
 }

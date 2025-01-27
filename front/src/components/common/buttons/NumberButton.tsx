@@ -1,29 +1,29 @@
 import { ReactNode } from 'react';
 
 interface NumberButtonProps {
-  // value prop은 문자열 및 React 요소 모두 받아야 함
   value: string | ReactNode;
-  onClick: (value: string) => void;
+  onClick: () => void;
+  variant: 'defualt' | 'action';
 }
 
-function NumberButton({ value, onClick }: NumberButtonProps) {
-  const handleClick = () => {
-    if (typeof value === 'string') {
-      onClick(value);
-    }
-  };
+function NumberButton({ value, onClick, variant = 'default' }: NumberButtonProps) {
+  // variant에 따른 스타일 분기
+  const buttonStyle = {
+    default: 'bg-[#FCD34D] hover:bg-[#F5EA4F] hover:border-[#FFC95E] ',
+    action: 'bg-[#FFB31A] hover:bg-[#FECC68] hover:border-[#FFC95E] hover:text-[#474747]', // delete, enter 색 다르게
+  }[variant];
+
   return (
     <button
       type="button"
-      className="rounded-full
-        bg-[#FCD34D] hover:bg-[#FFF781]
-        border-8 border-[#FFB31A] hover:border-[#FFC95E]
-        hover:text-gray-500
+      className={`rounded-full
+        ${buttonStyle}
+        border-8 border-[#FFB31A]
         flex items-center justify-center
         min-w-[75px] min-h-[75px]
-        font-['KCC-Ganpan']"
+        font-['KCC-Ganpan']`}
       style={{ fontSize: '2rem', fontWeight: 500 }}
-      onClick={handleClick}
+      onClick={onClick} // 직접 onClick prop 사용
     >
       <span>{value}</span>
     </button>

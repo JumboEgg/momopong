@@ -15,6 +15,7 @@
     "react-hooks"
   ],
   "rules": {
+    "linebreak-style": ["error", "windows"],
     "import/extensions": [
     "error",
     "ignorePackages",
@@ -46,7 +47,7 @@
   },
   "overrides": [
     {
-      "files": ["vite.config.ts", "tailwind.config.js"],
+      "files": ["vite.config.ts", "tailwind.config.js", "postcss.config.js"],
       "parserOptions": {
         "project": null
       }

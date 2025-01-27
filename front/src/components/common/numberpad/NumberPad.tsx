@@ -8,6 +8,11 @@ interface NumberPadProps {
   onClear: () => void;
 }
 
+const getVariant = (id: string): 'default' | 'delete' | 'enter' => {
+  if (id === 'delete' || id === 'enter') return 'action';
+  return 'default';
+};
+
 function NumberPad({ onNumberClick, onSubmit, onClear }: NumberPadProps): JSX.Element {
   // 각 버튼에 대한 핸들러 정의
   const handleClick = (id: string) => {
@@ -42,6 +47,7 @@ function NumberPad({ onNumberClick, onSubmit, onClear }: NumberPadProps): JSX.El
           <NumberButton
             value={value}
             onClick={onClick}
+            variant={getVariant(id)}
           />
         </div>
       ))}

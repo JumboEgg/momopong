@@ -6,6 +6,7 @@ import Story from './pages/Story';
 import MyHouse from './pages/MyHouse';
 import Profile from './pages/Profile';
 import Friends from './pages/Friends';
+import Parent from './pages/Parent';
 
 function App(): JSX.Element {
   return (
@@ -17,6 +18,7 @@ function App(): JSX.Element {
         <Route path="house" element={<MyHouse />} />
         <Route path="profile" element={<Profile />} />
         <Route path="friends" element={<Friends />} />
+        <Route path="parent" element={<Parent />} />
       </Route>
     </Routes>
   );
