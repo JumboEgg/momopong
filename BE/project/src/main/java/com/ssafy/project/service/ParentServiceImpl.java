@@ -6,7 +6,7 @@ import com.ssafy.project.dto.LoginRequestDto;
 import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateParentEmailException;
 import com.ssafy.project.exception.InvalidRefreshTokenException;
-import com.ssafy.project.exception.ParentNotFoundException;
+import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
 import com.ssafy.project.security.JwtToken;
 import com.ssafy.project.security.JwtTokenProvider;
@@ -68,7 +68,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public ParentDto readParentById(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
-                .orElseThrow(() -> new ParentNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
 
         return parent.entityToDto(parent);
     }
@@ -76,7 +76,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public ParentDto readParentByEmail(String email) {
         Parent parent = parentRepository.findByEmail(email)
-                .orElseThrow(() -> new ParentNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
 
         return parent.entityToDto(parent);
     }
@@ -95,7 +95,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public ParentDto updateParent(Long parentId, ParentDto parentDto) {
         Parent parent = parentRepository.findById(parentId)
-                .orElseThrow(() -> new ParentNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
 
         parent.updateParent(parentDto.getName(), parentDto.getPhone());
         return parent.entityToDto(parent);

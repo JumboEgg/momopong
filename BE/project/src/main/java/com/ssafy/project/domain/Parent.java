@@ -31,8 +31,9 @@ public class Parent implements UserDetails {
     @Column(name = "parent_id")
     private Long id;
 
+    @Builder.Default
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Child> children;
+    private List<Child> children = new ArrayList<>();
 
     @Email
     @NotNull

@@ -53,7 +53,7 @@ public class ParentController {
 
     // 회원 조회
     @GetMapping("/{parentId}")
-    public ResponseEntity<ParentDto> readParent(@PathVariable Long parentId) {
+    public ResponseEntity<ParentDto> readParent(@PathVariable("parentId") Long parentId) {
         ParentDto parentDto = parentService.readParentById(parentId);
 
         return ResponseEntity.ok(parentDto);
@@ -61,7 +61,7 @@ public class ParentController {
 
     // 회원 정보 수정
     @PatchMapping("/{parentId}")
-    public ResponseEntity<ParentDto> updateParent(@PathVariable Long parentId, @RequestBody ParentDto parentDto) {
+    public ResponseEntity<ParentDto> updateParent(@PathVariable("parentId") Long parentId, @RequestBody ParentDto parentDto) {
         if (!parentId.equals(parentDto.getParentId()))
             throw new IllegalArgumentException("본인 정보만 수정할 수 있습니다");
 
@@ -71,7 +71,7 @@ public class ParentController {
 
     // 회원 탈퇴
     @DeleteMapping("/{parentId}")
-    public ResponseEntity<Void> deleteParent(@PathVariable Long parentId) {
+    public ResponseEntity<Void> deleteParent(@PathVariable("parentId") Long parentId) {
         parentService.deleteParent(parentId);
 
         return new ResponseEntity<>(HttpStatus.OK);
