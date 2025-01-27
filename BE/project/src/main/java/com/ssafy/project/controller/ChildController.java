@@ -6,6 +6,7 @@ import com.ssafy.project.dto.ChildUpdateRequestDto;
 import com.ssafy.project.dto.SignUpResponseDto;
 import com.ssafy.project.service.ChildService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,5 +41,13 @@ public class ChildController {
 
         ChildDto updateChild = childService.updateChild(childId, updateRequestDto);
         return ResponseEntity.ok(updateChild);
+    }
+
+    // 자식 삭제
+    @DeleteMapping("/{childId}")
+    public ResponseEntity<Void> deleteChild(@PathVariable("childId") Long childId) {
+        childService.deleteChild(childId);
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

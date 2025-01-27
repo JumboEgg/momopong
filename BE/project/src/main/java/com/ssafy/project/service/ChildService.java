@@ -14,4 +14,7 @@ public interface ChildService {
 
     // 자식 계정 접속
     ChildDto login(Long childId);
+
+    // 자식 계정 삭제
+    void deleteChild(Long childId);
 }

@@ -1,5 +1,6 @@
 package com.ssafy.project.service;
 
+import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
 import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.LoginRequestDto;
@@ -29,6 +30,7 @@ public class ParentServiceImpl implements ParentService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
+    private final ChildService childService;
 
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
@@ -87,12 +89,11 @@ public class ParentServiceImpl implements ParentService {
     public JwtToken checkRefreshToken(String accessToken, String refreshToken) {
         // Refresh Token이 유효하지 않은 경우
         if (refreshToken == null || !jwtTokenProvider.validateRefreshToken(refreshToken))
-            throw new InvalidTokenException("Refresh Token은 null이 될 수 없습니다");
+            throw new InvalidTokenException("유효하지 않은 Refresh Token입니다");
 
-        // Access Token이 유효하지 않은 경우
-        if (accessToken == null || !jwtTokenProvider.validateToken(accessToken)) {
-            throw new InvalidTokenException("Access Token은 null이 될 수 없습니다");
-        }
+        // Access Token이 유효하지 않은 경우 (null이거나 블랙리스트에 존재함)
+        if (accessToken == null || tokenBlacklistService.isBlacklisted(accessToken))
+            throw new InvalidTokenException("유효하지 않은 Access Token입니다");
 
         // 블랙리스트에 이전 accessToken 넣기
         tokenBlacklistService.addBlacklist(accessToken);
@@ -116,6 +117,11 @@ public class ParentServiceImpl implements ParentService {
         // 논리적 삭제
         Parent parent = parentRepository.findById(parentId)
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
+
+        // 이렇게 하면 N + 1 문제 발생한다고 함
+        for (Child child : parent.getChildren()) {
+            childService.deleteChild(child.getId());
+        }
 
         parent.deleteParent();
     }

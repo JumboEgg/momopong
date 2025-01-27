@@ -32,7 +32,7 @@ public class Parent implements UserDetails {
     private Long id;
 
     @Builder.Default
-    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "parent")
     private List<Child> children = new ArrayList<>();
 
     @Email

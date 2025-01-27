@@ -29,7 +29,6 @@ public class JwtTokenProvider {
     private final Key key;
     private final UserDetailsService userDetailsService;
     private final RedisDao redisDao;
-    private final TokenBlacklistService tokenBlacklistService;
 
     @Value("${jwt.access-token.expire-time}")
     private long ACCESS_TOKEN_EXPIRE_TIME;
@@ -39,13 +38,11 @@ public class JwtTokenProvider {
 
     private static final String GRANT_TYPE = "Bearer";
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService, RedisDao redisDao,
-                            TokenBlacklistService tokenBlacklistService) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, UserDetailsService userDetailsService, RedisDao redisDao) {
         byte[] keyBytes = Base64.getEncoder().encode(secretKey.getBytes());
         this.key = Keys.hmacShaKeyFor(keyBytes);
         this.userDetailsService = userDetailsService;
         this.redisDao = redisDao;
-        this.tokenBlacklistService = tokenBlacklistService;
     }
 
     // Access Token, Refresh Token 생성하기
@@ -150,9 +147,7 @@ public class JwtTokenProvider {
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token);
-
-            // JWT 블랙리스트에 존재하는지 확인
-            return !tokenBlacklistService.isBlacklisted(token);
+            return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.warn("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {

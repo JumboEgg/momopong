@@ -2,6 +2,7 @@ package com.ssafy.project.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -28,5 +29,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({IllegalArgumentException.class, UserNotFoundException.class, ChildLimitExceededException.class})
     public ResponseEntity<String> handleIllegalArgumentException(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다: " + e.getMessage());
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<String> handleDisabledException(DisabledException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
     }
 }

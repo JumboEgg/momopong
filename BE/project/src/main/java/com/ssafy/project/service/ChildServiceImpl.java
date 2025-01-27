@@ -93,4 +93,10 @@ public class ChildServiceImpl implements ChildService {
 
         return childDto;
     }
+
+    @Override
+    @Transactional
+    public void deleteChild(Long childId) {
+        childRepository.deleteById(childId);
+    }
 }
