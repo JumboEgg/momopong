@@ -274,4 +274,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
+.eslintcache
+
 # End of https://www.toptal.com/developers/gitignore/api/macos,windows,visualstudiocode,intellij,eclipse,react

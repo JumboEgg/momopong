@@ -1,60 +1,95 @@
-import React, { useEffect, forwardRef, useRef } from "react"
-import { useStory } from "@/components/stories/contexts/StoryContext"
+import React, {
+  useEffect,
+  forwardRef,
+  useRef,
+  useCallback,
+} from 'react';
+
+import { useStory } from '@/components/stories/contexts/StoryContext';
 
 interface AudioPlayerProps {
-  audioUrl: string
-  autoPlay?: boolean
-  onEnded?: () => void
+  audioUrl: string;
+  autoPlay: boolean;
+  onEnded: () => void;
 }
 
-export const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(({ audioUrl, autoPlay = true, onEnded }, ref) => {
-  const { audioEnabled } = useStory()
-  const playAttemptRef = useRef<NodeJS.Timeout>()
+const AudioPlayer = forwardRef<HTMLAudioElement, AudioPlayerProps>(
+  ({ audioUrl, autoPlay = true, onEnded }, ref) => {
+    const { audioEnabled } = useStory();
+    const playAttemptRef = useRef<NodeJS.Timeout>();
+    const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  useEffect(() => {
-    const audioElement = ref as React.MutableRefObject<HTMLAudioElement | null>
-    if (audioElement?.current) {
-      audioElement.current.volume = audioEnabled ? 1 : 0
+    const handlePlay = useCallback(() => {
+      if (!audioRef.current) return;
+
+      audioRef.current.volume = audioEnabled ? 1 : 0;
 
       if (autoPlay && audioEnabled) {
-        // 이전 재생 시도를 취소
+        // Cancel previous play attempt
         if (playAttemptRef.current) {
-          clearTimeout(playAttemptRef.current)
+          clearTimeout(playAttemptRef.current);
         }
 
-        // 약간의 지연 후 재생 시도
+        // Attempt to play with a slight delay
         playAttemptRef.current = setTimeout(() => {
-          if (audioElement.current) {
-            audioElement.current.play().catch((e) => {
-              if (e.name !== "AbortError") {
-                console.error("Autoplay failed:", e)
+          if (audioRef.current) {
+            audioRef.current.play().catch((error) => {
+              if (error.name !== 'AbortError') {
+                // console.error('Autoplay failed:', error);
               }
-            })
+            });
           }
-        }, 100)
+        }, 100);
       }
-    }
+    }, [audioEnabled, autoPlay]);
 
-    // cleanup 함수
-    return () => {
-      if (playAttemptRef.current) {
-        clearTimeout(playAttemptRef.current)
+    useEffect(() => {
+      // Combine refs
+      if (typeof ref === 'function') {
+        ref(audioRef.current);
+      } else if (ref) {
+        // eslint-disable-next-line no-param-reassign
+        ref.current = audioRef.current;
       }
-      const audio = audioElement?.current
-      if (audio) {
-        audio.pause()
-        audio.currentTime = 0
-      }
-    }
-  }, [audioUrl, audioEnabled, autoPlay, ref])
 
-  return (
-    <div className="mt-4">
-      <audio ref={ref} src={audioUrl} controls className="w-full" onEnded={onEnded} onError={(e) => console.error("Audio error:", e)}>
-        <p>Your browser doesn't support HTML5 audio.</p>
-      </audio>
-    </div>
-  )
-})
+      handlePlay();
 
-AudioPlayer.displayName = "AudioPlayer"
+      // Cleanup function
+      return () => {
+        if (playAttemptRef.current) {
+          clearTimeout(playAttemptRef.current);
+        }
+
+        const audio = audioRef.current;
+        if (audio) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      };
+    }, [audioUrl, audioEnabled, autoPlay, ref, handlePlay]);
+
+    const handleError = useCallback((event: React.SyntheticEvent<HTMLAudioElement, Event>) => {
+      console.error('Audio error:', event);
+    }, []);
+
+    return (
+      <div className="mt-4">
+        <audio
+          ref={audioRef}
+          src={audioUrl}
+          controls
+          className="w-full"
+          onEnded={onEnded}
+          onError={handleError}
+        >
+          <track kind="captions" src="" />
+          <p>Your browser does not support HTML5 audio.</p>
+        </audio>
+      </div>
+    );
+  },
+);
+
+AudioPlayer.displayName = 'AudioPlayer';
+
+export default AudioPlayer;

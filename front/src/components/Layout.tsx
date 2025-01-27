@@ -1,6 +1,6 @@
-import { Outlet, Link } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 
-const Layout = () => {
+function Layout() {
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-md">
@@ -18,6 +18,6 @@ const Layout = () => {
       </main>
     </div>
   );
-};
+}
 
 export default Layout;
