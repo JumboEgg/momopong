@@ -1,5 +1,5 @@
 # 1. Java 17 런타임 이미지를 기반으로 사용
-FROM openjdk:17-jre-slim
+FROM openjdk:17-jdk-slim
 
 # 2. 컨테이너 내부의 작업 디렉토리 설정
 WORKDIR /app
