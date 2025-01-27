@@ -2,13 +2,13 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.SignUpRequestDto;
+import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.security.JwtToken;
 
 public interface ParentService {
 
     // 부모 회원가입
-    Long signup(SignUpRequestDto signUpDto);
+    Long signup(ParentSignUpRequestDto signUpDto);
 
     // 중복 이메일 확인
     boolean checkDuplicateParent(String email);

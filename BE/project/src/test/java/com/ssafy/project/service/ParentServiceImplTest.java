@@ -4,13 +4,12 @@ import com.ssafy.project.domain.Parent;
 import com.ssafy.project.domain.type.RoleType;
 import com.ssafy.project.dto.LoginRequestDto;
 import com.ssafy.project.dto.ParentDto;
-import com.ssafy.project.dto.SignUpRequestDto;
+import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateParentEmailException;
 import com.ssafy.project.exception.ParentNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
 import com.ssafy.project.security.JwtToken;
 import jakarta.transaction.Transactional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +34,7 @@ class ParentServiceImplTest {
     @Test
     void signupTest() {
         // given
-        SignUpRequestDto signUpDto = SignUpRequestDto.builder()
+        ParentSignUpRequestDto signUpDto = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
                 .password("1234")
                 .name("홍길동")
@@ -60,14 +59,14 @@ class ParentServiceImplTest {
     @Test
     void checkDuplicateParentTest() {
         // given
-        SignUpRequestDto signUpDto1 = SignUpRequestDto.builder()
+        ParentSignUpRequestDto signUpDto1 = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
                 .password("1234")
                 .name("홍길동")
                 .phone("010-1111-2222")
                 .build();
 
-        SignUpRequestDto signUpDto2 = SignUpRequestDto.builder()
+        ParentSignUpRequestDto signUpDto2 = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
                 .password("5678")
                 .name("동길홍")
@@ -85,7 +84,7 @@ class ParentServiceImplTest {
     @Test
     void loginTest() {
         // given
-        SignUpRequestDto signUpDto = new SignUpRequestDto("hong@test.com", "1234", "홍길동", "010-1111-2222", RoleType.PARENT);
+        ParentSignUpRequestDto signUpDto = new ParentSignUpRequestDto("hong@test.com", "1234", "홍길동", "010-1111-2222", RoleType.PARENT);
         parentService.signup(signUpDto);
 
         // when
@@ -104,7 +103,7 @@ class ParentServiceImplTest {
     @Test
     void updateParentTest() {
         // given
-        SignUpRequestDto signUpDto = SignUpRequestDto.builder()
+        ParentSignUpRequestDto signUpDto = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
                 .password("1234")
                 .name("홍길동")

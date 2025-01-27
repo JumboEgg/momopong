@@ -18,7 +18,7 @@ public class ParentController {
 
     // 회원가입
     @PostMapping("/signup")
-    public ResponseEntity<SignUpResponseDto> signup(@Valid @RequestBody SignUpRequestDto signUpDto) {
+    public ResponseEntity<SignUpResponseDto> signup(@Valid @RequestBody ParentSignUpRequestDto signUpDto) {
         Long saved = parentService.signup(signUpDto);
         SignUpResponseDto responseDto = new SignUpResponseDto(saved);
 

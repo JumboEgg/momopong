@@ -3,7 +3,7 @@ package com.ssafy.project.service;
 import com.ssafy.project.domain.Parent;
 import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.SignUpRequestDto;
+import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateParentEmailException;
 import com.ssafy.project.exception.InvalidRefreshTokenException;
 import com.ssafy.project.exception.ParentNotFoundException;
@@ -29,7 +29,7 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
 
     @Override
-    public Long signup(SignUpRequestDto signUpDto) {
+    public Long signup(ParentSignUpRequestDto signUpDto) {
         if (checkDuplicateParent(signUpDto.getEmail()))
             throw new DuplicateParentEmailException("이미 사용중인 이메일입니다");
 
