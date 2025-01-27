@@ -6,10 +6,11 @@ import com.ssafy.project.dto.LoginRequestDto;
 import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateParentEmailException;
-import com.ssafy.project.exception.ParentNotFoundException;
+import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
 import com.ssafy.project.security.JwtToken;
 import jakarta.transaction.Transactional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,7 +33,8 @@ class ParentServiceImplTest {
     private PasswordEncoder passwordEncoder;
 
     @Test
-    void signupTest() {
+    @DisplayName("부모 회원가입에 성공한다")
+    void 부모_회원가입_성공() {
         // given
         ParentSignUpRequestDto signUpDto = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
@@ -44,7 +46,7 @@ class ParentServiceImplTest {
         // when
         Long savedId = parentService.signup(signUpDto);
         Parent findParent = parentRepository.findById(savedId)
-                .orElseThrow(() -> new RuntimeException("회원가입 실패"));
+                .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
         // then
        assertThat(findParent)
@@ -57,7 +59,8 @@ class ParentServiceImplTest {
     }
 
     @Test
-    void checkDuplicateParentTest() {
+    @DisplayName("이메일이 중복되면 예외가 터져야 한다")
+    void 이메일_중복확인() {
         // given
         ParentSignUpRequestDto signUpDto1 = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
@@ -82,7 +85,8 @@ class ParentServiceImplTest {
     }
 
     @Test
-    void loginTest() {
+    @DisplayName("부모 로그인에 성공한다")
+    void 부모_로그인_성공() {
         // given
         ParentSignUpRequestDto signUpDto = new ParentSignUpRequestDto("hong@test.com", "1234", "홍길동", "010-1111-2222", RoleType.PARENT);
         parentService.signup(signUpDto);
@@ -101,7 +105,8 @@ class ParentServiceImplTest {
     }
 
     @Test
-    void updateParentTest() {
+    @DisplayName("부모 회원정보 수정에 성공한다")
+    void 부모_회원정보_수정_성공() {
         // given
         ParentSignUpRequestDto signUpDto = ParentSignUpRequestDto.builder()
                 .email("hong@test.com")
@@ -118,11 +123,11 @@ class ParentServiceImplTest {
                 .name("홍홍홍")
                 .phone("010-1111-1111")
                 .build();
-        ParentDto updatedParent = parentService.updateParent(saved, parentDto);
+        parentService.updateParent(saved, parentDto);
 
         // then
         Parent findParent = parentRepository.findById(saved)
-                .orElseThrow(() -> new ParentNotFoundException("부모 정보를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("부모 정보를 찾을 수 없습니다"));
 
         assertThat(findParent)
                 .satisfies(parent -> {
