@@ -2,6 +2,7 @@ package com.ssafy.project.domain;
 
 import com.ssafy.project.domain.type.GenderType;
 import com.ssafy.project.domain.type.StatusType;
+import com.ssafy.project.dto.ChildDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;
@@ -11,8 +12,8 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Period;
+import java.time.temporal.ChronoUnit;
 
 @Entity
 @Getter
@@ -36,11 +37,13 @@ public class Child {
     @NotNull
     @Size(min = 1, max = 50)
     private String name;
+
     private String profile;
 
     @NotNull
     @Past
     private LocalDate birth;
+
     private String code;
 
     @Enumerated(EnumType.STRING)
@@ -50,17 +53,22 @@ public class Child {
     private GenderType gender;
 
     @Builder.Default
-    private boolean login = false;
+    private boolean login = false; // 이거 필요없을 것 같음 그냥 상태로 오프라인이면 로그인 X, 아니면 로그인 O 이렇게 판별하면 될 듯
 
     @Builder.Default
     private boolean firstLogin = false;
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    private LocalDate createdAt;
 
     // 나이 계산 메서드
     public int getAge() {
-        return Period.between(this.birth, LocalDate.from(LocalDateTime.now())).getYears();
+        return Period.between(this.birth, LocalDate.now()).getYears();
+    }
+
+    // 시작일로부터 D-day 계산 메서드
+    public int getDaysSinceStart() {
+        return (int) ChronoUnit.DAYS.between(this.createdAt, LocalDate.now()) + 1;
     }
 
     public void updateLoginStatus(boolean login) {
@@ -71,9 +79,27 @@ public class Child {
         this.firstLogin = firstLogin;
     }
 
+    public void updateChild(String name, String profile) {
+        this.name = name;
+        this.profile = profile;
+    }
+
     // 연관관계 편의 메서드 (양방향)
     public void changeParent(Parent parent) {
         this.parent = parent;
         parent.getChildren().add(this);
+    }
+
+    // Entity to Dto
+    public ChildDto entityToDto(Child child) {
+        return ChildDto.builder()
+                .childId(child.getId())
+                .name(child.getName())
+                .profile(child.getProfile())
+                .age(child.getAge())
+                .daysSinceStart(child.getDaysSinceStart())
+                .code(child.getCode())
+                .firstLogin(child.isFirstLogin())
+                .build();
     }
 }
