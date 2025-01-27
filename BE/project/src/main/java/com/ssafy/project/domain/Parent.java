@@ -104,4 +104,9 @@ public class Parent implements UserDetails {
                 .phone(parent.getPhone())
                 .build();
     }
+
+    // 논리적 삭제
+    public void deleteParent() {
+        this.deleted = true;
+    }
 }

@@ -17,7 +17,7 @@ public interface ParentService {
     JwtToken login(LoginRequestDto loginDto);
 
     // 리프레시 토큰
-    JwtToken checkRefreshToken(String refreshToken);
+    JwtToken checkRefreshToken(String accessToken, String refreshToken);
 
     // 부모 조회
     ParentDto readParentById(Long parentId);

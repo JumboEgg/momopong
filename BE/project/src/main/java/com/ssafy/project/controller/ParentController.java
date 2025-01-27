@@ -38,8 +38,8 @@ public class ParentController {
 
     // Refresh Token 재발급
     @PostMapping("/refresh-token")
-    public ResponseEntity<JwtToken> refreshToken(@RequestHeader("Refresh-Token") String refreshToken) {
-        JwtToken jwtToken = parentService.checkRefreshToken(refreshToken);
+    public ResponseEntity<JwtToken> refreshToken(@RequestHeader("Access-Token") String accessToken, @RequestHeader("Refresh-Token") String refreshToken) {
+        JwtToken jwtToken = parentService.checkRefreshToken(accessToken, refreshToken);
         return ResponseEntity.ok(jwtToken);
     }
 

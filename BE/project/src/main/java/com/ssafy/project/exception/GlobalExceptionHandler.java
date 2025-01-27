@@ -20,9 +20,9 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    @ExceptionHandler(InvalidRefreshTokenException.class)
-    public ResponseEntity<String> handleInvalidateRefreshTokenException(InvalidRefreshTokenException e) {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 Refresh Token입니다: " + e.getMessage());
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<String> handleInvalidateTokenException(InvalidTokenException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않은 토큰입니다: " + e.getMessage());
     }
 
     @ExceptionHandler({IllegalArgumentException.class, UserNotFoundException.class, ChildLimitExceededException.class})

@@ -5,11 +5,12 @@ import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.LoginRequestDto;
 import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateParentEmailException;
-import com.ssafy.project.exception.InvalidRefreshTokenException;
+import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
 import com.ssafy.project.security.JwtToken;
 import com.ssafy.project.security.JwtTokenProvider;
+import com.ssafy.project.security.TokenBlacklistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +28,7 @@ public class ParentServiceImpl implements ParentService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final TokenBlacklistService tokenBlacklistService;
 
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
@@ -68,7 +70,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public ParentDto readParentById(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
         return parent.entityToDto(parent);
     }
@@ -76,16 +78,24 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public ParentDto readParentByEmail(String email) {
         Parent parent = parentRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
         return parent.entityToDto(parent);
     }
 
     @Override
-    public JwtToken checkRefreshToken(String refreshToken) {
+    public JwtToken checkRefreshToken(String accessToken, String refreshToken) {
         // Refresh Token이 유효하지 않은 경우
         if (refreshToken == null || !jwtTokenProvider.validateRefreshToken(refreshToken))
-            throw new InvalidRefreshTokenException("Refresh Token은 null이 될 수 없습니다");
+            throw new InvalidTokenException("Refresh Token은 null이 될 수 없습니다");
+
+        // Access Token이 유효하지 않은 경우
+        if (accessToken == null || !jwtTokenProvider.validateToken(accessToken)) {
+            throw new InvalidTokenException("Access Token은 null이 될 수 없습니다");
+        }
+
+        // 블랙리스트에 이전 accessToken 넣기
+        tokenBlacklistService.addBlacklist(accessToken);
 
         // Access Token & Refresh Token 재발급
         String userNameFromToken = jwtTokenProvider.getEmailFromToken(refreshToken);
@@ -95,7 +105,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public ParentDto updateParent(Long parentId, ParentDto parentDto) {
         Parent parent = parentRepository.findById(parentId)
-                .orElseThrow(() -> new UserNotFoundException("사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
         parent.updateParent(parentDto.getName(), parentDto.getPhone());
         return parent.entityToDto(parent);
@@ -103,7 +113,11 @@ public class ParentServiceImpl implements ParentService {
 
     @Override
     public void deleteParent(Long parentId) {
-        parentRepository.deleteById(parentId);
+        // 논리적 삭제
+        Parent parent = parentRepository.findById(parentId)
+                .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
+
+        parent.deleteParent();
     }
 
     @Override
