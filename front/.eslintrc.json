@@ -15,7 +15,7 @@
     "react-hooks"
   ],
   "rules": {
-    "linebreak-style": ["error", "unix"],
+    "linebreak-style": "off",
     "import/extensions": [
     "error",
     "ignorePackages",
@@ -28,6 +28,7 @@
   ],
     "no-var": "warn", // var 금지
     "react/react-in-jsx-scope": "off",
+    "react/require-default-props": "off",
     "react/function-component-definition": ["error", {
       "namedComponents": "function-declaration"
     }],

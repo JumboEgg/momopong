@@ -17,11 +17,11 @@ function ButtonDemo(): JSX.Element {
           <h2 className="text-xl font-bold mb-4">White Background</h2>
           <div className="space-y-4">
             <div className="flex gap-4 items-center">
-              {/* hasFocus 옵션을 false로 부여하면 포커스가 동작하지 않습니다 */}
-              <TextButton size="sm" variant="white" className="" hasFocus={false}>
+              {/* hasFocus 옵션을 적지 않으면 포커스가 동작하지 않습니다 */}
+              <TextButton size="sm" variant="white" className="">
                 텍스트
               </TextButton>
-              <TextButton size="md" variant="white" className="">텍스트</TextButton>
+              <TextButton size="md" variant="white" className="" hasFocus>텍스트</TextButton>
               <TextButton size="lg" variant="white" className="">텍스트</TextButton>
               <TextButton size="xl" variant="white" className="">텍스트</TextButton>
             </div>

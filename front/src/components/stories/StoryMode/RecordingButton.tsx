@@ -60,7 +60,7 @@ function RecordingButton({
       setIsRecording(true);
       setTimeLeft(20);
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      // console.error('Failed to start recording:', error);
     }
   }, [addRecording, characterType, storyIndex, onRecordingComplete]);
 

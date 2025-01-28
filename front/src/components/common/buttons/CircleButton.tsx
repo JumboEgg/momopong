@@ -27,7 +27,7 @@ const sizeClasses: Record<CircleButtonSize, string> = {
 
 const sizeToIconSize: Record<CircleButtonSize, string> = {
   sm: 'lg',
-  base: 'xl',
+  base: 'lg',
   md: 'xl',
   lg: '2x',
 };
@@ -89,7 +89,7 @@ function TextCircleButton({
   disabled = false,
   hasFocus = false,
   onClick,
-}: TextCircleButtonProps) {
+}: TextCircleButtonProps): JSX.Element {
   return (
     <div className="flex flex-col items-center gap-1">
       <IconCircleButton
