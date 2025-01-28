@@ -1,9 +1,19 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NumberPad from '@/components/common/numberpad/NumberPad';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+  faXmark,
+} from '@fortawesome/free-solid-svg-icons';
+
+interface ParentAuthModalProps {
+  // 모달 상태 제어하는 함수 받아옴
+  onClose: () => void;
+}
 
 // 모달 컴포넌트
-function ParentAuthModal(): JSX.Element {
+function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
   const navigate = useNavigate();
 
   const getRandom = (min: number, max: number) => Math.floor(Math.random() * (max - min) + min);
@@ -37,23 +47,34 @@ function ParentAuthModal(): JSX.Element {
     }
   };
 
+  const handleClose = () => {
+    onClose();
+  };
+
   return (
     <div
-      className="fixed top-0 left-0 w-full h-full z-50
+      className="fixed top-0 left-0 w-full h-full z-40
       bg-[#00000060]
       flex items-center justify-center"
     >
       <div className="w-[750px] min-h-[490px] bg-[#FFF08E] border-10 border-white
-        flex items-center justify-around p-4 rounded-[2vw] overflow-hidden"
+        flex relative items-center justify-around p-4 rounded-[2vw] overflow-hidden"
       >
+        <IconCircleButton
+          icon={<FontAwesomeIcon icon={faXmark} size="lg" />}
+          size="sm"
+          variant="action"
+          className="absolute top-4 left-4 z-50"
+          onClick={handleClose}
+        />
         <div className="text-center mb-8">
           <h2>정답을 입력하세요</h2>
           <span>{num1}</span>
           <span>X</span>
           <span>{num2}</span>
           <span>= ?</span>
-          <p className="bg-white px-4 py-2 rounded-lg min-w-[60px]">
-            {userInput || '_'}
+          <p className="bg-white px-4 py-2 rounded-lg min-w-[60px] min-h-10">
+            {userInput}
           </p>
           {isCorrect === false && (
             <p className="text-red-600">틀렸습니다. 다시 입력해주세요.</p>

@@ -78,6 +78,13 @@ function HomePage() {
           />
           <p className="text-center text-xs mt-1">나의집</p>
         </button>
+        <button
+          type="button"
+          onClick={() => handleNavigation('/test')}
+          className="cursor-pointer flex flex-col items-center"
+        >
+          <p className="text-center text-xs mt-1 border-2">테스트</p>
+        </button>
       </div>
     </div>
   );
