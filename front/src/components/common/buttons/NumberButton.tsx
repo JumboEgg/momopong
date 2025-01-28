@@ -3,7 +3,7 @@ import { ReactNode } from 'react';
 interface NumberButtonProps {
   value: string | ReactNode;
   onClick: () => void;
-  variant: 'defualt' | 'action';
+  variant: 'default' | 'action';
 }
 
 function NumberButton({ value, onClick, variant = 'default' }: NumberButtonProps) {
