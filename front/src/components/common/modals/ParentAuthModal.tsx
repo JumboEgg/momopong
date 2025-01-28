@@ -53,7 +53,7 @@ function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
 
   return (
     <div
-      className="fixed top-0 left-0 w-full h-full z-40
+      className="fixed top-0 left-0 w-full h-full z-30
       bg-[#00000060]
       flex items-center justify-center"
     >
@@ -64,7 +64,7 @@ function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
           icon={<FontAwesomeIcon icon={faXmark} size="lg" />}
           size="sm"
           variant="action"
-          className="absolute top-4 left-4 z-50"
+          className="absolute top-4 left-4 z-35"
           onClick={handleClose}
         />
         <div className="text-center mb-8">
