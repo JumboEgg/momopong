@@ -8,7 +8,8 @@ function HomePage() {
   };
 
   return (
-    <div className="p-4 m-4">
+    // 최상위 div에 p / m 옵션을 주면 상단이 비어버리니 주의합니다
+    <div className="">
       <div className="flex justify-center gap-4">
         <button
           type="button"

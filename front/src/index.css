@@ -31,6 +31,22 @@
   --color-lavender-rose-400: #fe68be;
   --color-lavender-rose-500: #f83ca3;
   --color-lavender-rose-600: #e81a81;
+  /* sky */
+  --color-onahau-50: #ecfdff;
+  --color-onahau-100: #cdf7ff; /* main sky */
+  --color-onahau-200: #a3edfe;
+  /* baby yellow */
+  --color-witch-haze-50: #fefee8;
+  --color-witch-haze-100: #ffffc2;
+  --color-witch-haze-200: #fffc99; /* main baby-yellow */
+  --color-witch-haze-300: #fff245;
+  --color-witch-haze-400: #fce213;
+  /* mint */
+  --color-snowy-mint-50: #effef0;
+  --color-snowy-mint-100: #ceffd1;
+  --color-snowy-mint-200: #b5fdba;
+  --color-snowy-mint-300: #7cf986;
+
 }
 
 @font-face {

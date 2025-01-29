@@ -13,7 +13,7 @@ function Layout() {
           <li><Link to="/friends">친구관리</Link></li>
         </ul> */}
       </nav>
-      <main className="p-4">
+      <main className="">
         <Outlet />
       </main>
     </div>

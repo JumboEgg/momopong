@@ -13,8 +13,8 @@ interface ButtonProps {
 
 const textSizeClasses: Record<ButtonSize, string> = {
   sm: 'px-2.5 py-1 text-xl',
-  md: 'px-10 py-1.5 text-2xl',
-  lg: 'px-18 py-1.5 text-3xl',
+  md: 'px-6 py-1.5 text-2xl',
+  lg: 'px-10 py-1.5 text-3xl',
   xl: 'px-25 py-2 text-4xl',
 };
 
