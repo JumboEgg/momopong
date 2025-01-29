@@ -11,18 +11,20 @@ import Test from './pages/Test';
 
 function App(): JSX.Element {
   return (
-    <Routes>
-      <Route path="/" element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="drawing" element={<Drawing />} />
-        <Route path="story/*" element={<Story />} />
-        <Route path="house" element={<MyHouse />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="friends" element={<Friends />} />
-        <Route path="parent" element={<Parent />} />
-        <Route path="test" element={<Test />} />
-      </Route>
-    </Routes>
+    <div className="fixed inset-0 touch-none overflow-hidden">
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Home />} />
+          <Route path="drawing" element={<Drawing />} />
+          <Route path="story/*" element={<Story />} />
+          <Route path="house" element={<MyHouse />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="friends" element={<Friends />} />
+          <Route path="parent" element={<Parent />} />
+          <Route path="test" element={<Test />} />
+        </Route>
+      </Routes>
+    </div>
   );
 }
 

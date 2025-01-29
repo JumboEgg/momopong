@@ -1,10 +1,10 @@
-import ButtonDemo from '@/components/common/buttons/ButtonDemo';
+// import TextButton from '@/components/common/buttons/TextButton';
 
 function Profile() {
   return (
-    <div className="p-4">
+    <div className="h-screen">
       <h1>Profile</h1>
-      <ButtonDemo />
+
     </div>
   );
 }
