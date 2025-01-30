@@ -19,10 +19,9 @@ function DrawingSelection({ onDrawingSelect }: DrawingSelectionProps): JSX.Eleme
         onDrawingSelect(template.templateId);
         setTemplateId(template.templateId);
       }}
-      style={{ width: '20%', height: '20%', textAlign: 'center' }}
+      style={{ width: '30%', height: '20%', textAlign: 'center' }}
     >
       <img src={getBackgroundSrc(template.templateId)} alt={template.name} width="100%" />
-      <span>{template.templateId}</span>
       <span>{template.name}</span>
     </button>
   ));

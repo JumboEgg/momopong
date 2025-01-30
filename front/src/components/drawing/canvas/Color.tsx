@@ -1,14 +1,11 @@
-export interface colorProps {
-  color: string,
-  setColor: React.Dispatch<React.SetStateAction<string>>,
-  setIsErasing: React.Dispatch<React.SetStateAction<boolean>>
-}
+import { useDrawing } from '../contexts/DrawingContext';
+import colors from '../data/colorList';
 
-function Color({
-  color,
-  setColor,
-  setIsErasing,
-}: colorProps): JSX.Element {
+function Color({ color }: { color: string }): JSX.Element {
+  const {
+    setIsErasing, setPenColor,
+  } = useDrawing();
+
   if (color === 'erase') {
     return (
       <button
@@ -27,7 +24,7 @@ function Color({
       id={color}
       className="color"
       onClick={() => {
-        setColor(color);
+        setPenColor(color);
         setIsErasing(false);
       }}
       style={{ flex: 1, background: color }}
@@ -36,4 +33,12 @@ function Color({
   );
 }
 
-export default Color;
+function Palette() {
+  const palette: JSX.Element[] = [];
+  colors.forEach((color) => {
+    palette.push(<Color key={color} color={color} />);
+  });
+  return <div style={{ display: 'flex', height: '3em' }}>{palette}</div>;
+}
+
+export default Palette;

@@ -17,4 +17,10 @@ export interface DrawingContextType {
   setMode: (mode: DrawingMode) => void;
   templateId: number;
   setTemplateId: (id: number) => void;
+  penColor: string;
+  setPenColor: (color: string) => void;
+  isErasing: boolean;
+  setIsErasing: (drawingState: boolean) => void;
+  imageData: string;
+  setImageData: (resultSrc: string) => void;
 }

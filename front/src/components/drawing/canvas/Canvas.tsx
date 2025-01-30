@@ -3,8 +3,8 @@ import {
   useMemo,
 } from 'react';
 import io from 'socket.io-client';
-import Color from './Color';
 import { getBackgroundSrc, getOutlineSrc } from '../utils/getImgSrc';
+import { useDrawing } from '../contexts/DrawingContext';
 
 const socket = io('http://localhost:3869');
 
@@ -25,9 +25,11 @@ export interface drawingData {
   curY: number;
 }
 
-const colors: string[] = ['red', 'orange', 'yellow', 'green', 'blue', 'purple', 'black', 'erase'];
+function DrawingCanvas(): JSX.Element {
+  const {
+    mode, templateId, isErasing, penColor, setImageData,
+  } = useDrawing();
 
-function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
 
   const bgImgSrc = getBackgroundSrc(templateId);
@@ -37,14 +39,9 @@ function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
   const canvasRef = useRef<HTMLCanvasElement>(null); // 그림 그리기 레이어
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(); // 그림 그리기 레이어 context
-  const [imageData, setImageData] = useState<string | undefined>(); // 그림 그리기 레이어 추출 이미지
 
-  const [isDrawing, setIsDrawing] = useState<boolean>(false); // 그림 그리기 상태
-  const [penColor, setPenColor] = useState<string>('black'); // 펜 색상
-  const [isErasing, setIsErasing] = useState<boolean>(false); // 지우개 선택 상태
+  const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [prevPos, setPrevPos] = useState<pos>({ x: 0, y: 0 }); // 내 그리기 이전 지점
-
-  const palette: JSX.Element[] = [];
 
   useEffect(() => {
     const container = containerRef.current;
@@ -58,23 +55,12 @@ function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
     container.addEventListener('touchstart', preventTouchScroll, { passive: false });
     container.addEventListener('touchmove', preventTouchScroll, { passive: false });
 
-    // 정리 함수
+    // TODO : 형식 변경 후에도 터치 인식 되는지 확인
     // return () => {
     container.removeEventListener('touchstart', preventTouchScroll);
     container.removeEventListener('touchmove', preventTouchScroll);
     // };
   }, []);
-
-  colors.forEach((color) => {
-    palette.push(
-      <Color
-        key={color}
-        color={color}
-        setColor={setPenColor}
-        setIsErasing={setIsErasing}
-      />,
-    );
-  });
 
   const canvasSize = useMemo(
     () => ({
@@ -143,36 +129,33 @@ function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
     return { x, y };
   }
 
-  /* Socket.io 사용 */
-  function startDrawing({ nativeEvent }: { nativeEvent: MouseEvent | TouchEvent }) {
-    setIsDrawing(true);
-    const { x, y }: pos = getPosition(nativeEvent);
-    setPrevPos({ x, y });
+  function stroke({
+    status, color, prevX, prevY, curX, curY,
+  }: drawingData) {
+    if (!ctx) return;
 
-    if (isErasing) {
-      socket.emit('message', {
-        status: 'erase',
-        prevX: x / canvasScale,
-        prevY: y / canvasScale,
-        curX: x / canvasScale,
-        curY: y / canvasScale,
-      });
+    if (status === 'erase') {
+      ctx.globalCompositeOperation = 'destination-out';
+      const eraserWidth = basePenWidth * canvasScale * 2;
+      ctx.lineWidth = eraserWidth;
+
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(curX, curY);
+      ctx.stroke();
+
+      ctx.lineWidth = basePenWidth * canvasScale;
+      ctx.globalCompositeOperation = 'source-over';
     } else {
-      socket.emit('message', {
-        status: 'draw',
-        prevX: x / canvasScale,
-        prevY: y / canvasScale,
-        curX: x / canvasScale,
-        curY: y / canvasScale,
-      });
+      ctx.strokeStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(prevX, prevY);
+      ctx.lineTo(curX, curY);
+      ctx.stroke();
     }
   }
 
-  function draw({ nativeEvent }: { nativeEvent: MouseEvent | TouchEvent }) {
-    const { x, y }: pos = getPosition(nativeEvent);
-    if (!ctx) return;
-    if (!isDrawing) return;
-
+  function sendStrokeData({ x, y }: pos) {
     if (isErasing) {
       socket.emit('message', {
         status: 'erase',
@@ -191,7 +174,41 @@ function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
         curY: y / canvasScale,
       });
     }
+  }
 
+  function startDrawing({ nativeEvent }: { nativeEvent: MouseEvent | TouchEvent }) {
+    setIsDrawing(true);
+    const { x, y }: pos = getPosition(nativeEvent);
+    setPrevPos({ x, y });
+    if (mode === 'together') sendStrokeData({ x, y });
+    else {
+      stroke({
+        status: isErasing ? 'erase' : 'draw',
+        color: penColor,
+        prevX: x,
+        prevY: y,
+        curX: x,
+        curY: y,
+      });
+    }
+  }
+
+  function draw({ nativeEvent }: { nativeEvent: MouseEvent | TouchEvent }) {
+    const { x, y }: pos = getPosition(nativeEvent);
+    if (!ctx) return;
+    if (!isDrawing) return;
+    if (mode === 'together') sendStrokeData({ x, y });
+    else {
+      // console.log(`draw from (${prevPos.x}, ${prevPos.y}) to (${x}, ${y})`);
+      stroke({
+        status: isErasing ? 'erase' : 'draw',
+        color: penColor,
+        prevX: prevPos.x,
+        prevY: prevPos.y,
+        curX: x,
+        curY: y,
+      });
+    }
     setPrevPos({ x, y });
   }
 
@@ -201,29 +218,9 @@ function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
 
   // socket.io의 그림 정보 수신
   useEffect(() => {
-    socket.on('draw', (data: drawingData) => {
+    socket.on('message', (data: drawingData) => {
       if (!ctx) return;
-
-      ctx.strokeStyle = data.color;
-      ctx.beginPath();
-      ctx.moveTo(data.prevX * canvasScale, data.prevY * canvasScale);
-      ctx.lineTo(data.curX * canvasScale, data.curY * canvasScale);
-      ctx.stroke();
-    });
-
-    socket.on('erase', (data: drawingData) => {
-      if (!ctx) return;
-      ctx.globalCompositeOperation = 'destination-out'; // 그린 부분을 투명하게 만든다.
-      const eraserWidth = basePenWidth * canvasScale * 2;
-      ctx.lineWidth = eraserWidth;
-
-      ctx.beginPath();
-      ctx.moveTo(data.prevX * canvasScale, data.prevY * canvasScale);
-      ctx.lineTo(data.curX * canvasScale, data.curY * canvasScale);
-      ctx.stroke();
-
-      ctx.lineWidth = basePenWidth * canvasScale;
-      ctx.globalCompositeOperation = 'source-over';
+      stroke(data);
     });
   });
 
@@ -257,60 +254,43 @@ function MultiCanvas({ templateId }: { templateId: number }): JSX.Element {
   }
 
   return (
-    <>
-      <div
-        className="palette"
+    <div
+      className="canvas"
+      style={{ position: 'relative', height: canvasSize.height }}
+      ref={containerRef}
+    >
+      <canvas
+        width={canvasSize.width}
+        height={canvasSize.height}
         style={{
-          width: canvasSize.width,
-          height: canvasSize.height * 0.1,
-          display: 'flex',
-          flexDirection: 'row',
-          margin: 0,
+          position: 'absolute', top: 0, left: 0, zIndex: 0, margin: 0,
         }}
-      >
-        { palette }
-      </div>
-      <div
-        className="canvas"
-        style={{ position: 'relative', height: canvasSize.height }}
-        ref={containerRef}
-      >
-        <canvas
-          width={canvasSize.width}
-          height={canvasSize.height}
-          style={{
-            position: 'absolute', top: 0, left: 0, zIndex: 0, margin: 0,
-          }}
-          tabIndex={0}
-          onMouseDown={startDrawing}
-          onMouseMove={draw}
-          onMouseUp={endDrawing}
-          onMouseLeave={endDrawing}
-          onTouchStart={startDrawing}
-          onTouchMove={draw}
-          onTouchEnd={endDrawing}
-          onTouchCancel={endDrawing}
-          ref={canvasRef}
-        />
-        <canvas // 윤곽선
-          width={canvasSize.width}
-          height={canvasSize.height}
-          style={{
-            position: 'absolute', top: 0, left: 0, zIndex: 1, margin: 0, pointerEvents: 'none',
-          }}
-          ref={outlineCanvasRef}
-        />
-        <div style={{ position: 'absolute', top: '100%' }}>
-          <div>
-            <button type="button" onClick={saveCanvas}>Save Canvas</button>
-          </div>
-          <div>
-            <img src={imageData} alt="drawing result" />
-          </div>
+        tabIndex={0}
+        onMouseDown={startDrawing}
+        onMouseMove={draw}
+        onMouseUp={endDrawing}
+        onMouseLeave={endDrawing}
+        onTouchStart={startDrawing}
+        onTouchMove={draw}
+        onTouchEnd={endDrawing}
+        onTouchCancel={endDrawing}
+        ref={canvasRef}
+      />
+      <canvas // 윤곽선
+        width={canvasSize.width}
+        height={canvasSize.height}
+        style={{
+          position: 'absolute', top: 0, left: 0, zIndex: 1, margin: 0, pointerEvents: 'none',
+        }}
+        ref={outlineCanvasRef}
+      />
+      <div style={{ position: 'absolute', top: '100%' }}>
+        <div>
+          <button type="button" onClick={saveCanvas}>Save Canvas</button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
-export default MultiCanvas;
+export default DrawingCanvas;

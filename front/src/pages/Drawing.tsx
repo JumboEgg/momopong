@@ -1,14 +1,15 @@
 import { DrawingProvider } from '@/components/drawing/contexts/DrawingContext';
-import DrawingSelection from '@/components/drawing/modeSelection/DrawingSelection';
+import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import { DrawingMode } from '@/components/drawing/types/drawing';
-import ModeSelection from '@/components/drawing/modeSelection/ModeSelection';
+import ModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
 import { useState } from 'react';
-import SingleDrawingMode from '@/components/drawing/drawingMode/SingleDrawingMode';
-import MultiDrawingMode from '@/components/drawing/drawingMode/MultiDrawingMode';
+import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
+import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 
 function Drawing() {
   const [selectedDrawing, setSelectedDrawing] = useState<number>();
   const [selectedMode, setSelectedMode] = useState<DrawingMode>();
+  const [resultSrc, setResultSrc] = useState<string>('');
 
   const handleDrawingSelect = (templateId: number) => {
     setSelectedDrawing(templateId);
@@ -27,7 +28,11 @@ function Drawing() {
       return <ModeSelection onModeSelect={handleModeSelect} />;
     }
 
-    return selectedMode === 'single' ? <SingleDrawingMode /> : <MultiDrawingMode />;
+    if (!resultSrc) {
+      return <DrawingPage onDrawingResult={setResultSrc} />;
+    }
+
+    return <ResultPage />;
   };
 
   return (

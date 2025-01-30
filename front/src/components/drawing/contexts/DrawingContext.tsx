@@ -8,6 +8,9 @@ const DrawingContext = createContext<DrawingContextType | undefined>(undefined);
 function DrawingProvider({ children }: { children: React.ReactNode }): JSX.Element {
   const [mode, setMode] = useState<DrawingMode>('single');
   const [templateId, setTemplateId] = useState<number>(0);
+  const [penColor, setPenColor] = useState<string>('black');
+  const [isErasing, setIsErasing] = useState<boolean>(false);
+  const [imageData, setImageData] = useState<string>('');
 
   const contextValue = useMemo(
     () => ({
@@ -15,8 +18,14 @@ function DrawingProvider({ children }: { children: React.ReactNode }): JSX.Eleme
       setMode,
       templateId,
       setTemplateId,
+      penColor,
+      setPenColor,
+      isErasing,
+      setIsErasing,
+      imageData,
+      setImageData,
     }),
-    [mode, templateId],
+    [mode, templateId, penColor, isErasing, imageData],
   );
 
   return (
