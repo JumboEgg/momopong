@@ -3,80 +3,75 @@ import { useNavigate } from 'react-router-dom';
 function HomePage() {
   const navigate = useNavigate();
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'): void => {
     navigate(path);
   };
 
   return (
-    <div className="p-4 m-4">
-      <div className="flex justify-center gap-4">
+    <div className="min-h-screen p-2">
+      {/* Top Navigation Icons */}
+      <div className="flex justify-between mb-6">
         <button
           type="button"
           onClick={() => handleNavigation('/profile')}
-          className="cursor-pointer flex flex-col items-center"
+          className="navigation-button"
         >
           <img
             src="/images/profileicon.png"
             alt="프로필"
-            style={{ width: '50px', height: '50px' }}
-            className="w-8 h-8 rounded-lg"
           />
-          <p className="text-center text-xs">프로필</p>
+          <p>프로필</p>
         </button>
+
         <button
           type="button"
           onClick={() => handleNavigation('/friends')}
-          className="cursor-pointer flex flex-col items-center"
+          className="navigation-button"
         >
           <img
             src="/images/friendsicon.png"
             alt="친구목록"
-            style={{ width: '50px', height: '50px' }}
-            className="w-8 h-8 rounded-lg"
           />
-          <p className="text-center text-xs">친구목록</p>
+          <p>친구목록</p>
         </button>
       </div>
 
-      <div className="flex justify-center items-center gap-4 mb-2 flex-row">
+      {/* Main Navigation Icons */}
+      <div className="flex justify-center items-center" style={{ gap: '2rem' }}>
         <button
           type="button"
           onClick={() => handleNavigation('/drawing')}
-          className="cursor-pointer flex flex-col items-center"
+          className="navigation-button main"
         >
           <img
             src="/images/crayonicon.png"
             alt="그림그리기"
-            style={{ width: '100px', height: '100px' }}
-            className="w-12 h-12 rounded-lg"
           />
-          <p className="text-center text-xs mt-1">그림그리기</p>
+          <p>그림그리기</p>
         </button>
+
         <button
           type="button"
           onClick={() => handleNavigation('/story')}
-          className="cursor-pointer flex flex-col items-center"
+          className="navigation-button main"
         >
           <img
             src="/images/bookicon.png"
             alt="동화읽기"
-            style={{ width: '100px', height: '100px' }}
-            className="w-12 h-12 rounded-lg"
           />
-          <p className="text-center text-xs mt-1">동화읽기</p>
+          <p>동화읽기</p>
         </button>
+
         <button
           type="button"
           onClick={() => handleNavigation('/house')}
-          className="cursor-pointer flex flex-col items-center"
+          className="navigation-button main"
         >
           <img
             src="/images/houseicon.png"
             alt="나의집"
-            style={{ width: '100px', height: '100px' }}
-            className="w-12 h-12 rounded-lg"
           />
-          <p className="text-center text-xs mt-1">나의집</p>
+          <p>나의집</p>
         </button>
       </div>
     </div>

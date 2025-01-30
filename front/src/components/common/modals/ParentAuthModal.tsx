@@ -6,7 +6,6 @@ function NumModal() {
   const num1 = getRandom(1, 10);
   const num2 = getRandom(1, 10);
   const result = num1 * num2;
-  };
 
   return (
     <div className="max-w-[750px] min-h-[510px] bg-[#FFF08E]
@@ -14,7 +13,7 @@ function NumModal() {
     >
       <div>
         정답을 입력하세요
-        <p>{{num1}}</p>
+        <p>{result}</p>
       </div>
       <NumberPad />
     </div>

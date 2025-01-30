@@ -9,3 +9,19 @@
   font-weight: normal;
   font-style: normal;
 }
+
+.navigation-button img {
+  width: 100px !important;  /* 상단 아이콘 크기 */
+  height: 100px !important;
+  object-fit: contain;
+}
+
+.navigation-button.main img {
+  width: 200px !important;  /* 메인 아이콘 크기 */
+  height: 200px !important;
+}
+
+.navigation-button p {
+  font-size: 20px;
+  margin-top: 2px;
+}

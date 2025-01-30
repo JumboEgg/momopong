@@ -1,55 +1,119 @@
+import { useState } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+
 interface StorySelectionProps {
   onStorySelect: (storyId: string) => void;
 }
 
+const stories = [
+  {
+    id: 'cinderella',
+    title: '신데렐라',
+    image: '/images/cinderella.jpg',
+    ageRange: '5-7세',
+  },
+  {
+    id: 'heungbu',
+    title: '흥부놀부',
+    image: '/images/heungbu.jpg',
+    ageRange: '5-7세',
+  },
+  {
+    id: 'snow-white',
+    title: '백설공주',
+    image: '/images/snowwhite.jpg',
+    ageRange: '5-7세',
+  },
+  {
+    id: 'mermaid',
+    title: '인어공주',
+    image: '/images/mermaid.jpg',
+    ageRange: '5-7세',
+  },
+  {
+    id: 'daily',
+    title: '견우와 직녀',
+    image: '/images/daily.jpg',
+    ageRange: '5-7세',
+  },
+  {
+    id: 'red-riding-hood',
+    title: '빨간망토',
+    image: '/images/red-riding-hood.jpg',
+    ageRange: '5-7세',
+  },
+];
+
 function StorySelection({ onStorySelect }: StorySelectionProps): JSX.Element {
+  const navigate = useNavigate();
+
+  const [startIndex, setStartIndex] = useState(0);
+  // 동화 선택 캐러셀
+  const showPrevious = () => {
+    setStartIndex((current) => Math.max(0, current - 3));
+  };
+
+  const showNext = () => {
+    setStartIndex((current) => Math.min(stories.length - 3, current + 3));
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-center mb-8">동화 선택하기</h1>
-        <div className="space-y-4">
+    <div className="bg-[#FCEDBA] flex flex-col items-center justify-center p-8">
+      <div className="w-full max-w-4xl">
+        {/* 뒤로가기 버튼 */}
+        <button
+          type="button"
+          onClick={() => navigate('/home')}
+          className="mb-8 flex items-center gap-2 text-gray-600 hover:text-gray-800"
+        >
+          <ChevronLeft size={24} />
+          <span>뒤로가기</span>
+        </button>
+
+        <h1 className="text-2xl font-bold mb-8">읽을 동화를 골라보아요</h1>
+
+        {/* 캐러셀 컨테이너 */}
+        <div className="flex items-center gap-8">
+          {/* 이전 버튼 */}
           <button
             type="button"
-            onClick={() => onStorySelect('cinderella')}
-            className="w-full bg-white border-2 border-purple-500 hover:border-purple-600 rounded-lg transition-colors overflow-hidden"
+            onClick={showPrevious}
+            disabled={startIndex === 0}
+            className="disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="aspect-video w-full">
-              <img
-                src="/images/cinderella.jpg"
-                alt="신데렐라"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-800">신데렐라</span>
-                <span className="text-sm bg-purple-100 text-purple-600 px-2 py-1 rounded">5-7세</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                착한 소녀 신데렐라의 마법 같은 이야기
-              </p>
+            <div className="w-8 h-8 bg-purple-600 text-white flex items-center justify-center rounded-full">
+              <ChevronLeft size={24} />
             </div>
           </button>
+
+          {/* 책 표지 그리드 */}
+          <div className="flex justify-center gap-16">
+            {stories.slice(startIndex, startIndex + 3).map((story) => (
+              <button
+                key={story.id}
+                type="button"
+                onClick={() => onStorySelect(story.id)}
+                className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow w-[180px]"
+              >
+                <img
+                  src={story.image}
+                  alt={story.title}
+                  className="w-full h-[240px] object-cover" // 높이를 240px로 고정
+                />
+              </button>
+            ))}
+          </div>
+
+          {/* 다음 버튼 */}
           <button
             type="button"
-            onClick={() => onStorySelect('heungbu')}
-            className="w-full bg-white border-2 border-purple-500 hover:border-purple-600 rounded-lg transition-colors overflow-hidden"
+            onClick={showNext}
+            disabled={startIndex >= stories.length - 3}
+            className="disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <div className="aspect-video w-full">
-              <img
-                src="/images/heungbu.jpg"
-                alt="흥부놀부"
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="p-4">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-semibold text-gray-800">흥부놀부</span>
-                <span className="text-sm bg-purple-100 text-purple-600 px-2 py-1 rounded">5-7세</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">
-                욕심쟁이 놀부와 착한 흥부 이야기
-              </p>
+            <div className="w-8 h-8 bg-purple-600 text-white flex items-center justify-center rounded-full">
+              <ChevronRight size={24} />
             </div>
           </button>
         </div>
