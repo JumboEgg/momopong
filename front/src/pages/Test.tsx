@@ -7,6 +7,7 @@ import ButtonDemo from '@/components/common/buttons/ButtonDemo';
 import TextButton from '@/components/common/buttons/TextButton';
 // import ParentAuthModal from '@/components/common/modals/ParentAuthModal';
 import DialogModal from '@/components/common/modals/DialogModal';
+import NotificationModal from '@/components/common/modals/NotificationModal';
 import Timer from '@/components/common/Timer';
 
 function Test() {
@@ -58,7 +59,7 @@ function Test() {
           onClose={handleCloseModal}
         />
       )}
-
+      <NotificationModal />
     </div>
   );
 }
