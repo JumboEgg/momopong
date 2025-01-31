@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/parents")
+@RequestMapping("/api/parents")
 public class ParentController {
 
     private final ParentService parentService;
