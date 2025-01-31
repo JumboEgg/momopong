@@ -4,7 +4,7 @@ function Landing(): JSX.Element {
   const navigate = useNavigate();
 
   const handleStart = () => {
-    navigate('/home');
+    navigate('/sub-account');
   };
 
   return (

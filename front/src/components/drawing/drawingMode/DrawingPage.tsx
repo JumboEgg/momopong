@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
-import DrawingCanvas from '../canvas/Canvas';
-import Palette from '../canvas/Color';
+import DrawingCanvas from '../canvasComponents/Canvas';
+import Palette from '../canvasComponents/Color';
 import { useDrawing } from '../contexts/DrawingContext';
 
 interface DrawingPageProps {
