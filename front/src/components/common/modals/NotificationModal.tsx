@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons';
-import NotificationList from '@/components/common/NotificationItem';
+import NotificationList from '@/components/common/NotificationList';
 
 function NotificationModal(): JSX.Element {
   return (
