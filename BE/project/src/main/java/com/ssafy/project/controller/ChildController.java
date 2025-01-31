@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/children")
+@RequestMapping("/api/children")
 public class ChildController {
 
     private final ChildService childService;
