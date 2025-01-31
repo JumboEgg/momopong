@@ -1,4 +1,4 @@
-export type DrawingMode = 'single' | 'together';
+export type DrawingMode = 'single' | 'together' | 'story';
 
 export interface DrawingTemplate {
   storyId: number;

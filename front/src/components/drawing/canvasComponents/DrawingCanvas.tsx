@@ -1,6 +1,5 @@
 import {
   useState, useRef, useEffect, useCallback,
-  useMemo,
 } from 'react';
 import io from 'socket.io-client';
 import { getBackgroundSrc, getOutlineSrc } from '../utils/getImgSrc';
@@ -10,6 +9,11 @@ const socket = io('http://localhost:3869');
 
 const baseWidth: number = 1600;
 const basePenWidth: number = 30;
+
+export interface DrawingCanvasProps {
+  canvasHeight: number;
+  canvasWidth: number;
+}
 
 export interface Pos {
   x: number;
@@ -32,7 +36,7 @@ export interface drawingData {
   curY: number;
 }
 
-function DrawingCanvas(): JSX.Element {
+function DrawingCanvas({ canvasHeight, canvasWidth }: DrawingCanvasProps): JSX.Element {
   const {
     mode, templateId, isErasing, penColor, setImageData,
   } = useDrawing();
@@ -42,7 +46,6 @@ function DrawingCanvas(): JSX.Element {
   const bgImgSrc = getBackgroundSrc(templateId);
   const outlineImgSrc = getOutlineSrc(templateId);
 
-  const canvasRatio: number = 1.6; // 캔버스 가로세로 비율
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
   const canvasRef = useRef<HTMLCanvasElement>(null); // 그림 그리기 레이어
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(); // 그림 그리기 레이어 context
@@ -71,16 +74,8 @@ function DrawingCanvas(): JSX.Element {
     // };
   }, []);
 
-  const canvasSize = useMemo(
-    () => ({
-      width: window.innerHeight * canvasRatio * 0.8,
-      height: window.innerHeight * 0.8,
-    }),
-    [],
-  );
-
   // 상대적 캔버스 크기 비율
-  const canvasScale: number = canvasSize.width / baseWidth;
+  const canvasScale: number = canvasWidth / baseWidth;
 
   // 캔버스 배경
   const drawBackgroundImg = useCallback(() => {
@@ -91,9 +86,9 @@ function DrawingCanvas(): JSX.Element {
     const img = new Image();
     img.src = outlineImgSrc;
     img.onload = () => {
-      context.drawImage(img, 0, 0, canvasSize.width, canvasSize.height);
+      context.drawImage(img, 0, 0, canvasWidth, canvasHeight);
     };
-  }, [canvasSize]);
+  }, []);
 
   useEffect(() => {
     drawBackgroundImg();
@@ -259,19 +254,19 @@ function DrawingCanvas(): JSX.Element {
     const tempCtx = tempCanvas.getContext('2d');
     if (!tempCtx) return;
 
-    tempCanvas.width = canvasSize.width;
-    tempCanvas.height = canvasSize.height;
+    tempCanvas.width = canvasWidth;
+    tempCanvas.height = canvasHeight;
 
     const bgImg = new Image();
     bgImg.src = bgImgSrc;
     bgImg.onload = () => {
-      tempCtx.drawImage(bgImg, 0, 0, canvasSize.width, canvasSize.height);
+      tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
       tempCtx.drawImage(currentCanvas, 0, 0);
 
       const outlineImg = new Image();
       outlineImg.src = outlineImgSrc;
       outlineImg.onload = () => {
-        tempCtx.drawImage(outlineImg, 0, 0, canvasSize.width, canvasSize.height);
+        tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
         const dataURL = tempCanvas.toDataURL('image/png');
         setImageData(dataURL);
       };
@@ -281,14 +276,22 @@ function DrawingCanvas(): JSX.Element {
   return (
     <div
       className="canvas"
-      style={{ position: 'relative', height: canvasSize.height }}
+      style={{ position: 'relative', height: canvasHeight, width: canvasWidth }}
       ref={containerRef}
     >
       <canvas
-        width={canvasSize.width}
-        height={canvasSize.height}
+        className="bg-white"
+        width={canvasWidth}
+        height={canvasHeight}
         style={{
           position: 'absolute', top: 0, left: 0, zIndex: 0, margin: 0,
+        }}
+      />
+      <canvas
+        width={canvasWidth}
+        height={canvasHeight}
+        style={{
+          position: 'absolute', top: 0, left: 0, zIndex: 1, margin: 0,
         }}
         tabIndex={0}
         onMouseDown={startDrawing}
@@ -302,10 +305,10 @@ function DrawingCanvas(): JSX.Element {
         ref={canvasRef}
       />
       <canvas // 윤곽선
-        width={canvasSize.width}
-        height={canvasSize.height}
+        width={canvasWidth}
+        height={canvasHeight}
         style={{
-          position: 'absolute', top: 0, left: 0, zIndex: 1, margin: 0, pointerEvents: 'none',
+          position: 'absolute', top: 0, left: 0, zIndex: 2, margin: 0, pointerEvents: 'none',
         }}
         ref={outlineCanvasRef}
       />
