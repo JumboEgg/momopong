@@ -3,81 +3,80 @@ import { useNavigate } from 'react-router-dom';
 function HomePage() {
   const navigate = useNavigate();
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
     navigate(path);
   };
 
   return (
-    // 최상위 div에 p / m 옵션을 주면 상단이 비어버리니 주의합니다
-    <div className="">
-      <div className="flex justify-center gap-4">
+    <div className="min-h-screen p-2">
+      {/* Top Navigation Icons */}
+      <div className="flex justify-between mb-6">
         <button
           type="button"
           onClick={() => handleNavigation('/profile')}
-          className="cursor-pointer flex flex-col items-center"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/profileicon.png"
             alt="프로필"
-            style={{ width: '50px', height: '50px' }}
-            className="w-8 h-8 rounded-lg"
+            className="w-8 h-8 object-contain"
           />
-          <p className="text-center text-xs">프로필</p>
+          <p className="text-xl mt-0.5">프로필</p>
         </button>
+
         <button
           type="button"
           onClick={() => handleNavigation('/friends')}
-          className="cursor-pointer flex flex-col items-center"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/friendsicon.png"
             alt="친구목록"
-            style={{ width: '50px', height: '50px' }}
-            className="w-8 h-8 rounded-lg"
+            className="w-8 h-8 object-contain"
           />
-          <p className="text-center text-xs">친구목록</p>
+          <p className="text-xl mt-0.5">친구목록</p>
         </button>
       </div>
 
-      <div className="flex justify-center items-center gap-4 mb-2 flex-row">
+      {/* Main Navigation Icons */}
+      <div className="flex justify-center items-center gap-12">
         <button
           type="button"
           onClick={() => handleNavigation('/drawing')}
-          className="cursor-pointer flex flex-col items-center"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/crayonicon.png"
             alt="그림그리기"
-            style={{ width: '100px', height: '100px' }}
-            className="w-12 h-12 rounded-lg"
+            className="w-16 h-16 object-contain"
           />
-          <p className="text-center text-xs mt-1">그림그리기</p>
+          <p className="text-xl mt-0.5">그림그리기</p>
         </button>
+
         <button
           type="button"
           onClick={() => handleNavigation('/story')}
-          className="cursor-pointer flex flex-col items-center"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/bookicon.png"
             alt="동화읽기"
-            style={{ width: '100px', height: '100px' }}
-            className="w-12 h-12 rounded-lg"
+            className="w-16 h-16 object-contain"
           />
-          <p className="text-center text-xs mt-1">동화읽기</p>
+          <p className="text-xl mt-0.5">동화읽기</p>
         </button>
+
         <button
           type="button"
           onClick={() => handleNavigation('/house')}
-          className="cursor-pointer flex flex-col items-center"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/houseicon.png"
             alt="나의집"
-            style={{ width: '100px', height: '100px' }}
-            className="w-12 h-12 rounded-lg"
+            className="w-16 h-16 object-contain"
           />
-          <p className="text-center text-xs mt-1">나의집</p>
+          <p className="text-xl mt-0.5">나의집</p>
         </button>
         <button
           type="button"

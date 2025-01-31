@@ -1,10 +1,11 @@
 export type StoryMode = 'reading' | 'together';
 
-export type CharacterType = 'narration' | 'hero1' | 'hero2' | 'bigsis1' | 'bigsis2';
+export type CharacterType = 'narration' | 'prince' | 'princess';
 
 export interface StoryLine {
   type: CharacterType;
   text: string;
+  audioFiles: string[];
 }
 
 export interface Friend {

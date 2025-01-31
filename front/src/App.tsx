@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
-import Layout from './components/Layout';
+import Landing from './pages/Landing';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -14,8 +14,8 @@ function App(): JSX.Element {
     // 추후 className에 touch-none overflow-hidden 설정시 스크롤이 방지됩니다
     <div className="fixed inset-0 overflow-auto">
       <Routes>
-        <Route path="/" element={<Layout />}>
-          <Route index element={<Home />} />
+      <Route path="/" element={<Landing />} >
+          <Route path="home" element={<Home />} />
           <Route path="drawing" element={<Drawing />} />
           <Route path="story/*" element={<Story />} />
           <Route path="house" element={<MyHouse />} />
@@ -23,8 +23,8 @@ function App(): JSX.Element {
           <Route path="friends" element={<Friends />} />
           <Route path="parent" element={<Parent />} />
           <Route path="test" element={<Test />} />
-        </Route>
-      </Routes>
+      </Route>
+    </Routes>
     </div>
   );
 }
