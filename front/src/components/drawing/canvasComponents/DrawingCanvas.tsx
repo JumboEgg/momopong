@@ -2,7 +2,7 @@ import {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import io from 'socket.io-client';
-import { getBackgroundSrc, getOutlineSrc } from '../utils/getImgSrc';
+import { getOutlineSrc } from '../utils/getImgSrc';
 import { useDrawing } from '../contexts/DrawingContext';
 
 const socket = io('http://localhost:3869');
@@ -13,6 +13,7 @@ const basePenWidth: number = 30;
 export interface DrawingCanvasProps {
   canvasHeight: number;
   canvasWidth: number;
+  setDrawingCanvasRef: HTMLCanvasElement;
 }
 
 export interface Pos {
@@ -36,14 +37,16 @@ export interface drawingData {
   curY: number;
 }
 
-function DrawingCanvas({ canvasHeight, canvasWidth }: DrawingCanvasProps): JSX.Element {
+function DrawingCanvas({
+  canvasHeight, canvasWidth, setDrawingCanvasRef,
+}: DrawingCanvasProps): JSX.Element {
   const {
-    mode, templateId, isErasing, penColor, setImageData,
+    mode, templateId, isErasing, penColor,
   } = useDrawing();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
 
-  const bgImgSrc = getBackgroundSrc(templateId);
+  // const bgImgSrc = getBackgroundSrc(templateId);
   const outlineImgSrc = getOutlineSrc(templateId);
 
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
@@ -54,6 +57,10 @@ function DrawingCanvas({ canvasHeight, canvasWidth }: DrawingCanvasProps): JSX.E
   const [newLine, setNewLine] = useState<LineData>({
     prevX: -100, prevY: -100, curX: -100, curY: -100,
   });
+
+  useEffect(() => {
+    setDrawingCanvasRef(canvasRef);
+  }, [canvasRef]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -244,34 +251,34 @@ function DrawingCanvas({ canvasHeight, canvasWidth }: DrawingCanvasProps): JSX.E
     });
   });
 
-  // 캔버스 로컬에 저장
-  function saveCanvas() {
-    if (!canvasRef.current) return;
-    const currentCanvas = canvasRef.current;
-    if (!currentCanvas) return;
+  // // 캔버스 로컬에 저장
+  // function saveCanvas() {
+  //   if (!canvasRef.current) return;
+  //   const currentCanvas = canvasRef.current;
+  //   if (!currentCanvas) return;
 
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    if (!tempCtx) return;
+  //   const tempCanvas = document.createElement('canvas');
+  //   const tempCtx = tempCanvas.getContext('2d');
+  //   if (!tempCtx) return;
 
-    tempCanvas.width = canvasWidth;
-    tempCanvas.height = canvasHeight;
+  //   tempCanvas.width = canvasWidth;
+  //   tempCanvas.height = canvasHeight;
 
-    const bgImg = new Image();
-    bgImg.src = bgImgSrc;
-    bgImg.onload = () => {
-      tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
-      tempCtx.drawImage(currentCanvas, 0, 0);
+  //   const bgImg = new Image();
+  //   bgImg.src = bgImgSrc;
+  //   bgImg.onload = () => {
+  //     tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+  //     tempCtx.drawImage(currentCanvas, 0, 0);
 
-      const outlineImg = new Image();
-      outlineImg.src = outlineImgSrc;
-      outlineImg.onload = () => {
-        tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
-        const dataURL = tempCanvas.toDataURL('image/png');
-        setImageData(dataURL);
-      };
-    };
-  }
+  //     const outlineImg = new Image();
+  //     outlineImg.src = outlineImgSrc;
+  //     outlineImg.onload = () => {
+  //       tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
+  //       const dataURL = tempCanvas.toDataURL('image/png');
+  //       setImageData(dataURL);
+  //     };
+  //   };
+  // }
 
   return (
     <div
@@ -312,11 +319,6 @@ function DrawingCanvas({ canvasHeight, canvasWidth }: DrawingCanvasProps): JSX.E
         }}
         ref={outlineCanvasRef}
       />
-      <div style={{ position: 'absolute', top: '100%' }}>
-        <div>
-          <button type="button" onClick={saveCanvas}>Save Canvas</button>
-        </div>
-      </div>
     </div>
   );
 }
