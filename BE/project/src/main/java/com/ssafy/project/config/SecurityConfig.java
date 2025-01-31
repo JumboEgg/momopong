@@ -29,9 +29,9 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http, HandlerMappingIntrospector introspector) throws Exception {
         MvcRequestMatcher.Builder mvc = new MvcRequestMatcher.Builder(introspector);
         MvcRequestMatcher[] permitAllList = {
-                mvc.pattern("/parents/signup"),
-                mvc.pattern("/parents/login"),
-                mvc.pattern("/parents/refresh-token")
+                mvc.pattern("/api/parents/signup"),
+                mvc.pattern("/api/parents/login"),
+                mvc.pattern("/api/parents/refresh-token")
         };
 
         // REST API -> basic auth 및 csrf 보안을 사용하지 않음

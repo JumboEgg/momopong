@@ -10,9 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/children")
+@RequestMapping("/api/children")
 public class ChildController {
 
     private final ChildService childService;
@@ -26,9 +28,18 @@ public class ChildController {
     }
 
     // 자식 계정 로그인
-    @PostMapping("/{childId}")
-    public ResponseEntity<ChildDto> login(@PathVariable("childId") Long childId) {
+    @PostMapping("/login")
+    public ResponseEntity<ChildDto> login(@RequestBody Map<String, String> map) {
+        Long childId = Long.parseLong(map.get("childId"));
+        System.out.println("childId = " + childId);
         ChildDto childDto = childService.login(childId);
+
+        return ResponseEntity.ok(childDto);
+    }
+
+    @GetMapping("/{childId}")
+    public ResponseEntity<ChildDto> findChild(@PathVariable("childId") Long childId) {
+        ChildDto childDto = childService.findChild(childId);
 
         return ResponseEntity.ok(childDto);
     }
