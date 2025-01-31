@@ -8,6 +8,9 @@ import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import Parent from './pages/Parent';
 import Test from './pages/Test';
+import MyBookStory from './components/myhouse/mybookstory/mybookstory';
+import MyDrawing from './components/myhouse/mydrawing/mydrawing';
+import MyLetters from './components/myhouse/letters/letters';
 
 function App(): JSX.Element {
   return (
@@ -23,6 +26,9 @@ function App(): JSX.Element {
         <Route path="/friends" element={<Friends />} />
         <Route path="/parent" element={<Parent />} />
         <Route path="/test" element={<Test />} />
+        <Route path="/house/letters" element={<MyLetters />} />
+        <Route path="/house/mybookstory" element={<MyBookStory />} />
+        <Route path="/house/mydrawing" element={<MyDrawing />} />
       </Routes>
     </div>
   );
