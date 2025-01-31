@@ -14,64 +14,69 @@ function HomePage() {
         <button
           type="button"
           onClick={() => handleNavigation('/profile')}
-          className="navigation-button"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/profileicon.png"
             alt="프로필"
+            className="w-8 h-8 object-contain"
           />
-          <p>프로필</p>
+          <p className="text-xl mt-0.5">프로필</p>
         </button>
 
         <button
           type="button"
           onClick={() => handleNavigation('/friends')}
-          className="navigation-button"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/friendsicon.png"
             alt="친구목록"
+            className="w-8 h-8 object-contain"
           />
-          <p>친구목록</p>
+          <p className="text-xl mt-0.5">친구목록</p>
         </button>
       </div>
 
       {/* Main Navigation Icons */}
-      <div className="flex justify-center items-center" style={{ gap: '2rem' }}>
+      <div className="flex justify-center items-center gap-12">
         <button
           type="button"
           onClick={() => handleNavigation('/drawing')}
-          className="navigation-button main"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/crayonicon.png"
             alt="그림그리기"
+            className="w-16 h-16 object-contain"
           />
-          <p>그림그리기</p>
+          <p className="text-xl mt-0.5">그림그리기</p>
         </button>
 
         <button
           type="button"
           onClick={() => handleNavigation('/story')}
-          className="navigation-button main"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/bookicon.png"
             alt="동화읽기"
+            className="w-16 h-16 object-contain"
           />
-          <p>동화읽기</p>
+          <p className="text-xl mt-0.5">동화읽기</p>
         </button>
 
         <button
           type="button"
           onClick={() => handleNavigation('/house')}
-          className="navigation-button main"
+          className="flex flex-col items-center bg-transparent border-0 p-0 m-0"
         >
           <img
             src="/images/houseicon.png"
             alt="나의집"
+            className="w-16 h-16 object-contain"
           />
-          <p>나의집</p>
+          <p className="text-xl mt-0.5">나의집</p>
         </button>
       </div>
     </div>
