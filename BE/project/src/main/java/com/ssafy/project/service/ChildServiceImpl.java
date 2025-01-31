@@ -2,6 +2,7 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
+import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.ChildDto;
 import com.ssafy.project.dto.ChildSignUpRequestDto;
 import com.ssafy.project.dto.ChildUpdateRequestDto;
@@ -90,6 +91,9 @@ public class ChildServiceImpl implements ChildService {
         // 첫 로그인이었으면 상태 변경하기
         if (child.isFirstLogin())
             child.updateFirstLogin(false);
+
+        // 온라인으로 상태 변경
+        child.updateStatus(StatusType.온라인);
 
         return childDto;
     }

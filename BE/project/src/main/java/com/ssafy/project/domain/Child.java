@@ -53,9 +53,6 @@ public class Child {
     private GenderType gender;
 
     @Builder.Default
-    private boolean login = false; // 이거 필요없을 것 같음 그냥 상태로 오프라인이면 로그인 X, 아니면 로그인 O 이렇게 판별하면 될 듯
-
-    @Builder.Default
     private boolean firstLogin = false;
 
     @CreatedDate
@@ -71,10 +68,6 @@ public class Child {
         return (int) ChronoUnit.DAYS.between(this.createdAt, LocalDate.now()) + 1;
     }
 
-    public void updateLoginStatus(boolean login) {
-        this.login = login;
-    }
-
     public void updateFirstLogin(boolean firstLogin) {
         this.firstLogin = firstLogin;
     }
@@ -82,6 +75,10 @@ public class Child {
     public void updateChild(String name, String profile) {
         this.name = name;
         this.profile = profile;
+    }
+
+    public void updateStatus(StatusType status) {
+        this.status = status;
     }
 
     // 연관관계 편의 메서드 (양방향)
