@@ -199,11 +199,7 @@ function DrawingCanvas(): JSX.Element {
     setNewLine({
       prevX: x, prevY: y, curX: x, curY: y,
     });
-    if (mode === 'together') {
-      // sendStrokeData({
-      //   prevX: x, prevY: y, curX: x, curY: y,
-      // });
-    } else {
+    if (mode === 'single') {
       stroke({
         status: isErasing ? 'erase' : 'draw',
         color: penColor,
@@ -219,12 +215,7 @@ function DrawingCanvas(): JSX.Element {
     const { x, y }: Pos = getPosition(nativeEvent);
     if (!ctx) return;
     if (!isDrawing) return;
-    if (mode === 'together') {
-      // sendStrokeData({
-      //   prevX: newLine.prevX, prevY: newLine.prevY, curX: x, curY: y,
-      // });
-    } else {
-      // console.log(`draw from (${prevPos.x}, ${prevPos.y}) to (${x}, ${y})`);
+    if (mode === 'single') {
       stroke({
         status: isErasing ? 'erase' : 'draw',
         color: penColor,
