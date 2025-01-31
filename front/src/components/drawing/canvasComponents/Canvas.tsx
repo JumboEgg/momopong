@@ -11,9 +11,16 @@ const socket = io('http://localhost:3869');
 const baseWidth: number = 1600;
 const basePenWidth: number = 30;
 
-export interface pos {
+export interface Pos {
   x: number;
   y: number;
+}
+
+export interface LineData {
+  prevX: number;
+  prevY: number;
+  curX: number;
+  curY: number;
 }
 
 export interface drawingData {
@@ -41,7 +48,9 @@ function DrawingCanvas(): JSX.Element {
   const [ctx, setCtx] = useState<CanvasRenderingContext2D>(); // 그림 그리기 레이어 context
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
-  const [prevPos, setPrevPos] = useState<pos>({ x: 0, y: 0 }); // 내 그리기 이전 지점
+  const [newLine, setNewLine] = useState<LineData>({
+    prevX: -100, prevY: -100, curX: -100, curY: -100,
+  });
 
   useEffect(() => {
     const container = containerRef.current;
@@ -114,7 +123,7 @@ function DrawingCanvas(): JSX.Element {
   // 클릭/터치 좌표 계산
   function getPosition(
     e: MouseEvent | TouchEvent,
-  ): pos {
+  ): Pos {
     let x: number = 0;
     let y: number = 0;
     if (e instanceof MouseEvent) {
@@ -146,7 +155,7 @@ function DrawingCanvas(): JSX.Element {
 
       ctx.lineWidth = basePenWidth * canvasScale;
       ctx.globalCompositeOperation = 'source-over';
-    } else {
+    } else if (status === 'draw') {
       ctx.strokeStyle = color;
       ctx.beginPath();
       ctx.moveTo(prevX, prevY);
@@ -155,33 +164,46 @@ function DrawingCanvas(): JSX.Element {
     }
   }
 
-  function sendStrokeData({ x, y }: pos) {
+  function sendStrokeData({
+    prevX, prevY, curX, curY,
+  }: LineData) {
     if (isErasing) {
       socket.emit('message', {
         status: 'erase',
-        prevX: prevPos.x / canvasScale,
-        prevY: prevPos.y / canvasScale,
-        curX: x / canvasScale,
-        curY: y / canvasScale,
+        prevX: prevX / canvasScale,
+        prevY: prevY / canvasScale,
+        curX: curX / canvasScale,
+        curY: curY / canvasScale,
       });
     } else {
       socket.emit('message', {
         status: 'draw',
         penColor,
-        prevX: prevPos.x / canvasScale,
-        prevY: prevPos.y / canvasScale,
-        curX: x / canvasScale,
-        curY: y / canvasScale,
+        prevX: prevX / canvasScale,
+        prevY: prevY / canvasScale,
+        curX: curX / canvasScale,
+        curY: curY / canvasScale,
       });
     }
   }
 
+  useEffect(() => {
+    if (mode === 'together' && newLine) {
+      sendStrokeData(newLine);
+    }
+  }, [newLine]);
+
   function startDrawing({ nativeEvent }: { nativeEvent: MouseEvent | TouchEvent }) {
     setIsDrawing(true);
-    const { x, y }: pos = getPosition(nativeEvent);
-    setPrevPos({ x, y });
-    if (mode === 'together') sendStrokeData({ x, y });
-    else {
+    const { x, y }: Pos = getPosition(nativeEvent);
+    setNewLine({
+      prevX: x, prevY: y, curX: x, curY: y,
+    });
+    if (mode === 'together') {
+      // sendStrokeData({
+      //   prevX: x, prevY: y, curX: x, curY: y,
+      // });
+    } else {
       stroke({
         status: isErasing ? 'erase' : 'draw',
         color: penColor,
@@ -194,22 +216,27 @@ function DrawingCanvas(): JSX.Element {
   }
 
   function draw({ nativeEvent }: { nativeEvent: MouseEvent | TouchEvent }) {
-    const { x, y }: pos = getPosition(nativeEvent);
+    const { x, y }: Pos = getPosition(nativeEvent);
     if (!ctx) return;
     if (!isDrawing) return;
-    if (mode === 'together') sendStrokeData({ x, y });
-    else {
+    if (mode === 'together') {
+      // sendStrokeData({
+      //   prevX: newLine.prevX, prevY: newLine.prevY, curX: x, curY: y,
+      // });
+    } else {
       // console.log(`draw from (${prevPos.x}, ${prevPos.y}) to (${x}, ${y})`);
       stroke({
         status: isErasing ? 'erase' : 'draw',
         color: penColor,
-        prevX: prevPos.x,
-        prevY: prevPos.y,
+        prevX: newLine.curX,
+        prevY: newLine.curY,
         curX: x,
         curY: y,
       });
     }
-    setPrevPos({ x, y });
+    setNewLine({
+      prevX: newLine.curX, prevY: newLine.curY, curX: x, curY: y,
+    });
   }
 
   function endDrawing() {
@@ -220,7 +247,14 @@ function DrawingCanvas(): JSX.Element {
   useEffect(() => {
     socket.on('message', (data: drawingData) => {
       if (!ctx) return;
-      stroke(data);
+      stroke({
+        status: data.status,
+        color: data.color,
+        prevX: data.prevX * canvasScale,
+        prevY: data.prevY * canvasScale,
+        curX: data.curX * canvasScale,
+        curY: data.curY * canvasScale,
+      });
     });
   });
 
