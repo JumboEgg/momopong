@@ -8,7 +8,7 @@ interface NumberPadProps {
   onClear: () => void;
 }
 
-const getVariant = (id: string): 'default' | 'delete' | 'enter' => {
+const getVariant = (id: string): 'default' | 'action' => {
   if (id === 'delete' || id === 'enter') return 'action';
   return 'default';
 };

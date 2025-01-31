@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
+import SubAccount from './pages/sub-account/SubAccountPage';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -15,6 +16,7 @@ function App(): JSX.Element {
     <div className="fixed inset-0 overflow-auto">
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/sub-account" element={<SubAccount />} />
         <Route path="/home" element={<Home />} />
         <Route path="/drawing" element={<Drawing />} />
         <Route path="/story/*" element={<Story />} />

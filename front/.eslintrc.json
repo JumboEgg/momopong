@@ -45,6 +45,14 @@
           "match": false
         }
       }
+    ],
+    "import/prefer-default-export": "off",
+    "import/no-extraneous-dependencies": [
+      "error", 
+      {
+        "devDependencies": true,
+        "dependencies": true
+      }
     ]
   },
   "overrides": [
