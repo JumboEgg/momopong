@@ -64,16 +64,6 @@ public class ChildServiceImpl implements ChildService {
     }
 
     @Override
-    public ChildDto updateChild(Long childId, ChildUpdateRequestDto updateRequestDto) {
-        Child child = childRepository.findById(childId)
-                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
-
-        child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
-
-        return child.entityToDto(child);
-    }
-
-    @Override
     public ChildDto login(Long childId) {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
@@ -96,6 +86,24 @@ public class ChildServiceImpl implements ChildService {
         child.updateStatus(StatusType.온라인);
 
         return childDto;
+    }
+
+    @Override
+    public ChildDto findChild(Long childId) {
+        Child child = childRepository.findById(childId)
+                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+
+        return child.entityToDto(child);
+    }
+
+    @Override
+    public ChildDto updateChild(Long childId, ChildUpdateRequestDto updateRequestDto) {
+        Child child = childRepository.findById(childId)
+                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+
+        child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
+
+        return child.entityToDto(child);
     }
 
     @Override

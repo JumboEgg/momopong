@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -42,7 +43,8 @@ public class FriendController {
 
     // 친구 요청
     @PostMapping("/{childId}/friend-requests")
-    public ResponseEntity<FriendDto> requestFriend(@PathVariable("childId") Long childId, @RequestParam String code) {
+    public ResponseEntity<FriendDto> requestFriend(@PathVariable("childId") Long childId, @RequestBody Map<String, String> map) {
+        String code = map.get("code");
         FriendDto friendDto = friendService.requestFriend(childId, code);
 
         return ResponseEntity.ok(friendDto);
