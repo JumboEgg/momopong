@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
-import SubAccount from './pages/sub-account/SubAccountPage';
+import SubAccount from './pages/subAccount/SubAccountPage';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
