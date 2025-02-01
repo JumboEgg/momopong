@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
+import Login from './pages/auth/Login';
 import SubAccount from './pages/subAccount/SubAccountPage';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
@@ -19,6 +20,7 @@ function App(): JSX.Element {
     <div className="fixed inset-0 overflow-auto">
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/parents/login" element={<Login />} />
         <Route path="/sub-account" element={<SubAccount />} />
         <Route path="/home" element={<Home />} />
         <Route path="/drawing" element={<Drawing />} />
