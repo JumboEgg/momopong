@@ -9,8 +9,11 @@ public interface ChildService {
     // 자식 계정 생성
     Long signUp(ChildSignUpRequestDto signUpRequestDto);
 
-    // 자식 계정 접속
+    // 자식 계정 로그인
     ChildDto login(Long childId);
+
+    // 자식 계정 로그아웃
+    void logout(Long childId);
 
     // 자식 계정 조회
     ChildDto findChild(Long childId);

@@ -31,12 +31,21 @@ public class ChildController {
     @PostMapping("/login")
     public ResponseEntity<ChildDto> login(@RequestBody Map<String, String> map) {
         Long childId = Long.parseLong(map.get("childId"));
-        System.out.println("childId = " + childId);
         ChildDto childDto = childService.login(childId);
 
         return ResponseEntity.ok(childDto);
     }
 
+    // 자식 계정 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody Map<String, String> map) {
+        Long childId = Long.parseLong(map.get("childId"));
+        childService.logout(childId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 자식 정보 조회
     @GetMapping("/{childId}")
     public ResponseEntity<ChildDto> findChild(@PathVariable("childId") Long childId) {
         ChildDto childDto = childService.findChild(childId);
