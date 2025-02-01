@@ -1,10 +1,12 @@
 type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 type ButtonVariant = 'white' | 'gray' | 'blue' | 'rounded';
+type ButtonType = 'button' | 'submit'; // 추가
 
 interface ButtonProps {
   children: React.ReactNode;
   size: ButtonSize;
   variant: ButtonVariant;
+  type?: ButtonType;
   className?: string;
   disabled?: boolean;
   hasFocus?: boolean,
@@ -22,6 +24,7 @@ function TextButton({
   children,
   size,
   variant,
+  type = 'button',
   className,
   disabled,
   onClick,
@@ -79,19 +82,39 @@ function TextButton({
   };
 
   return (
-    <button
-      type="button"
-      className={`
-        ${baseClasses}
-        ${textSizeClasses[size]}
-        ${variantClasses[variant]}
-        ${className}
-      `}
-      disabled={disabled}
-      onClick={onClick}
-    >
-      {children}
-    </button>
+    <>
+      {/* ESLint 규칙에 따라 버튼 타입을 고정된 문자열로 return */}
+      {type === 'button' && (
+        <button
+          type="button"
+          className={`
+            ${baseClasses}
+            ${textSizeClasses[size]}
+            ${variantClasses[variant]}
+            ${className}
+          `}
+          disabled={disabled}
+          onClick={onClick}
+        >
+          {children}
+        </button>
+      )}
+      {type === 'submit' && (
+        <button
+          type="submit"
+          className={`
+            ${baseClasses}
+            ${textSizeClasses[size]}
+            ${variantClasses[variant]}
+            ${className}
+          `}
+          disabled={disabled}
+          onClick={onClick}
+        >
+          {children}
+        </button>
+      )}
+    </>
   );
 }
 
