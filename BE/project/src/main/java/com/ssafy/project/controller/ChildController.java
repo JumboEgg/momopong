@@ -6,7 +6,6 @@ import com.ssafy.project.dto.ChildUpdateRequestDto;
 import com.ssafy.project.dto.SignUpResponseDto;
 import com.ssafy.project.service.ChildService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -68,6 +67,6 @@ public class ChildController {
     public ResponseEntity<Void> deleteChild(@PathVariable("childId") Long childId) {
         childService.deleteChild(childId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }

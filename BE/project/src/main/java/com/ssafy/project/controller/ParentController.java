@@ -5,7 +5,6 @@ import com.ssafy.project.security.JwtToken;
 import com.ssafy.project.service.ParentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,7 +47,7 @@ public class ParentController {
     public ResponseEntity<Void> logout(@RequestHeader("Refresh-Token") String refreshToken) {
         parentService.logout(refreshToken);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     // 회원 조회
@@ -74,6 +73,6 @@ public class ParentController {
     public ResponseEntity<Void> deleteParent(@PathVariable("parentId") Long parentId) {
         parentService.deleteParent(parentId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }
