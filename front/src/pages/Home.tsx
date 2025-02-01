@@ -19,7 +19,7 @@ function HomePage() {
           <img
             src="/images/profileicon.png"
             alt="프로필"
-            className="w-8 h-8 object-contain"
+            className="w-24 h-24 object-contain"
           />
           <p className="text-xl mt-0.5">프로필</p>
         </button>
@@ -32,7 +32,7 @@ function HomePage() {
           <img
             src="/images/friendsicon.png"
             alt="친구목록"
-            className="w-8 h-8 object-contain"
+            className="w-24 h-24 object-contain"
           />
           <p className="text-xl mt-0.5">친구목록</p>
         </button>
@@ -48,7 +48,7 @@ function HomePage() {
           <img
             src="/images/crayonicon.png"
             alt="그림그리기"
-            className="w-16 h-16 object-contain"
+            className="w-48 h-48 object-contain"
           />
           <p className="text-xl mt-0.5">그림그리기</p>
         </button>
@@ -61,7 +61,7 @@ function HomePage() {
           <img
             src="/images/bookicon.png"
             alt="동화읽기"
-            className="w-16 h-16 object-contain"
+            className="w-48 h-48 object-contain"
           />
           <p className="text-xl mt-0.5">동화읽기</p>
         </button>
@@ -74,7 +74,7 @@ function HomePage() {
           <img
             src="/images/houseicon.png"
             alt="나의집"
-            className="w-16 h-16 object-contain"
+            className="w-48 h-48 object-contain"
           />
           <p className="text-xl mt-0.5">나의집</p>
         </button>

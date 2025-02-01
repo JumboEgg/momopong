@@ -6,9 +6,9 @@ interface ButtonProps {
   size: ButtonSize; // Make optional in interface
   variant: ButtonVariant;
   className: string;
-  disabled: boolean;
-  hasFocus: boolean,
-  onClick: () => void;
+  disabled?: boolean;
+  hasFocus?: boolean,
+  onClick?: () => void;
 }
 
 const textSizeClasses: Record<ButtonSize, string> = {

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
+import SubAccount from './pages/sub-account/SubAccountPage';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -8,6 +9,9 @@ import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import Parent from './pages/Parent';
 import Test from './pages/Test';
+import MyBookStory from './components/myhouse/mybookstory/mybookstory';
+import MyDrawing from './components/myhouse/mydrawing/mydrawing';
+import MyLetters from './components/myhouse/letters/letters';
 
 function App(): JSX.Element {
   return (
@@ -15,6 +19,7 @@ function App(): JSX.Element {
     <div className="fixed inset-0 overflow-auto">
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/sub-account" element={<SubAccount />} />
         <Route path="/home" element={<Home />} />
         <Route path="/drawing" element={<Drawing />} />
         <Route path="/story/*" element={<Story />} />
@@ -23,6 +28,9 @@ function App(): JSX.Element {
         <Route path="/friends" element={<Friends />} />
         <Route path="/parent" element={<Parent />} />
         <Route path="/test" element={<Test />} />
+        <Route path="/house/letters" element={<MyLetters />} />
+        <Route path="/house/mybookstory" element={<MyBookStory />} />
+        <Route path="/house/mydrawing" element={<MyDrawing />} />
       </Routes>
     </div>
   );

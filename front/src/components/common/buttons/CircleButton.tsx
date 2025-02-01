@@ -8,9 +8,9 @@ interface CircleButtonBaseProps {
   size: CircleButtonSize;
   variant: CircleButtonVariant;
   className: string;
-  disabled: boolean;
-  hasFocus: boolean;
-  onClick: () => void;
+  disabled?: boolean;
+  hasFocus?: boolean;
+  onClick?: () => void;
 }
 
 // 버튼 아래에 추가될 텍스트 인터페이스
