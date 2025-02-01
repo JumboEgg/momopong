@@ -13,7 +13,7 @@ const basePenWidth: number = 30;
 export interface DrawingCanvasProps {
   canvasHeight: number;
   canvasWidth: number;
-  setDrawingCanvasRef: HTMLCanvasElement;
+  setDrawingCanvasRef:React.Dispatch<React.SetStateAction<HTMLCanvasElement | null>>;
 }
 
 export interface Pos {
@@ -59,7 +59,7 @@ function DrawingCanvas({
   });
 
   useEffect(() => {
-    setDrawingCanvasRef(canvasRef);
+    setDrawingCanvasRef(canvasRef.current);
   }, [canvasRef]);
 
   useEffect(() => {
