@@ -38,8 +38,7 @@ public class SecurityConfig {
                 mvc.pattern("/api/parents/login"),
                 mvc.pattern("/api/parents/refresh-token"),
                 mvc.pattern("/token"),
-                mvc.pattern("/api/book/letter/stt"),
-                mvc.pattern("/api/book/letter/gpt/**")
+                mvc.pattern("/api/book/letter/**")
 
         };
 

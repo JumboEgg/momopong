@@ -4,6 +4,7 @@ import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ssafy.project.domain.Letter;
+import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.LetterService;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +37,7 @@ public class LetterController {
 
     @GetMapping("/presigned-url")
     public ResponseEntity<Map<String, String>> getPresignedUrl() {
+
         try {
             String fileName = "letters/" + UUID.randomUUID().toString() + ".wav";
 
@@ -45,8 +47,6 @@ public class LetterController {
                             .withExpiration(DateTime.now().plusMinutes(5).toDate());
 
             URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-            System.out.println("url: "  + url);
 
             Map<String, String> response = new HashMap<>();
             response.put("presignedUrl", url.toString());
@@ -63,24 +63,27 @@ public class LetterController {
 
     @PostMapping("/gpt/{childId}")
     public ResponseEntity<Map<String, String>> getGPTResponse(
-            @PathVariable Long childId,
-            @RequestBody Map<String, String> request) {
+            @PathVariable("childId") Long childId,
+            @RequestBody LetterDto request) {
+
+
+        System.out.println("Received request - childId: , request: "+ childId + request);
 
         // GPT 응답 생성
         String gptResponse = letterService.getGPTResponse(
-                request.get("fairyTale"),
-                request.get("role"),
-                request.get("childName"),
-                request.get("content")
+                request.getFairyTale(),
+                request.getRole(),
+                request.getChildName(),
+                request.getContent()
         );
 
         // DB에 저장
         Letter letter = letterService.saveLetter(
                 childId,
-                request.get("content"),
+                request.getContent(),
                 gptResponse,
-                request.get("role"),
-                request.get("letterRecord")  // S3 URL
+                request.getRole(),
+                request.getLetterRecord() // S3 URL
         );
 
         // 응답을 JSON 형식으로 감싸기

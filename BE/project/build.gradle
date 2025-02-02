@@ -47,6 +47,7 @@ dependencies {
 
 
 	// stt
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation platform('com.google.cloud:libraries-bom:26.34.0')
 	implementation 'com.google.cloud:google-cloud-speech'
