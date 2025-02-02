@@ -17,12 +17,12 @@ public class RedisDao {
     }
 
     // 기본 데이터 저장
-    public void setValues(String key, String data) {
+    public void setValues(String key, Object data) {
         values.set(key, data);
     }
 
     // 만료 시간이 있는 데이터 저장
-    public void setValues(String key, String data, Duration duration) {
+    public void setValues(String key, Object data, Duration duration) {
         values.set(key, data, duration);
     }
 
