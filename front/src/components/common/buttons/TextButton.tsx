@@ -3,9 +3,9 @@ type ButtonVariant = 'white' | 'gray' | 'blue' | 'rounded';
 
 interface ButtonProps {
   children: React.ReactNode;
-  size: ButtonSize; // Make optional in interface
+  size: ButtonSize;
   variant: ButtonVariant;
-  className: string;
+  className?: string;
   disabled?: boolean;
   hasFocus?: boolean,
   onClick?: () => void;
