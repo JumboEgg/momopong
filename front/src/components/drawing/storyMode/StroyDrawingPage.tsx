@@ -15,29 +15,32 @@ function DrawingPage({ onDrawingResult }: DrawingPageProps): JSX.Element {
 
   useEffect(() => {
     onDrawingResult(imageData);
+    console.log(imageData);
   }, [imageData]);
 
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
 
-  const canvasHeight = window.innerHeight * 0.8;
+  const canvasHeight = window.innerHeight * 0.6;
   const canvasWidth = canvasHeight * 1.6;
 
   return (
-    <div className="bg-yellow-600 w-full h-full flex flex-col items-center justify-between m-0 p-0">
-      <div className="w-full h-20 flex justify-between m-0 p-0">
-        <span className="mt-4 ms-4">
+    <div className="bg-yellow-600 w-full h-full m-0 p-0 relative">
+      <div className="absolute top-0 right-0 w-full h-20 flex justify-end m-0 p-0 z-1">
+        <span className="mt-4 ms-4 me-4">
           <SaveButton canvasRef={canvasRef} />
         </span>
-        <span className="content-end flex">
-          <Palette />
-        </span>
       </div>
-      <div className="m-5 bg-white">
-        <DrawingCanvas
-          canvasHeight={canvasHeight}
-          canvasWidth={canvasWidth}
-          setDrawingCanvasRef={setCanvasRef}
-        />
+      <div className="absolute top-2 left-0 w-20 h-auto flex flex-col transform rotate-90 origin-top-left -scale-y-100 z-1">
+        <Palette />
+      </div>
+      <div className="flex justify-center items-center w-full">
+        <span className="bg-white mt-10">
+          <DrawingCanvas
+            canvasHeight={canvasHeight}
+            canvasWidth={canvasWidth}
+            setDrawingCanvasRef={setCanvasRef}
+          />
+        </span>
       </div>
     </div>
   );

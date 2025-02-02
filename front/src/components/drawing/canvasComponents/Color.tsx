@@ -6,19 +6,19 @@ function Color({ color }: { color: string }): JSX.Element {
     isErasing, setIsErasing, penColor, setPenColor,
   } = useDrawing();
 
-  const eraserClass = `bg-pink-200 w-16 ms-auto me-auto transition-all duration-200 ${isErasing ? 'h-full' : 'h-[80%]'}`;
-  const penClass = `h-full w-12 ms-auto me-auto transition-all duration-200 ${penColor === color ? 'h-full' : 'h-[80%]'}`;
-
   if (color === 'erase') {
     return (
       <button
         type="button"
         id="erase"
-        className="color h-full flex-2"
+        className="color h-full flex flex-2 items-start"
         onClick={() => { setIsErasing(true); }}
         aria-label="eraser button"
       >
-        <div className={eraserClass} />
+        <div
+          className="bg-pink-200 w-8 md:w-12 ms-auto me-auto self-start transition-all duration-200"
+          style={{ height: isErasing ? '80%' : '60%' }}
+        />
       </button>
     );
   }
@@ -26,7 +26,7 @@ function Color({ color }: { color: string }): JSX.Element {
     <button
       type="button"
       id={color}
-      className="color h-full flex-1"
+      className="color h-full flex flex-col flex-1 items-start overflow-visible relative me-1"
       onClick={() => {
         setPenColor(color);
         setIsErasing(false);
@@ -34,10 +34,15 @@ function Color({ color }: { color: string }): JSX.Element {
       aria-label="color selection button"
     >
       <div
-        className={penClass}
-        style={{ background: color }}
+        className="w-6 md:w-8 self-start transition-all duration-200 bg-gray-300 relative z-10"
+        style={{ height: penColor === color && !isErasing ? '60%' : '40%' }}
+      />
+      <div
+        className="w-6 h-3 md:w-8 md:h-4 rounded-b-full z-0"
+        style={{ background: color, bottom: '-30%' }}
       />
     </button>
+
   );
 }
 
@@ -46,7 +51,7 @@ function Palette() {
   colors.forEach((color) => {
     palette.push(<Color key={color} color={color} />);
   });
-  return <span className="flex w-1xs md:w-1xl h-16 md:h-20">{palette}</span>;
+  return <span className="flex h-20 md:h-24 items-start self-start me-2">{palette}</span>;
 }
 
 export default Palette;

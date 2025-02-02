@@ -251,35 +251,6 @@ function DrawingCanvas({
     });
   });
 
-  // // 캔버스 로컬에 저장
-  // function saveCanvas() {
-  //   if (!canvasRef.current) return;
-  //   const currentCanvas = canvasRef.current;
-  //   if (!currentCanvas) return;
-
-  //   const tempCanvas = document.createElement('canvas');
-  //   const tempCtx = tempCanvas.getContext('2d');
-  //   if (!tempCtx) return;
-
-  //   tempCanvas.width = canvasWidth;
-  //   tempCanvas.height = canvasHeight;
-
-  //   const bgImg = new Image();
-  //   bgImg.src = bgImgSrc;
-  //   bgImg.onload = () => {
-  //     tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
-  //     tempCtx.drawImage(currentCanvas, 0, 0);
-
-  //     const outlineImg = new Image();
-  //     outlineImg.src = outlineImgSrc;
-  //     outlineImg.onload = () => {
-  //       tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
-  //       const dataURL = tempCanvas.toDataURL('image/png');
-  //       setImageData(dataURL);
-  //     };
-  //   };
-  // }
-
   return (
     <div
       className="canvas"
@@ -287,18 +258,10 @@ function DrawingCanvas({
       ref={containerRef}
     >
       <canvas
-        className="bg-white"
         width={canvasWidth}
         height={canvasHeight}
         style={{
           position: 'absolute', top: 0, left: 0, zIndex: 0, margin: 0,
-        }}
-      />
-      <canvas
-        width={canvasWidth}
-        height={canvasHeight}
-        style={{
-          position: 'absolute', top: 0, left: 0, zIndex: 1, margin: 0,
         }}
         tabIndex={0}
         onMouseDown={startDrawing}
@@ -315,7 +278,7 @@ function DrawingCanvas({
         width={canvasWidth}
         height={canvasHeight}
         style={{
-          position: 'absolute', top: 0, left: 0, zIndex: 2, margin: 0, pointerEvents: 'none',
+          position: 'absolute', top: 0, left: 0, zIndex: 1, margin: 0, pointerEvents: 'none',
         }}
         ref={outlineCanvasRef}
       />
