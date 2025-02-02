@@ -2,10 +2,10 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
-import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.LoginRequestDto;
+import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.ParentSignUpRequestDto;
-import com.ssafy.project.exception.DuplicateParentEmailException;
+import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
@@ -35,7 +35,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
         if (checkDuplicateParent(signUpDto.getEmail()))
-            throw new DuplicateParentEmailException("이미 사용중인 이메일입니다");
+            throw new DuplicateException("이미 사용중인 이메일입니다");
 
         // 암호화된 비밀번호 저장
         String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
