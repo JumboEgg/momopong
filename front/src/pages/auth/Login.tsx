@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
-import useLoginStore from '@/stores/LoginStore';
-import type { LoginRequest } from '@/stores/LoginStore';
+import useLoginStore from '@/stores/loginStore';
+import type { LoginRequest } from '@/stores/loginStore';
 
 // 유효성 검사를 위한 인터페이스
 interface FormErrors {

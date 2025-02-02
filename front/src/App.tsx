@@ -2,7 +2,7 @@ import { Routes, Route } from 'react-router-dom';
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
-import SubAccount from './pages/subAccount/SubAccountPage';
+import SubAccountPage from './pages/subAccount/SubAccountPage';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -23,7 +23,7 @@ function App(): JSX.Element {
         <Route path="/" element={<Landing />} />
         <Route path="/parents/login" element={<Login />} />
         <Route path="/parents/signup" element={<SignUp />} />
-        <Route path="/sub-account" element={<SubAccount />} />
+        <Route path="/children/login" element={<SubAccountPage />} />
         <Route path="/home" element={<Home />} />
         <Route path="/drawing" element={<Drawing />} />
         <Route path="/story/*" element={<Story />} />

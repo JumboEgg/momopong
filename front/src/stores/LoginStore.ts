@@ -1,4 +1,3 @@
-// src/stores/AuthStore.ts
 import { create } from 'zustand';
 import axios, { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
 

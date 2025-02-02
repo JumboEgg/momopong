@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import axios, { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
-import useAuthStore from './LoginStore'; // 로그인 스토어 import
+import useAuthStore from './loginStore'; // 로그인 스토어 import
 
 interface SignUpRequest {
   email: string;

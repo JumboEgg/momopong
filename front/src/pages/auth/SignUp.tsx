@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import useSignUpStore from '@/stores/SignUpStore';
-import useLoginStore from '@/stores/LoginStore';
+import useSignUpStore from '@/stores/signUpStore';
+import useLoginStore from '@/stores/loginStore';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
-import type { SignUpFormData } from '@/stores/SignUpStore';
+import type { SignUpFormData } from '@/stores/signUpStore';
 
 interface FormErrors {
   email?: string;
