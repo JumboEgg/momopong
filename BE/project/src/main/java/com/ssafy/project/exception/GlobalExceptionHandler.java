@@ -2,6 +2,7 @@ package com.ssafy.project.exception;
 
 import com.ssafy.project.exception.friend.AlreadyAcceptedException;
 import com.ssafy.project.exception.friend.FriendNotFoundException;
+import com.ssafy.project.exception.friend.IllegalFriendRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.DisabledException;
@@ -36,19 +37,13 @@ public class GlobalExceptionHandler {
     }
 
     // 잘못된 요청
-    @ExceptionHandler({IllegalArgumentException.class, ChildLimitExceededException.class})
+    @ExceptionHandler({IllegalArgumentException.class, ChildLimitExceededException.class, DisabledException.class, IllegalFriendRequestException.class})
     public ResponseEntity<String> handleBadRequestException(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다: " + e.getMessage());
     }
 
-    // 접근 권한 없음
-    @ExceptionHandler(DisabledException.class)
-    public ResponseEntity<String> handleDisabledException(DisabledException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
-    }
-
     // 중복 요청
-    @ExceptionHandler({DuplicateParentEmailException.class, AlreadyAcceptedException.class})
+    @ExceptionHandler({DuplicateException.class, AlreadyAcceptedException.class})
     public ResponseEntity<String> handleConflictException(Exception e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 처리된 요청입니다: " + e.getMessage());
     }

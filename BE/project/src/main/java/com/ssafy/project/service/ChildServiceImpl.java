@@ -1,6 +1,6 @@
 package com.ssafy.project.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import com.ssafy.project.common.JsonConverter;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
@@ -25,7 +25,10 @@ import java.util.UUID;
 public class ChildServiceImpl implements ChildService {
     private final ParentRepository parentRepository;
     private final ChildRepository childRepository;
+    private final JsonConverter jsonConverter;
     private final RedisDao redisDao;
+
+    private static final String CHILD_STATUS_KEY = "child:status:%d";
 
     @Override
     public Long signUp(ChildSignUpRequestDto signUpRequestDto) {
@@ -87,24 +90,21 @@ public class ChildServiceImpl implements ChildService {
             child.updateFirstLogin(false);
 
         // 온라인으로 상태 변경 (Redis에서 상태 관리)
-        String key = "child:status:" + childId;
+        String key = String.format(CHILD_STATUS_KEY, childId);
         ChildStatusDto statusDto = ChildStatusDto.builder()
                 .childId(childId)
                 .name(child.getName())
                 .status(StatusType.ONLINE)
                 .build();
 
-        try {
-            redisDao.setValues(key, statusDto.toJson());
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e); // 나중에 에러 만들거나 하기 StatusConversionException
-        }
+        // 문자열로 변환 후 Redis에 저장
+        redisDao.setValues(key, jsonConverter.toJson(statusDto));
         return childDto;
     }
 
     @Override
     public void logout(Long childId) {
-        String key = "child:status:" + childId;
+        String key = String.format(CHILD_STATUS_KEY, childId);
         redisDao.deleteValues(key);
     }
 
