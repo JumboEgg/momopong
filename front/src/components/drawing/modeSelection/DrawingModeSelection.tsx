@@ -1,18 +1,19 @@
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useDrawing } from '../contexts/DrawingContext';
-import { DrawingMode } from '../types/drawing';
+import { useDrawing } from '@/stores/drawingStore';
+import { useEffect } from 'react';
 
-interface ModeSelectionProps {
-  onModeSelect: (mode: DrawingMode) => void;
-  onBack: () => void;
-}
-
-function DrawingModeSelection({ onModeSelect, onBack }: ModeSelectionProps): JSX.Element {
+function DrawingModeSelection(): JSX.Element {
   const {
-    setMode,
+    setTemplateId, setMode, mode,
   } = useDrawing();
+
+  useEffect(() => {
+    if (mode) {
+      setMode(null); // 기존 모드가 있으면 강제로 초기화
+    }
+  }, []);
 
   return (
     <div className="h-full w-full bg-[#FCEDBA]">
@@ -21,10 +22,10 @@ function DrawingModeSelection({ onModeSelect, onBack }: ModeSelectionProps): JSX
           size="sm"
           variant="action"
           className=""
-          onClick={onBack}
+          onClick={() => setTemplateId(0)}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
         />
-        <button type="button" onClick={() => onModeSelect('story')}>스토리 모드 테스트</button>
+        <button type="button" onClick={() => setMode('story')}>스토리 모드 테스트</button>
       </div>
       <div className="h-full w-full flex items-center justify-evenly columns-2">
         <div className="max-w-md flex justify-center">
@@ -32,7 +33,6 @@ function DrawingModeSelection({ onModeSelect, onBack }: ModeSelectionProps): JSX
             <button
               type="button"
               onClick={() => {
-                onModeSelect('single');
                 setMode('single');
               }}
               className="py-4 px-6 text-lg hover:text-2xl duration-200 font-semibold flex flex-col"
@@ -52,7 +52,6 @@ function DrawingModeSelection({ onModeSelect, onBack }: ModeSelectionProps): JSX
             <button
               type="button"
               onClick={() => {
-                onModeSelect('together');
                 setMode('together');
               }}
               className="py-4 px-6 text-lg hover:text-2xl duration-200 font-semibold flex flex-col"

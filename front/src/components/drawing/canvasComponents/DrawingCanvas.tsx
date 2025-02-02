@@ -1,11 +1,9 @@
 import {
   useState, useRef, useEffect, useCallback,
 } from 'react';
-import io from 'socket.io-client';
+import { useDrawing } from '@/stores/drawingStore';
 import { getOutlineSrc } from '../utils/getImgSrc';
-import { useDrawing } from '../contexts/DrawingContext';
-
-const socket = io('http://localhost:3869', { autoConnect: false });
+import useSocketStore, { drawingData } from '../hooks/useSocketStore';
 
 const baseWidth: number = 1600;
 const basePenWidth: number = 30;
@@ -28,21 +26,16 @@ export interface LineData {
   curY: number;
 }
 
-export interface drawingData {
-  status: string;
-  color: string;
-  prevX: number;
-  prevY: number;
-  curX: number;
-  curY: number;
-}
-
 function DrawingCanvas({
   canvasHeight, canvasWidth, setDrawingCanvasRef,
 }: DrawingCanvasProps): JSX.Element {
   const {
     mode, templateId, isErasing, penColor, imageData,
   } = useDrawing();
+
+  const {
+    setIsConnected, socket,
+  } = useSocketStore();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
 
@@ -59,8 +52,9 @@ function DrawingCanvas({
   });
 
   useEffect(() => {
-    if (mode !== 'single' && !imageData) socket.connect();
-    if (mode !== 'single' && imageData) socket.disconnect();
+    if (mode !== 'together' && mode !== 'story') return;
+    if (!imageData) setIsConnected(true);
+    if (imageData) setIsConnected(false);
   }, [mode, imageData]);
 
   useEffect(() => {
@@ -120,7 +114,7 @@ function DrawingCanvas({
     context.lineCap = 'round';
 
     setCtx(context);
-  });
+  }, [canvasRef.current]);
 
   // 펜 색상 변경
   useEffect(() => {
@@ -174,6 +168,7 @@ function DrawingCanvas({
   function sendStrokeData({
     prevX, prevY, curX, curY,
   }: LineData) {
+    if (!socket) return;
     if (isErasing) {
       socket.emit('message', {
         status: 'erase',
@@ -243,6 +238,7 @@ function DrawingCanvas({
 
   // socket.io의 그림 정보 수신
   useEffect(() => {
+    if (!socket) return;
     socket.on('message', (data: drawingData) => {
       if (!ctx) return;
       stroke({

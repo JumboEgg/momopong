@@ -1,23 +1,18 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
 // import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 // import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DialogModal from '@/components/common/modals/DialogModal';
-import { useDrawing } from '../contexts/DrawingContext';
-
-// export interface ResultPageProps {
-//   onBack: () => void;
-// }
+import { useDrawing } from '@/stores/drawingStore';
 
 function ResultPage() {
   const {
-    mode, imageData, templateName,
-    // setImageData,
+    mode, setMode, setTemplateId, imageData, setImageData, templateName,
   } = useDrawing();
 
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
   const [saveModal, setSaveModal] = useState<boolean>(false);
@@ -35,27 +30,21 @@ function ResultPage() {
   }, []);
 
   const onSave = () => {
-    setSaveModal(true);
+    // navigate('/home');
+    setTemplateId(0);
+    setMode(null);
+    setImageData('');
   };
 
   const onDelete = () => {
-    setDeleteModal(true);
+    // navigate('/home');
+    setTemplateId(0);
+    setMode(null);
+    setImageData('');
   };
 
   return (
     <div className="w-full h-full bg-amber-200">
-      {/* <div className="absolute mt-5 ml-5">
-        <IconCircleButton
-          size="sm"
-          variant="action"
-          className=""
-          onClick={() => {
-            onBack();
-            setImageData('');
-          }}
-          icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
-        />
-      </div> */}
       <div className="flex flex-col items-center justify-center w-full h-full">
         <div className="text-center max-w-[90%]">
           <img
@@ -72,8 +61,8 @@ function ResultPage() {
           </p>
         </div>
         <div className="text-center mt-4 md:mt-10 space-x-4">
-          <TextButton size={buttonSize} variant="white" onClick={onSave}>액자에 걸어둘래</TextButton>
-          <TextButton size={buttonSize} variant="white" onClick={onDelete}>그냥 두고 갈래</TextButton>
+          <TextButton size={buttonSize} variant="white" onClick={() => setSaveModal(true)}>액자에 걸어둘래</TextButton>
+          <TextButton size={buttonSize} variant="white" onClick={() => setDeleteModal(true)}>그냥 두고 갈래</TextButton>
         </div>
       </div>
       {
@@ -83,8 +72,8 @@ function ResultPage() {
               type="info"
               message1="그림을 액자에 걸었어요!"
               message2="내가 그린 그림은 나의 집에서 다시 볼 수 있어요"
-              onConfirm={() => navigate('/home')}
-              onClose={() => navigate('/home')}
+              onConfirm={onSave}
+              onClose={onSave}
             />
           )
           : null
@@ -96,8 +85,8 @@ function ResultPage() {
               type="info"
               message1="그림을 정리했어요!"
               message2="언제든 다시 그릴 수 있어요"
-              onConfirm={() => navigate('/home')}
-              onClose={() => navigate('/home')}
+              onConfirm={onDelete}
+              onClose={onDelete}
             />
           )
           : null
