@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
-import useAuthStore from '@/stores/AuthStore';
-import type { LoginRequest } from '@/stores/AuthStore';
+import useLoginStore from '@/stores/LoginStore';
+import type { LoginRequest } from '@/stores/LoginStore';
 
 // 유효성 검사를 위한 인터페이스
 interface FormErrors {
@@ -21,10 +21,10 @@ function Login(): JSX.Element {
   const [errors, setErrors] = useState<FormErrors>({});
 
   // 필요한 상태만 선택적으로 구독(불필요한 리렌더/무한루프 방지)
-  const login = useAuthStore((state) => state.login);
-  const isLoading = useAuthStore((state) => state.isLoading);
-  const error = useAuthStore((state) => state.error);
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const login = useLoginStore((state) => state.login);
+  const isLoading = useLoginStore((state) => state.isLoading);
+  const error = useLoginStore((state) => state.error);
+  const isAuthenticated = useLoginStore((state) => state.isAuthenticated);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -146,6 +146,14 @@ function Login(): JSX.Element {
             </TextButton>
           </div>
         </form>
+        <TextButton
+          size="lg"
+          variant="gray"
+          onClick={() => navigate('/parents/signup')}
+          className="w-full"
+        >
+          회원가입
+        </TextButton>
       </div>
     </div>
   );

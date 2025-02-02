@@ -21,6 +21,7 @@ function App(): JSX.Element {
       <Routes>
         <Route path="/" element={<Landing />} />
         <Route path="/parents/login" element={<Login />} />
+        {/* <Route path="/parents/signup" element={<SignUp />} /> */}
         <Route path="/sub-account" element={<SubAccount />} />
         <Route path="/home" element={<Home />} />
         <Route path="/drawing" element={<Drawing />} />

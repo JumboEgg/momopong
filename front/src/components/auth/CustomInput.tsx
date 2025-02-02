@@ -1,6 +1,6 @@
 import React, { useState, InputHTMLAttributes } from 'react';
 
-type CustomInputType = 'text' | 'password' | 'email';
+type CustomInputType = 'text' | 'password' | 'email' | 'tel';
 
 interface CustomInputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

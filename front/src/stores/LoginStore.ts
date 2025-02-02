@@ -1,4 +1,3 @@
-// src/stores/AuthStore.ts
 import { create } from 'zustand';
 import axios, { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
 
@@ -7,15 +6,29 @@ interface LoginRequest {
   password: string;
 }
 
+interface ParentDto {
+  parentId: number;
+  email: string;
+  name: string;
+  phone: string;
+}
+
+interface JwtToken {
+  grantType: string;
+  accessToken: string;
+  refreshToken: string;
+}
+
 interface LoginResponse {
-  id: number;
-  accessToken: string; // JWT 토큰
+  parentDto: ParentDto;
+  jwtToken: JwtToken;
 }
 
 interface AuthState {
   isAuthenticated: boolean;
-  userId: number | null;
+  user: ParentDto | null; // userId 대신 전체 사용자 정보 저장
   accessToken: string | null;
+  refreshToken: string | null; // refresh 토큰 추가
   isLoading: boolean;
   error: string | null;
   login: (loginData: LoginRequest) => Promise<void>;
@@ -43,23 +56,27 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   };
 });
 
-const useAuthStore = create<AuthState>((set) => ({
+const useLoginStore = create<AuthState>((set) => ({
   isAuthenticated: !!localStorage.getItem('accessToken'),
-  userId: null,
+  user: null,
   accessToken: localStorage.getItem('accessToken'),
+  refreshToken: localStorage.getItem('refreshToken'),
   isLoading: false,
   error: null,
   login: async (loginData) => {
     try {
       set({ isLoading: true, error: null });
-      const response = await api.post<LoginResponse>('/parents/signup', loginData);
-      // JWT 토큰을 로컬 스토리지에 저장
-      localStorage.setItem('accessToken', response.data.accessToken);
+      const response = await api.post<LoginResponse>('/parents/login', loginData);
+
+      // JWT 토큰들을 로컬 스토리지에 저장
+      localStorage.setItem('accessToken', response.data.jwtToken.accessToken);
+      localStorage.setItem('refreshToken', response.data.jwtToken.refreshToken);
 
       set({
         isAuthenticated: true,
-        userId: response.data.id,
-        accessToken: response.data.accessToken,
+        user: response.data.parentDto,
+        accessToken: response.data.jwtToken.accessToken,
+        refreshToken: response.data.jwtToken.refreshToken,
         isLoading: false,
       });
     } catch (error) {
@@ -72,14 +89,16 @@ const useAuthStore = create<AuthState>((set) => ({
   },
   logout: () => {
     localStorage.removeItem('accessToken');
+    localStorage.removeItem('refreshToken');
     set({
       isAuthenticated: false,
-      userId: null,
+      user: null,
       accessToken: null,
+      refreshToken: null,
       error: null,
     });
   },
 }));
 
 export type { LoginRequest };
-export default useAuthStore;
+export default useLoginStore;
