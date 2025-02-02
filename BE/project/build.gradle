@@ -51,6 +51,9 @@ dependencies {
 	implementation platform('com.google.cloud:libraries-bom:26.34.0')
 	implementation 'com.google.cloud:google-cloud-speech'
 
+	// AWS 버전이거 맞음??
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 }
 
 tasks.named('test') {

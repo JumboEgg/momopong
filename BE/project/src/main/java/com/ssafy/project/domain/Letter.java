@@ -22,7 +22,7 @@ public class Letter {
     private Long letterId;
 
     @Column(name = "child_id")
-    private Integer childId;
+    private Long childId;
 
     @Column(name = "letter")
     private String letter;

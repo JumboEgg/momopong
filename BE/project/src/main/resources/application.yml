@@ -59,3 +59,18 @@ livekit:
 openai:
   api:
     key: ${OPENAI_API_KEY}
+
+
+
+# AWS
+cloud:
+  aws:
+    credentials:
+      access-key:
+      secret-key:
+    region:
+      static:
+    s3:
+      bucket:
+    stack:
+      auto: false
