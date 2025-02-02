@@ -17,7 +17,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -31,8 +36,15 @@ public class SecurityConfig {
         MvcRequestMatcher[] permitAllList = {
                 mvc.pattern("/api/parents/signup"),
                 mvc.pattern("/api/parents/login"),
-                mvc.pattern("/api/parents/refresh-token")
+                mvc.pattern("/api/parents/refresh-token"),
+                mvc.pattern("/token"),
+                mvc.pattern("/api/book/letter/stt"),
+                mvc.pattern("/api/book/letter/gpt/**")
+
         };
+
+        // CORS 설정 추가
+        http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         // REST API -> basic auth 및 csrf 보안을 사용하지 않음
         http.httpBasic(AbstractHttpConfigurer::disable)
@@ -56,6 +68,22 @@ public class SecurityConfig {
                 UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    // CORS 설정을 위한 빈 추가
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList(
+                "GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"
+        ));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(true);
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
