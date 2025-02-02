@@ -1,8 +1,159 @@
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import ActivityTab from '@/components/parentReport/tabs/ActivityTab';
+import CraftsTab from '@/components/parentReport/tabs/CraftsTab';
+import ReportTab from '@/components/parentReport/tabs/ReportTab';
+import { useReportStore } from '@/stores/reportStore';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { useNavigate } from 'react-router-dom';
+
 function Parent() {
+  const navigate = useNavigate();
+
+  const {
+    childIdx, setChildIdx, reportTab, setReportTab,
+  } = useReportStore();
+
+  const MOCK_CHILDREN_DATA = [
+    {
+      childId: 1,
+      childName: '박치킨',
+      childAge: 7,
+      joinDate: 45,
+      profileSrc: 'public/images/coloringTemplates/03/backgroundImg.png',
+    },
+    {
+      childId: 2,
+      childName: '박초코',
+      childAge: 8,
+      joinDate: 145,
+      profileSrc: 'public/images/coloringTemplates/04/backgroundImg.png',
+    },
+    {
+      childId: 3,
+      childName: '박사탕',
+      childAge: 17,
+      joinDate: 2045,
+      profileSrc: 'public/images/coloringTemplates/02/backgroundImg.png',
+    },
+  ];
+
+  const content = (): JSX.Element => {
+    if (reportTab === 'report') {
+      return (
+        <ReportTab />
+      );
+    }
+
+    if (reportTab === 'activities') {
+      return (
+        <ActivityTab />
+      );
+    }
+
+    return (
+      <CraftsTab />
+    );
+  };
+
   return (
-    <div>
-      보호자 페이지
+    <div className="w-full h-full relative bg-pink-200 flex font-[BMJUA]">
+      <div className="absolute top-5 left-5">
+        <IconCircleButton
+          size="sm"
+          variant="action"
+          className=""
+          onClick={() => navigate('/sub-account')}
+          icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
+        />
+      </div>
+      <div className="self-center mx-auto flex flex-col justify-center w-[80%] h-[80%] space-y-2">
+        <div
+          className="text-5xl"
+          style={{
+            textShadow: '2px 2px 0px white, -2px -2px 0px white, -2px 2px 0px white, 2px -2px 0px white',
+          }}
+        >
+          아이 활동 리포트
+        </div>
+        <div className="bg-white rounded-2xl w-full h-full flex flex-col p-10 space-y-5">
+          <div className="flex flex-row">
+            {MOCK_CHILDREN_DATA.map((child, idx) => (
+              <button
+                key={MOCK_CHILDREN_DATA[idx].childId}
+                type="button"
+                onClick={() => setChildIdx(idx)}
+                className="text-2xl mr-10"
+                style={{
+                  color: childIdx === idx ? 'steelblue' : 'cornflowerblue',
+                }}
+              >
+                {child.childName}
+              </button>
+            ))}
+          </div>
+          <div className="flex flex-row">
+            <div className="flex-1 flex flex-col justify-baseline items-center max-w-64 space-y-2">
+              <img
+                src={MOCK_CHILDREN_DATA[childIdx].profileSrc}
+                alt={MOCK_CHILDREN_DATA[childIdx].childName}
+                className="w-[50%] min-w-40 aspect-square rounded-full bg-amber-300"
+              />
+              <div className="text-3xl">{MOCK_CHILDREN_DATA[childIdx].childName}</div>
+              <div className="text-xl">
+                {MOCK_CHILDREN_DATA[childIdx].childAge}
+                세
+              </div>
+              <div className="text-xl">
+                가입 후
+                {' '}
+                {MOCK_CHILDREN_DATA[childIdx].joinDate}
+                일
+              </div>
+
+            </div>
+            <div className="flex-2">
+              <div className="flex flex-row">
+                <button
+                  type="button"
+                  onClick={() => setReportTab('report')}
+                  className="text-2xl mr-10"
+                  style={{
+                    color: reportTab === 'report' ? 'steelblue' : 'cornflowerblue',
+                  }}
+                >
+                  활동 분석
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportTab('activities')}
+                  className="text-2xl mr-10"
+                  style={{
+                    color: reportTab === 'activities' ? 'steelblue' : 'cornflowerblue',
+                  }}
+                >
+                  활동 내역
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReportTab('crafts')}
+                  className="text-2xl mr-10"
+                  style={{
+                    color: reportTab === 'crafts' ? 'steelblue' : 'cornflowerblue',
+                  }}
+                >
+                  아이의 작품
+                </button>
+              </div>
+              <div className="mt-5">
+                {content()}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
+
 export default Parent;
