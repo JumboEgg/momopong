@@ -5,7 +5,7 @@ import io from 'socket.io-client';
 import { getOutlineSrc } from '../utils/getImgSrc';
 import { useDrawing } from '../contexts/DrawingContext';
 
-const socket = io('http://localhost:3869');
+const socket = io('http://localhost:3869', { autoConnect: false });
 
 const baseWidth: number = 1600;
 const basePenWidth: number = 30;
@@ -41,7 +41,7 @@ function DrawingCanvas({
   canvasHeight, canvasWidth, setDrawingCanvasRef,
 }: DrawingCanvasProps): JSX.Element {
   const {
-    mode, templateId, isErasing, penColor,
+    mode, templateId, isErasing, penColor, imageData,
   } = useDrawing();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
@@ -57,6 +57,11 @@ function DrawingCanvas({
   const [newLine, setNewLine] = useState<LineData>({
     prevX: -100, prevY: -100, curX: -100, curY: -100,
   });
+
+  useEffect(() => {
+    if (mode !== 'single' && !imageData) socket.connect();
+    if (mode !== 'single' && imageData) socket.disconnect();
+  }, [mode, imageData]);
 
   useEffect(() => {
     setDrawingCanvasRef(canvasRef.current);
