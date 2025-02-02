@@ -5,6 +5,7 @@ import com.google.api.gax.rpc.ApiStreamObserver;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
+import com.ssafy.project.config.GoogleCloudConfig;
 import com.ssafy.project.service.LetterService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,21 +22,21 @@ import java.io.IOException;
 @Slf4j
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
+    private final GoogleCloudConfig googleCloudConfig;
     private SpeechClient speechClient;
     private final LetterService letterService;
     private ApiStreamObserver<StreamingRecognizeRequest> requestObserver;
 
     @Autowired
-    public WebSocketHandler(LetterService letterService) {
+    public WebSocketHandler(GoogleCloudConfig googleCloudConfig, LetterService letterService) {
+        this.googleCloudConfig = googleCloudConfig;
         this.letterService = letterService;
     }
 
     @PostConstruct
     public void initializeSpeechClient() {
         try {
-            GoogleCredentials credentials = GoogleCredentials.fromStream(
-                    getClass().getResourceAsStream("/ssafy-fairytale-43a2757e76e7.json")
-            );
+            GoogleCredentials credentials = googleCloudConfig.getCredentials();
             SpeechSettings settings = SpeechSettings.newBuilder()
                     .setCredentialsProvider(FixedCredentialsProvider.create(credentials))
                     .build();
@@ -47,6 +48,18 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    private void sendMessageToClient(WebSocketSession session, String message) {
+        try {
+            // 세션이 열려있는지 확인
+            if (session.isOpen()) {
+                session.sendMessage(new TextMessage(message));
+            } else {
+                log.warn("WebSocket session is closed. Message not sent.");
+            }
+        } catch (IOException e) {
+            log.error("Error sending message through WebSocket", e);
+        }
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
@@ -56,17 +69,29 @@ public class WebSocketHandler extends TextWebSocketHandler {
             @Override
             public void onNext(StreamingRecognizeResponse response) {
                 try {
+
+                    if (!session.isOpen()) {
+                        log.warn("WebSocket session is closed. Skipping message processing.");
+                        return;
+                    }
+
                     if (response.getResultsCount() > 0) {
                         StreamingRecognitionResult result = response.getResults(0);
                         String transcript = result.getAlternatives(0).getTranscript();
 
                         // 최종 결과일 때만 isFinal true로 전송
-                        session.sendMessage(new TextMessage(
-                                String.format(
-                                        "{\"transcript\": \"%s\", \"isFinal\": %b}",
-                                        transcript, result.getIsFinal()
-                                )
-                        ));
+                        try {
+                            // JSON 형식의 응답 생성
+                            String jsonResponse = String.format(
+                                    "{\"transcript\": \"%s\", \"isFinal\": %b}",
+                                    transcript.replace("\"", "\\\""), // 특수문자 이스케이프
+                                    result.getIsFinal()
+                            );
+
+                            sendMessageToClient(session, jsonResponse);
+                        } catch (Exception e) {
+                            log.error("Error sending message to client", e);
+                        }
                     }
                 } catch (Exception e) {
                     log.error("Error in handling response", e);
@@ -77,11 +102,17 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             @Override
             public void onError(Throwable t) {
-                System.err.println("Error: " + t.getMessage());
+                log.error("Streaming error occurred", t);
                 try {
-                    session.sendMessage(new TextMessage("{\"error\": \"" + t.getMessage() + "\"}"));
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    if (session.isOpen()) {
+                        String errorMessage = String.format(
+                                "{\"error\": \"%s\"}",
+                                t.getMessage().replace("\"", "\\\"")
+                        );
+                        sendMessageToClient(session, errorMessage);
+                    }
+                } catch (Exception e) {
+                    log.error("Error sending error message to client", e);
                 }
             }
 
@@ -91,6 +122,8 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 System.out.println("Streaming completed.");
             }
         };
+
+
 
         requestObserver = speechClient.streamingRecognizeCallable().bidiStreamingCall(responseObserver);
 
@@ -127,30 +160,5 @@ public class WebSocketHandler extends TextWebSocketHandler {
         }
     }
 
-//    @Override
-//    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-//        try {
-//            System.out.println("Received message: " + message.getPayload());
-//
-//            RecognitionConfig config = RecognitionConfig.newBuilder()
-//                    .setEncoding(RecognitionConfig.AudioEncoding.LINEAR16)
-//                    .setSampleRateHertz(16000)
-//                    .setLanguageCode("ko-KR")
-//                    .build();
-//
-//            RecognitionAudio audio = RecognitionAudio.newBuilder()
-//                    .setContent(ByteString.copyFrom(message.getPayload().getBytes()))
-//                    .build();
-//
-//            RecognizeResponse response = speechClient.recognize(config, audio);
-//            System.out.print("api 요청");
-//            SpeechRecognitionResult result = response.getResultsList().get(0);
-//            String transcript = result.getAlternativesList().get(0).getTranscript();
-//
-//            session.sendMessage(new TextMessage(transcript));
-//        }catch (Exception e) {
-//            e.printStackTrace();
-//            System.out.println("Error processing message: " + e.getMessage());
-//        }
-//    }
+
 }

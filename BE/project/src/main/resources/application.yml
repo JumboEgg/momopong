@@ -54,8 +54,39 @@ livekit:
     secret: ${LIVEKIT_API_SECRET:secret}
   url: ws://localhost:7880
 
+# STT
+google:
+  cloud:
+    credentials:
+      type: ${GCP_TYPE:service_account}
+      project-id: ${GCP_PROJECT_ID}
+      private-key-id: ${GCP_PRIVATE_KEY_ID}
+      private-key: ${GCP_PRIVATE_KEY}
+      client-email: ${GCP_CLIENT_EMAIL}
+      client-id: ${GCP_CLIENT_ID}
+      auth-uri: ${GCP_AUTH_URI}
+      token-uri: ${GCP_TOKEN_URI}
+      auth-provider-x509-cert-url: ${GCP_AUTH_PROVIDER_CERT_URL}
+      client-x509-cert-url: ${GCP_CLIENT_CERT_URL}
+      universe_domain: ${GCP_UNIVERSE_DOMAIN}
+
 
 # gpt api
 openai:
   api:
     key: ${OPENAI_API_KEY}
+
+
+
+# AWS
+cloud:
+  aws:
+    credentials:
+      access-key: ${AWS_ACCESS_KEY}
+      secret-key: ${AWS_SECRET_KEY}
+    region:
+      static: ${AWS_REGION}
+    s3:
+      bucket: ${AWS_S3_BUCKET}
+    stack:
+      auto: false
