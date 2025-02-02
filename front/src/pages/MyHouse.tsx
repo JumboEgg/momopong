@@ -1,15 +1,31 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
 
 function MyHouse() {
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState<'letter' | 'frame' | 'book' | null>(null);
+
+  const handleBack = () => {
+    navigate('/home');
+  };
 
   return (
     <div
       className="min-h-screen w-full bg-cover bg-center bg-no-repeat relative"
       style={{ backgroundImage: "url('/images/house-background.png')" }}
     >
+      {/* 뒤로가기 버튼 */}
+      <div className="mb-6">
+        <button
+          type="button"
+          onClick={handleBack}
+          className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 hover:bg-gray-100"
+        >
+          <ArrowLeft size={24} />
+        </button>
+      </div>
+
       {/* 편지 이미지 */}
       <button
         type="button"
