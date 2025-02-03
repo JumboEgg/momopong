@@ -1,6 +1,10 @@
 package com.ssafy.project.service;
 
+import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Letter;
+import com.ssafy.project.dto.LetterDto;
+import com.ssafy.project.exception.UserNotFoundException;
+import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.LetterRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,6 +20,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -27,6 +32,7 @@ public class LetterServiceImpl implements LetterService {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final LetterRepository letterRepository;
+    private final ChildRepository childRepository;
 
 
     @Override
@@ -73,12 +79,34 @@ public class LetterServiceImpl implements LetterService {
     }
 
     @Override
+    public List<LetterDto> getLettersByChildId(Long childId) {
+        List<Letter> letters = letterRepository.findAllByChildId(childId);
+        return letters.stream()
+                .map(Letter::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public LetterDto getLetter(Long childId, Long letterId) {
+        Letter letter = letterRepository.findByChildIdAndLetterId(childId, letterId);
+        if (letter == null) {
+            throw new RuntimeException("편지를 찾을 수 없습니다.");
+        }
+
+        return Letter.entityToDto(letter);
+    }
+
+    @Override
     @Transactional
-    public Letter saveLetter(Long childId, String content, String reply, String role, String letterRecord) {
+    public Letter saveLetter(Long childId, String content,  String reply, String bookTitle,String role, String letterRecord) {
+    Child child = childRepository.findById(childId)
+            .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+
         Letter letter = Letter.builder()
-                .childId(childId)
+                .child(child)
                 .letter(content)
                 .reply(reply)
+                .bookTitle(bookTitle)
                 .role(role)
                 .letterRecord(letterRecord)
                 .createdAt(LocalDateTime.now())
@@ -86,6 +114,4 @@ public class LetterServiceImpl implements LetterService {
 
         return letterRepository.save(letter);
     }
-
-
 }
