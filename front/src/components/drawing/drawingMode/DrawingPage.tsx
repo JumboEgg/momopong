@@ -1,22 +1,9 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import DrawingCanvas from '../canvasComponents/DrawingCanvas';
 import Palette from '../canvasComponents/Color';
-import { useDrawing } from '../contexts/DrawingContext';
 import SaveButton from '../canvasComponents/SaveButton';
 
-interface DrawingPageProps {
-  onDrawingResult: (resultSrc: string) => void;
-}
-
-function DrawingPage({ onDrawingResult }: DrawingPageProps): JSX.Element {
-  const {
-    imageData,
-  } = useDrawing();
-
-  useEffect(() => {
-    onDrawingResult(imageData);
-  }, [imageData]);
-
+function DrawingPage(): JSX.Element {
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
 
   const canvasHeight = window.innerHeight * 0.8;

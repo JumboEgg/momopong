@@ -2,15 +2,11 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { useDrawing } from '../contexts/DrawingContext';
+import { useDrawing } from '@/stores/drawingStore';
 import drawingTemplate from '../data/templateList';
 import { getBackgroundSrc } from '../utils/getImgSrc';
 
-interface DrawingSelectionProps {
-  onDrawingSelect: (template: number) => void;
-}
-
-function DrawingSelection({ onDrawingSelect }: DrawingSelectionProps): JSX.Element {
+function DrawingSelection(): JSX.Element {
   const {
     setTemplateId, setTemplateName, setBackgroundSrc, setOutlineSrc,
   } = useDrawing();
@@ -22,7 +18,6 @@ function DrawingSelection({ onDrawingSelect }: DrawingSelectionProps): JSX.Eleme
       type="button"
       key={template.templateId}
       onClick={() => {
-        onDrawingSelect(template.templateId);
         setTemplateId(template.templateId);
         setTemplateName(template.name);
         setBackgroundSrc(template.bgSrc);
@@ -46,8 +41,8 @@ function DrawingSelection({ onDrawingSelect }: DrawingSelectionProps): JSX.Eleme
   ));
 
   return (
-    <div className="w-full h-full p-5 bg-[#FCEDBA]">
-      <div>
+    <div className="w-full h-full p-5 bg-[#FCEDBA] relative">
+      <div className="relative z-10">
         <IconCircleButton
           size="sm"
           variant="action"
@@ -56,7 +51,7 @@ function DrawingSelection({ onDrawingSelect }: DrawingSelectionProps): JSX.Eleme
           icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
         />
       </div>
-      <div className="absolute top-10 flex justify-center items-center w-full font-[BMJUA] text-3xl">
+      <div className="absolute top-10 flex justify-center items-center w-full font-[BMJUA] text-3xl z-0">
         색칠하고 싶은 그림을 골라보세요
       </div>
       <div className="mt-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4 justify-between flex flex-wrap items-start content-start">

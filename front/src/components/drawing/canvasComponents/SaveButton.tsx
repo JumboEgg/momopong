@@ -1,6 +1,6 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useCallback, useEffect, useState } from 'react';
-import { useDrawing } from '../contexts/DrawingContext';
+import { useDrawing } from '@/stores/drawingStore';
 import { getBackgroundSrc, getOutlineSrc } from '../utils/getImgSrc';
 
 export interface SaveButtonProps {

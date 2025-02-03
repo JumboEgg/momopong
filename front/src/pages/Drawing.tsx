@@ -1,58 +1,51 @@
-import { DrawingProvider } from '@/components/drawing/contexts/DrawingContext';
 import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
-import { DrawingMode } from '@/components/drawing/types/drawing';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
 import { FriendProvider } from '@/components/stories/contexts/FriendContext';
 import StoryDrawingPage from '@/components/drawing/storyMode/StroyDrawingPage';
+import { useDrawing } from '@/stores/drawingStore';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 
 function Drawing() {
-  const [selectedDrawing, setSelectedDrawing] = useState<number | null>(null);
-  const [selectedMode, setSelectedMode] = useState<DrawingMode | null>(null);
-  const [resultSrc, setResultSrc] = useState<string | null>(null);
+  const {
+    mode, templateId, imageData,
+  } = useDrawing();
+
+  const {
+    setIsConnected,
+  } = useSocketStore();
+
   const [selectedFriendId, setSelectedFriendId] = useState<string>();
 
-  const handleDrawingSelect = (templateId: number) => {
-    setSelectedDrawing(templateId);
-  };
-
-  const handleModeSelect = (mode: DrawingMode) => {
-    setSelectedMode(mode);
-  };
+  useEffect(() => {
+    setIsConnected(false);
+  }, [mode]);
 
   const content = () => {
-    if (!selectedDrawing) {
-      return <DrawingSelection onDrawingSelect={handleDrawingSelect} />;
+    if (!templateId) {
+      return <DrawingSelection />;
     }
 
-    if (!selectedMode) {
+    if (!mode) {
+      return <DrawingModeSelection />;
+    }
+
+    if (mode === 'together' && !selectedFriendId) {
       return (
-        <DrawingModeSelection
-          onModeSelect={handleModeSelect}
-          onBack={() => setSelectedDrawing(null)}
-        />
+        <FriendSelection onFriendSelect={setSelectedFriendId} />
       );
     }
 
-    if (selectedMode === 'together' && !selectedFriendId) {
-      return (
-        <FriendSelection
-          onFriendSelect={setSelectedFriendId}
-          onBack={() => setSelectedMode(null)}
-        />
-      );
+    if (mode === 'story' && !imageData) {
+      return <StoryDrawingPage />;
     }
 
-    if (selectedMode === 'story' && !resultSrc) {
-      return <StoryDrawingPage onDrawingResult={setResultSrc} />;
-    }
-
-    if (!resultSrc) {
+    if (!imageData) {
       return (
-        <DrawingPage onDrawingResult={setResultSrc} />
+        <DrawingPage />
       );
     }
 
@@ -60,11 +53,9 @@ function Drawing() {
   };
 
   return (
-    <DrawingProvider>
-      <FriendProvider>
-        {content()}
-      </FriendProvider>
-    </DrawingProvider>
+    <FriendProvider>
+      {content()}
+    </FriendProvider>
   );
 }
 export default Drawing;

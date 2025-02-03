@@ -1,11 +1,14 @@
+import { useDrawing } from '@/stores/drawingStore';
 import { useFriends } from '../contexts/FriendContext';
 
 interface FriendSelectionProps {
   onFriendSelect: (friendId: string) => void;
-  onBack: () => void;
 }
 
-function FriendSelection({ onFriendSelect, onBack }: FriendSelectionProps): JSX.Element {
+function FriendSelection({ onFriendSelect }: FriendSelectionProps): JSX.Element {
+  const {
+    setMode,
+  } = useDrawing();
   const { friends } = useFriends();
 
   return (
@@ -14,7 +17,7 @@ function FriendSelection({ onFriendSelect, onBack }: FriendSelectionProps): JSX.
         <div className="flex items-center mb-6">
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => setMode(null)}
             className="text-gray-600 hover:text-gray-800"
           >
             ← 뒤로

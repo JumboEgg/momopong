@@ -1,4 +1,4 @@
-import { useDrawing } from '../contexts/DrawingContext';
+import { useDrawing } from '@/stores/drawingStore';
 import colors from '../data/colorList';
 
 function Color({ color }: { color: string }): JSX.Element {
