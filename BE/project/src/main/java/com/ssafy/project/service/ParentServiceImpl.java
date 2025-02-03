@@ -2,10 +2,8 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
-import com.ssafy.project.dto.ParentDto;
-import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.ParentSignUpRequestDto;
-import com.ssafy.project.exception.DuplicateParentEmailException;
+import com.ssafy.project.dto.*;
+import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
@@ -19,6 +17,9 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -35,7 +36,7 @@ public class ParentServiceImpl implements ParentService {
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
         if (checkDuplicateParent(signUpDto.getEmail()))
-            throw new DuplicateParentEmailException("이미 사용중인 이메일입니다");
+            throw new DuplicateException("이미 사용중인 이메일입니다");
 
         // 암호화된 비밀번호 저장
         String encodedPassword = passwordEncoder.encode(signUpDto.getPassword());
@@ -112,6 +113,20 @@ public class ParentServiceImpl implements ParentService {
         return parent.entityToDto(parent);
     }
 
+    @Override
+    public List<ChildListDto> childrenList(Long parentId) {
+        Parent parent = parentRepository.findById(parentId)
+                .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
+
+        List<Child> children = parent.getChildren();
+        return children.stream()
+                .map(child -> ChildListDto.builder()
+                        .childId(child.getId())
+                        .name(child.getName())
+                        .profile(child.getProfile())
+                        .build())
+                .collect(Collectors.toList());
+    }
     @Override
     public void deleteParent(Long parentId) {
         // 논리적 삭제

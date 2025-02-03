@@ -1,4 +1,4 @@
-package com.ssafy.project.dto.friend;
+package com.ssafy.project.dto.book;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,9 +9,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class FriendDto {
-    private Long friendId;
-    private Long fromId;
-    private String fromName;
-    private Long toId;
+public class BookDto {
+    private Long bookId;
+    private String title;
+    private String thumbnail;
 }

@@ -40,7 +40,7 @@ public class SecurityConfig {
                 mvc.pattern("/token"),
                 mvc.pattern("/api/book/letter/**"),
                 mvc.pattern("/api/profile/**")
-
+                mvc.pattern("/ws/**")
         };
 
         // CORS 설정 추가
