@@ -26,20 +26,18 @@ function MyDrawing() {
   return (
     <div className="flex flex-col min-h-screen bg-yellow-100 p-8">
       {/* 뒤로가기 버튼 */}
-      <div className="mb-6">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 hover:bg-gray-100"
-        >
-          <ArrowLeft size={24} />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleBack}
+        className="fixed top-5 left-5 flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 hover:bg-gray-100"
+      >
+        <ArrowLeft size={24} />
+      </button>
 
       {/* 메인 그림 영역 */}
-      <div className="relative flex items-center justify-center">
+      <div className="relative flex flex-col items-center justify-center flex-grow">
         {/* 제목 버튼 */}
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-20">
+        <div className="translate-y-8">
           <div className="px-6 py-2 bg-yellow-300 rounded-full font-[BMJUA] text-2xl whitespace-nowrap">
             {localDrawingList.length ? localDrawingList[currentIndex].title : '아직 그림이 없어요'}
           </div>
@@ -55,7 +53,7 @@ function MyDrawing() {
         </button>
 
         {/* 그림 프레임 */}
-        <div className="w-full max-w-4xl aspect-video bg-amber-700 rounded-xl p-4 shadow-lg">
+        <div className="w-full max-w-[60%] md:max-w-[70%] lg:max-w-4xl aspect-video bg-amber-700 rounded-xl p-4 shadow-lg">
           <div className="w-full h-full bg-gray-100 rounded-lg overflow-hidden">
             {
               localDrawingList.length
@@ -92,12 +90,12 @@ function MyDrawing() {
       <img
         src="/images/icons/teddybearicon.png"
         alt="곰인형 장식"
-        className="fixed top-[70%] -right-3 w-[20%]"
+        className="fixed -bottom-[10%] -right-3 w-[20%]"
       />
       <img
         src="/images/icons/planticon.png"
         alt="식물 장식"
-        className="fixed top-[60%] -left-3 w-[20%]"
+        className="fixed -bottom-[10%] -left-3 w-[20%]"
       />
     </div>
   );
