@@ -39,7 +39,7 @@ public class SecurityConfig {
                 mvc.pattern("/api/parents/refresh-token"),
                 mvc.pattern("/token"),
                 mvc.pattern("/api/book/letter/**"),
-                mvc.pattern("/api/profile/**")
+                mvc.pattern("/api/profile/**"),
                 mvc.pattern("/ws/**")
         };
 
