@@ -36,6 +36,28 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.security:spring-security-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
+	// JWT
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Web Socket
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	//openvidu
+	implementation 'io.livekit:livekit-server:0.8.2'
+
+
+	// stt
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation platform('com.google.cloud:libraries-bom:26.34.0')
+	implementation 'com.google.cloud:google-cloud-speech'
+
+	// AWS 버전이거 맞음??
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 }
 
 tasks.named('test') {
