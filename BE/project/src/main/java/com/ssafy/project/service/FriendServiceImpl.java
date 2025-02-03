@@ -67,6 +67,7 @@ public class FriendServiceImpl implements FriendService {
                 .map(request -> FriendDto.builder()
                         .friendId(request.getId())
                         .fromId(request.getFrom().getId())
+                        .fromName(request.getFrom().getName())
                         .toId(request.getTo().getId()).build())
                 .collect(Collectors.toList());
     }
@@ -105,6 +106,7 @@ public class FriendServiceImpl implements FriendService {
         return FriendDto.builder()
                 .friendId(saved.getId())
                 .fromId(fromChild.getId())
+                .fromName(fromChild.getName())
                 .toId(toChild.getId()).build();
     }
 
