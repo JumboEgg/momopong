@@ -13,7 +13,11 @@ function DrawingPage(): JSX.Element {
     <div className="bg-yellow-600 w-full h-full m-0 p-0 relative">
       <div className="absolute top-0 right-0 w-full h-20 flex justify-end m-0 p-0 z-1">
         <span className="mt-4 ms-4 me-4">
-          <SaveButton canvasRef={canvasRef} />
+          <SaveButton
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            canvasRef={canvasRef}
+          />
         </span>
       </div>
       <div className="absolute top-2 left-0 w-20 h-auto flex flex-col transform rotate-90 origin-top-left -scale-y-100 z-1">

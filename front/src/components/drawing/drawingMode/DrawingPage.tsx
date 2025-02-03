@@ -13,7 +13,11 @@ function DrawingPage(): JSX.Element {
     <div className="bg-yellow-600 w-full h-full flex flex-col items-center justify-between m-0 p-0">
       <div className="w-full h-20 flex justify-between m-0 p-0">
         <span className="mt-4 ms-4">
-          <SaveButton canvasRef={canvasRef} />
+          <SaveButton
+            canvasWidth={canvasWidth}
+            canvasHeight={canvasHeight}
+            canvasRef={canvasRef}
+          />
         </span>
         <span className="content-end flex">
           <Palette />
