@@ -60,7 +60,9 @@ const useDrawingStore = create<DrawingStore>((set) => ({
   setImageData: (data) => set({ imageData: data }),
 
   localDrawingList: [],
-  addDrawingData: (data) => set({ localDrawingList: [...localDrawingList, data] }),
+  addDrawingData: (data) => set((state) => ({
+    localDrawingList: [...state.localDrawingList, data],
+  })),
 }));
 
 // Zustand에서 상태를 가져오는 커스텀 훅
