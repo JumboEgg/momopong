@@ -44,6 +44,20 @@ dependencies {
 
 	// Web Socket
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+	//openvidu
+	implementation 'io.livekit:livekit-server:0.8.2'
+
+
+	// stt
+	implementation 'org.springframework.boot:spring-boot-configuration-processor'
+	implementation 'org.springframework.boot:spring-boot-starter-websocket'
+	implementation platform('com.google.cloud:libraries-bom:26.34.0')
+	implementation 'com.google.cloud:google-cloud-speech'
+
+	// AWS 버전이거 맞음??
+	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
 }
 
 tasks.named('test') {
