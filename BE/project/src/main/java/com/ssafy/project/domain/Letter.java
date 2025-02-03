@@ -1,11 +1,15 @@
 package com.ssafy.project.domain;
 
 
+import com.ssafy.project.dto.LetterDto;
+import com.ssafy.project.dto.ParentDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
 
@@ -15,27 +19,41 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 @Table(name = "letter")
+@EntityListeners(AuditingEntityListener.class)
 public class Letter {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "letter_id")
     private Long letterId;
 
-    @Column(name = "child_id")
-    private Long childId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "child_id")
+    private Child child;
 
-    @Column(name = "letter")
     private String letter;
 
-    @Column(name = "reply")
     private String reply;
 
-    @Column(name = "role")
+    @Column(name = "book_title")
+    private String bookTitle;
+
     private String role;
 
-    @Column(name = "letter_record")
     private String letterRecord;
 
-    @Column(name = "created_at")
+    @CreatedDate
     private LocalDateTime createdAt;
+
+
+    public static LetterDto entityToDto(Letter letter) {
+        return LetterDto.builder()
+                .bookTitle(letter.bookTitle)
+                .role(letter.role)
+                .content(letter.letter)
+                .letterRecord(letter.letterRecord)
+                .reply(letter.reply)
+                .createdAt(String.valueOf(letter.createdAt))
+                .build();
+    }
+
 }

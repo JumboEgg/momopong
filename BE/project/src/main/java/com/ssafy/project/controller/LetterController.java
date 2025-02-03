@@ -15,11 +15,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/book/letter")
+@RequestMapping("/api")
 @CrossOrigin(origins = "*")  // CORS 설정 추가
 public class LetterController {
     private final LetterService letterService;
@@ -35,7 +36,7 @@ public class LetterController {
         this.amazonS3 = amazonS3;
     }
 
-    @GetMapping("/presigned-url")
+    @GetMapping("/book/letter/presigned-url")
     public ResponseEntity<Map<String, String>> getPresignedUrl() {
 
         try {
@@ -61,27 +62,27 @@ public class LetterController {
     }
 
 
-    @PostMapping("/gpt/{childId}")
+    @PostMapping("/book/letter/gpt/{childId}")
     public ResponseEntity<Map<String, String>> getGPTResponse(
             @PathVariable("childId") Long childId,
             @RequestBody LetterDto request) {
 
 
-        System.out.println("Received request - childId: , request: "+ childId + request);
 
         // GPT 응답 생성
         String gptResponse = letterService.getGPTResponse(
-                request.getFairyTale(),
+                request.getBookTitle(),
                 request.getRole(),
                 request.getChildName(),
                 request.getContent()
         );
 
         // DB에 저장
-        Letter letter = letterService.saveLetter(
+        letterService.saveLetter(
                 childId,
                 request.getContent(),
                 gptResponse,
+                request.getBookTitle(),
                 request.getRole(),
                 request.getLetterRecord() // S3 URL
         );
@@ -92,4 +93,30 @@ public class LetterController {
 
         return ResponseEntity.ok(responseMap);
     }
+
+    @GetMapping("/profile/{childId}/letter/{letterId}")
+    public ResponseEntity<LetterDto> getLetter(
+            @PathVariable("childId") Long childId,
+            @PathVariable("letterId") Long letterId) {
+        try {
+            LetterDto letter = letterService.getLetter(childId, letterId);
+
+            return ResponseEntity.ok(letter);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+
+    @GetMapping("/profile/{childId}/letter")
+    public ResponseEntity<List<LetterDto>> getLetterList(
+            @PathVariable("childId") Long childId) {
+        try {
+            List<LetterDto> letters = letterService.getLettersByChildId(childId);
+            return ResponseEntity.ok(letters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }
