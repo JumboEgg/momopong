@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
 type ProfileImgShape = 'circle' | 'square';
 
@@ -20,11 +22,15 @@ function ProfileImage({
   className = '',
   onClick,
 }: ProfileImgProps): JSX.Element {
+  const [imageError, setImageError] = useState(false);
+  const defaultImage = '/images/default-profile.png';
+  const imageSrc = imageError || !src ? defaultImage : src;
+
   const sizeClasses = {
-    sm: 'w-15 h-15',
-    md: 'w-20 h-20',
-    lg: 'w-50 h-50',
-    xl: 'w-100 h-100',
+    sm: 'w-15 h-15', // 친구목록
+    md: 'w-20 h-20', // 프로필카드 이동
+    lg: 'w-50 h-50', // 서브계정 그리드
+    xl: 'w-100 h-100', // 프로필카드, 서브계정 가입
   } as const;
 
   const shapeClasses = {
@@ -44,9 +50,10 @@ function ProfileImage({
       aria-label={onClick ? alt : undefined}
     >
       <img
-        src={src}
+        src={imageSrc}
         alt={alt}
         className="w-full h-full object-cover"
+        onError={() => setImageError(true)}
       />
     </Component>
   );

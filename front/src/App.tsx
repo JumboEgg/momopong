@@ -3,6 +3,7 @@ import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
 import SubAccountPage from './pages/subAccount/SubAccountPage';
+import SubAccountForm from './pages/subAccount/SubAccountForm';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -23,7 +24,8 @@ function App(): JSX.Element {
         <Route path="/" element={<Landing />} />
         <Route path="/parents/login" element={<Login />} />
         <Route path="/parents/signup" element={<SignUp />} />
-        <Route path="/children/login" element={<SubAccountPage />} />
+        <Route path="/parents/{parent_id}/children" element={<SubAccountPage />} />
+        <Route path="/children/signup" element={<SubAccountForm />} />
         <Route path="/home" element={<Home />} />
         <Route path="/drawing" element={<Drawing />} />
         <Route path="/story/*" element={<Story />} />

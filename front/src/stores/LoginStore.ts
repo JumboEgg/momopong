@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import axios, { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
+import { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
+import api from '@/api/axios';
 
 interface LoginRequest {
   email: string;
@@ -20,8 +21,8 @@ interface JwtToken {
 }
 
 interface LoginResponse {
-  parentDto: ParentDto;
-  jwtToken: JwtToken;
+  parentDto: ParentDto; // 부모 계정 정보
+  jwtToken: JwtToken; // 토큰 정보
 }
 
 interface AuthState {
@@ -34,13 +35,6 @@ interface AuthState {
   login: (loginData: LoginRequest) => Promise<void>;
   logout: () => void;
 }
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
 
 // axios 인터셉터 설정
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
@@ -74,7 +68,7 @@ const useLoginStore = create<AuthState>((set) => ({
 
       set({
         isAuthenticated: true,
-        user: response.data.parentDto,
+        user: response.data.parentDto, // user 설정
         accessToken: response.data.jwtToken.accessToken,
         refreshToken: response.data.jwtToken.refreshToken,
         isLoading: false,

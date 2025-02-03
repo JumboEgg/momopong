@@ -1,14 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
-// import useSubAccountStore from '@/stores/subAccountStore';
 import TextButton from '@/components/common/buttons/TextButton';
 import ParentAuthModal from '@/components/common/modals/ParentAuthModal';
+import useLoginStore from '@/stores/loginStore';
 import SubAccountGrid from './SubAccountGrid';
-// import SubAccountForm from './SubAccountForm';
+import SubAccountForm from './SubAccountForm';
 
-function SubAccountPage(): JSX.Element {
+function SubAccountPage(): React.ReactElement | null {
   const navigate = useNavigate();
-  // const { isEditing } = useSubAccountStore();
+  const { user } = useLoginStore();
+
+  const handleAddAccount = () => {
+    navigate('/children/signup');
+  };
+
+  // 부모 계정 정보가 없으면 로그인 페이지로 리다이렉트
+  useEffect(() => {
+    if (!user?.parentId) {
+      navigate('/login');
+    }
+  }, [user, navigate]);
+
+  if (!user?.parentId) {
+    return null; // 또는 로딩 상태 표시
+  }
 
   const [isModalOpen, setIsModalOpen] = useState(false); // 키패드 모달 상태
 
@@ -36,20 +51,17 @@ function SubAccountPage(): JSX.Element {
           />
         )}
       </div>
-      <div>
-        <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
-          <Routes>
-            <Route
-              path="/"
-              element={<SubAccountGrid onAdd={() => navigate('/create')} />}
-            />
-            {/* 폼 prop 수정 예정 */}
-            {/* <Route
-              path="/create"
-              element={<SubAccountForm mode="create" />}
-            /> */}
-          </Routes>
-        </div>
+      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
+        <Routes>
+          <Route
+            path="/"
+            element={<SubAccountGrid onAdd={handleAddAccount} />}
+          />
+          <Route
+            path="/create"
+            element={<SubAccountForm />}
+          />
+        </Routes>
       </div>
     </div>
   );

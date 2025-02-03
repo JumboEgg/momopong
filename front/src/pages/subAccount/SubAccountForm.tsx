@@ -2,28 +2,28 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import ImageUpload from '@/components/ImageUpload';
+import useLoginStore from '@/stores/loginStore';
 
 interface SubAccountFormProps {
-  mode: 'create' | 'edit';
-  parentId: number;
+  mode?: 'create' | 'edit';
 }
 
-const DEFAULT_PROFILE = '/assets/default-profile.png'; // 기본 프로필 이미지 경로
-
-function SubAccountForm({ mode, parentId }: SubAccountFormProps): JSX.Element {
+function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
   const navigate = useNavigate();
-  const { createSubAccount, isLoading, error } = useSubAccountStore();
-
-  const [formData, setFormData] = useState({
-    name: '',
-    profile: DEFAULT_PROFILE,
-    birth: '',
-    gender: '남자' as '남자' | '여자',
-  });
+  const {
+    formData,
+    setFormField,
+    handleImageChange,
+    createSubAccount,
+    isLoading,
+    error,
+  } = useSubAccountStore();
+  const { user } = useLoginStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+    console.log('Selected image:', profile); // 이미지 변경 시 로그
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -31,8 +31,8 @@ function SubAccountForm({ mode, parentId }: SubAccountFormProps): JSX.Element {
 
     try {
       await createSubAccount({
-        parentId,
         ...formData,
+        parentId: user.parentId,
       });
       navigate('/');
     } catch (err) {
