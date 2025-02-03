@@ -4,7 +4,7 @@ function Landing(): JSX.Element {
   const navigate = useNavigate();
 
   const handleStart = () => {
-    navigate('/sub-account');
+    navigate('/parents/login');
   };
 
   return (
@@ -24,7 +24,7 @@ function Landing(): JSX.Element {
           type="button"
           onClick={handleStart}
           className="px-8 py-3 bg-white text-blue-600 rounded-lg font-semibold
-                   hover:bg-blue-50 transition-colors duration-200 shadow-lg"
+                  hover:bg-blue-50 transition-colors duration-200 shadow-lg"
         >
           시작하기
         </button>

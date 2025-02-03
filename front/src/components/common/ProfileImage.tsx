@@ -1,5 +1,3 @@
-import React from 'react';
-
 type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
 type ProfileImgShape = 'circle' | 'square';
 
