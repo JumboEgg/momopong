@@ -8,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/parents")
@@ -56,6 +58,14 @@ public class ParentController {
         ParentDto parentDto = parentService.readParentById(parentId);
 
         return ResponseEntity.ok(parentDto);
+    }
+
+    // 전체 자식 조회
+    @GetMapping("/{parentId}/children")
+    public ResponseEntity<List<ChildListDto>> childrenList(@PathVariable("parentId") Long parentId) {
+        List<ChildListDto> childrenList = parentService.childrenList(parentId);
+
+        return ResponseEntity.ok(childrenList);
     }
 
     // 회원 정보 수정
