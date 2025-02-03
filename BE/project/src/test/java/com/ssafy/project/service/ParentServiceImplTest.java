@@ -5,7 +5,7 @@ import com.ssafy.project.domain.type.RoleType;
 import com.ssafy.project.dto.LoginRequestDto;
 import com.ssafy.project.dto.ParentDto;
 import com.ssafy.project.dto.ParentSignUpRequestDto;
-import com.ssafy.project.exception.DuplicateParentEmailException;
+import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
 import com.ssafy.project.security.JwtToken;
@@ -80,7 +80,7 @@ class ParentServiceImplTest {
         parentService.signup(signUpDto1);
 
         // then
-        assertThrows(DuplicateParentEmailException.class,
+        assertThrows(DuplicateException.class,
                 () -> parentService.signup(signUpDto2));
     }
 

@@ -6,7 +6,6 @@ import com.ssafy.project.dto.ChildUpdateRequestDto;
 import com.ssafy.project.dto.SignUpResponseDto;
 import com.ssafy.project.service.ChildService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,12 +30,21 @@ public class ChildController {
     @PostMapping("/login")
     public ResponseEntity<ChildDto> login(@RequestBody Map<String, String> map) {
         Long childId = Long.parseLong(map.get("childId"));
-        System.out.println("childId = " + childId);
         ChildDto childDto = childService.login(childId);
 
         return ResponseEntity.ok(childDto);
     }
 
+    // 자식 계정 로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody Map<String, String> map) {
+        Long childId = Long.parseLong(map.get("childId"));
+        childService.logout(childId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 자식 정보 조회
     @GetMapping("/{childId}")
     public ResponseEntity<ChildDto> findChild(@PathVariable("childId") Long childId) {
         ChildDto childDto = childService.findChild(childId);
@@ -59,6 +67,6 @@ public class ChildController {
     public ResponseEntity<Void> deleteChild(@PathVariable("childId") Long childId) {
         childService.deleteChild(childId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }

@@ -4,7 +4,6 @@ import com.ssafy.project.dto.friend.FriendDto;
 import com.ssafy.project.dto.friend.FriendListDto;
 import com.ssafy.project.service.FriendService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,7 +29,7 @@ public class FriendController {
     public ResponseEntity<Void> deleteFriend(@PathVariable("childId") Long childId, @PathVariable("friendId") Long friendId) {
         friendService.deleteFriend(friendId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     // 친구 요청 목록
@@ -55,7 +54,7 @@ public class FriendController {
     public ResponseEntity<Void> acceptFriend(@PathVariable("childId") Long childId, @PathVariable("friendId") Long friendId) {
         friendService.acceptFriend(friendId, childId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 
     // 친구 요청 거절
@@ -63,6 +62,6 @@ public class FriendController {
     public ResponseEntity<Void> rejectFriend(@PathVariable("childId") Long childId, @PathVariable("friendId") Long friendId) {
         friendService.rejectFriend(friendId, childId);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }
