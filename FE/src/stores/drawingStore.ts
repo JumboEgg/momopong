@@ -1,6 +1,12 @@
 import { DrawingMode } from '@/components/drawing/types/drawing';
 import { create } from 'zustand';
 
+export interface DrawingData {
+  title: string;
+  date: number;
+  src: string;
+}
+
 // Drawing 상태 관리 스토어
 interface DrawingStore {
   mode: DrawingMode | null;
@@ -23,18 +29,14 @@ interface DrawingStore {
   setIsErasing: (isErasing: boolean) => void;
   imageData: string;
   setImageData: (data: string) => void;
+  localDrawingList: DrawingData;
+  addDrawingData: (data: DrawingData) => void;
 }
 
 // Zustand 상태 훅 생성
 const useDrawingStore = create<DrawingStore>((set) => ({
   mode: null,
   setMode: (mode) => set({ mode }),
-
-  friendId: 0,
-  setFriendId: (id) => set({ friendId: id }),
-
-  friendName: '',
-  setFriendName: (name) => set({ friendName: name }),
 
   templateId: 0,
   setTemplateId: (id) => set({ templateId: id }),
@@ -56,6 +58,11 @@ const useDrawingStore = create<DrawingStore>((set) => ({
 
   imageData: '',
   setImageData: (data) => set({ imageData: data }),
+
+  localDrawingList: [],
+  addDrawingData: (data) => set((state) => ({
+    localDrawingList: [...state.localDrawingList, data],
+  })),
 }));
 
 // Zustand에서 상태를 가져오는 커스텀 훅

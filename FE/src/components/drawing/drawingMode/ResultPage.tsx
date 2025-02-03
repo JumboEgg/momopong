@@ -1,18 +1,12 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useEffect, useState } from 'react';
-// import { useNavigate } from 'react-router-dom';
-// import { IconCircleButton } from '@/components/common/buttons/CircleButton';
-// import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-// import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import DialogModal from '@/components/common/modals/DialogModal';
-import { useDrawing } from '@/stores/drawingStore';
+import { DrawingData, useDrawing } from '@/stores/drawingStore';
 
 function ResultPage() {
   const {
-    mode, setMode, setTemplateId, imageData, setImageData, templateName,
+    mode, setMode, setTemplateId, imageData, setImageData, templateName, addDrawingData,
   } = useDrawing();
-
-  // const navigate = useNavigate();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
   const [saveModal, setSaveModal] = useState<boolean>(false);
@@ -30,14 +24,21 @@ function ResultPage() {
   }, []);
 
   const onSave = () => {
-    // navigate('/home');
+    const drawingResult: DrawingData = {
+      title: `${mode === 'single' ? '내가 그린' : '친구와 그린'} ${templateName}`,
+      date: new Date(),
+      src: imageData,
+    };
+
+    console.log(drawingResult);
+
+    addDrawingData(drawingResult);
     setTemplateId(0);
     setMode(null);
     setImageData('');
   };
 
   const onDelete = () => {
-    // navigate('/home');
     setTemplateId(0);
     setMode(null);
     setImageData('');

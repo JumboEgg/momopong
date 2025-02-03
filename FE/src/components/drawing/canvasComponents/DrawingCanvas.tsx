@@ -190,7 +190,7 @@ function DrawingCanvas({
   }
 
   useEffect(() => {
-    if (mode === 'together' && newLine) {
+    if ((mode === 'together' || mode === 'story') && newLine) {
       sendStrokeData(newLine);
     }
   }, [newLine]);

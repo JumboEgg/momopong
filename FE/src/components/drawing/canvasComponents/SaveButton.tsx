@@ -4,18 +4,17 @@ import { useDrawing } from '@/stores/drawingStore';
 import { getBackgroundSrc, getOutlineSrc } from '../utils/getImgSrc';
 
 export interface SaveButtonProps {
+  canvasWidth: number;
+  canvasHeight: number;
   canvasRef: HTMLCanvasElement | null;
 }
 
-function SaveButton({ canvasRef }: SaveButtonProps) {
+function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
   const {
-    mode, templateId, setImageData,
+    templateId, setImageData,
   } = useDrawing();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
-
-  const canvasHeight = mode === 'story' ? window.innerHeight * 0.6 : window.innerHeight * 0.8;
-  const canvasWidth = canvasHeight * 1.6;
 
   const bgImgSrc = getBackgroundSrc(templateId);
   const outlineImgSrc = getOutlineSrc(templateId);
