@@ -1,8 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import ImageUpload from '@/components/ImageUpload';
-import useLoginStore from '@/stores/loginStore';
 
 interface SubAccountFormProps {
   mode?: 'create' | 'edit';
@@ -18,25 +16,20 @@ function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
     isLoading,
     error,
   } = useSubAccountStore();
-  const { user } = useLoginStore();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    console.log('Selected image:', profile); // 이미지 변경 시 로그
+    setFormField(name, value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-      await createSubAccount({
-        ...formData,
-        parentId: user.parentId,
-      });
+      await createSubAccount(formData);
       navigate('/');
     } catch (err) {
-      console.error('Form submission failed:', err);
+      // 에러는 이미 store에서 처리됨
     }
   };
 
@@ -56,7 +49,7 @@ function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
         <div className="flex flex-col items-center mb-6">
           <ImageUpload
             currentImage={formData.profile}
-            onImageChange={(imageUrl) => setFormData((prev) => ({ ...prev, profile: imageUrl }))}
+            onImageChange={handleImageChange}
           />
         </div>
 

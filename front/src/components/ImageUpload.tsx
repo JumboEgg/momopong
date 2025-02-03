@@ -1,4 +1,3 @@
-// src/components/ImageUpload.tsx
 import { useRef } from 'react';
 import ProfileImage from '@/components/common/ProfileImage';
 

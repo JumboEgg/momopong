@@ -70,7 +70,7 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
   formData: {
     parentId: 0,
     name: '',
-    profile: '/images/default-profile.png',
+    profile: '/images/default-profile.jpg',
     birth: '',
     gender: '남자',
   },

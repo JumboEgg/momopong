@@ -23,7 +23,7 @@ function ProfileImage({
   onClick,
 }: ProfileImgProps): JSX.Element {
   const [imageError, setImageError] = useState(false);
-  const defaultImage = '/images/default-profile.png';
+  const defaultImage = '/images/default-profile.jpg';
   const imageSrc = imageError || !src ? defaultImage : src;
 
   const sizeClasses = {
