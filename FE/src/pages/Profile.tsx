@@ -5,8 +5,10 @@ import {
 import TextButton from '@/components/common/buttons/TextButton';
 import ProfileImage from '@/components/common/ProfileImage';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { useNavigate } from 'react-router-dom';
 
 function Profile(): JSX.Element {
+  const navigate = useNavigate();
   const MOCK_PROFILE = {
     name: '김과자',
     type: '동화나라 여행자',
@@ -25,7 +27,13 @@ function Profile(): JSX.Element {
         />
       </div>
       <div className="absolute top-6 right-6">
-        <TextButton size="md" variant="gray" className="">계정 변경</TextButton>
+        <TextButton
+          size="md"
+          variant="gray"
+          onClick={() => navigate('/parents/{parent_id}/children')}
+        >
+          계정 변경
+        </TextButton>
       </div>
       <div className="flex absolute items-center justify-center
         min-w-4/5 h-[75vh] rounded-[2vw]

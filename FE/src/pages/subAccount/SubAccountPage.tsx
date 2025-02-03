@@ -17,7 +17,7 @@ function SubAccountPage(): React.ReactElement | null {
   // 부모 계정 정보가 없으면 로그인 페이지로 리다이렉트
   useEffect(() => {
     if (!user?.parentId) {
-      navigate('/login');
+      navigate('/parents/login');
     }
   }, [user, navigate]);
 

@@ -87,7 +87,7 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
         throw new Error('부모 계정 정보를 찾을 수 없습니다.');
       }
 
-      const response = await api.get(`/api/parents/${parentId}/children`);
+      const response = await api.get(`/parents/${parentId}/children`);
 
       set({
         subAccounts: response.data,
@@ -113,7 +113,7 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
 
     try {
       const response = await api.post<CreateSubAccountResponse>(
-        '/api/children/signup',
+        '/children/signup',
         data,
       );
 
@@ -134,7 +134,7 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await api.post<SubAccount>('/api/children/login', { childId });
+      const response = await api.post<SubAccount>('/children/login', { childId });
 
       set({
         selectedAccount: response.data,

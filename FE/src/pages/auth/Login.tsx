@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
@@ -24,13 +24,6 @@ function Login(): JSX.Element {
   const login = useLoginStore((state) => state.login);
   const isLoading = useLoginStore((state) => state.isLoading);
   const error = useLoginStore((state) => state.error);
-  const isAuthenticated = useLoginStore((state) => state.isAuthenticated);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/home');
-    }
-  }, [isAuthenticated, navigate]);
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) return '이메일은 필수입니다';
@@ -93,6 +86,11 @@ function Login(): JSX.Element {
 
     try {
       await login(formData);
+      // 로그인 응답을 기다린 후 라우팅
+      const { user } = useLoginStore.getState();
+      if (user?.parentId) {
+        navigate(`/parents/${user.parentId}/children`);
+      }
     } catch (err) {
       console.error('Login failed:', err);
     }
