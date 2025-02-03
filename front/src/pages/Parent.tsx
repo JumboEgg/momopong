@@ -41,7 +41,7 @@ function Parent() {
   const content = (): JSX.Element => {
     if (reportTab === 'report') {
       return (
-        <ReportTab />
+        <ReportTab childName={MOCK_CHILDREN_DATA[childIdx].childName} />
       );
     }
 
@@ -145,7 +145,7 @@ function Parent() {
                   아이의 작품
                 </button>
               </div>
-              <div className="mt-5">
+              <div className="mt-5 h-full w-full">
                 {content()}
               </div>
             </div>
