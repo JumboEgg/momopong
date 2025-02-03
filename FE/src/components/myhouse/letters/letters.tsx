@@ -13,7 +13,6 @@ interface Letter {
   content: string;
 }
 
-// 예시 데이터
 const initialLetters: Letter[] = [
   {
     id: 1,
@@ -56,8 +55,9 @@ const initialLetters: Letter[] = [
 function MyLetters(): React.JSX.Element {
   const [letters] = useState<Letter[]>(initialLetters);
   const [selectedLetter, setSelectedLetter] = useState<Letter | null>(null);
+  const navigate = useNavigate();
 
-  function handleLetterSelect(letter: Letter): void {
+  function handleLetterSelect(letter: Letter | null): void {
     setSelectedLetter(letter);
   }
 
@@ -66,85 +66,89 @@ function MyLetters(): React.JSX.Element {
       handleLetterSelect(letter);
     }
   }
-  const navigate = useNavigate();
 
   const handleBack = () => {
     navigate('/house');
   };
 
   return (
-    <div className="flex flex-col h-screen bg-yellow-100 p-4">
-      {/* 뒤로가기 버튼 */}
-      <div className="mb-6">
+    <div className="min-h-screen bg-yellow-100 flex flex-col items-center justify-center">
+      {/* Content wrapper with padding and full width */}
+      <div className="w-full max-w-4xl px-4">
+        {/* Back button container */}
         <IconCircleButton
           size="sm"
           variant="action"
-          className=""
           onClick={handleBack}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
+          className="fixed top-5 left-5"
         />
-      </div>
-      <div className="flex justify-end">
-        <div className="w-full flex items-center justify-end relative">
-          {/* selectedLetter div with animation */}
-          <div className="absolute left-0 w-1/2 transition-all duration-500 ease-out transform">
-            {selectedLetter && (
-              <div
-                className="bg-pink-200 p-6 mr-4 rounded-2xl relative font-[BMJUA] animate-slide-up"
-                style={{
-                  animation: 'slide-up 0.5s ease-out',
-                }}
-              >
-                {/* 읽어주기 버튼 수정 */}
-                <span className="absolute -top-10 right-3">
-                  <TextCircleButton
-                    icon={<FontAwesomeIcon icon={faVolumeHigh} />}
-                    text="내가 보낸 편지"
-                    size="sm"
-                    variant="action"
-                    className="text-2xl"
-                  />
-                </span>
-                <p className="my-3 text-xl">사탕이에게</p>
-                <div className="w-full h-[calc(100%-120px)] relative">
-                  <div className="customScrollbar overflow-y-auto h-full text-xl">
-                    <p>{selectedLetter.content}</p>
-                  </div>
-                </div>
-                <p className="my-3 text-xl text-end">
-                  {selectedLetter.sender}
-                  {' '}
-                  보냄
-                </p>
-              </div>
-            )}
-          </div>
 
-          {/* 받은 편지 목록 */}
-          <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 p-4 border-orange-300 overflow-hidden min-w-2xl max-w-3xl h-[calc(100vh-200px)]">
-            <div className="p-4 font-[BMJUA] text-2xl">내가 받은 편지들</div>
-            <div className="customScrollbar overflow-y-auto h-[calc(100%-60px)]">
-              {letters.map((letter) => (
+        {/* Main content container */}
+        <div className="h-[80vh]">
+          <div className="flex gap-4 h-full">
+            {/* Left side - Selected Letter */}
+            <div className="w-1/2 h-full">
+              {selectedLetter ? (
                 <div
-                  key={letter.id}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => {
-                    if (!selectedLetter || letter.id !== selectedLetter.id) {
-                      handleLetterSelect(letter);
-                    } else {
-                      handleLetterSelect(null);
-                    }
-                  }}
-                  onKeyDown={(e) => handleKeyDown(e, letter)}
-                  className={`p-4 bg-[#FBB787] hover:bg-orange-200 cursor-pointer flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-orange-500 mx-3 mb-3 rounded-2xl ${selectedLetter && selectedLetter.id === letter.id ? 'bg-orange-300' : ''}`}
+                  className="bg-pink-200 p-6 rounded-2xl relative font-[BMJUA] h-full animate-slide-up"
                 >
-                  <div>
-                    <div className="font-[BMJUA] text-lg">{letter.sender}</div>
-                    <div className="text-lg text-gray-500">{letter.date}</div>
+                  <span className="absolute -top-10 right-3">
+                    <TextCircleButton
+                      icon={<FontAwesomeIcon icon={faVolumeHigh} />}
+                      text="내가 보낸 편지"
+                      size="sm"
+                      variant="action"
+                      className="text-2xl"
+                    />
+                  </span>
+                  <p className="my-3 text-xl ps-4">사탕이에게</p>
+                  <div className="h-[calc(100%-160px)]">
+                    <div className="customScrollbar overflow-y-auto h-full text-xl px-4">
+                      <p>{selectedLetter.content}</p>
+                    </div>
                   </div>
+                  <p className="my-3 text-xl text-end px-4">
+                    {selectedLetter.sender}
+                    {' '}
+                    보냄
+                  </p>
                 </div>
-              ))}
+              ) : (
+                <div className="h-full rounded-2xl font-[BMJUA] text-2xl flex justify-center items-center">
+                  누구의 편지를 읽어볼까?
+                </div>
+              )}
+            </div>
+
+            {/* Right side - Letters List */}
+            <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 border-orange-300 overflow-hidden h-full p-4">
+              <div className="p-4 font-[BMJUA] text-2xl">내가 받은 편지들</div>
+              <div className="customScrollbar overflow-y-auto h-[calc(100%-60px)]">
+                {letters.map((letter) => (
+                  <div
+                    key={letter.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => {
+                      if (!selectedLetter || letter.id !== selectedLetter.id) {
+                        handleLetterSelect(letter);
+                      } else {
+                        handleLetterSelect(null);
+                      }
+                    }}
+                    onKeyDown={(e) => handleKeyDown(e, letter)}
+                    className={`p-4 bg-[#FBB787] hover:bg-orange-200 cursor-pointer flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-orange-500 mx-3 mb-3 rounded-2xl ${
+                      selectedLetter && selectedLetter.id === letter.id ? 'bg-orange-300' : ''
+                    }`}
+                  >
+                    <div>
+                      <div className="font-[BMJUA] text-lg">{letter.sender}</div>
+                      <div className="text-lg text-gray-500">{letter.date}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
@@ -152,25 +156,5 @@ function MyLetters(): React.JSX.Element {
     </div>
   );
 }
-
-// Add keyframes for slide-up animation
-const style = document.createElement('style');
-style.textContent = `
-  @keyframes slide-up {
-    from {
-      transform: translateY(100%);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  .animate-slide-up {
-    animation: slide-up 0.5s ease-out;
-  }
-`;
-document.head.appendChild(style);
 
 export default MyLetters;
