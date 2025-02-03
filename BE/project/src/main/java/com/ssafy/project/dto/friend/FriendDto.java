@@ -12,5 +12,6 @@ import lombok.NoArgsConstructor;
 public class FriendDto {
     private Long friendId;
     private Long fromId;
+    private String fromName;
     private Long toId;
 }
