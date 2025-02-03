@@ -9,4 +9,13 @@ const colors: string[] = [
   'dimgray', 'black',
   'erase'];
 
+export const simpleColors: string[] = [
+  'crimson', 'orange',
+  'gold', 'yellow',
+  'yellowgreen', 'olivedrab',
+  'cornflowerblue', 'steelblue',
+  'darkorchid',
+  'dimgray', 'black',
+  'erase'];
+
 export default colors;
