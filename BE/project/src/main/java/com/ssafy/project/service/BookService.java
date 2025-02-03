@@ -20,6 +20,6 @@ public interface BookService {
     void acceptInvitation(Long bookId, Long fromChildId, Long toChildId);
 
     // 친구 초대 거절하기
-    void rejectInvitation(Long fromChildId, Long toChildId);
+    void rejectInvitation(Long bookId, Long fromChildId, Long toChildId);
 
 }

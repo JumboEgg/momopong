@@ -34,29 +34,29 @@ public class BookController {
     }
 
     // 친구 초대 보내기
-    @PostMapping("/{bookId}/friend/{childId}/invitation")
-    public ResponseEntity<?> sendInvitation(@PathVariable("bookId") Long bookId, @PathVariable("childId") Long fromChildId, @RequestBody Map<String, String> map) {
-        Long toChildId = Long.parseLong(map.get("toChildId"));
-        InvitationDto invitationDto = bookService.sendInvitation(bookId, fromChildId, toChildId);
+    @PostMapping("/{bookId}/friend/{inviterId}/invitation")
+    public ResponseEntity<?> sendInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviterId") Long inviterId, @RequestBody Map<String, String> map) {
+        Long inviteeId = Long.parseLong(map.get("inviteeId"));
+        InvitationDto invitationDto = bookService.sendInvitation(bookId, inviterId, inviteeId);
 
         return ResponseEntity.ok(invitationDto);
     }
 
     // 친구 초대 수락하기
-    @PostMapping("/{bookId}/friend/{childId}/invitation/accept")
-    public ResponseEntity<?> acceptInvitation(@PathVariable("bookId") Long bookId, @PathVariable("childId") Long fromChildId, @RequestBody Map<String, String> map) {
-        Long toChildId = Long.parseLong(map.get("toChildId"));
-        bookService.acceptInvitation(bookId, fromChildId, toChildId);
+    @PostMapping("/{bookId}/friend/{inviteeId}/invitation/accept")
+    public ResponseEntity<?> acceptInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
+        Long inviterId = Long.parseLong(map.get("inviterId"));
+        bookService.acceptInvitation(bookId, inviterId, inviteeId);
 
         // 수락하면 오픈비두 방으로 이동해야 함!
         return null;
     }
 
     // 친구 초대 거절하기
-    @PostMapping("/{bookId}/friend/{childId}/invitation/reject")
-    public ResponseEntity<Void> rejectInvitation(@PathVariable("childId") Long fromChildId, @RequestBody Map<String, String> map) {
-        Long toChildId = Long.parseLong(map.get("toChildId"));
-        bookService.rejectInvitation(fromChildId, toChildId);
+    @PostMapping("/{bookId}/friend/{inviteeId}/invitation/reject")
+    public ResponseEntity<Void> rejectInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
+        Long inviterId = Long.parseLong(map.get("inviterId"));
+        bookService.rejectInvitation(bookId, inviterId, inviteeId);
 
         return ResponseEntity.ok().build();
     }
