@@ -18,6 +18,7 @@
     "linebreak-style": "off",
     "import/extensions": "off",
     "no-var": "warn", // var 금지
+    "import/no-unresolved": "error", // 존재하지 않은 파일 import 방지
     "react/react-in-jsx-scope": "off",
     "react/require-default-props": "off",
     "react/function-component-definition": ["error", {
