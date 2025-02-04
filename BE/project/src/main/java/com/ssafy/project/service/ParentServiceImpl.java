@@ -2,7 +2,10 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.ChildListDto;
+import com.ssafy.project.dto.LoginRequestDto;
+import com.ssafy.project.dto.ParentDto;
+import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
@@ -142,8 +145,8 @@ public class ParentServiceImpl implements ParentService {
     }
 
     @Override
-    public void logout(String refreshToken) {
-        String email = jwtTokenProvider.getEmailFromToken(refreshToken);
+    public void logout(String accessToken, String email) {
         jwtTokenProvider.deleteRefreshToken(email);
+        tokenBlacklistService.addBlacklist(accessToken);
     }
 }

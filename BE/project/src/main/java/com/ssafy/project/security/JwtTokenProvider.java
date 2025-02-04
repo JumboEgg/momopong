@@ -1,6 +1,7 @@
 package com.ssafy.project.security;
 
 import com.ssafy.project.dao.RedisDao;
+import com.ssafy.project.domain.type.RoleType;
 import com.ssafy.project.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -108,6 +109,19 @@ public class JwtTokenProvider {
                 .compact();
     }
 
+    // 자식 ID로 자식 Access Token 생성
+    public String generateChildToken(Long childId) {
+        long now = (new Date()).getTime();
+        Date accessTokenExpireDate = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        return Jwts.builder()
+                .setSubject(String.valueOf(childId))
+                .claim("auth", "ROLE_" + RoleType.CHILD.toString())
+                .setExpiration(accessTokenExpireDate)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+    }
+
     // JWT 토큰에서 인증 정보 꺼내기
     public Authentication getAuthentication(String token) {
         // JWT 토큰 복호화 (Claim 가져오기)
@@ -143,11 +157,16 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             // JWT 토큰 확인
-            Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token);
-            return true;
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            String auth = claims.get("auth", String.class);
+            System.out.println("auth = " + auth);
+            // 권한 정보가 있는지 확인
+            return auth != null && (auth.contains(RoleType.PARENT.toString()) || auth.contains(RoleType.CHILD.toString()));
         } catch (SecurityException | MalformedJwtException e) {
             log.warn("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {
