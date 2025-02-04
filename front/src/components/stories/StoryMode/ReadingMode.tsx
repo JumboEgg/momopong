@@ -33,13 +33,24 @@ function ReadingMode(): ReactElement {
   }, []);
 
   // 다음 페이지 이동
+  // 다음 페이지 이동
+  // 다음 페이지 이동
   const handleNext = useCallback(() => {
-    if (currentIndex < storyData.length - 1) {
+  // 다음 content 또는 페이지로 이동하기 전에 현재 상태 확인을 위한 로그
+    console.log('Current Index:', currentIndex);
+    console.log('Current Content Index:', currentContentIndex);
+    console.log('Current Page Contents Length:', storyData[currentIndex].contents.length);
+
+    // 음성 모드가 꺼져있고, 현재 페이지의 마지막 content가 아닐 때
+    if (!audioEnabled && currentContentIndex < storyData[currentIndex].contents.length - 1) {
+      setCurrentContentIndex(currentContentIndex + 1);
+    } else if (currentIndex < storyData.length - 1) {
+    // 다음 페이지로 이동
       stopCurrentAudio();
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
     }
-  }, [currentIndex, stopCurrentAudio, setCurrentIndex]);
+  }, [currentIndex, currentContentIndex, audioEnabled, stopCurrentAudio, setCurrentIndex]);
 
   // 이전 페이지 이동
   const handlePrevious = useCallback(() => {
@@ -92,7 +103,7 @@ function ReadingMode(): ReactElement {
   );
 
   return (
-    <div className="max-w-2xl mx-auto p-6 relative min-h-screen">
+    <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
       <div className="mb-6 flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">
           신데렐라
@@ -116,39 +127,22 @@ function ReadingMode(): ReactElement {
       <StoryIllustration
         pageNumber={currentPage.pageNumber}
         currentContentIndex={currentContentIndex}
+        onPrevious={handlePrevious}
+        onNext={handleNext}
+        isFirst={currentIndex === 0}
+        isLast={isStoryEnd}
       />
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        {currentPage.contents.map((content, idx) => (
-          <div
-            key={`${currentPage.pageNumber}-${content.type}-${content.text.substring(0, 20)}`}
-            className={`mb-4 last:mb-0 ${
-              !audioEnabled || (audioEnabled && idx === currentContentIndex)
-                ? 'block'
-                : 'hidden'
-            }`}
-          >
-            {content.type !== 'narration' && (
-              <div className="text-sm font-medium text-gray-500 mb-1">
-                {content.type === 'princess' ? '신데렐라' : '왕자'}
-              </div>
-            )}
-            <p className="text-lg text-gray-700 leading-relaxed whitespace-pre-line">
-              {content.text}
-            </p>
-          </div>
-        ))}
 
-        {audioEnabled && currentAudioFiles.length > 0 && (
-          <AudioPlayer
-            ref={audioRef}
-            audioFiles={currentAudioFiles}
-            autoPlay
-            onEnded={handleContentEnd}
-          />
-        )}
-      </div>
+      {audioEnabled && currentAudioFiles.length > 0 && (
+      <AudioPlayer
+        ref={audioRef}
+        audioFiles={currentAudioFiles}
+        autoPlay
+        onEnded={handleContentEnd}
+      />
+      )}
 
-      <div className="flex justify-between">
+      {/* <div className="flex justify-between">
         <button
           type="button"
           onClick={handlePrevious}
@@ -165,7 +159,7 @@ function ReadingMode(): ReactElement {
         >
           다음
         </button>
-      </div>
+      </div> */}
 
       {/* 이야기 종료시 나타날 오버레이 */}
       {isStoryEnd && (

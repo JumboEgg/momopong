@@ -59,6 +59,12 @@ export interface RecordingButtonProps {
 // StoryIllustration.tsx
 export interface StoryIllustrationProps {
   pageNumber: number;
+  currentContentIndex: number;
+  onPrevious: () => void;
+  onNext: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+  userRole?: 'prince' | 'princess';
 }
 
 // TogetherMode.tsx
