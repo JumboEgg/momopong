@@ -45,6 +45,9 @@ public class GoogleCloudConfig {
 
         ObjectMapper mapper = new ObjectMapper();
         String credentialsJson = mapper.writeValueAsString(credentialsMap);
+
+//        System.out.println("Credentials JSON: " + credentialsJson);
+
         return GoogleCredentials.fromStream(
                 new ByteArrayInputStream(credentialsJson.getBytes())
         );
