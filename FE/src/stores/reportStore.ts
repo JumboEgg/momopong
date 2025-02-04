@@ -17,7 +17,7 @@ export const useReportStore = create<ReportStore>((set) => ({
     childIdx: value,
   })),
 
-  reportTab: null,
+  reportTab: 'report',
 
   setReportTab: (value) => set(() => ({
     reportTab: value,

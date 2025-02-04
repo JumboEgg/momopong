@@ -47,12 +47,12 @@ function Parent() {
 
     if (reportTab === 'activities') {
       return (
-        <ActivityTab />
+        <ActivityTab childName={MOCK_CHILDREN_DATA[childIdx].childName} />
       );
     }
 
     return (
-      <CraftsTab />
+      <CraftsTab childName={MOCK_CHILDREN_DATA[childIdx].childName} />
     );
   };
 
@@ -67,86 +67,90 @@ function Parent() {
           icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
         />
       </div>
-      <div className="self-center mx-auto flex flex-col justify-center w-[80%] h-[80%] space-y-2">
-        <div
-          className="text-5xl"
-          style={{
-            textShadow: '2px 2px 0px white, -2px -2px 0px white, -2px 2px 0px white, 2px -2px 0px white',
-          }}
-        >
-          아이 활동 리포트
-        </div>
-        <div className="bg-white rounded-2xl w-full h-full flex flex-col p-10 space-y-5">
-          <div className="flex flex-row">
-            {MOCK_CHILDREN_DATA.map((child, idx) => (
-              <button
-                key={MOCK_CHILDREN_DATA[idx].childId}
-                type="button"
-                onClick={() => setChildIdx(idx)}
-                className="text-2xl mr-10"
-                style={{
-                  color: childIdx === idx ? 'steelblue' : 'cornflowerblue',
-                }}
-              >
-                {child.childName}
-              </button>
-            ))}
+      {/* 리포트 영역 */}
+      <div className="w-full h-full flex items-center justify-center p-8">
+        <div className="w-[80%] max-w-4xl min-w-3xl h-[80%] flex flex-col">
+          <div
+            className="text-5xl mb-4"
+            style={{
+              textShadow: '2px 2px 0px white, -2px -2px 0px white, -2px 2px 0px white, 2px -2px 0px white',
+            }}
+          >
+            아이 활동 리포트
           </div>
-          <div className="flex flex-row">
-            <div className="flex-1 flex flex-col justify-baseline items-center max-w-64 space-y-2">
-              <img
-                src={MOCK_CHILDREN_DATA[childIdx].profileSrc}
-                alt={MOCK_CHILDREN_DATA[childIdx].childName}
-                className="w-[50%] min-w-40 aspect-square rounded-full bg-amber-300"
-              />
-              <div className="text-3xl">{MOCK_CHILDREN_DATA[childIdx].childName}</div>
-              <div className="text-xl">
-                {MOCK_CHILDREN_DATA[childIdx].childAge}
-                세
-              </div>
-              <div className="text-xl">
-                가입 후
-                {' '}
-                {MOCK_CHILDREN_DATA[childIdx].joinDate}
-                일
-              </div>
-
+          <div className="bg-white rounded-2xl flex-1 overflow-hidden flex flex-col p-10">
+            <div className="flex flex-row mb-5">
+              {MOCK_CHILDREN_DATA.map((child, idx) => (
+                <button
+                  key={MOCK_CHILDREN_DATA[idx].childId}
+                  type="button"
+                  onClick={() => setChildIdx(idx)}
+                  className="text-2xl mr-10"
+                  style={{
+                    color: childIdx === idx ? 'steelblue' : 'cornflowerblue',
+                  }}
+                >
+                  {child.childName}
+                </button>
+              ))}
             </div>
-            <div className="flex-2">
-              <div className="flex flex-row">
-                <button
-                  type="button"
-                  onClick={() => setReportTab('report')}
-                  className="text-2xl mr-10"
-                  style={{
-                    color: reportTab === 'report' ? 'steelblue' : 'cornflowerblue',
-                  }}
-                >
-                  활동 분석
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReportTab('activities')}
-                  className="text-2xl mr-10"
-                  style={{
-                    color: reportTab === 'activities' ? 'steelblue' : 'cornflowerblue',
-                  }}
-                >
-                  활동 내역
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setReportTab('crafts')}
-                  className="text-2xl mr-10"
-                  style={{
-                    color: reportTab === 'crafts' ? 'steelblue' : 'cornflowerblue',
-                  }}
-                >
-                  아이의 작품
-                </button>
+            <div className="flex flex-row flex-1 min-h-0">
+              <div className="flex-none w-64 flex flex-col items-center space-y-2 pe-5">
+                <div className="w-[50%] min-w-40">
+                  <img
+                    src={MOCK_CHILDREN_DATA[childIdx].profileSrc}
+                    alt={MOCK_CHILDREN_DATA[childIdx].childName}
+                    className="w-full aspect-square rounded-full bg-amber-300"
+                  />
+                </div>
+                <div className="text-3xl">{MOCK_CHILDREN_DATA[childIdx].childName}</div>
+                <div className="text-xl">
+                  {MOCK_CHILDREN_DATA[childIdx].childAge}
+                  세
+                </div>
+                <div className="text-xl">
+                  가입 후
+                  {' '}
+                  {MOCK_CHILDREN_DATA[childIdx].joinDate}
+                  일
+                </div>
               </div>
-              <div className="mt-5 h-full w-full">
-                {content()}
+              <div className="flex-1 min-w-0 flex flex-col">
+                <div className="flex flex-row mb-5">
+                  <button
+                    type="button"
+                    onClick={() => setReportTab('report')}
+                    className="text-2xl mr-10"
+                    style={{
+                      color: reportTab === 'report' ? 'steelblue' : 'cornflowerblue',
+                    }}
+                  >
+                    활동 분석
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportTab('activities')}
+                    className="text-2xl mr-10"
+                    style={{
+                      color: reportTab === 'activities' ? 'steelblue' : 'cornflowerblue',
+                    }}
+                  >
+                    활동 내역
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setReportTab('crafts')}
+                    className="text-2xl mr-10"
+                    style={{
+                      color: reportTab === 'crafts' ? 'steelblue' : 'cornflowerblue',
+                    }}
+                  >
+                    아이의 작품
+                  </button>
+                </div>
+                <div className="flex-1 overflow-y-auto">
+                  {content()}
+                </div>
               </div>
             </div>
           </div>

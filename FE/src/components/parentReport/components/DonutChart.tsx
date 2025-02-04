@@ -7,7 +7,7 @@ export interface DonutChartProps {
 
 function DonutChart({ singleTime = 60, multiTime = 40 }: DonutChartProps) {
   const total = singleTime + multiTime;
-  const radius = 50;
+  const radius = 60;
   const strokeWidth = 10;
   const centerX = radius + strokeWidth;
   const centerY = radius + strokeWidth;
@@ -30,7 +30,7 @@ function DonutChart({ singleTime = 60, multiTime = 40 }: DonutChartProps) {
   const endAngle2 = startAngle1 + (2 * Math.PI);
 
   return (
-    <div className="flex items-center gap-8">
+    <div className="flex items-center">
       <div className="relative">
         <svg width={2 * (radius + strokeWidth)} height={2 * (radius + strokeWidth)}>
           {/* First segment */}
