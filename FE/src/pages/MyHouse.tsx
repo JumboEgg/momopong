@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 
 function MyHouse() {
   const navigate = useNavigate();
@@ -16,15 +18,13 @@ function MyHouse() {
       style={{ backgroundImage: "url('/images/house-background.png')" }}
     >
       {/* 뒤로가기 버튼 */}
-      <div className="mb-6">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 hover:bg-gray-100"
-        >
-          <ArrowLeft size={24} />
-        </button>
-      </div>
+      <IconCircleButton
+        size="sm"
+        variant="action"
+        onClick={handleBack}
+        icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
+        className="fixed top-5 left-5"
+      />
 
       {/* 편지 이미지 */}
       <button
@@ -35,9 +35,8 @@ function MyHouse() {
       `}
         style={{
           left: '13%',
-          top: '50%',
-          width: '150px',
-          height: '150px',
+          top: '51%',
+          width: '10vw',
           background: 'transparent',
           border: 'none',
         }}
@@ -47,11 +46,15 @@ function MyHouse() {
         aria-label="내가 받은 편지함으로 이동"
       >
         <img src="/images/letter-icon.png" alt="편지함" className="w-full h-full object-contain" />
-        {hoveredItem === 'letter' && (
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
+          <p className="text-sm whitespace-nowrap">내가 받은 편지함</p>
+        </div>
+        {/* {hoveredItem === 'letter' && (
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
+          bg-white px-3 py-1 rounded-full shadow-lg">
             <p className="text-sm whitespace-nowrap">내가 받은 편지함</p>
           </div>
-        )}
+        )} */}
       </button>
 
       {/* 책장 이미지 */}
@@ -62,9 +65,8 @@ function MyHouse() {
          ${hoveredItem === 'book' ? 'scale-110' : ''}
        `}
         style={{
-          left: '52%',
-          top: '20%',
-          transform: 'translateX(-50%)',
+          left: '40%',
+          bottom: '20%',
           background: 'transparent',
           border: 'none',
         }}
@@ -77,15 +79,19 @@ function MyHouse() {
           src="/images/bookshelf-icon.png"
           alt="책장"
           style={{
-            width: '350px',
-            height: '450px',
+            width: '23vw',
+            aspectRatio: (7 / 9),
           }}
         />
-        {hoveredItem === 'book' && (
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
+          <p className="text-sm whitespace-nowrap">내가 읽은 동화</p>
+        </div>
+        {/* {hoveredItem === 'book' && (
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
+          bg-white px-3 py-1 rounded-full shadow-lg">
             <p className="text-sm whitespace-nowrap">내가 읽은 동화</p>
           </div>
-        )}
+        )} */}
       </button>
 
       {/* 액자 이미지 */}
@@ -98,8 +104,8 @@ function MyHouse() {
         style={{
           right: '15%',
           top: '20%',
-          width: '150px',
-          height: '150px',
+          width: '10vw',
+          // height: '150px',
           background: 'transparent',
           border: 'none',
         }}
@@ -109,11 +115,15 @@ function MyHouse() {
         aria-label="내가 그린 그림 갤러리로 이동"
       >
         <img src="/images/frame-icon.png" alt="그림 갤러리" className="w-full h-full object-contain" />
-        {hoveredItem === 'frame' && (
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
+          <p className="text-sm whitespace-nowrap">내가 그린 그림들</p>
+        </div>
+        {/* {hoveredItem === 'frame' && (
+          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
+          bg-white px-3 py-1 rounded-full shadow-lg">
             <p className="text-sm whitespace-nowrap">내가 그린 그림들</p>
           </div>
-        )}
+        )} */}
       </button>
     </div>
   );
