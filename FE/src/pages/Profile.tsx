@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -5,6 +6,7 @@ import {
 import TextButton from '@/components/common/buttons/TextButton';
 import ProfileImage from '@/components/common/ProfileImage';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { useNavigate } from 'react-router-dom';
 
 function Profile(): JSX.Element {
   const MOCK_PROFILE = {
@@ -14,38 +16,67 @@ function Profile(): JSX.Element {
     code: '1234 5678',
   };
 
+  const navigate = useNavigate();
+
+  const [imgSize, setImgSize] = useState('sm');
+  const handleResize = () => {
+    if (window.innerWidth >= 1024) {
+      setImgSize('lg');
+    } else if (window.innerWidth >= 768) {
+      setImgSize('md');
+    } else {
+      setImgSize('sm');
+    }
+  };
+
+  useEffect(() => {
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
   return (
-    <div className="w-full h-screen bg-onahau-100 flex items-center justify-center relative">
+    <div className="w-full h-screen bg-onahau-100 flex items-center justify-center relative font-[BMJUA]">
       <div className="absolute top-6 left-6">
         <IconCircleButton
           size="sm"
           variant="action"
           className=""
-          icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
+          icon={<FontAwesomeIcon icon={faArrowLeft} size={imgSize} />}
+          onClick={() => navigate('/home')}
         />
       </div>
       <div className="absolute top-6 right-6">
-        <TextButton size="md" variant="gray" className="">계정 변경</TextButton>
+        <TextButton
+          size="md"
+          variant="gray"
+          className=""
+          onClick={() => navigate('/Parent')}
+        >
+          계정 변경
+        </TextButton>
       </div>
       <div className="flex absolute items-center justify-center
-        min-w-4/5 h-[75vh] rounded-[2vw]
+        w-4/5 min-w-2xl max-w-4xl h-[75vh] rounded-[2vw]
         bg-witch-haze-200
         border-6 border-tainoi-300"
       >
-        <div className="flex gap-4 relative">
+        <div className="columns-2 gap-4 relative">
           <ProfileImage
             src="https://health.chosun.com/site/data/img_dir/2023/07/17/2023071701753_0.jpg"
             size="xl"
           />
-          <div>
-            <h2 className="text-xl font-bold">{MOCK_PROFILE.type}</h2>
-            <h1 className="text-2xl font-bold mt-1">{MOCK_PROFILE.name}</h1>
-            <p className="text-sm mt-2">
+          <div className="w-full h-full flex flex-col items-center justify-center">
+            <h2 className="text-xl md:text-2xl">{MOCK_PROFILE.type}</h2>
+            <h1 className="text-2xl md:text-4xl mt-1 md:mt-2">{MOCK_PROFILE.name}</h1>
+            <p className="text-sm md:text-xl mt-2 md:mt-5">
               여행을 시작한 지 +
               {MOCK_PROFILE.days}
               일
             </p>
-            <div className="bg-white rounded-lg px-3 py-1 mt-2 inline-block">
+            <div className="text-xl md:text-2xl bg-orange-300 rounded-lg px-3 md:px-5 py-1 md:py-3 mt-2 md:mt-4 inline-block">
               나의 코드:
               {' '}
               {MOCK_PROFILE.code}

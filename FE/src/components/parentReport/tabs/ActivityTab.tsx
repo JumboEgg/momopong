@@ -1,6 +1,6 @@
-interface ActivityTabProps {
-  childName: string;
-}
+// interface ActivityTabProps {
+//   childName: string;
+// }
 
 export interface ReadDataType {
   title: string;
@@ -15,25 +15,25 @@ const MOCK_READ_DATA: ReadDataType[] = [
     coverSrc: '/images/heungbu.jpg',
   },
   {
-    title: '신데렐라',
+    title: '헨젤과 그레텔',
     readCount: 12,
-    coverSrc: '/images/cinderella.jpg',
+    coverSrc: '/images/bookcover/hanselandgretel.jpeg',
   },
   {
-    title: '견우와 직녀',
+    title: '빨간 망토',
     readCount: 3,
-    coverSrc: '/images/daily.jpg',
+    coverSrc: '/images/bookcover/redridinghood.jpeg',
   },
 ];
 
 function BookReport({ bookData }: { bookData: ReadDataType }) {
   return (
-    <div className="flex flex-col justify-center items-center w-full">
+    <div className="flex flex-col justify-center items-center w-full py-3">
       <div className="w-[80%] mb-2">
         <img
           src={bookData.coverSrc}
           alt={bookData.title}
-          className="max-w-full"
+          className="max-w-full aspect-[4/3]"
         />
       </div>
       <div className="text-xl">{bookData.title}</div>
@@ -47,20 +47,20 @@ function BookReport({ bookData }: { bookData: ReadDataType }) {
   );
 }
 
-function ActivityTab({ childName }: ActivityTabProps) {
+function ActivityTab() {
   const readData = MOCK_READ_DATA.map((book) => <BookReport key={book.title} bookData={book} />);
 
   return (
     <div className="flex flex-col w-full h-full gap-y-5">
-      <div className="text-2xl">
-        이번 달,
+      <div className="text-xl">
+        {/* 이번 달,
         {' '}
         <span className="text-[cornflowerblue]">{childName}</span>
         {' '}
         어린이는
         <br />
         동화누리에서
-        {' '}
+        {' '} */}
         <span className="text-[steelblue]">
           {MOCK_READ_DATA[0].title}
           ,

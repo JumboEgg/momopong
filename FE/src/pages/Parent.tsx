@@ -6,6 +6,7 @@ import { useReportStore } from '@/stores/reportStore';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
+import '@/components/common/scrollbar.css';
 
 function Parent() {
   const navigate = useNavigate();
@@ -47,7 +48,7 @@ function Parent() {
 
     if (reportTab === 'activities') {
       return (
-        <ActivityTab childName={MOCK_CHILDREN_DATA[childIdx].childName} />
+        <ActivityTab />
       );
     }
 
@@ -63,29 +64,31 @@ function Parent() {
           size="sm"
           variant="action"
           className=""
-          onClick={() => navigate('/sub-account')}
+          onClick={() => navigate('/Profile')}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
         />
       </div>
-      {/* 리포트 영역 */}
       <div className="w-full h-full flex items-center justify-center p-8">
         <div className="w-[80%] max-w-4xl min-w-3xl h-[80%] flex flex-col">
+          {/* 리포트 제목 */}
           <div
-            className="text-5xl mb-4"
+            className="text-3xl md:text-4xl lg:text-5xl mb-4"
             style={{
               textShadow: '2px 2px 0px white, -2px -2px 0px white, -2px 2px 0px white, 2px -2px 0px white',
             }}
           >
             아이 활동 리포트
           </div>
-          <div className="bg-white rounded-2xl flex-1 overflow-hidden flex flex-col p-10">
+          {/* 리포트 전체 영역 */}
+          <div className="bg-white rounded-2xl flex-1 overflow-hidden flex flex-col px-10 py-5">
+            {/* 아이 선택 탭 */}
             <div className="flex flex-row mb-5">
               {MOCK_CHILDREN_DATA.map((child, idx) => (
                 <button
                   key={MOCK_CHILDREN_DATA[idx].childId}
                   type="button"
                   onClick={() => setChildIdx(idx)}
-                  className="text-2xl mr-10"
+                  className="text-xl md:text-2xl mr-5 md:mr-10"
                   style={{
                     color: childIdx === idx ? 'steelblue' : 'cornflowerblue',
                   }}
@@ -95,15 +98,16 @@ function Parent() {
               ))}
             </div>
             <div className="flex flex-row flex-1 min-h-0">
-              <div className="flex-none w-64 flex flex-col items-center space-y-2 pe-5">
-                <div className="w-[50%] min-w-40">
+              {/* 아이 프로필 영역 */}
+              <div className="flex flex-col flex-1 items-center space-y-2 pe-5">
+                <div className="w-[80%] min-w-20">
                   <img
                     src={MOCK_CHILDREN_DATA[childIdx].profileSrc}
                     alt={MOCK_CHILDREN_DATA[childIdx].childName}
                     className="w-full aspect-square rounded-full bg-amber-300"
                   />
                 </div>
-                <div className="text-3xl">{MOCK_CHILDREN_DATA[childIdx].childName}</div>
+                <div className="text-xl md:text-2xl lg:text-3xl">{MOCK_CHILDREN_DATA[childIdx].childName}</div>
                 <div className="text-xl">
                   {MOCK_CHILDREN_DATA[childIdx].childAge}
                   세
@@ -115,12 +119,12 @@ function Parent() {
                   일
                 </div>
               </div>
-              <div className="flex-1 min-w-0 flex flex-col">
-                <div className="flex flex-row mb-5">
+              <div className="flex-3 min-w-0 flex flex-col">
+                <div className="flex flex-row mb-2 md:mb-4">
                   <button
                     type="button"
                     onClick={() => setReportTab('report')}
-                    className="text-2xl mr-10"
+                    className="text-xl md:text-2xl mr-5 md:mr-10"
                     style={{
                       color: reportTab === 'report' ? 'steelblue' : 'cornflowerblue',
                     }}
@@ -130,7 +134,7 @@ function Parent() {
                   <button
                     type="button"
                     onClick={() => setReportTab('activities')}
-                    className="text-2xl mr-10"
+                    className="text-xl md:text-2xl mr-5 md:mr-10"
                     style={{
                       color: reportTab === 'activities' ? 'steelblue' : 'cornflowerblue',
                     }}
@@ -140,7 +144,7 @@ function Parent() {
                   <button
                     type="button"
                     onClick={() => setReportTab('crafts')}
-                    className="text-2xl mr-10"
+                    className="text-xl md:text-2xl mr-5 md:mr-10"
                     style={{
                       color: reportTab === 'crafts' ? 'steelblue' : 'cornflowerblue',
                     }}
@@ -148,7 +152,7 @@ function Parent() {
                     아이의 작품
                   </button>
                 </div>
-                <div className="flex-1 overflow-y-auto">
+                <div className="flex-1 overflow-y-auto customScrollbar">
                   {content()}
                 </div>
               </div>

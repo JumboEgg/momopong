@@ -17,21 +17,19 @@ export interface ReportTabProps {
 
 function ReportTab({ childName }: ReportTabProps) {
   return (
-    <div className="flex flex-col w-full h-full gap-y-5">
-      <div className="text-2xl">
+    <div className="flex flex-col w-full h-full gap-y-2">
+      <div className="text-xl">
         이번 달,
         {' '}
         <span className="text-[cornflowerblue]">{childName}</span>
         {' '}
-        어린이는
-        <br />
-        동화누리에서
+        어린이는 동화누리에서
         {' '}
         <span className="text-[steelblue]">{MOCK_REPORT_DATA.monthTime}</span>
         {' '}
         여행했어요.
       </div>
-      <div className="w-full h-full flex justify-center items-center bg-pink-100 border-4 border-pink-300 rounded-2xl font-sans font-bold">
+      <div className="w-full h-full flex justify-center items-center bg-pink-100 border-4 border-pink-300 rounded-2xl font-sans font-bold py-3">
         <div className="w-full flex justify-evenly items-baseline">
           <div>
             <div className="text-xl flex items-center">
