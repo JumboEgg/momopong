@@ -60,4 +60,13 @@ public class BookController {
 
         return ResponseEntity.ok().build();
     }
+
+    // 친구 초대 만료
+    @PostMapping("/{bookId}/friend/{inviteeId}/invitation/expire")
+    public ResponseEntity<Void> expireInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
+        Long inviterId = Long.parseLong(map.get("inviterId"));
+        bookService.expireInvitation(bookId, inviterId, inviteeId);
+
+        return ResponseEntity.ok().build();
+    }
 }

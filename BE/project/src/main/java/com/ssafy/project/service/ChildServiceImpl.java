@@ -113,7 +113,7 @@ public class ChildServiceImpl implements ChildService {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
-        return child.entityToDto(child);
+        return child.entityToDto();
     }
 
     @Override
@@ -123,7 +123,7 @@ public class ChildServiceImpl implements ChildService {
 
         child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
 
-        return child.entityToDto(child);
+        return child.entityToDto();
     }
 
     @Override

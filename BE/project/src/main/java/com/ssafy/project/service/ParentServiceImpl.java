@@ -75,7 +75,7 @@ public class ParentServiceImpl implements ParentService {
         Parent parent = parentRepository.findById(parentId)
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
-        return parent.entityToDto(parent);
+        return parent.entityToDto();
     }
 
     @Override
@@ -83,7 +83,7 @@ public class ParentServiceImpl implements ParentService {
         Parent parent = parentRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
-        return parent.entityToDto(parent);
+        return parent.entityToDto();
     }
 
     @Override
@@ -110,7 +110,7 @@ public class ParentServiceImpl implements ParentService {
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
         parent.updateParent(parentDto.getName(), parentDto.getPhone());
-        return parent.entityToDto(parent);
+        return parent.entityToDto();
     }
 
     @Override
