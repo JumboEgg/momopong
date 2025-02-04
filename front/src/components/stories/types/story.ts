@@ -35,11 +35,33 @@ export interface StoryPageContent {
   type: CharacterType;
   text: string;
   audioFiles: string[];
-  illustration?: string; // 선택적 속성 추가
+  illustration: string;
 }
 
 export interface StoryPage {
   pageNumber: number;
   illustration?: string;
   contents: StoryPageContent[];
+}
+
+// FriendSelection.tsx
+export interface FriendSelectionProps {
+  onFriendSelect: (friendId: string) => void;
+}
+
+// RecordingButton.tsx
+export interface RecordingButtonProps {
+  characterType: CharacterType;
+  storyIndex: number;
+  onRecordingComplete: () => void;
+}
+
+// StoryIllustration.tsx
+export interface StoryIllustrationProps {
+  pageNumber: number;
+}
+
+// TogetherMode.tsx
+export interface TogetherModeProps {
+  friendId: string;
 }

@@ -1,11 +1,18 @@
-import { useRef, useCallback, useState } from 'react';
+import {
+  useRef,
+  useCallback,
+  useState,
+  ReactElement,
+} from 'react';
+
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '../contexts/StoryContext';
 import storyData from '../data/cinderella';
 import AudioPlayer from '../AudioPlayer';
 import getAudioPath from '../utils/audioHelper';
+import StoryIllustration from './StoryIllustration';
 
-function ReadingMode(): JSX.Element {
+function ReadingMode(): ReactElement {
   const navigate = useNavigate();
   const {
     currentIndex,
@@ -13,6 +20,7 @@ function ReadingMode(): JSX.Element {
     audioEnabled, // 오디오 활성화 여부
     toggleAudio,
   } = useStory();
+
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
 
@@ -45,11 +53,12 @@ function ReadingMode(): JSX.Element {
   // 콘텐츠 종료 처리
   const handleContentEnd = useCallback(() => {
     const currentPage = storyData[currentIndex];
+    // 현재 페이지의 마지막 컨텐츠인지 확인
     if (currentContentIndex < currentPage.contents.length - 1) {
       // 다음 컨텐츠로 이동
       setCurrentContentIndex((prev) => prev + 1);
     } else {
-      // 다음 페이지로 이동
+      // 마지막 컨텐츠면 다음 페이지로 이동
       handleNext();
     }
   }, [currentIndex, currentContentIndex, handleNext]);
@@ -104,6 +113,10 @@ function ReadingMode(): JSX.Element {
         </button>
       </div>
 
+      <StoryIllustration
+        pageNumber={currentPage.pageNumber}
+        currentContentIndex={currentContentIndex}
+      />
       <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
         {currentPage.contents.map((content, idx) => (
           <div

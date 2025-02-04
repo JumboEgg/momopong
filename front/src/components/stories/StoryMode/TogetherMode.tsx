@@ -7,10 +7,7 @@ import RecordingButton from './RecordingButton';
 import AudioPlayer from '../AudioPlayer';
 import { CharacterType } from '../types/story';
 import getAudioPath from '../utils/audioHelper';
-
-interface TogetherModeProps {
-  friendId: string;
-}
+import type { TogetherModeProps } from '../types/story';
 
 function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
   const {

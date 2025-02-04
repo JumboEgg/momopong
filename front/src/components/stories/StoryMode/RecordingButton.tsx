@@ -1,12 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CharacterType } from '../types/story';
+import { RecordingButtonProps } from '../types/story';
 import { useStory } from '../contexts/StoryContext';
-
-interface RecordingButtonProps {
-  characterType: CharacterType;
-  storyIndex: number;
-  onRecordingComplete: () => void;
-}
 
 function RecordingButton({
   characterType,
