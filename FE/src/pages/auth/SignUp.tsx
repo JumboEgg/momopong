@@ -27,13 +27,13 @@ function SignUp(): JSX.Element {
   const [errors, setErrors] = useState<FormErrors>({});
 
   const { register, isLoading, error } = useSignUpStore();
-  const isAuthenticated = useLoginStore((state) => state.isAuthenticated);
+  const { isAuthenticated, user } = useLoginStore();
 
   useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/home');
+    if (isAuthenticated && user?.parentId) {
+      navigate(`/parents/${user.parentId}/children`);
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, user, navigate]);
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) return '이메일은 필수입니다';
