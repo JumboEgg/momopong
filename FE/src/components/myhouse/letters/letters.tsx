@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { faArrowLeft, faVolumeHigh } from '@fortawesome/free-solid-svg-icons';
 import { TextCircleButton, IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-
 import '@/components/common/scrollbar.css';
 
 interface Letter {
