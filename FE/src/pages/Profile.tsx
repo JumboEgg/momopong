@@ -4,7 +4,7 @@ import {
   faArrowLeft,
 } from '@fortawesome/free-solid-svg-icons';
 import TextButton from '@/components/common/buttons/TextButton';
-import ProfileImage from '@/components/common/ProfileImage';
+import ProfileImage, { ProfileImgSize } from '@/components/common/ProfileImage';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { useNavigate } from 'react-router-dom';
 
@@ -18,14 +18,14 @@ function Profile(): JSX.Element {
 
   const navigate = useNavigate();
 
-  const [imgSize, setImgSize] = useState('sm');
+  const [imgSize, setImgSize] = useState<ProfileImgSize>('xl');
   const handleResize = () => {
     if (window.innerWidth >= 1024) {
-      setImgSize('lg');
+      setImgSize('xl');
     } else if (window.innerWidth >= 768) {
-      setImgSize('md');
+      setImgSize('lg');
     } else {
-      setImgSize('sm');
+      setImgSize('md');
     }
   };
 
@@ -44,7 +44,7 @@ function Profile(): JSX.Element {
           size="sm"
           variant="action"
           className=""
-          icon={<FontAwesomeIcon icon={faArrowLeft} size={imgSize} />}
+          icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
           onClick={() => navigate('/home')}
         />
       </div>
@@ -58,7 +58,7 @@ function Profile(): JSX.Element {
           계정 변경
         </TextButton>
       </div>
-      <div className="flex absolute items-center justify-center
+      <div className="flex flex-col absolute items-center justify-center
         w-4/5 min-w-2xl max-w-4xl h-[75vh] rounded-[2vw]
         bg-witch-haze-200
         border-6 border-tainoi-300"
@@ -66,7 +66,7 @@ function Profile(): JSX.Element {
         <div className="columns-2 gap-4 relative">
           <ProfileImage
             src="https://health.chosun.com/site/data/img_dir/2023/07/17/2023071701753_0.jpg"
-            size="xl"
+            size={imgSize}
           />
           <div className="w-full h-full flex flex-col items-center justify-center">
             <h2 className="text-xl md:text-2xl">{MOCK_PROFILE.type}</h2>

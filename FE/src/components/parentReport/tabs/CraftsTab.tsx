@@ -11,8 +11,12 @@ function CraftsTab({ childName }: CraftsTabProps) {
   } = useDrawing();
 
   const drawingHistory = localDrawingList.map((data) => (
-    <div className="w-full">
-      {data}
+    <div key={data.src} className="w-full p-3">
+      <img
+        src={data.src}
+        alt={data.title}
+        className="bg-white"
+      />
     </div>
   ));
 
@@ -24,7 +28,7 @@ function CraftsTab({ childName }: CraftsTabProps) {
           {childName}
           (이)가 참여한 작품
         </div>
-        <div className="w-full h-full grid grid-cols-3 justify-center items-start bg-yellow-100 border-4 border-yellow-300 rounded-2xl font-sans font-bold overflow-y-auto customScrollbar">
+        <div className="w-full h-full grid grid-cols-3 justify-center items-start bg-yellow-100 border-4 border-yellow-300 rounded-2xl font-sans font-bold overflow-y-auto customScrollbar p-4">
           {drawingHistory}
         </div>
       </div>
