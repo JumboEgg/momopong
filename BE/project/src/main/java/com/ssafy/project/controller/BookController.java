@@ -6,6 +6,7 @@ import com.ssafy.project.dto.invitation.InvitationDto;
 import com.ssafy.project.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('CHILD')")
 @RequestMapping("/api/book")
 public class BookController {
     private final BookService bookService;
