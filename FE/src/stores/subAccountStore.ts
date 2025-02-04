@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import api from '@/api/axios';
-import useLoginStore from './loginStore';
+import { clearChildTokens } from '@/utils/auth';
 
 interface SubAccount { // 로그인한 서브계정 정보
   childId: number;
@@ -30,6 +30,10 @@ interface SubAccountState {
   selectedAccount: SubAccount | null; // 현재 선택된(로그인된) 자식 계정
   isLoading: boolean;
   error: string | null;
+  childToken: {
+    accessToken: string | null;
+    refreshToken: string | null;
+  }
 
   // 유틸리티
   canAddMore: () => boolean; // 계정 추가 더 가능한지 확인
@@ -38,6 +42,7 @@ interface SubAccountState {
   fetchSubAccounts: () => Promise<void>; // GET
   createSubAccount: (data: CreateSubAccountRequest) => Promise<number>; // POST
   loginSubAccount: (childId: number) => Promise<boolean>;
+  logoutSubAccount: () => void;
 
   // 로컬 상태 관리
   setLoading: (status: boolean) => void;
@@ -65,6 +70,10 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
   selectedAccount: null,
   isLoading: false,
   error: null,
+  childToken: {
+    accessToken: localStorage.getItem('childAccessToken'),
+    refreshToken: localStorage.getItem('childRefreshToken'),
+  },
 
   // 폼 초기 상태
   formData: {
@@ -80,8 +89,7 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const loginStore = useLoginStore.getState();
-      const parentId = loginStore.user?.parentId;
+      const parentId = localStorage.getItem('parentId');
 
       if (!parentId) {
         throw new Error('부모 계정 정보를 찾을 수 없습니다.');
@@ -134,10 +142,28 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
     set({ isLoading: true, error: null });
 
     try {
-      const response = await api.post<SubAccount>('/children/login', { childId });
+      const response = await api.post<SubAccount & { accessToken: string; refreshToken: string }>(
+        '/children/login',
+        { childId },
+      );
+
+      localStorage.setItem('childAccessToken', response.data.accessToken);
+      localStorage.setItem('childRefreshToken', response.data.accessToken);
 
       set({
-        selectedAccount: response.data,
+        selectedAccount: {
+          childId: response.data.childId,
+          name: response.data.name,
+          profile: response.data.profile,
+          age: response.data.age,
+          daysSinceStart: response.data.daysSinceStart,
+          code: response.data.code,
+          firstLogin: response.data.firstLogin,
+        },
+        childToken: {
+          accessToken: response.data.accessToken,
+          refreshToken: response.data.refreshToken,
+        },
         isLoading: false,
       });
 
@@ -150,6 +176,19 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
       set({ error: errorMessage, isLoading: false });
       throw error;
     }
+  },
+
+  // 자식 계정 로그아웃
+  logoutSubAccount: () => {
+    clearChildTokens();
+
+    set({
+      selectedAccount: null,
+      childToken: {
+        accessToken: null,
+        refreshToken: null,
+      },
+    });
   },
 
   // 유틸리티 메서드
