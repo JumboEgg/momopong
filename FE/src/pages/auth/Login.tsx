@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
-import useLoginStore from '@/stores/loginStore';
-import type { LoginRequest } from '@/stores/loginStore';
+import useAuthStore from '@/stores/authStore';
+import { useLoginStore } from '@/stores/loginStore';
+import type { LoginRequest } from '@/types/auth';
 
 // 유효성 검사를 위한 인터페이스
 interface FormErrors {
@@ -85,15 +86,20 @@ function Login(): JSX.Element {
     }
 
     try {
+      // login 함수 완료될 때까지 대기
       await login(formData);
-      // 로그인 응답을 기다린 후 라우팅
-      const { user } = useLoginStore.getState();
-      if (user?.parentId) {
-        navigate(`/parents/${user.parentId}/children`);
+      setTimeout(() => {
+        // 로그인 응답을 기다린 후 라우팅
+        const { user } = useAuthStore.getState();
+        if (user?.parentId) {
+          navigate(`/parents/${user.parentId}/children`);
+        } else {
+          console.log('User data not available:', user);
+      } catch (err) {
+        console.error('Login failed:', err);
       }
-    } catch (err) {
-      console.error('Login failed:', err);
-    }
+
+      })
   };
 
   return (

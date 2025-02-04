@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useSignUpStore from '@/stores/signUpStore';
-import useLoginStore from '@/stores/loginStore';
+import useAuthStore from '@/stores/authStore';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
 import type { SignUpFormData } from '@/stores/signUpStore';
@@ -27,7 +27,7 @@ function SignUp(): JSX.Element {
   const [errors, setErrors] = useState<FormErrors>({});
 
   const { register, isLoading, error } = useSignUpStore();
-  const { isAuthenticated, user } = useLoginStore();
+  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
     if (isAuthenticated && user?.parentId) {
