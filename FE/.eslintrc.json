@@ -49,7 +49,9 @@
     "import/prefer-default-export": "off",
     "import/no-extraneous-dependencies": ["error", {
       "devDependencies": true
-    }]
+    }],
+    "no-console": "off", // console.log 허용
+    "no-alert": "off" // alert 허용
   },
   "overrides": [
     {
