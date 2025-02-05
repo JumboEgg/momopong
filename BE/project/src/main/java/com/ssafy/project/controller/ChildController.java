@@ -7,18 +7,21 @@ import com.ssafy.project.dto.SignUpResponseDto;
 import com.ssafy.project.service.ChildService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('CHILD')")
 @RequestMapping("/api/children")
 public class ChildController {
 
     private final ChildService childService;
 
     // 자식 계정 생성
+    @PreAuthorize("hasRole('PARENT')")
     @PostMapping("/signup")
     public ResponseEntity<SignUpResponseDto> signUp(@RequestBody ChildSignUpRequestDto signUpRequestDto) {
         Long saved = childService.signUp(signUpRequestDto);
@@ -27,19 +30,20 @@ public class ChildController {
     }
 
     // 자식 계정 로그인
+    @PreAuthorize("hasRole('PARENT')")
     @PostMapping("/login")
-    public ResponseEntity<ChildDto> login(@RequestBody Map<String, String> map) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> map) {
         Long childId = Long.parseLong(map.get("childId"));
-        ChildDto childDto = childService.login(childId);
+        Map<String, Object> childMap = childService.login(childId);
 
-        return ResponseEntity.ok(childDto);
+        return ResponseEntity.ok(childMap);
     }
 
     // 자식 계정 로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestBody Map<String, String> map) {
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> map) {
         Long childId = Long.parseLong(map.get("childId"));
-        childService.logout(childId);
+        childService.logout(authorization, childId);
 
         return ResponseEntity.ok().build();
     }

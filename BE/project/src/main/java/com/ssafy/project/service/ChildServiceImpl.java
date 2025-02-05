@@ -13,10 +13,14 @@ import com.ssafy.project.exception.ChildLimitExceededException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.ParentRepository;
+import com.ssafy.project.security.JwtTokenProvider;
+import com.ssafy.project.security.TokenBlacklistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -25,7 +29,9 @@ import java.util.UUID;
 public class ChildServiceImpl implements ChildService {
     private final ParentRepository parentRepository;
     private final ChildRepository childRepository;
+    private final JwtTokenProvider jwtTokenProvider;
     private final JsonConverter jsonConverter;
+    private final TokenBlacklistService tokenBlacklistService;
     private final RedisDao redisDao;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d";
@@ -71,9 +77,11 @@ public class ChildServiceImpl implements ChildService {
     }
 
     @Override
-    public ChildDto login(Long childId) {
+    public Map<String, Object> login(Long childId) {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+
+        String accessToken = jwtTokenProvider.generateChildToken(childId);
 
         ChildDto childDto = ChildDto.builder()
                 .childId(childId)
@@ -99,13 +107,20 @@ public class ChildServiceImpl implements ChildService {
 
         // 문자열로 변환 후 Redis에 저장
         redisDao.setValues(key, jsonConverter.toJson(statusDto));
-        return childDto;
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("childDto", childDto);
+        map.put("accessToken", accessToken);
+        return map;
     }
 
     @Override
-    public void logout(Long childId) {
-        String key = String.format(CHILD_STATUS_KEY, childId);
+    public void logout(String authorization, Long childId) {
+        String key = String.format(CHILD_STATUS_KEY, childId); // 자식 상태 삭제
         redisDao.deleteValues(key);
+        // 자식 accessToken 블랙리스트에 저장
+        String accessToken = authorization.substring(7);
+        tokenBlacklistService.addBlacklist(accessToken);
     }
 
     @Override
@@ -113,7 +128,7 @@ public class ChildServiceImpl implements ChildService {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
-        return child.entityToDto(child);
+        return child.entityToDto();
     }
 
     @Override
@@ -123,7 +138,7 @@ public class ChildServiceImpl implements ChildService {
 
         child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
 
-        return child.entityToDto(child);
+        return child.entityToDto();
     }
 
     @Override
