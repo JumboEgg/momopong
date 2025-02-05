@@ -1,4 +1,7 @@
-import { ArrowLeft, Book } from 'lucide-react';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { Book } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const books = [
@@ -44,15 +47,13 @@ function MyBookStory() {
   return (
     <div className="min-h-screen bg-yellow-100 p-8">
       {/* 뒤로가기 버튼 */}
-      <div className="mb-6">
-        <button
-          type="button"
-          onClick={handleBack}
-          className="flex items-center justify-center w-10 h-10 rounded-full border-2 border-gray-300 hover:bg-gray-100"
-        >
-          <ArrowLeft size={24} />
-        </button>
-      </div>
+      <IconCircleButton
+        size="sm"
+        variant="action"
+        onClick={handleBack}
+        icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
+        className="fixed top-5 left-5"
+      />
 
       {/* 타이틀 */}
       <h1 className="text-3xl font-bold text-center mb-8">내가 읽은 동화</h1>

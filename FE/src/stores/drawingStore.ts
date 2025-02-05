@@ -29,7 +29,7 @@ interface DrawingStore {
   setIsErasing: (isErasing: boolean) => void;
   imageData: string;
   setImageData: (data: string) => void;
-  localDrawingList: DrawingData;
+  localDrawingList: DrawingData[];
   addDrawingData: (data: DrawingData) => void;
 }
 

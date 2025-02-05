@@ -3,7 +3,7 @@ import {
 } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
 import { getOutlineSrc } from '../utils/getImgSrc';
-import useSocketStore, { drawingData } from '../hooks/useSocketStore';
+import useSocketStore from '../hooks/useSocketStore';
 
 const baseWidth: number = 1600;
 const basePenWidth: number = 30;
@@ -20,6 +20,15 @@ export interface Pos {
 }
 
 export interface LineData {
+  prevX: number;
+  prevY: number;
+  curX: number;
+  curY: number;
+}
+
+export interface DrawingData {
+  status: string;
+  color: string;
   prevX: number;
   prevY: number;
   curX: number;
@@ -141,7 +150,7 @@ function DrawingCanvas({
 
   function stroke({
     status, color, prevX, prevY, curX, curY,
-  }: drawingData) {
+  }: DrawingData) {
     if (!ctx) return;
 
     if (status === 'erase') {
@@ -180,7 +189,7 @@ function DrawingCanvas({
     } else {
       socket.emit('message', {
         status: 'draw',
-        penColor,
+        color: penColor,
         prevX: prevX / canvasScale,
         prevY: prevY / canvasScale,
         curX: curX / canvasScale,
@@ -239,8 +248,9 @@ function DrawingCanvas({
   // socket.io의 그림 정보 수신
   useEffect(() => {
     if (!socket) return;
-    socket.on('message', (data: drawingData) => {
+    socket.on('message', (data: DrawingData) => {
       if (!ctx) return;
+      console.log(`received color : ${data.color}`);
       stroke({
         status: data.status,
         color: data.color,
