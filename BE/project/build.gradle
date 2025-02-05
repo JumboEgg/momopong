@@ -54,9 +54,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation platform('com.google.cloud:libraries-bom:26.34.0')
 	implementation 'com.google.cloud:google-cloud-speech'
+	implementation 'com.google.protobuf:protobuf-java:3.25.1'
+	implementation 'com.google.protobuf:protobuf-java-util:3.25.1'
 
 	// AWS 버전이거 맞음??
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
+	// 서브 컨텐츠 그림 그리기
+	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
 
 }
 

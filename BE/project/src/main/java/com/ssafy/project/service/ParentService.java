@@ -1,6 +1,9 @@
 package com.ssafy.project.service;
 
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.ChildListDto;
+import com.ssafy.project.dto.LoginRequestDto;
+import com.ssafy.project.dto.ParentDto;
+import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.security.JwtToken;
 
 import java.util.List;
@@ -34,5 +37,5 @@ public interface ParentService {
     List<ChildListDto> childrenList(Long parentId);
 
     // 부모 로그아웃
-    void logout(String email);
+    void logout(String accessToken, String email);
 }

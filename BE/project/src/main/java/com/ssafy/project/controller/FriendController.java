@@ -5,6 +5,7 @@ import com.ssafy.project.dto.friend.FriendListDto;
 import com.ssafy.project.service.FriendService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('CHILD')")
 @RequestMapping("/api/children")
 public class FriendController {
     private final FriendService friendService;

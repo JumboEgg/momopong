@@ -172,4 +172,26 @@ public class BookServiceImpl implements BookService {
                 .build();
         notificationService.sendNotification(inviterId, notification);
     }
+
+    @Override
+    public void expireInvitation(Long bookId, Long inviterId, Long inviteeId) {
+        Child inviter = childRepository.findById(inviterId)
+                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+        Child invitee = childRepository.findById(inviteeId)
+                .orElseThrow(() -> new UserNotFoundException("해당 친구를 찾을 수 없습니다"));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
+
+        NotificationDto notification = NotificationDto.builder()
+                .notificationType(NotificationType.EXPIRE)
+                .bookId(bookId)
+                .bookTitle(book.getTitle())
+                .inviterId(inviterId)
+                .inviterName(inviter.getName())
+                .inviteeId(inviteeId)
+                .inviteeName(invitee.getName())
+                .build();
+        notificationService.sendNotification(inviterId, notification);
+    }
 }
