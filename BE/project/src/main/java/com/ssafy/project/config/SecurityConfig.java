@@ -3,8 +3,10 @@ package com.ssafy.project.config;
 import com.ssafy.project.security.JwtAuthenticationFilter;
 import com.ssafy.project.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,6 +45,16 @@ public class SecurityConfig {
                 mvc.pattern("/ws/**")
         };
 
+
+        MvcRequestMatcher[] swaggerPatterns = {
+                mvc.pattern("/v3/api-docs"),
+                mvc.pattern("/v3/api-docs/**"),
+                mvc.pattern("/swagger-ui/**"),
+                mvc.pattern("/swagger-ui.html"),
+                mvc.pattern("/swagger-resources/**"),
+                mvc.pattern("/webjars/**"),
+        };
+
         // CORS 설정 추가
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
@@ -59,7 +71,9 @@ public class SecurityConfig {
 
         // http request 인증 설정
         http.authorizeHttpRequests(authorize ->
-                authorize.requestMatchers(permitAllList).permitAll()
+                authorize
+                        .requestMatchers(swaggerPatterns).permitAll()
+                        .requestMatchers(permitAllList).permitAll()
                         .anyRequest().authenticated()
         );
 
