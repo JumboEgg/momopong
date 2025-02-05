@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import axios, { InternalAxiosRequestConfig, AxiosHeaders } from 'axios';
-import useAuthStore from './loginStore'; // 로그인 스토어 import
+import api from '@/api/axios';
+import { AxiosError } from 'axios';
 
 interface SignUpRequest {
   email: string;
@@ -24,29 +24,12 @@ interface SignUpResponse {
 interface RegisterState {
   isLoading: boolean;
   error: string | null;
-  register: (registerData: SignUpRequest) => Promise<void>;
+  register: (registerData: SignUpRequest) => Promise<{
+    success: boolean;
+    email: string;
+    password: string;
+  }>;
 }
-
-const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-// axios 인터셉터 설정
-api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = localStorage.getItem('accessToken');
-  if (!token) return config;
-
-  const headers = new AxiosHeaders(config.headers);
-  headers.set('Authorization', `Bearer ${token}`);
-
-  return {
-    ...config,
-    headers,
-  };
-});
 
 const useSignUpStore = create<RegisterState>((set) => ({
   isLoading: false,
@@ -55,23 +38,32 @@ const useSignUpStore = create<RegisterState>((set) => ({
     try {
       set({ isLoading: true, error: null });
 
-      // 1. 회원가입 요청
       await api.post<SignUpResponse>('/parents/signup', registerData);
-
-      // 2. 회원가입 성공 후 로그인 시도
-      const { login } = useAuthStore.getState(); // zustand store에서 login 함수 가져오기
-      await login({
-        email: registerData.email,
-        password: registerData.password,
-      });
-
-      set({ isLoading: false });
+      return { success: true, email: registerData.email, password: registerData.password };
     } catch (error) {
-      set({
-        isLoading: false,
-        error: '회원가입에 실패했습니다. 다시 시도해주세요.',
-      });
+      let errorMessage = '회원가입에 실패했습니다. 다시 시도해주세요.';
+
+      if (error instanceof AxiosError) {
+        switch (error.response?.status) {
+          case 409:
+            errorMessage = '이미 등록된 이메일입니다.';
+            break;
+          case 400:
+            errorMessage = '입력하신 정보를 확인해주세요.';
+            break;
+          case 500:
+            errorMessage = '서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+            break;
+          default:
+            errorMessage = '알 수 없는 오류가 발생했습니다. 고객센터에 문의해주세요.';
+            break;
+        }
+      }
+
+      set({ error: errorMessage });
       throw error;
+    } finally {
+      set({ isLoading: false });
     }
   },
 }));

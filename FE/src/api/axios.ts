@@ -1,4 +1,3 @@
-// src/api/axios.ts
 import axios, {
   InternalAxiosRequestConfig,
   AxiosError,
@@ -6,6 +5,14 @@ import axios, {
 } from 'axios';
 import useAuthStore from '@/stores/authStore';
 import type { RefreshResponse } from '@/types/auth';
+
+// 인증이 필요없는 공개 API 경로 목록
+// 해당 파트는 추후 상수화 가능할거같아요
+const publicPaths = [
+  '/parents/signup',
+  '/parents/signin',
+  '/parents/refresh-token',
+];
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
@@ -15,6 +22,11 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  // 공개 API인 경우 토큰 추가하지 않음
+  if (publicPaths.includes(config.url || '')) {
+    return config;
+  }
+
   const token = useAuthStore.getState().accessToken;
   if (!token) return config;
 

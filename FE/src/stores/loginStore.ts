@@ -22,6 +22,8 @@ export const useLoginStore = create<LoginState>((set) => ({
       authStore.setTokens(response.data.jwtToken);
       authStore.setUser(response.data.parentDto);
 
+      localStorage.setItem('parentId', response.data.parentDto.parentId.toString());
+
       set({ isLoading: false });
     } catch (error) {
       set({

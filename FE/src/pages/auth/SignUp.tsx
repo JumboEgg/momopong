@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import useSignUpStore from '@/stores/signUpStore';
 import useAuthStore from '@/stores/authStore';
+import { useLoginStore } from '@/stores/loginStore';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
 import type { SignUpFormData } from '@/stores/signUpStore';
@@ -143,6 +144,13 @@ function SignUp(): JSX.Element {
 
     try {
       await register(formData);
+      // 회원가입 성공 후 로그인 시도
+      const { login } = useLoginStore.getState();
+      await login({
+        email: formData.email,
+        password: formData.password,
+      });
+      navigate('/parents/login'); // 로그인 성공 후 메인 페이지로 이동
     } catch (err) {
       console.error('회원가입 실패:', err);
     }

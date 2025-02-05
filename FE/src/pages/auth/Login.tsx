@@ -86,21 +86,16 @@ function Login(): JSX.Element {
     }
 
     try {
-      // login 함수 완료될 때까지 대기
       await login(formData);
+      // login이 완료된 후 약간의 딜레이를 두고 라우팅
       setTimeout(() => {
-        try {
-          // 로그인 응답을 기다린 후 라우팅
-          const { user } = useAuthStore.getState();
-          if (user?.parentId) {
-            navigate(`/parents/${user.parentId}/children`);
-          } else {
-            console.log('User data not available:', user);
-          }
-        } catch (err) {
-          console.error('Login failed:', err);
+        const { user } = useAuthStore.getState();
+        if (user?.parentId) {
+          navigate(`/parents/${user.parentId}/children`);
+        } else {
+          console.error('User data not available:', user);
         }
-      });
+      }, 1000); // 1초 딜레이 추가
     } catch (err) {
       console.error('Login failed:', err);
     }
