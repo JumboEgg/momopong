@@ -48,7 +48,7 @@ const storyData: StoryPage[] = [
     },
     {
       type: 'narration',
-      text: '새언니들과 새엄마는 화려한 마차를 타고 성으로 향했고,\n홀로 남은 신데렐라는 다락방으로 돌아와 훌쩍훌쩍 울고 말았답니다.',
+      text: '새언니들과 새엄마는 화려한 마차를 타고 성으로 향했고, 홀로 남은 신데렐라는 다락방으로 돌아와 훌쩍훌쩍 울고 말았답니다.',
       audioFiles: ['05.mp3'],
       illustration: '/images/storyimg/2.png',
     },
@@ -101,7 +101,7 @@ const storyData: StoryPage[] = [
       type: 'narration',
       text: '요술 지팡이가 호박에 닿자 순식간에 황금으로 뒤덮인, 아름다운 마차로 변했습니다.',
       audioFiles: ['12.mp3'],
-      illustration: '/images/storyimg/4.png',
+      illustration: '/images/storyimg/5.png',
     },
     ],
   },
@@ -110,7 +110,7 @@ const storyData: StoryPage[] = [
     contents: [
       {
         type: 'narration',
-        text: '요정 할머니는 그런 다음 구석으로 가 덫에 걸려 있던 여섯 마리의 생쥐들을 한 마리씩 놓은 그녀는 차례차례 지팡이로 생쥐를 두드렸습니다.',
+        text: '요정 할머니는 그런 다음 구석으로 가 덫에 걸려 있던 여섯 마리의 생쥐들을 한 마리씩 놓았고 그녀는 차례차례 지팡이로 생쥐를 두드렸습니다.',
         audioFiles: ['13.mp3'],
         illustration: '/images/storyimg/6.png',
       },
@@ -449,7 +449,7 @@ const storyData: StoryPage[] = [
       type: 'narration',
       text: '마음씨 고운 신데렐라는 그들을 용서했고, 왕자님과 함께 성으로 떠나 행복하게 살았답니다.',
       audioFiles: ['60.mp3'],
-      illustration: '/images/storyimg/20.png',
+      illustration: '/images/storyimg/21.png',
     },
     ],
   },
