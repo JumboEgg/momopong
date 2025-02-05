@@ -5,5 +5,4 @@ export const clearAuthTokens = () => {
 
 export const clearChildTokens = () => {
   localStorage.removeItem('childAccessToken');
-  localStorage.removeItem('childRefreshToken');
 };

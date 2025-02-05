@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import api from '@/api/axios';
 import { clearChildTokens } from '@/utils/auth';
 
-interface SubAccount { // 로그인한 서브계정 정보
+interface SubAccount {
   childId: number;
   name: string;
   profile: string;
@@ -10,6 +10,11 @@ interface SubAccount { // 로그인한 서브계정 정보
   daysSinceStart: number;
   code: string;
   firstLogin: boolean;
+}
+
+interface ChildLoginResponse {
+  childDto: SubAccount;
+  accessToken: string;
 }
 
 interface CreateSubAccountRequest {
@@ -32,7 +37,6 @@ interface SubAccountState {
   error: string | null;
   childToken: {
     accessToken: string | null;
-    refreshToken: string | null;
   }
 
   // 유틸리티
@@ -138,37 +142,36 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
   },
 
   // 자식 계정 로그인
+  // 중복로그인 방지 생각해보기
   loginSubAccount: async (childId: number) => {
     set({ isLoading: true, error: null });
 
     try {
-      const response = await api.post<SubAccount & { accessToken: string; refreshToken: string }>(
+      const currentAccount = get().selectedAccount;
+      if (currentAccount) {
+        get().logoutSubAccount(); // 기존 토큰 클리어
+      }
+
+      const response = await api.post<ChildLoginResponse>(
         '/children/login',
         { childId },
       );
 
-      localStorage.setItem('childAccessToken', response.data.accessToken);
-      localStorage.setItem('childRefreshToken', response.data.accessToken);
+      const { childDto, accessToken } = response.data;
+
+      localStorage.setItem('childAccessToken', accessToken);
+      localStorage.setItem('childId', response.data.childDto.childId.toString());
 
       set({
-        selectedAccount: {
-          childId: response.data.childId,
-          name: response.data.name,
-          profile: response.data.profile,
-          age: response.data.age,
-          daysSinceStart: response.data.daysSinceStart,
-          code: response.data.code,
-          firstLogin: response.data.firstLogin,
-        },
+        selectedAccount: childDto,
         childToken: {
-          accessToken: response.data.accessToken,
-          refreshToken: response.data.refreshToken,
+          accessToken,
         },
         isLoading: false,
       });
 
       // firstLogin이 true인 경우 처리 가능
-      return response.data.firstLogin;
+      return childDto.firstLogin;
     } catch (error) {
       const errorMessage = error instanceof Error
         ? error.message
@@ -186,7 +189,6 @@ const useSubAccountStore = create<SubAccountState>((set, get) => ({
       selectedAccount: null,
       childToken: {
         accessToken: null,
-        refreshToken: null,
       },
     });
   },
