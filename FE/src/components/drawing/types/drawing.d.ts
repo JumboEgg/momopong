@@ -4,7 +4,7 @@ export interface DrawingTemplate {
   storyId: number;
   templateId: number;
   name: string;
-  bgSrc: string;
+  bgSrc: string | null;
   olSrc: string;
 }
 

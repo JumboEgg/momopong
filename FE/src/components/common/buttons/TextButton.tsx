@@ -1,4 +1,4 @@
-type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl';
 type ButtonVariant = 'white' | 'gray' | 'blue' | 'rounded';
 type ButtonType = 'button' | 'submit'; // 추가
 

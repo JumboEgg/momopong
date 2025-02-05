@@ -7,25 +7,33 @@ import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
 import { FriendProvider } from '@/components/stories/contexts/FriendContext';
 import StoryDrawingPage from '@/components/drawing/storyMode/StroyDrawingPage';
 import { useDrawing } from '@/stores/drawingStore';
-import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+// import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 
 function Drawing() {
   const {
-    mode, templateId, imageData,
+    mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
   } = useDrawing();
 
-  const {
-    setIsConnected,
-  } = useSocketStore();
+  useEffect(() => {
+    setMode(null);
+    setTemplate(null);
+    setPenColor('black');
+    setIsErasing(false);
+    setImageData('');
+  }, []);
+
+  // const {
+  //   setConnect,
+  // } = useSocketStore();
 
   const [selectedFriendId, setSelectedFriendId] = useState<string>();
 
-  useEffect(() => {
-    setIsConnected(false);
-  }, [mode]);
+  // useEffect(() => {
+  //   setIsConnected(false);
+  // }, [mode]);
 
   const content = () => {
-    if (!templateId) {
+    if (!template) {
       return <DrawingSelection />;
     }
 

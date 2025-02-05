@@ -2,7 +2,6 @@ import {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
-import { getOutlineSrc } from '../utils/getImgSrc';
 import useSocketStore from '../hooks/useSocketStore';
 
 const baseWidth: number = 1600;
@@ -39,17 +38,17 @@ function DrawingCanvas({
   canvasHeight, canvasWidth, setDrawingCanvasRef,
 }: DrawingCanvasProps): JSX.Element {
   const {
-    mode, templateId, isErasing, penColor, imageData,
+    mode, template, isErasing, penColor,
   } = useDrawing();
 
   const {
-    setIsConnected, socket,
+    socket,
   } = useSocketStore();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
 
   // const bgImgSrc = getBackgroundSrc(templateId);
-  const outlineImgSrc = getOutlineSrc(templateId);
+  const outlineImgSrc = template ? template.outlineSrc : '';
 
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
   const canvasRef = useRef<HTMLCanvasElement>(null); // 그림 그리기 레이어
@@ -60,11 +59,12 @@ function DrawingCanvas({
     prevX: -100, prevY: -100, curX: -100, curY: -100,
   });
 
-  useEffect(() => {
-    if (mode !== 'together' && mode !== 'story') return;
-    if (!imageData) setIsConnected(true);
-    if (imageData) setIsConnected(false);
-  }, [mode, imageData]);
+  // socket 상시 연결
+  // useEffect(() => {
+  //   if (mode !== 'together' && mode !== 'story') return;
+  //   if (!imageData) setIsConnected(true);
+  //   if (imageData) setIsConnected(false);
+  // }, [mode, imageData]);
 
   useEffect(() => {
     setDrawingCanvasRef(canvasRef.current);
@@ -82,11 +82,11 @@ function DrawingCanvas({
     container.addEventListener('touchstart', preventTouchScroll, { passive: false });
     container.addEventListener('touchmove', preventTouchScroll, { passive: false });
 
-    // TODO : 형식 변경 후에도 터치 인식 되는지 확인
-    // return () => {
-    container.removeEventListener('touchstart', preventTouchScroll);
-    container.removeEventListener('touchmove', preventTouchScroll);
-    // };
+    // eslint-disable-next-line consistent-return
+    return () => {
+      container.removeEventListener('touchstart', preventTouchScroll);
+      container.removeEventListener('touchmove', preventTouchScroll);
+    };
   }, []);
 
   // 상대적 캔버스 크기 비율

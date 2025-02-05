@@ -1,7 +1,6 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
-import { getBackgroundSrc, getOutlineSrc } from '../utils/getImgSrc';
 
 export interface SaveButtonProps {
   canvasWidth: number;
@@ -11,13 +10,18 @@ export interface SaveButtonProps {
 
 function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
   const {
-    templateId, setImageData,
+    mode, template, setImageData,
   } = useDrawing();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
 
-  const bgImgSrc = getBackgroundSrc(templateId);
-  const outlineImgSrc = getOutlineSrc(templateId);
+  let bgImgSrc = '';
+  let outlineImgSrc = '';
+
+  if (template) {
+    bgImgSrc = template.backgroundSrc ?? '';
+    outlineImgSrc = template.outlineSrc ?? '';
+  }
 
   const saveCanvas = useCallback(() => {
     if (!canvasRef) return;
@@ -31,20 +35,37 @@ function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
     tempCanvas.width = canvasWidth;
     tempCanvas.height = canvasHeight;
 
-    const bgImg = new Image();
-    bgImg.src = bgImgSrc;
-    bgImg.onload = () => {
-      tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+    if (mode === 'story') {
+      const bgImg = new Image();
+      bgImg.src = bgImgSrc;
+      bgImg.onload = () => {
+        tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+        tempCtx.drawImage(currentCanvas, 0, 0);
+
+        const outlineImg = new Image();
+        outlineImg.src = outlineImgSrc;
+        outlineImg.onload = () => {
+          tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
+          const dataURL = tempCanvas.toDataURL('image/webp');
+
+          // TODO : 로컬 대신 서버에 전송하는 로직으로 대체
+          // or 동화읽기가 끝나면 마지막 그림을 삭제
+          setImageData(dataURL);
+        };
+      };
+    } else {
+      tempCtx.fillStyle = 'white';
+      tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       tempCtx.drawImage(currentCanvas, 0, 0);
 
       const outlineImg = new Image();
       outlineImg.src = outlineImgSrc;
       outlineImg.onload = () => {
         tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
-        const dataURL = tempCanvas.toDataURL('image/png');
+        const dataURL = tempCanvas.toDataURL('image/webp');
         setImageData(dataURL);
       };
-    };
+    }
   }, [canvasRef]);
 
   useEffect(() => {

@@ -1,14 +1,20 @@
-import { useState } from 'react';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
   const navigate = useNavigate();
-
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
     navigate(path);
   };
-
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
+
+  const {
+    setConnect,
+  } = useSocketStore();
+  useEffect(() => {
+    setConnect(true);
+  }, []);
 
   return (
     <div
