@@ -65,6 +65,7 @@ function Profile(): JSX.Element {
           <ProfileImage
             src="https://health.chosun.com/site/data/img_dir/2023/07/17/2023071701753_0.jpg"
             size={imgSize}
+            shape="square"
           />
           <div className="w-full h-full flex flex-col items-center justify-center">
             <h2 className="text-xl md:text-2xl">{MOCK_PROFILE.type}</h2>

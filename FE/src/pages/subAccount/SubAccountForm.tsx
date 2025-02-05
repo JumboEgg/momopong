@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import ImageUpload from '@/components/ImageUpload';
-import useLoginStore from '@/stores/loginStore';
+import useAuthStore from '@/stores/authStore';
 import { useEffect } from 'react';
 
 interface SubAccountFormProps {
@@ -9,7 +9,7 @@ interface SubAccountFormProps {
 }
 
 function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
-  const { user } = useLoginStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const {
     formData,
