@@ -42,7 +42,7 @@ const storyData: StoryPage[] = [
     pageNumber: 2,
     contents: [{
       type: 'narration',
-      text: '어느 날, 성에서 가면 무도회가 열린다는 소식이 들려왔어요.',
+      text: '어느 날, 성에서 무도회가 열린다는 소식이 들려왔어요.',
       audioFiles: ['04.mp3'],
       illustration: '/images/storyimg/2-1.png',
     },
@@ -71,7 +71,7 @@ const storyData: StoryPage[] = [
       },
       {
         type: 'princess',
-        text: '"저도 가면 무도회에 가고 싶었어요."',
+        text: '"저도 무도회에 가고 싶었어요."',
         audioFiles: ['08.mp3'],
         illustration: '/images/storyimg/3.png',
       },
@@ -193,7 +193,7 @@ const storyData: StoryPage[] = [
         type: 'narration',
         text: '신데렐라는 떨리는 마음을 주체할 수 없었습니다.',
         audioFiles: ['25.mp3'],
-        illustration: '/images/storyimg/9.png',
+        illustration: '/images/storyimg/9-1.png',
       },
     ],
   },
@@ -441,7 +441,7 @@ const storyData: StoryPage[] = [
     pageNumber: 17,
     contents: [{
       type: 'narration',
-      text: '이 모든 상황을 지켜보던 새엄마와 새언니들은 무릎을 꿇고 신데렐라에게 그동안 괴롭혔던 것에 대해 용서를 빌었습니다.\n마음씨 고운 신데렐라는 그들을 용서했고, 왕자님과 함께 성으로 떠나 행복하게 살았답니다.',
+      text: '이 모든 상황을 지켜보던 새엄마와 새언니들은 무릎을 꿇고 신데렐라에게 그동안 괴롭혔던 것에 대해 용서를 빌었습니다.',
       audioFiles: ['59.mp3'],
       illustration: '/images/storyimg/20.png',
     },
