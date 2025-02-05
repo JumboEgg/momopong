@@ -34,6 +34,7 @@ interface DrawingStore {
 }
 
 // Zustand 상태 훅 생성
+// 이거 안건드렸는데 뭐 type 오류났네용
 const useDrawingStore = create<DrawingStore>((set) => ({
   mode: null,
   setMode: (mode) => set({ mode }),

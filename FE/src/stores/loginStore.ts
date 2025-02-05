@@ -10,6 +10,7 @@ interface LoginState {
   logout: () => void;
 }
 
+// 로그인 로직엔 당장 중요한 상태 없으므로 persist 하지 않습니다. 정보는 authStore에서 저장됩니다
 export const useLoginStore = create<LoginState>((set) => ({
   isLoading: false,
   error: null,

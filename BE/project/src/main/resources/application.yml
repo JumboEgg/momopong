@@ -4,14 +4,15 @@ spring:
 
   # .env 파일 환경변수 읽기
   config:
-    import: optional:file:.env[.properties]
+    import:
+      - optional:file:.env
 
   # 데이터베이스 설정
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${DB_URL}:${DB_PORT}/${DB}
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    url: jdbc:mysql://52.79.138.211:3306/ssafy
+    username: d103
+    password: ssafy
 
   # JPA 설정
   jpa:
@@ -82,11 +83,11 @@ openai:
 cloud:
   aws:
     credentials:
-      access-key: ${AWS_ACCESS_KEY}
-      secret-key: ${AWS_SECRET_KEY}
+      access-key: AKIAUZPNLOYVV34QG5GY
+      secret-key: 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
     region:
-      static: ${AWS_REGION}
+      static: ap-northeast-2
     s3:
-      bucket: ${AWS_S3_BUCKET}
+      bucket: demo-s3-329599645227
     stack:
       auto: false
