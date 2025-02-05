@@ -16,17 +16,9 @@
   ],
   "rules": {
     "linebreak-style": "off",
-    "import/extensions": [
-    "error",
-    "ignorePackages",
-    {
-      "js": "never",
-      "jsx": "never",
-      "ts": "never",
-      "tsx": "never"
-    }
-  ],
+    "import/extensions": "off",
     "no-var": "warn", // var 금지
+    "import/no-unresolved": "error", // 존재하지 않은 파일 import 방지
     "react/react-in-jsx-scope": "off",
     "react/require-default-props": "off",
     "react/function-component-definition": ["error", {
@@ -49,7 +41,9 @@
     "import/prefer-default-export": "off",
     "import/no-extraneous-dependencies": ["error", {
       "devDependencies": true
-    }]
+    }],
+    "no-console": "off", // console.log 허용
+    "no-alert": "off" // alert 허용
   },
   "overrides": [
     {
