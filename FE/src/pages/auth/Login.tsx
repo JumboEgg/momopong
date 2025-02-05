@@ -89,17 +89,21 @@ function Login(): JSX.Element {
       // login 함수 완료될 때까지 대기
       await login(formData);
       setTimeout(() => {
-        // 로그인 응답을 기다린 후 라우팅
-        const { user } = useAuthStore.getState();
-        if (user?.parentId) {
-          navigate(`/parents/${user.parentId}/children`);
-        } else {
-          console.log('User data not available:', user);
-      } catch (err) {
-        console.error('Login failed:', err);
-      }
-
-      })
+        try {
+          // 로그인 응답을 기다린 후 라우팅
+          const { user } = useAuthStore.getState();
+          if (user?.parentId) {
+            navigate(`/parents/${user.parentId}/children`);
+          } else {
+            console.log('User data not available:', user);
+          }
+        } catch (err) {
+          console.error('Login failed:', err);
+        }
+      });
+    } catch (err) {
+      console.error('Login failed:', err);
+    }
   };
 
   return (
