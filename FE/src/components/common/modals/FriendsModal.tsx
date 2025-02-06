@@ -1,22 +1,29 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
-// import { useState } from 'react';
+import { useState } from 'react';
 import FriendList from '@/components/friends/FriendList';
+import FriendRequestList from '@/components/friends/FriendRequestList';
+import AddFriendModal from './AddFriendModal';
 import TextButton from '../buttons/TextButton';
 import { IconCircleButton } from '../buttons/CircleButton';
 
 interface FriendsModalProps {
   onClose: () => void; // onClose 함수를 받아올 Props
 }
-function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
-  // const [isModalOpen, setIsModalOpen] = useState(false);
 
-  // const handleOpenModal = () => {
-  //   setIsModalOpen(true);
-  // };
-  // const handleCloseModal = () => {
-  //   setIsModalOpen(false);
-  // };
+type TabType = 'list' | 'request';
+
+function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
+  const [activeTab, setActiveTab] = useState<TabType>('list');
+  const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+
+  const handleTabChange = (tab: TabType) => {
+    setActiveTab(tab);
+  };
+
+  const handleOpenAddFriendModal = () => {
+    setIsAddFriendModalOpen(true);
+  };
 
   return (
     <div
@@ -38,30 +45,41 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           <TextButton
             size="lg"
             variant="white"
-            hasFocus
+            hasFocus={activeTab === 'list'}
+            onClick={() => handleTabChange('list')}
           >
             친구 목록
           </TextButton>
           <TextButton
             size="lg"
             variant="white"
-            hasFocus
+            hasFocus={activeTab === 'request'}
+            onClick={() => handleTabChange('request')}
           >
             친구 요청
           </TextButton>
         </div>
-        <div className="">
-          <FriendList />
+        {/* 탭으로 전환되는 부분 */}
+        <div className="flex-1 w-full overflow-y-auto my-8">
+          {activeTab === 'list' ? (
+            <FriendList />
+          ) : (
+            <FriendRequestList />
+          )}
         </div>
         <TextButton
           size="xl"
           variant="rounded"
-          // onClick={handleOpenModal}
+          onClick={handleOpenAddFriendModal}
         >
           친구 추가하기
         </TextButton>
 
-        {/* {isModalOpen && (d)} */}
+        {isAddFriendModalOpen && (
+          <AddFriendModal
+            onClose={() => setIsAddFriendModalOpen(false)}
+          />
+        )}
       </div>
     </div>
   );

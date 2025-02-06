@@ -9,7 +9,7 @@ interface ParentAuthModalProps {
   onClose: () => void; // onClose 함수를 받아올 Props
 }
 
-function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
+function AddFriendModal({ onClose }: ParentAuthModalProps): JSX.Element {
   const navigate = useNavigate();
   const {
     userInput,
@@ -66,4 +66,4 @@ function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
   );
 }
 
-export default ParentAuthModal;
+export default AddFriendModal;
