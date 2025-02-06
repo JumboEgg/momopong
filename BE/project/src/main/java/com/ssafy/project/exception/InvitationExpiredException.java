@@ -1,5 +1,5 @@
 package com.ssafy.project.exception;
-
+// 초대 만료되었을 떄
 public class InvitationExpiredException extends RuntimeException {
     public InvitationExpiredException() {
         super();

@@ -35,7 +35,9 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
     private final ChildService childService;
+    private final PresignedUrlService presignedUrlService;
 
+    // 부모 회원가입
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
         if (checkDuplicateParent(signUpDto.getEmail()))
@@ -126,7 +128,7 @@ public class ParentServiceImpl implements ParentService {
                 .map(child -> ChildListDto.builder()
                         .childId(child.getId())
                         .name(child.getName())
-                        .profile(child.getProfile())
+                        .profile(presignedUrlService.getProfile(child.getProfile()))
                         .build())
                 .collect(Collectors.toList());
     }

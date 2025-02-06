@@ -30,7 +30,7 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("API Test")
+                .title("모모핑 API")
                 .description("Let's practice SwaggerUI")
                 .version("1.0.0");
     }
