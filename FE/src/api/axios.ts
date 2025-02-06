@@ -3,11 +3,9 @@ import axios, {
   AxiosError,
   AxiosHeaders,
 } from 'axios';
-import useAuthStore from '@/stores/authStore';
 import type { RefreshResponse } from '@/types/auth';
+import { tokenService } from '@/services/tokenService';
 
-// 인증이 필요없는 공개 API 경로 목록
-// 해당 파트는 추후 상수화 가능할거같아요
 const publicPaths = [
   '/parents/signup',
   '/parents/signin',
@@ -22,21 +20,17 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  // 공개 API인 경우 토큰 추가하지 않음
   if (publicPaths.includes(config.url || '')) {
     return config;
   }
 
-  const token = useAuthStore.getState().accessToken;
+  const token = tokenService.getActiveToken();
   if (!token) return config;
 
   const headers = new AxiosHeaders(config.headers);
   headers.set('Authorization', `Bearer ${token}`);
 
-  return {
-    ...config,
-    headers,
-  };
+  return { ...config, headers };
 });
 
 let isRefreshing = false;
@@ -73,21 +67,30 @@ api.interceptors.response.use(
       originalRequest.retry = true;
       isRefreshing = true;
 
-      const { refreshToken } = useAuthStore.getState();
+      const refreshToken = tokenService.getRefreshToken();
+      const currentChildId = tokenService.getCurrentChildId();
+
       if (!refreshToken) {
-        useAuthStore.getState().reset();
+        tokenService.clearAllTokens();
         return Promise.reject(error);
       }
 
       try {
         const response = await api.post<RefreshResponse>('/parents/refresh-token', { refreshToken });
-        useAuthStore.getState().setTokens(response.data.jwtToken);
+        tokenService.setParentToken(response.data.jwtToken.accessToken);
+        tokenService.setRefreshToken(response.data.jwtToken.refreshToken);
+
+        // 자녀 계정이 활성화되어 있었다면 재로그인
+        if (currentChildId) {
+          const childLoginResponse = await api.post('/children/login', { childId: currentChildId });
+          tokenService.setChildToken(childLoginResponse.data.accessToken);
+        }
 
         processQueue();
         return await api(originalRequest);
       } catch (refreshError) {
         processQueue(refreshError as Error);
-        useAuthStore.getState().reset();
+        tokenService.clearAllTokens();
         return await Promise.reject(refreshError);
       } finally {
         isRefreshing = false;
