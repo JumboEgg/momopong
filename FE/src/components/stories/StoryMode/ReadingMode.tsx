@@ -17,14 +17,14 @@ function ReadingMode(): ReactElement {
   const {
     currentIndex,
     setCurrentIndex,
-    audioEnabled, // 오디오 활성화 여부
+    audioEnabled,
     toggleAudio,
   } = useStory();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [showEndOverlay, setShowEndOverlay] = useState(false);
 
-  // 현재 재생중인 오디오 정지
   const stopCurrentAudio = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
@@ -32,27 +32,16 @@ function ReadingMode(): ReactElement {
     }
   }, []);
 
-  // 다음 페이지 이동
-  // 다음 페이지 이동
-  // 다음 페이지 이동
   const handleNext = useCallback(() => {
-  // 다음 content 또는 페이지로 이동하기 전에 현재 상태 확인을 위한 로그
-    console.log('Current Index:', currentIndex);
-    console.log('Current Content Index:', currentContentIndex);
-    console.log('Current Page Contents Length:', storyData[currentIndex].contents.length);
-
-    // 음성 모드가 꺼져있고, 현재 페이지의 마지막 content가 아닐 때
     if (!audioEnabled && currentContentIndex < storyData[currentIndex].contents.length - 1) {
       setCurrentContentIndex(currentContentIndex + 1);
     } else if (currentIndex < storyData.length - 1) {
-    // 다음 페이지로 이동
       stopCurrentAudio();
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
     }
   }, [currentIndex, currentContentIndex, audioEnabled, stopCurrentAudio, setCurrentIndex]);
 
-  // 이전 페이지 이동
   const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
       stopCurrentAudio();
@@ -61,46 +50,42 @@ function ReadingMode(): ReactElement {
     }
   }, [currentIndex, stopCurrentAudio, setCurrentIndex]);
 
-  // 콘텐츠 종료 처리
   const handleContentEnd = useCallback(() => {
-    const currentPage = storyData[currentIndex];
-    // 현재 페이지의 마지막 컨텐츠인지 확인
-    if (currentContentIndex < currentPage.contents.length - 1) {
-      // 다음 컨텐츠로 이동
+    const isLastPage = currentIndex === storyData.length - 1;
+    const isLastContent = currentContentIndex === storyData[currentIndex].contents.length - 1;
+
+    if (isLastPage && isLastContent) {
+      setShowEndOverlay(true);
+      return;
+    }
+
+    if (currentContentIndex < storyData[currentIndex].contents.length - 1) {
       setCurrentContentIndex((prev) => prev + 1);
     } else {
-      // 마지막 컨텐츠면 다음 페이지로 이동
       handleNext();
     }
-  }, [currentIndex, currentContentIndex, handleNext]);
+  }, [currentIndex, currentContentIndex, handleNext, setCurrentIndex]);
 
-  const currentPage = storyData[currentIndex];
-  const currentContent = currentPage.contents[currentContentIndex];
-
-  // Prepare audio files with paths
-  const currentAudioFiles = currentContent.audioFiles
-    ? currentContent.audioFiles.map((fileName: string) => getAudioPath(fileName))
-    : [];
-
-  // 동화 재시작 핸들러
   const handleRestart = useCallback(() => {
     stopCurrentAudio();
     setCurrentIndex(0);
     setCurrentContentIndex(0);
-  }, [stopCurrentAudio]);
+    setShowEndOverlay(false);
+  }, [stopCurrentAudio, setCurrentIndex]);
 
-  // 홈으로 이동 핸들러
   const handleGoHome = useCallback(() => {
     stopCurrentAudio();
     navigate('/home');
   }, [navigate, stopCurrentAudio]);
 
-  const isStoryEnd = currentIndex === storyData.length - 1 && (
-    // 음성 모드가 꺼져있을 때는 바로 마지막 페이지에서 종료
-    !audioEnabled
-    // 음성 모드가 켜져있을 때는 마지막 오디오까지 재생 후 종료
-    || (audioEnabled && currentContentIndex === currentPage.contents.length - 1)
-  );
+  const currentPage = storyData[currentIndex];
+  const currentContent = currentPage.contents[currentContentIndex];
+  const isLastContent = currentIndex === storyData.length - 1
+  && currentContentIndex === storyData[currentIndex].contents.length - 1;
+
+  const currentAudioFiles = currentContent.audioFiles
+    ? currentContent.audioFiles.map((fileName: string) => getAudioPath(fileName))
+    : [];
 
   return (
     <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
@@ -130,39 +115,19 @@ function ReadingMode(): ReactElement {
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFirst={currentIndex === 0}
-        isLast={isStoryEnd}
+        isLast={isLastContent}
       />
 
       {audioEnabled && currentAudioFiles.length > 0 && (
-      <AudioPlayer
-        ref={audioRef}
-        audioFiles={currentAudioFiles}
-        autoPlay
-        onEnded={handleContentEnd}
-      />
+        <AudioPlayer
+          ref={audioRef}
+          audioFiles={currentAudioFiles}
+          autoPlay
+          onEnded={handleContentEnd}
+        />
       )}
 
-      {/* <div className="flex justify-between">
-        <button
-          type="button"
-          onClick={handlePrevious}
-          disabled={currentIndex === 0}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
-        >
-          이전
-        </button>
-        <button
-          type="button"
-          onClick={handleNext}
-          disabled={isStoryEnd}
-          className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300"
-        >
-          다음
-        </button>
-      </div> */}
-
-      {/* 이야기 종료시 나타날 오버레이 */}
-      {isStoryEnd && (
+      {showEndOverlay && (
         <div className="fixed inset-0 flex items-center justify-center z-50">
           <div className="fixed inset-0 bg-black opacity-50" />
           <div className="bg-white rounded-lg p-8 shadow-xl max-w-sm w-full mx-4 z-50 relative">
