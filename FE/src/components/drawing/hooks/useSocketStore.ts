@@ -11,8 +11,8 @@ export interface drawingData {
 }
 
 interface SocketStore {
-  isConnected: boolean;
-  setIsConnected: (connected: boolean) => void;
+  connect: boolean;
+  setConnect: (connected: boolean) => void;
   roomId: string | null;
   setRoomId: (roomId: string | null) => void;
   socket: Socket | null;
@@ -24,10 +24,10 @@ const useSocketStore = create<SocketStore>((set, get) => {
   let socket: Socket | null = null;
 
   return {
-    isConnected: false,
-    setIsConnected: (connected) => {
-      set({ isConnected: connected });
-      if (connected) {
+    connect: false,
+    setConnect: (connection) => {
+      set({ connect: connection });
+      if (connection) {
         get().connectSocket();
       } else {
         get().disconnectSocket();

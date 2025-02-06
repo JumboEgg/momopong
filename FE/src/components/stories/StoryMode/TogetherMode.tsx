@@ -5,12 +5,9 @@ import { useStory } from '../contexts/StoryContext';
 import storyData from '../data/cinderella';
 import RecordingButton from './RecordingButton';
 import AudioPlayer from '../AudioPlayer';
-import { CharacterType } from '../types/story';
 import getAudioPath from '../utils/audioHelper';
-
-interface TogetherModeProps {
-  friendId: string;
-}
+import type { TogetherModeProps } from '../types/story';
+import StoryIllustration from './StoryIllustration';
 
 function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
   const {
@@ -70,6 +67,9 @@ function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
   // Reset isLastAudioCompleted when content changes
   useEffect(() => {
     setIsLastAudioCompleted(false);
+    console.log('Current Page:', currentPage);
+    console.log('Current Content:', currentContent);
+    console.log('Illustration:', currentContent?.illustration);
   }, [currentIndex, currentContentIndex]);
 
   const isUserTurn = useMemo(() => {
@@ -77,12 +77,12 @@ function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
     return currentContent.type === userRole;
   }, [userRole, currentContent]);
 
-  const getCurrentSpeaker = useCallback((type: CharacterType) => {
-    if (type === 'narration') return '나레이션';
-    if (type === 'prince') return `왕자님${userRole === 'prince' ? ' (나)' : ''}`;
-    if (type === 'princess') return `신데렐라${userRole === 'princess' ? ' (나)' : ''}`;
-    return '등장인물';
-  }, [userRole]);
+  // const getCurrentSpeaker = useCallback((type: CharacterType) => {
+  //   if (type === 'narration') return '나레이션';
+  //   if (type === 'prince') return `왕자님${userRole === 'prince' ? ' (나)' : ''}`;
+  //   if (type === 'princess') return `신데렐라${userRole === 'princess' ? ' (나)' : ''}`;
+  //   return '등장인물';
+  // }, [userRole]);
 
   const handleNext = useCallback(() => {
     if (!currentPage) return;
@@ -152,32 +152,38 @@ function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
   }
 
   return (
-    <div className="max-w-2xl mx-auto p-6">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
-        <p className="text-gray-600 mt-2">
-          내 역할:
-          {' '}
-          {userRole === 'prince' ? '왕자님' : '신데렐라'}
-        </p>
-        <p className="text-gray-600">
-          함께 읽는 친구:
-          {' '}
-          {friendId}
-        </p>
+    <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
+      <div className="mb-6 flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
+          <p className="text-gray-600">
+            내 역할:
+            {userRole === 'prince' ? '왕자님' : '신데렐라'}
+          </p>
+          <p className="text-gray-600">
+            함께 읽는 친구:
+            {friendId}
+          </p>
+        </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
-        <div className="mb-4 flex justify-between items-center">
-          <span className="text-sm font-medium text-gray-500">
-            {getCurrentSpeaker(currentContent.type)}
-            의 대사
-          </span>
-          {hasRecording(currentIndex) && <span className="text-green-500 text-sm">✓ 녹음완료</span>}
-        </div>
+      <StoryIllustration
+        pageNumber={currentPage.pageNumber}
+        currentContentIndex={currentContentIndex}
+        onPrevious={() => {
+          if (currentIndex > 0) {
+            setCurrentIndex(currentIndex - 1);
+            setCurrentContentIndex(0);
+          }
+        }}
+        onNext={handleNext}
+        isFirst={currentIndex === 0}
+        isLast={isStoryEnd}
+        userRole={userRole || undefined}
+      />
 
-        <p className="text-lg text-gray-700 leading-relaxed mb-4">{currentContent.text}</p>
-
+      {/* 녹음 버튼과 오디오 플레이어 */}
+      <div className="mt-4 flex justify-center">
         {isUserTurn ? (
           <div className="mt-4">
             {!hasRecording(currentIndex) && (
@@ -190,26 +196,37 @@ function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
           </div>
         ) : (
           audioEnabled && (
-            <AudioPlayer
-              ref={audioRef}
-              audioFiles={currentAudioFiles}
-              autoPlay
-              onEnded={handleAudioComplete}
-            />
+            <div className="hidden">
+              <AudioPlayer
+                ref={audioRef}
+                audioFiles={currentAudioFiles}
+                autoPlay
+                onEnded={handleAudioComplete}
+              />
+            </div>
           )
         )}
       </div>
 
-      {(!isUserTurn || hasRecording(currentIndex)) && (
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={handleNext}
-            disabled={isStoryEnd}
-            className="px-4 py-2 bg-blue-500 text-white rounded disabled:bg-gray-300 hover:bg-blue-600 transition-colors"
-          >
-            다음
-          </button>
+      {/* 이야기 종료시 나타날 오버레이 */}
+      {isStoryEnd && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="fixed inset-0 bg-black opacity-50" />
+          <div className="bg-white rounded-lg p-8 shadow-xl max-w-sm w-full mx-4 z-50 relative">
+            <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">
+              함께했던 스토리는 나의집에서 다시볼수있어!
+            </h3>
+            <p className="text-gray-600 mb-8 text-center">
+              다음에 또만나자~
+            </p>
+            <button
+              type="button"
+              onClick={handleHomeClick}
+              className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-lg font-medium"
+            >
+              홈으로 가기
+            </button>
+          </div>
         </div>
       )}
     </div>

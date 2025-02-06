@@ -145,7 +145,7 @@ function AudioPlayerComponent(
       <audio
         ref={audioRef}
         src={audioFiles[currentFileIndex]}
-        controls
+        // controls
         className="w-full"
         onEnded={handleAudioEnd}
         onError={handleError}
