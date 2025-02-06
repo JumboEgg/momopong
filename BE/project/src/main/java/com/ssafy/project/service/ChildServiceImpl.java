@@ -5,10 +5,7 @@ import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.ChildDto;
-import com.ssafy.project.dto.ChildSignUpRequestDto;
-import com.ssafy.project.dto.ChildStatusDto;
-import com.ssafy.project.dto.ChildUpdateRequestDto;
+import com.ssafy.project.dto.*;
 import com.ssafy.project.exception.ChildLimitExceededException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;
@@ -33,6 +30,7 @@ public class ChildServiceImpl implements ChildService {
     private final JsonConverter jsonConverter;
     private final TokenBlacklistService tokenBlacklistService;
     private final RedisDao redisDao;
+    private final PresignedUrlService presignedUrlService;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d";
     // 서브 회원가입
@@ -50,7 +48,7 @@ public class ChildServiceImpl implements ChildService {
 
         Child child = Child.builder()
                 .name(signUpRequestDto.getName())
-                .profile(signUpRequestDto.getProfile())
+                .profile(signUpRequestDto.getProfile()) // Presigned URL 요청으로 얻은 fileName
                 .birth(signUpRequestDto.getBirth())
                 .code(code)
                 .gender(signUpRequestDto.getGender())
@@ -63,6 +61,7 @@ public class ChildServiceImpl implements ChildService {
 
         return savedChild.getId();
     }
+
     // 친구 코드 
     private String generateRandomCode() {
         UUID uuid = UUID.randomUUID();
@@ -75,6 +74,7 @@ public class ChildServiceImpl implements ChildService {
         System.out.println("numericCode = " + numericCode);
         return String.valueOf(numericCode);
     }
+
     // 자식 로그인
     @Override
     public Map<String, Object> login(Long childId) {
@@ -86,7 +86,7 @@ public class ChildServiceImpl implements ChildService {
         ChildDto childDto = ChildDto.builder()
                 .childId(childId)
                 .name(child.getName())
-                .profile(child.getProfile())
+                .profile(presignedUrlService.getProfile(child.getProfile()))
                 .age(child.getAge())
                 .daysSinceStart(child.getDaysSinceStart())
                 .code(child.getCode())
@@ -113,6 +113,7 @@ public class ChildServiceImpl implements ChildService {
         map.put("accessToken", accessToken);
         return map;
     }
+
     // 로그아웃 
     @Override
     public void logout(String authorization, Long childId) {
@@ -122,14 +123,18 @@ public class ChildServiceImpl implements ChildService {
         String accessToken = authorization.substring(7);
         tokenBlacklistService.addBlacklist(accessToken);
     }
+
     // 자식계정 조회
     @Override
     public ChildDto findChild(Long childId) {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
-        return child.entityToDto();
+        ChildDto childDto = child.entityToDto();
+        childDto.updateProfile(presignedUrlService.getProfile(childDto.getProfile()));
+        return childDto;
     }
+
     // 자식 회원 정보 수정
     @Override
     public ChildDto updateChild(Long childId, ChildUpdateRequestDto updateRequestDto) {
@@ -138,12 +143,34 @@ public class ChildServiceImpl implements ChildService {
 
         child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
 
-        return child.entityToDto();
+        ChildDto childDto = child.entityToDto();
+        childDto.updateProfile(presignedUrlService.getProfile(childDto.getProfile()));
+        return childDto;
     }
+
     // 자식 계정 삭제
     @Override
     @Transactional
     public void deleteChild(Long childId) {
         childRepository.deleteById(childId);
+    }
+
+    // Presigned URL - PUT
+    @Override
+    public FileDto getPresignedUrl() {
+        return presignedUrlService.getPresignedUrl();
+//        String fileName = "profile/" + UUID.randomUUID() + ".webp";
+//
+//        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+//                new GeneratePresignedUrlRequest(bucket, fileName)
+//                        .withMethod(HttpMethod.PUT)
+//                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
+//
+//        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+//
+//        return FileDto.builder()
+//                .presignedUrl(url.toString())
+//                .fileName(fileName)
+//                .build();
     }
 }
