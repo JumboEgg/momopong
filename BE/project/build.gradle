@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.2'
+	id 'org.springframework.boot' version '3.3.8'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -63,6 +63,11 @@ dependencies {
 	// 서브 컨텐츠 그림 그리기
 	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
 
+	// Swagger UI
+// Swagger UI 의존성 업데이트
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:2.2.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.2.0'
 }
 
 tasks.named('test') {
