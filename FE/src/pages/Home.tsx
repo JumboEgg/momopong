@@ -1,3 +1,4 @@
+import FriendsModal from '@/components/common/modals/FriendsModal';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,6 +9,14 @@ function HomePage() {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
 
   const {
     setConnect,
@@ -39,7 +48,7 @@ function HomePage() {
 
       <button
         type="button"
-        onClick={() => handleNavigation('/friends')}
+        onClick={handleOpenModal}
         className="fixed top-5 right-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
       >
         <img
@@ -49,6 +58,12 @@ function HomePage() {
         />
         <p className="text-xl mt-0.5">친구목록</p>
       </button>
+
+      {isModalOpen && (
+        <FriendsModal
+          onClose={handleCloseModal}
+        />
+      )}
 
       {/* Main Navigation Icons */}
       <div className="flex justify-center items-center gap-12 font-[BMJUA] text-3xl">

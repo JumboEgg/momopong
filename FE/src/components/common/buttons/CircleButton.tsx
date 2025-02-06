@@ -1,7 +1,7 @@
 import React from 'react';
 
-type CircleButtonSize = 'sm' | 'base' | 'md' | 'lg';
-type CircleButtonVariant = 'default' | 'action' | 'story';
+export type CircleButtonSize = 'xs' | 'sm' | 'base' | 'md' | 'lg';
+export type CircleButtonVariant = 'default' | 'action' | 'story';
 
 interface CircleButtonBaseProps {
   icon: React.ReactNode;
@@ -19,6 +19,7 @@ interface TextCircleButtonProps extends CircleButtonBaseProps {
 }
 
 const sizeClasses: Record<CircleButtonSize, string> = {
+  xs: 'w-12 h-12 text-lg',
   sm: 'w-18 h-18 text-3xl',
   base: 'w-20 h-20 text-3xl',
   md: 'w-28 h-28 text-5xl',
@@ -26,6 +27,7 @@ const sizeClasses: Record<CircleButtonSize, string> = {
 };
 
 const sizeToIconSize: Record<CircleButtonSize, string> = {
+  xs: 'md',
   sm: 'lg',
   base: 'lg',
   md: 'xl',
