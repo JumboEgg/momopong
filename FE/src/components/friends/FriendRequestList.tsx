@@ -1,9 +1,16 @@
-// src/components/friends/FriendRequestList.tsx
 import { useFriendRequestStore } from '@/stores/friendRequestStore';
+import useSubAccountStore from '@/stores/subAccountStore';
 import FriendRequestItem from './FriendRequestItem';
 
 function FriendRequestList(): JSX.Element {
-  const { requests } = useFriendRequestStore();
+  const { requests, acceptRequest, rejectRequest } = useFriendRequestStore();
+  const { selectedAccount } = useSubAccountStore();
+
+  if (!selectedAccount) {
+    return <div>로그인된 계정이 없습니다.</div>;
+  }
+
+  const { childId } = selectedAccount;
 
   if (requests.length === 0) {
     return (
@@ -18,8 +25,9 @@ function FriendRequestList(): JSX.Element {
       {requests.map((request) => (
         <FriendRequestItem
           key={request.friendId}
-          message="친구 요청을 보냈어요"
-          // profileImage는 API에서 제공되면 추가
+          request={request}
+          onAccept={(friendId) => acceptRequest(childId, friendId)}
+          onReject={(friendId) => rejectRequest(childId, friendId)}
         />
       ))}
     </div>

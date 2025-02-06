@@ -9,6 +9,8 @@ export interface Friend {
 
 export interface FriendRequest {
   friendId: number;
+  fromProfile: string;
+  fromName: string;
   formId: number;
   toId: number;
 }
