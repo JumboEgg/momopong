@@ -41,6 +41,7 @@ const useSocketStore = create<SocketStore>((set, get) => {
 
     connectSocket: () => {
       if (!socket) {
+        // TODO : socket.io 서버 수정
         socket = io('http://localhost:3869', { autoConnect: false });
         socket.connect();
         socket.on('connect', () => console.log('Connected to socket'));

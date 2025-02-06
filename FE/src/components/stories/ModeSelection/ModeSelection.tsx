@@ -1,39 +1,11 @@
 // ModeSelection/ModeSelection.tsx
-import { useState } from 'react';
 import { StoryMode } from '@/components/stories/types/story';
-import { FriendProvider } from '@/components/stories/contexts/FriendContext';
-import FriendSelection from '../StoryMode/FriendSelection';
 
 interface ModeSelectionProps {
-  onModeSelect: (mode: StoryMode, friendId?: string) => void;
+  onModeSelect: (mode: StoryMode) => void;
 }
 
 function ModeSelection({ onModeSelect }: ModeSelectionProps): JSX.Element {
-  const [showFriendSelection, setShowFriendSelection] = useState(false);
-
-  const handleModeSelect = (mode: StoryMode) => {
-    if (mode === 'together') {
-      setShowFriendSelection(true);
-    } else {
-      onModeSelect(mode);
-    }
-  };
-
-  const handleFriendSelect = (friendId: string) => {
-    onModeSelect('together', friendId);
-  };
-
-  if (showFriendSelection) {
-    return (
-      <FriendProvider>
-        <FriendSelection
-          onFriendSelect={handleFriendSelect}
-          onBack={() => setShowFriendSelection(false)}
-        />
-      </FriendProvider>
-    );
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
@@ -41,14 +13,14 @@ function ModeSelection({ onModeSelect }: ModeSelectionProps): JSX.Element {
         <div className="flex justify-center gap-4">
           <button
             type="button"
-            onClick={() => handleModeSelect('reading')}
+            onClick={() => onModeSelect('reading')}
             className="py-4 px-6 text-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
           >
             읽기 모드
           </button>
           <button
             type="button"
-            onClick={() => handleModeSelect('together')}
+            onClick={() => onModeSelect('together')}
             className="py-4 px-6 text-lg font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
           >
             함께 읽기 모드

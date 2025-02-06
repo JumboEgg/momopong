@@ -9,7 +9,7 @@ import getAudioPath from '../utils/audioHelper';
 import type { TogetherModeProps } from '../types/story';
 import StoryIllustration from './StoryIllustration';
 
-function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
+function TogetherMode({ friend }: TogetherModeProps): JSX.Element {
   const {
     currentIndex, setCurrentIndex, recordings, audioEnabled,
   } = useStory();
@@ -162,7 +162,7 @@ function TogetherMode({ friendId }: TogetherModeProps): JSX.Element {
           </p>
           <p className="text-gray-600">
             함께 읽는 친구:
-            {friendId}
+            {friend.name}
           </p>
         </div>
       </div>

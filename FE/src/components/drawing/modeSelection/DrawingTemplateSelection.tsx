@@ -59,7 +59,7 @@ function DrawingSelection(): JSX.Element {
       <div
         className="mt-3 grid-cols-2 sm:grid-cols-3 md:grid-cols-4
         flex flex-wrap items-start content-start justify-center
-        max-h-[75vh] overflow-y-scroll customScrollbar"
+        max-h-[75vh] overflow-y-scroll customScrollbar yellow"
       >
         { drawingImgList }
       </div>

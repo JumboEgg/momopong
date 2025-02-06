@@ -21,16 +21,16 @@ export function FriendProvider({ children }: { children: ReactNode }) {
   // 임시 친구 데이터 (실제로는 API에서 가져와야 함)
   const friends: Friend[] = [
     {
-      id: '1', name: '미나', avatar: '/api/placeholder/40/40', status: 'online',
+      id: '1', name: '미나', avatar: '/images/profileicon.png', status: 'online',
     },
     {
-      id: '2', name: '준호', avatar: '/api/placeholder/40/40', status: 'online',
+      id: '2', name: '준호', avatar: '/images/profileicon.png', status: 'online',
     },
     {
-      id: '3', name: '소희', avatar: '/api/placeholder/40/40', status: 'offline',
+      id: '3', name: '소희', avatar: '/images/profileicon.png', status: 'offline',
     },
     {
-      id: '4', name: '태민', avatar: '/api/placeholder/40/40', status: 'online',
+      id: '4', name: '태민', avatar: '/images/profileicon.png', status: 'online',
     },
   ];
 

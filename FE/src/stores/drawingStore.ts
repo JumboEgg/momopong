@@ -18,14 +18,6 @@ export interface DrawingData {
 interface DrawingStore {
   mode: DrawingMode | null;
   setMode: (mode: DrawingMode | null) => void;
-  // templateId: number;
-  // setTemplateId: (id: number) => void;
-  // templateName: string;
-  // setTemplateName: (name: string) => void;
-  // backgroundSrc: string;
-  // setBackgroundSrc: (src: string) => void;
-  // outlineSrc: string;
-  // setOutlineSrc: (src: string) => void;
   template: TemplateData | null;
   setTemplate: (data : TemplateData | null) => void;
   penColor: string;
@@ -42,18 +34,6 @@ interface DrawingStore {
 const useDrawingStore = create<DrawingStore>((set) => ({
   mode: null,
   setMode: (mode) => set({ mode }),
-
-  // templateId: 0,
-  // setTemplateId: (id) => set({ templateId: id }),
-
-  // templateName: '',
-  // setTemplateName: (name) => set({ templateName: name }),
-
-  // backgroundSrc: '',
-  // setBackgroundSrc: (src) => set({ backgroundSrc: src }),
-
-  // outlineSrc: '',
-  // setOutlineSrc: (src) => set({ outlineSrc: src }),
 
   template: null,
   setTemplate: (data) => set({ template: data }),
