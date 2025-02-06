@@ -1,6 +1,7 @@
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackgroundMusic from '@/components/BackgroundMusic';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ function HomePage() {
         backgroundSize: '100% 100%',
       }}
     >
+      <BackgroundMusic />
       <button
         type="button"
         onClick={() => handleNavigation('/profile')}
