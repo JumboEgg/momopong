@@ -35,7 +35,7 @@ public class ChildServiceImpl implements ChildService {
     private final RedisDao redisDao;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d";
-
+    // 서브 회원가입
     @Override
     public Long signUp(ChildSignUpRequestDto signUpRequestDto) {
         Parent parent = parentRepository.findById(signUpRequestDto.getParentId())
@@ -63,7 +63,7 @@ public class ChildServiceImpl implements ChildService {
 
         return savedChild.getId();
     }
-
+    // 친구 코드 
     private String generateRandomCode() {
         UUID uuid = UUID.randomUUID();
 
@@ -75,7 +75,7 @@ public class ChildServiceImpl implements ChildService {
         System.out.println("numericCode = " + numericCode);
         return String.valueOf(numericCode);
     }
-
+    // 자식 로그인
     @Override
     public Map<String, Object> login(Long childId) {
         Child child = childRepository.findById(childId)
@@ -113,7 +113,7 @@ public class ChildServiceImpl implements ChildService {
         map.put("accessToken", accessToken);
         return map;
     }
-
+    // 로그아웃 
     @Override
     public void logout(String authorization, Long childId) {
         String key = String.format(CHILD_STATUS_KEY, childId); // 자식 상태 삭제
@@ -122,7 +122,7 @@ public class ChildServiceImpl implements ChildService {
         String accessToken = authorization.substring(7);
         tokenBlacklistService.addBlacklist(accessToken);
     }
-
+    // 자식계정 조회
     @Override
     public ChildDto findChild(Long childId) {
         Child child = childRepository.findById(childId)
@@ -130,7 +130,7 @@ public class ChildServiceImpl implements ChildService {
 
         return child.entityToDto();
     }
-
+    // 자식 회원 정보 수정
     @Override
     public ChildDto updateChild(Long childId, ChildUpdateRequestDto updateRequestDto) {
         Child child = childRepository.findById(childId)
@@ -140,7 +140,7 @@ public class ChildServiceImpl implements ChildService {
 
         return child.entityToDto();
     }
-
+    // 자식 계정 삭제
     @Override
     @Transactional
     public void deleteChild(Long childId) {
