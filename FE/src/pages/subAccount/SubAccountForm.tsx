@@ -29,7 +29,7 @@ function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
     e.preventDefault();
     try {
       await createSubAccount(formData);
-      navigate('/home');
+      navigate('/parents/:parent_id/children');
     } catch (err) {
       // 에러는 이미 store에서 처리됨
     }

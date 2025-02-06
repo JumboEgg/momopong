@@ -19,22 +19,23 @@ interface AuthState {
 const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
-      isAuthenticated: !!localStorage.getItem('accessToken'),
+      isAuthenticated: false,
       user: null,
-      accessToken: localStorage.getItem('accessToken'),
-      refreshToken: localStorage.getItem('refreshToken'),
+      accessToken: null,
+      refreshToken: null,
       isLoading: false,
       error: null,
+
       setTokens: (tokens: JwtToken) => {
-        localStorage.setItem('accessToken', tokens.accessToken);
-        localStorage.setItem('refreshToken', tokens.refreshToken);
         set({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           isAuthenticated: true,
         });
       },
+
       setUser: (user: ParentDto) => set({ user }),
+
       reset: () => {
         clearAuthTokens();
         set({
@@ -48,6 +49,11 @@ const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
+      partialize: (state) => Object.fromEntries(
+        Object.entries(state)
+          .filter(([key]) => ['isAuthenticated', 'user', 'accessToken', 'refreshToken']
+            .includes(key)),
+      ),
     },
   ),
 );

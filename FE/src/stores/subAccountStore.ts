@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import api from '@/api/axios';
-import { clearChildTokens } from '@/utils/auth';
+import useAuthStore from './authStore';
 
 interface SubAccount {
   childId: number;
@@ -78,8 +78,7 @@ const useSubAccountStore = create<SubAccountState>()(
       isLoading: false,
       error: null,
       childToken: {
-        accessToken: localStorage.getItem('childAccessToken'),
-        refreshToken: localStorage.getItem('childRefreshToken'),
+        accessToken: null,
       },
 
       // 폼 초기 상태
@@ -92,17 +91,17 @@ const useSubAccountStore = create<SubAccountState>()(
       },
 
       // API 액션
-      fetchSubAccounts: async () => { // 전체 서브계정 조회
+      fetchSubAccounts: async () => {
         set({ isLoading: true, error: null });
 
         try {
-          const parentId = localStorage.getItem('parentId');
+          const { user } = useAuthStore.getState();
 
-          if (!parentId) {
+          if (!user?.parentId) {
             throw new Error('부모 계정 정보를 찾을 수 없습니다.');
           }
 
-          const response = await api.get(`/parents/${parentId}/children`);
+          const response = await api.get(`/parents/${user.parentId}/children`);
 
           set({
             subAccounts: response.data,
@@ -150,20 +149,12 @@ const useSubAccountStore = create<SubAccountState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const currentAccount = get().selectedAccount;
-          if (currentAccount) {
-            get().logoutSubAccount(); // 기존 토큰 클리어
-          }
-
           const response = await api.post<ChildLoginResponse>(
             '/children/login',
             { childId },
           );
 
           const { childDto, accessToken } = response.data;
-
-          localStorage.setItem('childAccessToken', accessToken);
-          localStorage.setItem('childId', response.data.childDto.childId.toString());
 
           set({
             selectedAccount: childDto,
@@ -186,8 +177,6 @@ const useSubAccountStore = create<SubAccountState>()(
 
       // 자식 계정 로그아웃
       logoutSubAccount: () => {
-        clearChildTokens();
-
         set({
           selectedAccount: null,
           childToken: {
