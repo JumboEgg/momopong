@@ -21,21 +21,21 @@ function Parent() {
       childName: '박치킨',
       childAge: 7,
       joinDate: 45,
-      profileSrc: 'public/images/coloringTemplates/03/backgroundImg.png',
+      profileSrc: 'images/coloringTemplates/cinderella.webp',
     },
     {
       childId: 2,
       childName: '박초코',
       childAge: 8,
       joinDate: 145,
-      profileSrc: 'public/images/coloringTemplates/04/backgroundImg.png',
+      profileSrc: 'images/coloringTemplates/prince.webp',
     },
     {
       childId: 3,
       childName: '박사탕',
       childAge: 17,
       joinDate: 2045,
-      profileSrc: 'public/images/coloringTemplates/02/backgroundImg.png',
+      profileSrc: 'images/coloringTemplates/thepremiumshoe.webp',
     },
   ];
 
