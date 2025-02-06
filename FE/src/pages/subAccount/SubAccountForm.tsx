@@ -1,12 +1,15 @@
 import { useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import ImageUpload from '@/components/ImageUpload';
+import useAuthStore from '@/stores/authStore';
+import { useEffect } from 'react';
 
 interface SubAccountFormProps {
   mode?: 'create' | 'edit';
 }
 
 function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
+  const { user } = useAuthStore();
   const navigate = useNavigate();
   const {
     formData,
@@ -24,14 +27,19 @@ function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     try {
       await createSubAccount(formData);
-      navigate('/');
+      navigate('/parents/:parent_id/children');
     } catch (err) {
       // 에러는 이미 store에서 처리됨
     }
   };
+
+  useEffect(() => {
+    if (user?.parentId) {
+      setFormField('parentId', user.parentId);
+    }
+  }, [user]);
 
   return (
     <div className="p-6">
@@ -102,7 +110,7 @@ function SubAccountForm({ mode }: SubAccountFormProps): JSX.Element {
         <div className="flex justify-end space-x-3 pt-4">
           <button
             type="button"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(`/parents/${user?.parentId}/children`)}
             className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
           >
             취소

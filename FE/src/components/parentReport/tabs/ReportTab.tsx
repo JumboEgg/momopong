@@ -23,7 +23,7 @@ function ReportTab({ childName }: ReportTabProps) {
         {' '}
         <span className="text-[cornflowerblue]">{childName}</span>
         {' '}
-        어린이는 동화누리에서
+        어린이는 모모핑에서
         {' '}
         <span className="text-[steelblue]">{MOCK_REPORT_DATA.monthTime}</span>
         {' '}

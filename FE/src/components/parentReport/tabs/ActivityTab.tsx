@@ -1,7 +1,3 @@
-// interface ActivityTabProps {
-//   childName: string;
-// }
-
 export interface ReadDataType {
   title: string;
   readCount: number;
@@ -53,14 +49,6 @@ function ActivityTab() {
   return (
     <div className="flex flex-col w-full h-full gap-y-5">
       <div className="text-xl">
-        {/* 이번 달,
-        {' '}
-        <span className="text-[cornflowerblue]">{childName}</span>
-        {' '}
-        어린이는
-        <br />
-        동화누리에서
-        {' '} */}
         <span className="text-[steelblue]">
           {MOCK_READ_DATA[0].title}
           ,

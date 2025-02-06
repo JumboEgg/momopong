@@ -4,16 +4,18 @@ import com.ssafy.project.dto.ChildDto;
 import com.ssafy.project.dto.ChildSignUpRequestDto;
 import com.ssafy.project.dto.ChildUpdateRequestDto;
 
+import java.util.Map;
+
 public interface ChildService {
 
     // 자식 계정 생성
     Long signUp(ChildSignUpRequestDto signUpRequestDto);
 
     // 자식 계정 로그인
-    ChildDto login(Long childId);
+    Map<String, Object> login(Long childId);
 
     // 자식 계정 로그아웃
-    void logout(Long childId);
+    void logout(String authorization, Long childId);
 
     // 자식 계정 조회
     ChildDto findChild(Long childId);
