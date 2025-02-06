@@ -42,17 +42,20 @@ public class FriendServiceImpl implements FriendService {
         List<Friend> friendList = friendRepository.findAllByFrom(fromChild);
         return friendList.stream()
                 .map(friend -> {
+                    Child toChild = childRepository.findById(friend.getTo().getId())
+                            .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+
                     // Redis에서 상태 가져오기
                     StatusType status;
-                    String key = String.format(CHILD_STATUS_KEY, fromChild.getId());
+                    String key = String.format(CHILD_STATUS_KEY, friend.getId());
                     Object json = redisDao.getValues(key);
                     if (json == null) status = StatusType.OFFLINE;
                     else status = jsonConverter.fromJson((String) json, ChildStatusDto.class).getStatus();
 
                     return  FriendListDto.builder()
-                            .childId(fromChild.getId())
-                            .name(fromChild.getName())
-                            .profile(presignedUrlService.getProfile(fromChild.getProfile()))
+                            .childId(toChild.getId())
+                            .name(toChild.getName())
+                            .profile(presignedUrlService.getProfile(toChild.getProfile()))
                             .status(status).build();
                 })
                 .collect(Collectors.toList());
