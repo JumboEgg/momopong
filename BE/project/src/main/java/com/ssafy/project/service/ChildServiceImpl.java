@@ -1,8 +1,5 @@
 package com.ssafy.project.service;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ssafy.project.common.JsonConverter;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
@@ -17,11 +14,8 @@ import com.ssafy.project.security.JwtTokenProvider;
 import com.ssafy.project.security.TokenBlacklistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
@@ -36,10 +30,7 @@ public class ChildServiceImpl implements ChildService {
     private final JsonConverter jsonConverter;
     private final TokenBlacklistService tokenBlacklistService;
     private final RedisDao redisDao;
-    private final AmazonS3 amazonS3;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
+    private final PresignedUrlService presignedUrlService;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d";
     // 서브 회원가입
@@ -95,7 +86,7 @@ public class ChildServiceImpl implements ChildService {
         ChildDto childDto = ChildDto.builder()
                 .childId(childId)
                 .name(child.getName())
-                .profile(getProfile(child.getProfile()))
+                .profile(presignedUrlService.getProfile(child.getProfile()))
                 .age(child.getAge())
                 .daysSinceStart(child.getDaysSinceStart())
                 .code(child.getCode())
@@ -140,7 +131,7 @@ public class ChildServiceImpl implements ChildService {
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
         ChildDto childDto = child.entityToDto();
-        childDto.updateProfile(getProfile(childDto.getProfile()));
+        childDto.updateProfile(presignedUrlService.getProfile(childDto.getProfile()));
         return childDto;
     }
 
@@ -153,7 +144,7 @@ public class ChildServiceImpl implements ChildService {
         child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
 
         ChildDto childDto = child.entityToDto();
-        childDto.updateProfile(getProfile(childDto.getProfile()));
+        childDto.updateProfile(presignedUrlService.getProfile(childDto.getProfile()));
         return childDto;
     }
 
@@ -167,29 +158,19 @@ public class ChildServiceImpl implements ChildService {
     // Presigned URL - PUT
     @Override
     public FileDto getPresignedUrl() {
-        String fileName = "profile/" + UUID.randomUUID() + ".webp";
-
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, fileName)
-                        .withMethod(HttpMethod.PUT)
-                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-        return FileDto.builder()
-                .presignedUrl(url.toString())
-                .fileName(fileName)
-                .build();
-    }
-
-    // Presigned URL - GET
-    private String getProfile(String fileName) {
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
-                .withMethod(HttpMethod.GET)
-                .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        System.out.println("url.toString() = " + url.toString());
-        return url.toString();
+        return presignedUrlService.getPresignedUrl();
+//        String fileName = "profile/" + UUID.randomUUID() + ".webp";
+//
+//        GeneratePresignedUrlRequest generatePresignedUrlRequest =
+//                new GeneratePresignedUrlRequest(bucket, fileName)
+//                        .withMethod(HttpMethod.PUT)
+//                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
+//
+//        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
+//
+//        return FileDto.builder()
+//                .presignedUrl(url.toString())
+//                .fileName(fileName)
+//                .build();
     }
 }

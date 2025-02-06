@@ -1,8 +1,5 @@
 package com.ssafy.project.service;
 
-import com.amazonaws.HttpMethod;
-import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
 import com.ssafy.project.dto.ChildListDto;
@@ -18,15 +15,12 @@ import com.ssafy.project.security.JwtTokenProvider;
 import com.ssafy.project.security.TokenBlacklistService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.DateTime;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.net.URL;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -41,10 +35,7 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
     private final ChildService childService;
-    private final AmazonS3 amazonS3;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
+    private final PresignedUrlService presignedUrlService;
 
     // 부모 회원가입
     @Override
@@ -137,7 +128,7 @@ public class ParentServiceImpl implements ParentService {
                 .map(child -> ChildListDto.builder()
                         .childId(child.getId())
                         .name(child.getName())
-                        .profile(getProfile(child.getProfile()))
+                        .profile(presignedUrlService.getProfile(child.getProfile()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -159,16 +150,5 @@ public class ParentServiceImpl implements ParentService {
     public void logout(String accessToken, String email) {
         jwtTokenProvider.deleteRefreshToken(email);
         tokenBlacklistService.addBlacklist(accessToken);
-    }
-
-    // Presigned URL - GET
-    private String getProfile(String fileName) {
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
-                .withMethod(HttpMethod.GET)
-                .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        System.out.println("url.toString() = " + url.toString());
-        return url.toString();
     }
 }
