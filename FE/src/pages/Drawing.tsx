@@ -1,10 +1,9 @@
 import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
-// import { FriendProvider } from '@/components/stories/contexts/FriendContext';
 import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
 import { useDrawing } from '@/stores/drawingStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
@@ -17,10 +16,6 @@ function Drawing() {
     mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
   } = useDrawing();
 
-  const {
-    friend, setFriend, isConnected, setIsConnected,
-  } = useFriends();
-
   useEffect(() => {
     setMode(null);
     setTemplate(null);
@@ -30,11 +25,12 @@ function Drawing() {
   }, []);
 
   const {
+    friend, setFriend, isConnected, setIsConnected,
+  } = useFriends();
+
+  const {
     socket, setConnect,
   } = useSocketStore();
-
-  const [selectedFriendId, setSelectedFriendId] = useState<string>();
-  if (false) console.log(selectedFriendId);
 
   useEffect(() => {
     // setConnect(false);
@@ -61,7 +57,7 @@ function Drawing() {
     if (mode === 'together') {
       if (!friend) {
         return (
-          <FriendSelection onFriendSelect={setSelectedFriendId} />
+          <FriendSelection />
         );
       } if (friend && !socket) {
         return (

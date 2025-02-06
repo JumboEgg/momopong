@@ -9,17 +9,16 @@ export interface Friend {
 
 interface FriendStore {
   friend: Friend | null;
-  setFriend: (f: Friend) => void;
+  setFriend: (f: Friend | null) => void;
   isConnected: boolean;
   setIsConnected: (state: boolean) => void;
   friendList: Friend[];
 }
 
-const useFriendStore = create<FriendStore>((set, get) => ({
+const useFriendStore = create<FriendStore>((set) => ({
   friend: null,
   setFriend: (f) => {
     set({ friend: f });
-    console.log(get().friend);
   },
 
   isConnected: false,

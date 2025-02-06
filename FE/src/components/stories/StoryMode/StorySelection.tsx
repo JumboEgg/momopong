@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface StorySelectionProps {
-  onStorySelect: (storyId: string) => void;
-}
+import { useStory } from '@/stores/storyStore';
 
 const stories = [
   {
@@ -45,8 +42,11 @@ const stories = [
   },
 ];
 
-function StorySelection({ onStorySelect }: StorySelectionProps): JSX.Element {
+function StorySelection(): JSX.Element {
   const navigate = useNavigate();
+  const {
+    setStoryId,
+  } = useStory();
 
   const [startIndex, setStartIndex] = useState(0);
   // 동화 선택 캐러셀
@@ -93,7 +93,7 @@ function StorySelection({ onStorySelect }: StorySelectionProps): JSX.Element {
               <button
                 key={story.id}
                 type="button"
-                onClick={() => onStorySelect(story.id)}
+                onClick={() => setStoryId(story.id)}
                 className="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow w-[180px]"
               >
                 <img

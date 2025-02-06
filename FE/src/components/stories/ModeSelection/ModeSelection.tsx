@@ -1,11 +1,10 @@
-// ModeSelection/ModeSelection.tsx
-import { StoryMode } from '@/components/stories/types/story';
+import { useStory } from '@/stores/storyStore';
 
-interface ModeSelectionProps {
-  onModeSelect: (mode: StoryMode) => void;
-}
+function ModeSelection(): JSX.Element {
+  const {
+    setMode,
+  } = useStory();
 
-function ModeSelection({ onModeSelect }: ModeSelectionProps): JSX.Element {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
@@ -13,14 +12,14 @@ function ModeSelection({ onModeSelect }: ModeSelectionProps): JSX.Element {
         <div className="flex justify-center gap-4">
           <button
             type="button"
-            onClick={() => onModeSelect('reading')}
+            onClick={() => setMode('reading')}
             className="py-4 px-6 text-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
           >
             읽기 모드
           </button>
           <button
             type="button"
-            onClick={() => onModeSelect('together')}
+            onClick={() => setMode('together')}
             className="py-4 px-6 text-lg font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
           >
             함께 읽기 모드

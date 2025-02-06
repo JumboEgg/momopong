@@ -1,18 +1,23 @@
 import {
   useState, useEffect, useRef, useCallback, useMemo,
 } from 'react';
-import { useStory } from '../contexts/StoryContext';
+import { useFriends } from '@/stores/friendStore';
+import { useStory } from '@/stores/storyStore';
 import storyData from '../data/cinderella';
 import RecordingButton from './RecordingButton';
 import AudioPlayer from '../AudioPlayer';
 import getAudioPath from '../utils/audioHelper';
-import type { TogetherModeProps } from '../types/story';
 import StoryIllustration from './StoryIllustration';
 
-function TogetherMode({ friend }: TogetherModeProps): JSX.Element {
+function TogetherMode(): JSX.Element {
   const {
     currentIndex, setCurrentIndex, recordings, audioEnabled,
   } = useStory();
+
+  const {
+    friend,
+  } = useFriends();
+
   const [userRole, setUserRole] = useState<'prince' | 'princess' | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [isLastAudioCompleted, setIsLastAudioCompleted] = useState(false);
@@ -162,7 +167,7 @@ function TogetherMode({ friend }: TogetherModeProps): JSX.Element {
           </p>
           <p className="text-gray-600">
             함께 읽는 친구:
-            {friend.name}
+            {friend ? friend.name : ''}
           </p>
         </div>
       </div>

@@ -6,7 +6,7 @@ import {
 } from 'react';
 
 import { useNavigate } from 'react-router-dom';
-import { useStory } from '../contexts/StoryContext';
+import { useStory } from '@/stores/storyStore';
 import storyData from '../data/cinderella';
 import AudioPlayer from '../AudioPlayer';
 import getAudioPath from '../utils/audioHelper';

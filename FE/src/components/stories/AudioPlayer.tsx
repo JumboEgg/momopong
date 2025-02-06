@@ -1,9 +1,8 @@
+import { useStory } from '@/stores/storyStore';
 import {
   useEffect, useRef, useCallback, useState,
   ForwardedRef, forwardRef, SyntheticEvent,
 } from 'react';
-
-import { useStory } from '@/components/stories/contexts/StoryContext';
 
 interface AudioPlayerProps {
   audioFiles: string[];
