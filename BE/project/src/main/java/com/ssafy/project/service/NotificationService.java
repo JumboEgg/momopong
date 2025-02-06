@@ -11,8 +11,8 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class NotificationService {
     private final SimpMessagingTemplate messagingTemplate;
-
-    // 알림 보내기
+    
+    // 동화 초대 알림 보내기
     public void sendNotification(Long inviteeId, NotificationDto notificationDto) {
         messagingTemplate.convertAndSend(
                 "/sub/invitation/" + inviteeId,

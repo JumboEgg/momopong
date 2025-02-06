@@ -1,5 +1,5 @@
 package com.ssafy.project.exception;
-
+// 토큰 만료
 public class InvalidTokenException extends RuntimeException {
     public InvalidTokenException() {
         super();

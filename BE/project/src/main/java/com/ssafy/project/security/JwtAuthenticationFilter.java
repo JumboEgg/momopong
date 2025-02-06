@@ -32,7 +32,7 @@ public class JwtAuthenticationFilter extends GenericFilter {
         // 다음 필터로 요청 전달
         filterChain.doFilter(servletRequest, servletResponse);
     }
-
+    // 액세스 토큰 갖져오기
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (bearerToken != null && bearerToken.startsWith("Bearer")) {

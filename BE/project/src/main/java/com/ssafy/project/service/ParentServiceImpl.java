@@ -35,7 +35,7 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
     private final ChildService childService;
-
+    // 부모 회원가입
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
         if (checkDuplicateParent(signUpDto.getEmail()))
