@@ -20,7 +20,7 @@ import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 @Slf4j
-@Component
+@Component("sttWebSocketHandler")
 public class WebSocketHandler extends TextWebSocketHandler {
     private final GoogleCloudConfig googleCloudConfig;
     private SpeechClient speechClient;
