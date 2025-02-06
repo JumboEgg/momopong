@@ -1,9 +1,6 @@
 import { useDrawing } from '@/stores/drawingStore';
 import { useFriends } from '../contexts/FriendContext';
-
-interface FriendSelectionProps {
-  onFriendSelect: (friendId: string) => void;
-}
+import type { FriendSelectionProps } from '../types/story';
 
 function FriendSelection({ onFriendSelect }: FriendSelectionProps): JSX.Element {
   const {
