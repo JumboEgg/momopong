@@ -3,6 +3,7 @@ import { create } from 'zustand';
 import api from '@/api/axios';
 import { FriendRequest } from '@/types/friend';
 import { AxiosError } from 'axios';
+import { tokenService } from '@/services/tokenService';
 
 interface FriendRequestState {
   requests: FriendRequest[];
@@ -22,17 +23,46 @@ const useFriendRequestStore = create<FriendRequestState>((set) => ({
   fetchRequests: async (childId: number) => {
     try {
       set({ isLoading: true, error: null });
+
+      // 현재 활성화된 토큰 확인
+      const activeToken = tokenService.getActiveToken();
+      if (!activeToken) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      console.log('Fetching requests for childId:', childId);
       const response = await api.get(`/children/${childId}/friend-requests`);
+      console.log('Fetched requests:', response.data);
+
       set({ requests: response.data, isLoading: false });
-    } catch (error) {
-      set({ error: 'Failed to fetch friend requests', isLoading: false });
+    } catch (err) {
+      console.error('Error fetching requests:', err);
+
+      if (err instanceof AxiosError) {
+        const errorMessage = err.response?.status === 403
+          ? '권한이 없습니다. 자녀 계정으로 로그인되어 있는지 확인해주세요.'
+          : '친구 요청 목록을 불러오는데 실패했습니다.';
+        set({ error: errorMessage, isLoading: false });
+      } else {
+        set({ error: '친구 요청 목록을 불러오는데 실패했습니다.', isLoading: false });
+      }
     }
   },
 
   sendRequest: async (childId: number, code: string) => {
     try {
       set({ isLoading: true, error: null });
+
+      // 현재 활성화된 토큰 확인
+      const activeToken = tokenService.getActiveToken();
+      if (!activeToken) {
+        throw new Error('로그인이 필요합니다.');
+      }
+
+      console.log('Active Token:', activeToken);
+      console.log('Request payload:', { childId, code });
       await api.post(`/children/${childId}/friend-requests`, { code });
+
       set({ isLoading: false });
     } catch (err) {
       const error = err as AxiosError; // AxiosError로 타입 단언
@@ -47,7 +77,7 @@ const useFriendRequestStore = create<FriendRequestState>((set) => ({
   acceptRequest: async (childId: number, friendId: number) => {
     try {
       set({ isLoading: true, error: null });
-      await api.put(`/children/${childId}/friend-requests/${friendId}`);
+      await api.post(`/children/${childId}/friend-requests/${friendId}`);
       set((state) => ({
         requests: state.requests.filter((req) => req.friendId !== friendId),
         isLoading: false,

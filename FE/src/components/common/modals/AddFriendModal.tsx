@@ -55,7 +55,7 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
         setError('친구 요청에 실패했습니다. 다시 시도해주세요.');
       }
     }
-  }; // 이 부분에 중괄호가 빠져있었습니다
+  };
 
   return (
     <div className="fixed top-0 left-0 w-full h-full z-30 bg-[#00000060] flex items-center justify-center">
