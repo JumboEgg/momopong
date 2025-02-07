@@ -14,12 +14,14 @@ public interface BookService {
     List<ChildStatusDto> playAvailableList(Long childId);
 
     // 친구 초대 보내기
-    InvitationDto sendInvitation(Long bookId, Long fromChildId, Long toChildId);
+    InvitationDto sendInvitation(Long bookId, Long inviterId, Long inviteeId);
 
     // 친구 초대 수락하기
-    void acceptInvitation(Long bookId, Long fromChildId, Long toChildId);
+    void acceptInvitation(Long bookId, Long inviterId, Long inviteeId);
 
     // 친구 초대 거절하기
-    void rejectInvitation(Long bookId, Long fromChildId, Long toChildId);
+    void rejectInvitation(Long bookId, Long inviterId, Long inviteeId);
 
+    // 친구 초대 만료
+    void expireInvitation(Long bookId, Long inviterId, Long inviteeId);
 }

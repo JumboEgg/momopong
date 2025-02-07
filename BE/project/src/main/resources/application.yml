@@ -16,7 +16,7 @@ spring:
   # JPA 설정
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: true
@@ -37,9 +37,9 @@ logging:
 jwt:
   secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
   access-token:
-    expire-time: 1800000 # 30분
-  refresh-token:
     expire-time: 259200000 # 3일
+  refresh-token:
+    expire-time: 604800000 # 7일
 
 # 포트 설정
 server:

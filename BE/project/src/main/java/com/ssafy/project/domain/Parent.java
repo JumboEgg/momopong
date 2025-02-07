@@ -96,12 +96,12 @@ public class Parent implements UserDetails {
     }
 
     // Entity to DTO
-    public ParentDto entityToDto(Parent parent) {
+    public ParentDto entityToDto() {
         return ParentDto.builder()
-                .parentId(parent.getId())
-                .email(parent.getEmail())
-                .name(parent.getName())
-                .phone(parent.getPhone())
+                .parentId(this.getId())
+                .email(this.getEmail())
+                .name(this.getName())
+                .phone(this.getPhone())
                 .build();
     }
 

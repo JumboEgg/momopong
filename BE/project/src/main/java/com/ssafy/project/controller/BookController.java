@@ -6,6 +6,7 @@ import com.ssafy.project.dto.invitation.InvitationDto;
 import com.ssafy.project.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("hasRole('CHILD')")
 @RequestMapping("/api/book")
 public class BookController {
     private final BookService bookService;
@@ -57,6 +59,15 @@ public class BookController {
     public ResponseEntity<Void> rejectInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
         Long inviterId = Long.parseLong(map.get("inviterId"));
         bookService.rejectInvitation(bookId, inviterId, inviteeId);
+
+        return ResponseEntity.ok().build();
+    }
+
+    // 친구 초대 만료
+    @PostMapping("/{bookId}/friend/{inviteeId}/invitation/expire")
+    public ResponseEntity<Void> expireInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
+        Long inviterId = Long.parseLong(map.get("inviterId"));
+        bookService.expireInvitation(bookId, inviterId, inviteeId);
 
         return ResponseEntity.ok().build();
     }
