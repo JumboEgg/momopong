@@ -12,6 +12,7 @@ const publicPaths = [
   '/parents/signup',
   '/parents/signin',
   '/parents/refresh-token',
+  '/children/presigned-url',
 ];
 
 const api = axios.create({
