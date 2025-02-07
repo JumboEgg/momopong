@@ -10,9 +10,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class InvitationDto {
-    private Long fromId; // 초대장을 보낸 아이 ID
-    private Long toId; // 초대장을 받은 아이 ID
-    private String fromName; // 초대장을 보낸 아이 이름
-    private String toName; // 초대장을 받은 아이 이름
+    private Long inviterId; // 초대장을 보낸 아이 ID
+    private Long inviteeId; // 초대장을 받은 아이 ID
+    private String inviterName; // 초대장을 보낸 아이 이름
+    private String inviteeName; // 초대장을 받은 아이 이름
     private String bookTitle; // 책 제목
+    private Long bookId; // 책 ID
 }

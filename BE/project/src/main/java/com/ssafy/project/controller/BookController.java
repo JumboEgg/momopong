@@ -50,8 +50,7 @@ public class BookController {
         Long inviterId = Long.parseLong(map.get("inviterId"));
         bookService.acceptInvitation(bookId, inviterId, inviteeId);
 
-        // 수락하면 오픈비두 방으로 이동해야 함!
-        return null;
+        return ResponseEntity.ok().build();
     }
 
     // 친구 초대 거절하기
