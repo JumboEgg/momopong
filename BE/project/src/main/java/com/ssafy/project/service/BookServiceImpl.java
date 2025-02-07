@@ -36,7 +36,7 @@ public class BookServiceImpl implements BookService {
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
     private final NotificationService notificationService;
-
+    // Redis 저장
     private static final String CHILD_STATUS_KEY = "child:status:%d";
     private static final String INVITATION_KEY = "book:invitation:%d:%d";
 
@@ -172,7 +172,7 @@ public class BookServiceImpl implements BookService {
                 .build();
         notificationService.sendNotification(inviterId, notification);
     }
-
+    // 초대장 만료
     @Override
     public void expireInvitation(Long bookId, Long inviterId, Long inviteeId) {
         Child inviter = childRepository.findById(inviterId)

@@ -77,10 +77,6 @@ public class Child {
         this.profile = profile;
     }
 
-    public void updateStatus(StatusType status) {
-        this.status = status;
-    }
-
     // 연관관계 편의 메서드 (양방향)
     public void changeParent(Parent parent) {
         this.parent = parent;
