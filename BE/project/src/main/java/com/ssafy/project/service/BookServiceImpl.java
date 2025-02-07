@@ -89,11 +89,12 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
         InvitationDto invitationDto = InvitationDto.builder()
-                .fromId(inviterId)
-                .toId(inviteeId)
-                .fromName(inviter.getName())
-                .toName(invitee.getName())
+                .inviterId(inviterId)
+                .inviteeId(inviteeId)
+                .inviterName(inviter.getName())
+                .inviteeName(invitee.getName())
                 .bookTitle(book.getTitle())
+                .bookId(bookId)
                 .build();
 
         // 초대장 Redis에 저장 (10초간 초대장 유효)
