@@ -1,9 +1,6 @@
 package com.ssafy.project.controller;
 
-import com.ssafy.project.dto.ChildDto;
-import com.ssafy.project.dto.ChildSignUpRequestDto;
-import com.ssafy.project.dto.ChildUpdateRequestDto;
-import com.ssafy.project.dto.SignUpResponseDto;
+import com.ssafy.project.dto.*;
 import com.ssafy.project.service.ChildService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -72,5 +69,13 @@ public class ChildController {
         childService.deleteChild(childId);
 
         return ResponseEntity.ok().build();
+    }
+
+    // Presigned URL - GEt
+    @GetMapping("/presigned-url")
+    public ResponseEntity<FileDto> getPresignedUrl() {
+        FileDto presignedUrl = childService.getPresignedUrl();
+
+        return ResponseEntity.ok(presignedUrl);
     }
 }

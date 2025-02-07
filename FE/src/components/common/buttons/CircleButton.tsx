@@ -27,7 +27,7 @@ const sizeClasses: Record<CircleButtonSize, string> = {
 };
 
 const sizeToIconSize: Record<CircleButtonSize, string> = {
-  xs: 'md',
+  xs: 'sm',
   sm: 'lg',
   base: 'lg',
   md: 'xl',

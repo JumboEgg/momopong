@@ -29,6 +29,7 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
 
   const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
   const [localError, setLocalError] = useState<string | null>(null);
+  const [isImageUploading, setIsImageUploading] = useState(false);
 
   useEffect(() => {
     if (user?.parentId) {
@@ -84,9 +85,27 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
     setValidationErrors((prev) => ({ ...prev, profile: undefined }));
   };
 
+  const handleImageUploadStart = () => {
+    setIsImageUploading(true);
+  };
+
+  const handleImageUploadComplete = () => {
+    setIsImageUploading(false);
+  };
+
+  const handleImageUploadError = (error: string) => {
+    setLocalError(error);
+    setIsImageUploading(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
+
+    if (isImageUploading) {
+      setLocalError('이미지 업로드가 완료될 때까지 기다려주세요.');
+      return;
+    }
 
     if (!validateForm()) {
       return;
@@ -134,6 +153,9 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
           <ImageUpload
             currentImage={formData.profile}
             onImageChange={handleImageChange}
+            onUploadStart={handleImageUploadStart}
+            onUploadComplete={handleImageUploadComplete}
+            onError={handleImageUploadError}
           />
           {validationErrors.profile && (
             <p className="mt-2 text-sm text-red-600">{validationErrors.profile}</p>

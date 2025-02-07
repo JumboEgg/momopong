@@ -37,7 +37,6 @@ function App(): JSX.Element {
         <Route path="/house/letters" element={<MyLetters />} />
         <Route path="/house/mybookstory" element={<MyBookStory />} />
         <Route path="/house/mydrawing" element={<MyDrawing />} />
-        <Route path="/sub-accounts/create" element={<SubAccountForm />} />
       </Routes>
     </div>
   );

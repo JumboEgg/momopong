@@ -31,7 +31,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
       bg-[#00000060]
       flex items-center justify-center"
     >
-      <div className="w-1/2 min-h-[85vh] bg-[#FFF08E] border-10 border-tainoi-400
+      <div className="w-1/2 min-h-[85vh] bg-broom-200 border-10 border-tainoi-400
         flex flex-col absolute items-center justify-between p-8 rounded-[2vw] overflow-hidden"
       >
         <IconCircleButton
