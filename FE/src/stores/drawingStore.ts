@@ -1,6 +1,13 @@
 import { DrawingMode } from '@/components/drawing/types/drawing';
 import { create } from 'zustand';
 
+export interface TemplateData {
+  id: number;
+  name: string;
+  backgroundSrc: string | null;
+  outlineSrc: string;
+}
+
 export interface DrawingData {
   title: string;
   date: number;
@@ -11,25 +18,15 @@ export interface DrawingData {
 interface DrawingStore {
   mode: DrawingMode | null;
   setMode: (mode: DrawingMode | null) => void;
-  friendId: number;
-  setFriendId: (id: number) => void;
-  friendName: string;
-  setFriendName: (name: string) => void;
-  templateId: number;
-  setTemplateId: (id: number) => void;
-  templateName: string;
-  setTemplateName: (name: string) => void;
-  backgroundSrc: string;
-  setBackgroundSrc: (src: string) => void;
-  outlineSrc: string;
-  setOutlineSrc: (src: string) => void;
+  template: TemplateData | null;
+  setTemplate: (data : TemplateData | null) => void;
   penColor: string;
   setPenColor: (color: string) => void;
   isErasing: boolean;
   setIsErasing: (isErasing: boolean) => void;
   imageData: string;
   setImageData: (data: string) => void;
-  localDrawingList: DrawingData;
+  localDrawingList: DrawingData[];
   addDrawingData: (data: DrawingData) => void;
 }
 
@@ -38,17 +35,8 @@ const useDrawingStore = create<DrawingStore>((set) => ({
   mode: null,
   setMode: (mode) => set({ mode }),
 
-  templateId: 0,
-  setTemplateId: (id) => set({ templateId: id }),
-
-  templateName: '',
-  setTemplateName: (name) => set({ templateName: name }),
-
-  backgroundSrc: '',
-  setBackgroundSrc: (src) => set({ backgroundSrc: src }),
-
-  outlineSrc: '',
-  setOutlineSrc: (src) => set({ outlineSrc: src }),
+  template: null,
+  setTemplate: (data) => set({ template: data }),
 
   penColor: 'black',
   setPenColor: (color) => set({ penColor: color }),

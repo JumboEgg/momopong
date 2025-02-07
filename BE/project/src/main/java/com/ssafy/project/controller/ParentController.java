@@ -6,9 +6,11 @@ import com.ssafy.project.service.ParentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -45,14 +47,18 @@ public class ParentController {
     }
 
     // 로그아웃
+    @PreAuthorize("hasRole('PARENT')")
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Refresh-Token") String refreshToken) {
-        parentService.logout(refreshToken);
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> map) {
+        String email = map.get("email");
+        String accessToken = authorization.substring(7);
+        parentService.logout(accessToken, email);
 
         return ResponseEntity.ok().build();
     }
 
     // 회원 조회
+    @PreAuthorize("hasRole('PARENT')")
     @GetMapping("/{parentId}")
     public ResponseEntity<ParentDto> readParent(@PathVariable("parentId") Long parentId) {
         ParentDto parentDto = parentService.readParentById(parentId);
@@ -61,6 +67,7 @@ public class ParentController {
     }
 
     // 전체 자식 조회
+    @PreAuthorize("hasRole('PARENT')")
     @GetMapping("/{parentId}/children")
     public ResponseEntity<List<ChildListDto>> childrenList(@PathVariable("parentId") Long parentId) {
         List<ChildListDto> childrenList = parentService.childrenList(parentId);
@@ -69,6 +76,7 @@ public class ParentController {
     }
 
     // 회원 정보 수정
+    @PreAuthorize("hasRole('PARENT')")
     @PatchMapping("/{parentId}")
     public ResponseEntity<ParentDto> updateParent(@PathVariable("parentId") Long parentId, @RequestBody ParentDto parentDto) {
         if (!parentId.equals(parentDto.getParentId()))
@@ -79,6 +87,7 @@ public class ParentController {
     }
 
     // 회원 탈퇴
+    @PreAuthorize("hasRole('PARENT')")
     @DeleteMapping("/{parentId}")
     public ResponseEntity<Void> deleteParent(@PathVariable("parentId") Long parentId) {
         parentService.deleteParent(parentId);

@@ -2,8 +2,7 @@ import {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
-import { getOutlineSrc } from '../utils/getImgSrc';
-import useSocketStore, { drawingData } from '../hooks/useSocketStore';
+import useSocketStore from '../hooks/useSocketStore';
 
 const baseWidth: number = 1600;
 const basePenWidth: number = 30;
@@ -26,21 +25,28 @@ export interface LineData {
   curY: number;
 }
 
+export interface DrawingData {
+  status: string;
+  color: string;
+  prevX: number;
+  prevY: number;
+  curX: number;
+  curY: number;
+}
+
 function DrawingCanvas({
   canvasHeight, canvasWidth, setDrawingCanvasRef,
 }: DrawingCanvasProps): JSX.Element {
   const {
-    mode, templateId, isErasing, penColor, imageData,
+    mode, template, isErasing, penColor,
   } = useDrawing();
 
   const {
-    setIsConnected, socket,
+    socket,
   } = useSocketStore();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
-
-  // const bgImgSrc = getBackgroundSrc(templateId);
-  const outlineImgSrc = getOutlineSrc(templateId);
+  const outlineImgSrc = template ? template.outlineSrc : '';
 
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
   const canvasRef = useRef<HTMLCanvasElement>(null); // 그림 그리기 레이어
@@ -50,16 +56,6 @@ function DrawingCanvas({
   const [newLine, setNewLine] = useState<LineData>({
     prevX: -100, prevY: -100, curX: -100, curY: -100,
   });
-
-  useEffect(() => {
-    if (mode !== 'together' && mode !== 'story') return;
-    if (!imageData) setIsConnected(true);
-    if (imageData) setIsConnected(false);
-  }, [mode, imageData]);
-
-  useEffect(() => {
-    setDrawingCanvasRef(canvasRef.current);
-  }, [canvasRef]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -73,11 +69,11 @@ function DrawingCanvas({
     container.addEventListener('touchstart', preventTouchScroll, { passive: false });
     container.addEventListener('touchmove', preventTouchScroll, { passive: false });
 
-    // TODO : 형식 변경 후에도 터치 인식 되는지 확인
-    // return () => {
-    container.removeEventListener('touchstart', preventTouchScroll);
-    container.removeEventListener('touchmove', preventTouchScroll);
-    // };
+    // eslint-disable-next-line consistent-return
+    return () => {
+      container.removeEventListener('touchstart', preventTouchScroll);
+      container.removeEventListener('touchmove', preventTouchScroll);
+    };
   }, []);
 
   // 상대적 캔버스 크기 비율
@@ -89,12 +85,14 @@ function DrawingCanvas({
     const context = outlineCanvasRef.current.getContext('2d');
     if (!context) return;
 
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+
     const img = new Image();
     img.src = outlineImgSrc;
     img.onload = () => {
       context.drawImage(img, 0, 0, canvasWidth, canvasHeight);
     };
-  }, []);
+  }, [outlineImgSrc, canvasWidth, canvasHeight]);
 
   useEffect(() => {
     drawBackgroundImg();
@@ -114,7 +112,9 @@ function DrawingCanvas({
     context.lineCap = 'round';
 
     setCtx(context);
-  }, [canvasRef.current]);
+
+    setDrawingCanvasRef(canvasRef.current);
+  }, [canvasScale, penColor, setDrawingCanvasRef]);
 
   // 펜 색상 변경
   useEffect(() => {
@@ -141,7 +141,7 @@ function DrawingCanvas({
 
   function stroke({
     status, color, prevX, prevY, curX, curY,
-  }: drawingData) {
+  }: DrawingData) {
     if (!ctx) return;
 
     if (status === 'erase') {
@@ -180,7 +180,7 @@ function DrawingCanvas({
     } else {
       socket.emit('message', {
         status: 'draw',
-        penColor,
+        color: penColor,
         prevX: prevX / canvasScale,
         prevY: prevY / canvasScale,
         curX: curX / canvasScale,
@@ -239,7 +239,7 @@ function DrawingCanvas({
   // socket.io의 그림 정보 수신
   useEffect(() => {
     if (!socket) return;
-    socket.on('message', (data: drawingData) => {
+    socket.on('message', (data: DrawingData) => {
       if (!ctx) return;
       stroke({
         status: data.status,

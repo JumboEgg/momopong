@@ -2,11 +2,24 @@ import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useEffect, useState } from 'react';
 import DialogModal from '@/components/common/modals/DialogModal';
 import { DrawingData, useDrawing } from '@/stores/drawingStore';
+import { useFriends } from '@/stores/friendStore';
 
 function ResultPage() {
   const {
-    mode, setMode, setTemplateId, imageData, setImageData, templateName, addDrawingData,
+    mode,
+    setMode,
+    template,
+    setTemplate,
+    setPenColor,
+    setIsErasing,
+    imageData,
+    setImageData,
+    addDrawingData,
   } = useDrawing();
+
+  const {
+    friend, setFriend, setIsConnected,
+  } = useFriends();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
   const [saveModal, setSaveModal] = useState<boolean>(false);
@@ -25,21 +38,29 @@ function ResultPage() {
 
   const onSave = () => {
     const drawingResult: DrawingData = {
-      title: `${mode === 'single' ? '내가 그린' : '친구와 그린'} ${templateName}`,
-      date: new Date(),
+      title: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
+      date: new Date().getDate(),
       src: imageData,
     };
 
     console.log(drawingResult);
 
+    setFriend(null);
+    setIsConnected(false);
+    setPenColor('black');
+    setIsErasing(false);
     addDrawingData(drawingResult);
-    setTemplateId(0);
+    setTemplate(null);
     setMode(null);
     setImageData('');
   };
 
   const onDelete = () => {
-    setTemplateId(0);
+    setFriend(null);
+    setIsConnected(false);
+    setPenColor('black');
+    setIsErasing(false);
+    setTemplate(null);
     setMode(null);
     setImageData('');
   };
@@ -51,14 +72,14 @@ function ResultPage() {
           <img
             className="outline-amber-900 outline-8 md:outline-12 max-w-[80%] max-h-[80vh] border-8 md:border-12 border-amber-700 shadow-2xl bg-white mx-auto"
             src={imageData}
-            alt={templateName}
+            alt={template ? template.name : ''}
           />
         </div>
         <div className="text-center mt-[-16px]">
           <p className="bg-amber-400 font-bold md:text-xl p-1 ps-5 pe-5 rounded-md shadow-md">
-            {mode === 'single' ? '내가 그린' : '친구와 그린'}
+            {mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`}
             {' '}
-            {templateName}
+            {template ? template.name : ''}
           </p>
         </div>
         <div className="text-center mt-4 md:mt-10 space-x-4">

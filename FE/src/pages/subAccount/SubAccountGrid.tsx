@@ -61,7 +61,7 @@ function SubAccountGrid({ onAdd }: SubAccountGridProps): JSX.Element {
           <button
             key={account.childId}
             type="button"
-            onClick={() => navigate('/children/signup')}
+            onClick={() => handleAccountSelect(account.childId)}
             disabled={isLoading}
             className="aspect-square w-50 h-50 rounded-lg border-2 border-gray-200 p-4 flex flex-col items-center justify-center hover:border-blue-500 disabled:opacity-50"
           >
