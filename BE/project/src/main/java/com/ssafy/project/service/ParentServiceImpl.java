@@ -128,7 +128,7 @@ public class ParentServiceImpl implements ParentService {
                 .map(child -> ChildListDto.builder()
                         .childId(child.getId())
                         .name(child.getName())
-                        .profile(presignedUrlService.getProfile(child.getProfile()))
+                        .profile(presignedUrlService.getFile(child.getProfile()))
                         .build())
                 .collect(Collectors.toList());
     }

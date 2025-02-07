@@ -3,9 +3,11 @@ package com.ssafy.project.controller;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.FrameDto;
 import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.FrameService;
+import com.ssafy.project.service.PresignedUrlService;
 import lombok.RequiredArgsConstructor;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,6 +26,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class FrameController {
     private final FrameService frameService;
+    private final PresignedUrlService presignedUrlService;
 
     private final AmazonS3 amazonS3;
 
@@ -33,10 +36,9 @@ public class FrameController {
 
     //그림(서브컨텐츠) 저장용 presigned-url 생성
     @GetMapping("/draw/presigned-url")
-    public ResponseEntity<Map<String, String>> getPresignedUrl() {
-
-        Map<String, String> response = frameService.getPresignedUrl();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<FileDto> getPresignedUrl() {
+        FileDto presignedUrl = presignedUrlService.getPresignedUrl("frame", "webp");
+        return ResponseEntity.ok(presignedUrl);
     }
 
 

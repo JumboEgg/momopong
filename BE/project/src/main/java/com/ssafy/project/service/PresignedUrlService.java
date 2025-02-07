@@ -42,7 +42,7 @@ public class PresignedUrlService {
     }
 
     // Presigned URL - GET
-    public String getProfile(String fileName) {
+    public String getFile(String fileName) {
         GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
                 .withMethod(HttpMethod.GET)
                 .withExpiration(DateTime.now().plusMinutes(5).toDate());

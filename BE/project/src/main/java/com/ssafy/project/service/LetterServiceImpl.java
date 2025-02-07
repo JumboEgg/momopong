@@ -30,6 +30,7 @@ import java.util.stream.Collectors;
 public class LetterServiceImpl implements LetterService {
 
     private final AmazonS3 amazonS3;
+    private final PresignedUrlService presignedUrlService;
 
     @Value("${openai.api.key}")
     private String apiKey;
@@ -41,24 +42,7 @@ public class LetterServiceImpl implements LetterService {
     private final LetterRepository letterRepository;
     private final ChildRepository childRepository;
 
-    // 편지 음성 저장용 S3 presignedUrl 생성하고 return
-    @Override
-    public Map<String, String> getPresignedUrl() {
-        String fileName = "letters/" + UUID.randomUUID().toString() + ".wav";
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, fileName)
-                        .withMethod(HttpMethod.PUT)
-                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("presignedUrl", url.toString());   //파일 업로드를 위한 임시 권한용
-        response.put("fileName", fileName);     // 파일 이름
-
-        return response;
-    }
 
     //gpt 응답 받아서 return
     @Override
@@ -129,7 +113,7 @@ public class LetterServiceImpl implements LetterService {
         return letters.stream()
                 .map(letter -> {
                     LetterDto letterDto = Letter.entityToDto(letter);
-                    letterDto.updateletterUrl(getLetterUrl(letterDto.getLetterFileName()));
+                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
 
                     return letterDto;
                 })
@@ -148,15 +132,4 @@ public class LetterServiceImpl implements LetterService {
         return Letter.entityToDto(letter);
     }
 
-
-    // 편지 조회용 S3 presignedUrl 생성
-    private String getLetterUrl(String fileName) {  //여기서만 사용해서 private이다
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
-                .withMethod(HttpMethod.GET)
-                .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        System.out.println("url.toString() = " + url.toString());
-        return url.toString();
-    }
 }
