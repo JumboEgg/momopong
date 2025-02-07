@@ -154,23 +154,4 @@ public class ChildServiceImpl implements ChildService {
     public void deleteChild(Long childId) {
         childRepository.deleteById(childId);
     }
-
-    // Presigned URL - PUT
-    @Override
-    public FileDto getPresignedUrl() {
-        return presignedUrlService.getPresignedUrl();
-//        String fileName = "profile/" + UUID.randomUUID() + ".webp";
-//
-//        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-//                new GeneratePresignedUrlRequest(bucket, fileName)
-//                        .withMethod(HttpMethod.PUT)
-//                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
-//
-//        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-//
-//        return FileDto.builder()
-//                .presignedUrl(url.toString())
-//                .fileName(fileName)
-//                .build();
-    }
 }

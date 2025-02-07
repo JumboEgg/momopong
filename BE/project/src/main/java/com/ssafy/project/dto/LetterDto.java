@@ -14,7 +14,12 @@ public class LetterDto {
     private String role;
     private String childName;
     private String content;
-    private String letterRecord;
+    private String letterFileName;
+    private String letterUrl;
     private String reply;
     private String createdAt;
+
+    public void updateletterUrl(String letterUrl) {
+        this.letterUrl = letterUrl;
+    }
 }
