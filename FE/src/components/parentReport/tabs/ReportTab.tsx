@@ -9,6 +9,7 @@ const MOCK_REPORT_DATA = {
   drawingTogetherTime: 567,
   thisWeek: 345,
   lastWeek: 456,
+  resignCnt: 3,
 };
 
 export interface ReportTabProps {
@@ -29,7 +30,9 @@ function ReportTab({ childName }: ReportTabProps) {
         {' '}
         여행했어요.
       </div>
-      <div className="w-full h-full flex justify-center items-center bg-pink-100 border-4 border-pink-300 rounded-2xl font-sans font-bold py-3">
+      <div className="w-full h-full flex flex-col justify-center items-center
+        bg-pink-100 border-4 border-pink-300 rounded-2xl font-sans font-bold py-3 space-y-3"
+      >
         <div className="w-full flex justify-evenly items-baseline">
           <div>
             <div className="text-xl flex items-center">
@@ -72,6 +75,11 @@ function ReportTab({ childName }: ReportTabProps) {
               </div>
             </div>
           </div>
+        </div>
+        <div>
+          멀티플레이 중 중도퇴장 횟수:
+          {' '}
+          {MOCK_REPORT_DATA.resignCnt}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version '3.4.2'
+	id 'org.springframework.boot' version '3.3.8'
 	id 'io.spring.dependency-management' version '1.1.7'
 }
 
@@ -58,10 +58,20 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 	implementation platform('com.google.cloud:libraries-bom:26.34.0')
 	implementation 'com.google.cloud:google-cloud-speech'
+	implementation 'com.google.protobuf:protobuf-java:3.25.1'
+	implementation 'com.google.protobuf:protobuf-java-util:3.25.1'
 
 	// AWS 버전이거 맞음??
 	implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
 
+	// 서브 컨텐츠 그림 그리기
+	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
+
+	// Swagger UI
+// Swagger UI 의존성 업데이트
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-common:2.2.0'
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.2.0'
 }
 
 tasks.named('test') {

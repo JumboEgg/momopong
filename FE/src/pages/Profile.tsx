@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faArrowLeft,
@@ -6,17 +7,15 @@ import {
 import TextButton from '@/components/common/buttons/TextButton';
 import ProfileImage, { ProfileImgSize } from '@/components/common/ProfileImage';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
-import { useNavigate } from 'react-router-dom';
 
 function Profile(): JSX.Element {
+  const navigate = useNavigate();
   const MOCK_PROFILE = {
     name: '김과자',
     type: '동화나라 여행자',
     days: 45,
     code: '1234 5678',
   };
-
-  const navigate = useNavigate();
 
   const [imgSize, setImgSize] = useState<ProfileImgSize>('xl');
   const handleResize = () => {
@@ -52,8 +51,7 @@ function Profile(): JSX.Element {
         <TextButton
           size="md"
           variant="gray"
-          className=""
-          onClick={() => navigate('/Parent')}
+          onClick={() => navigate('/parents/:parent_id/children')}
         >
           계정 변경
         </TextButton>
@@ -67,6 +65,7 @@ function Profile(): JSX.Element {
           <ProfileImage
             src="https://health.chosun.com/site/data/img_dir/2023/07/17/2023071701753_0.jpg"
             size={imgSize}
+            shape="square"
           />
           <div className="w-full h-full flex flex-col items-center justify-center">
             <h2 className="text-xl md:text-2xl">{MOCK_PROFILE.type}</h2>

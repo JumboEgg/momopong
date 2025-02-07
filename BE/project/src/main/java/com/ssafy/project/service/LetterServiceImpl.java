@@ -34,7 +34,7 @@ public class LetterServiceImpl implements LetterService {
     private final LetterRepository letterRepository;
     private final ChildRepository childRepository;
 
-
+    //
     @Override
     public String getGPTResponse(String fairyTale, String role, String childName, String content) {
         // GPT 프롬프트 생성

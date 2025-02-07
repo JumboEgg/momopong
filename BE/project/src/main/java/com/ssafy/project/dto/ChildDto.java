@@ -18,4 +18,8 @@ public class ChildDto {
     private int daysSinceStart; // 시작일로부터 며칠 지났는지
     private String code;
     private boolean firstLogin;
+
+    public void updateProfile(String profile) {
+        this.profile = profile;
+    }
 }

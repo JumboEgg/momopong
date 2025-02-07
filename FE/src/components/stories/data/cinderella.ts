@@ -1,19 +1,15 @@
 export type CharacterType = 'narration' | 'princess' | 'prince';
 
-export interface StoryPage {
-  pageNumber: number;
-  contents: {
-    type: CharacterType;
-    text: string;
-    audioFiles: string[];
-  }[];
-}
-
 export interface StoryPageContent {
   type: CharacterType;
   text: string;
   audioFiles: string[];
   illustration?: string; // 선택적 속성으로 추가
+}
+
+export interface StoryPage {
+  pageNumber: number;
+  contents: StoryPageContent[];
 }
 
 const storyData: StoryPage[] = [

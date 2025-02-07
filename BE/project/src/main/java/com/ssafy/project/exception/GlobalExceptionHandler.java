@@ -31,20 +31,26 @@ public class GlobalExceptionHandler {
     }
 
     // 리소스를 찾을 수 없는 예외
-    @ExceptionHandler({UserNotFoundException.class, FriendNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, FriendNotFoundException.class, BookNotFoundException.class})
     public ResponseEntity<String> handleNotFoundException(Exception e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("리소스를 찾을 수 없습니다: " + e.getMessage());
     }
 
     // 잘못된 요청
-    @ExceptionHandler({IllegalArgumentException.class, ChildLimitExceededException.class, DisabledException.class, IllegalFriendRequestException.class})
+    @ExceptionHandler({IllegalArgumentException.class, ChildLimitExceededException.class, IllegalFriendRequestException.class, DuplicateException.class})
     public ResponseEntity<String> handleBadRequestException(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("잘못된 요청입니다: " + e.getMessage());
     }
 
     // 중복 요청
-    @ExceptionHandler({DuplicateException.class, AlreadyAcceptedException.class})
+    @ExceptionHandler({AlreadyAcceptedException.class})
     public ResponseEntity<String> handleConflictException(Exception e) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body("이미 처리된 요청입니다: " + e.getMessage());
+    }
+
+    // 만료된 요청
+    @ExceptionHandler({DisabledException.class , InvitationExpiredException.class})
+    public ResponseEntity<String> handleGoneException(Exception e) {
+        return ResponseEntity.status(HttpStatus.GONE).body("이미 만료된 요청입니다: " + e.getMessage());
     }
 }

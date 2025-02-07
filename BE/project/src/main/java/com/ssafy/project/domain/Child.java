@@ -77,10 +77,6 @@ public class Child {
         this.profile = profile;
     }
 
-    public void updateStatus(StatusType status) {
-        this.status = status;
-    }
-
     // 연관관계 편의 메서드 (양방향)
     public void changeParent(Parent parent) {
         this.parent = parent;
@@ -88,15 +84,15 @@ public class Child {
     }
 
     // Entity to Dto
-    public ChildDto entityToDto(Child child) {
+    public ChildDto entityToDto() {
         return ChildDto.builder()
-                .childId(child.getId())
-                .name(child.getName())
-                .profile(child.getProfile())
-                .age(child.getAge())
-                .daysSinceStart(child.getDaysSinceStart())
-                .code(child.getCode())
-                .firstLogin(child.isFirstLogin())
+                .childId(this.getId())
+                .name(this.getName())
+                .profile(this.getProfile())
+                .age(this.getAge())
+                .daysSinceStart(this.getDaysSinceStart())
+                .code(this.getCode())
+                .firstLogin(this.isFirstLogin())
                 .build();
     }
 }

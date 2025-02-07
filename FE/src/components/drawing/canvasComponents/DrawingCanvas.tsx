@@ -46,8 +46,6 @@ function DrawingCanvas({
   } = useSocketStore();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
-
-  // const bgImgSrc = getBackgroundSrc(templateId);
   const outlineImgSrc = template ? template.outlineSrc : '';
 
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
@@ -58,17 +56,6 @@ function DrawingCanvas({
   const [newLine, setNewLine] = useState<LineData>({
     prevX: -100, prevY: -100, curX: -100, curY: -100,
   });
-
-  // socket 상시 연결
-  // useEffect(() => {
-  //   if (mode !== 'together' && mode !== 'story') return;
-  //   if (!imageData) setIsConnected(true);
-  //   if (imageData) setIsConnected(false);
-  // }, [mode, imageData]);
-
-  useEffect(() => {
-    setDrawingCanvasRef(canvasRef.current);
-  }, [canvasRef]);
 
   useEffect(() => {
     const container = containerRef.current;
@@ -98,12 +85,14 @@ function DrawingCanvas({
     const context = outlineCanvasRef.current.getContext('2d');
     if (!context) return;
 
+    context.clearRect(0, 0, canvasWidth, canvasHeight);
+
     const img = new Image();
     img.src = outlineImgSrc;
     img.onload = () => {
       context.drawImage(img, 0, 0, canvasWidth, canvasHeight);
     };
-  }, []);
+  }, [outlineImgSrc, canvasWidth, canvasHeight]);
 
   useEffect(() => {
     drawBackgroundImg();
@@ -123,7 +112,9 @@ function DrawingCanvas({
     context.lineCap = 'round';
 
     setCtx(context);
-  }, [canvasRef.current]);
+
+    setDrawingCanvasRef(canvasRef.current);
+  }, [canvasScale, penColor, setDrawingCanvasRef]);
 
   // 펜 색상 변경
   useEffect(() => {
@@ -250,7 +241,6 @@ function DrawingCanvas({
     if (!socket) return;
     socket.on('message', (data: DrawingData) => {
       if (!ctx) return;
-      console.log(`received color : ${data.color}`);
       stroke({
         status: data.status,
         color: data.color,

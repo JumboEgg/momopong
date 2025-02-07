@@ -3,6 +3,9 @@ package com.ssafy.project.service;
 import com.ssafy.project.dto.ChildDto;
 import com.ssafy.project.dto.ChildSignUpRequestDto;
 import com.ssafy.project.dto.ChildUpdateRequestDto;
+import com.ssafy.project.dto.FileDto;
+
+import java.util.Map;
 
 public interface ChildService {
 
@@ -10,10 +13,10 @@ public interface ChildService {
     Long signUp(ChildSignUpRequestDto signUpRequestDto);
 
     // 자식 계정 로그인
-    ChildDto login(Long childId);
+    Map<String, Object> login(Long childId);
 
     // 자식 계정 로그아웃
-    void logout(Long childId);
+    void logout(String authorization, Long childId);
 
     // 자식 계정 조회
     ChildDto findChild(Long childId);
@@ -23,4 +26,7 @@ public interface ChildService {
 
     // 자식 계정 삭제
     void deleteChild(Long childId);
+
+    // Presigned Url 얻기
+    FileDto getPresignedUrl();
 }

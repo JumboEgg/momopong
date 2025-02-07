@@ -1,5 +1,6 @@
 import { DrawingMode } from '@/components/drawing/types/drawing';
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 export interface TemplateData {
   id: number;
@@ -18,14 +19,6 @@ export interface DrawingData {
 interface DrawingStore {
   mode: DrawingMode | null;
   setMode: (mode: DrawingMode | null) => void;
-  // templateId: number;
-  // setTemplateId: (id: number) => void;
-  // templateName: string;
-  // setTemplateName: (name: string) => void;
-  // backgroundSrc: string;
-  // setBackgroundSrc: (src: string) => void;
-  // outlineSrc: string;
-  // setOutlineSrc: (src: string) => void;
   template: TemplateData | null;
   setTemplate: (data : TemplateData | null) => void;
   penColor: string;
@@ -39,39 +32,41 @@ interface DrawingStore {
 }
 
 // Zustand 상태 훅 생성
-const useDrawingStore = create<DrawingStore>((set) => ({
-  mode: null,
-  setMode: (mode) => set({ mode }),
+const useDrawingStore = create<DrawingStore>()(
+  persist(
+    (set) => ({
+      mode: null,
+      setMode: (mode) => set({ mode }),
 
-  // templateId: 0,
-  // setTemplateId: (id) => set({ templateId: id }),
+      template: null,
+      setTemplate: (data) => set({ template: data }),
 
-  // templateName: '',
-  // setTemplateName: (name) => set({ templateName: name }),
+      penColor: 'black',
+      setPenColor: (color) => set({ penColor: color }),
 
-  // backgroundSrc: '',
-  // setBackgroundSrc: (src) => set({ backgroundSrc: src }),
+      isErasing: false,
+      setIsErasing: (isErasing) => set({ isErasing }),
 
-  // outlineSrc: '',
-  // setOutlineSrc: (src) => set({ outlineSrc: src }),
+      imageData: '',
+      setImageData: (data) => set({ imageData: data }),
 
-  template: null,
-  setTemplate: (data) => set({ template: data }),
-
-  penColor: 'black',
-  setPenColor: (color) => set({ penColor: color }),
-
-  isErasing: false,
-  setIsErasing: (isErasing) => set({ isErasing }),
-
-  imageData: '',
-  setImageData: (data) => set({ imageData: data }),
-
-  localDrawingList: [],
-  addDrawingData: (data) => set((state) => ({
-    localDrawingList: [...state.localDrawingList, data],
-  })),
-}));
+      localDrawingList: [],
+      addDrawingData: (data) => set((state) => ({
+        localDrawingList: [...state.localDrawingList, data],
+      })),
+    }),
+    {
+      name: 'drawing-storage',
+      partialize: (state) => Object.fromEntries(
+        // TODO : 새로고침 시 페이지 생성 시 초기화 설정 때문에 의미가 없다
+        // 개선 방안 고려
+        Object.entries(state)
+          .filter(([key]) => ['mode', 'templateId', 'imageData', 'localDrawingList']
+            .includes(key)),
+      ),
+    },
+  ),
+);
 
 // Zustand에서 상태를 가져오는 커스텀 훅
 export const useDrawing = (): DrawingStore => useDrawingStore();
