@@ -2,6 +2,7 @@ import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useEffect, useState } from 'react';
 import DialogModal from '@/components/common/modals/DialogModal';
 import { DrawingData, useDrawing } from '@/stores/drawingStore';
+import { useFriends } from '@/stores/friendStore';
 
 function ResultPage() {
   const {
@@ -15,6 +16,10 @@ function ResultPage() {
     setImageData,
     addDrawingData,
   } = useDrawing();
+
+  const {
+    friend, setFriend, setIsConnected,
+  } = useFriends();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
   const [saveModal, setSaveModal] = useState<boolean>(false);
@@ -33,13 +38,15 @@ function ResultPage() {
 
   const onSave = () => {
     const drawingResult: DrawingData = {
-      title: `${mode === 'single' ? '내가 그린' : '친구와 그린'} ${template ? template.name : ''}`,
+      title: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
       date: new Date().getDate(),
       src: imageData,
     };
 
     console.log(drawingResult);
 
+    setFriend(null);
+    setIsConnected(false);
     setPenColor('black');
     setIsErasing(false);
     addDrawingData(drawingResult);
@@ -49,6 +56,10 @@ function ResultPage() {
   };
 
   const onDelete = () => {
+    setFriend(null);
+    setIsConnected(false);
+    setPenColor('black');
+    setIsErasing(false);
     setTemplate(null);
     setMode(null);
     setImageData('');
@@ -66,7 +77,7 @@ function ResultPage() {
         </div>
         <div className="text-center mt-[-16px]">
           <p className="bg-amber-400 font-bold md:text-xl p-1 ps-5 pe-5 rounded-md shadow-md">
-            {mode === 'single' ? '내가 그린' : '친구와 그린'}
+            {mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`}
             {' '}
             {template ? template.name : ''}
           </p>

@@ -80,7 +80,7 @@ function MyLetters(): React.JSX.Element {
           variant="action"
           onClick={handleBack}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
-          className="fixed top-5 left-5"
+          className="fixed top-2 md:top-5 left-2 md:left-5 z-10"
         />
 
         {/* Main content container */}
@@ -90,7 +90,7 @@ function MyLetters(): React.JSX.Element {
             <div className="w-1/2 h-full">
               {selectedLetter ? (
                 <div
-                  className="bg-pink-200 p-6 rounded-2xl relative font-[BMJUA] h-full animate-slide-up"
+                  className="bg-pink-200 p-3 md:p-6 rounded-2xl relative font-[BMJUA] h-full animate-slide-up"
                 >
                   <span className="absolute -top-10 right-3">
                     <TextCircleButton
@@ -101,13 +101,13 @@ function MyLetters(): React.JSX.Element {
                       className="text-2xl"
                     />
                   </span>
-                  <p className="my-3 text-xl ps-4">사탕이에게</p>
-                  <div className="h-[calc(100%-160px)]">
-                    <div className="customScrollbar overflow-y-auto h-full text-xl px-4">
+                  <p className="my-3 text-lg md:text-xl ps-2 md:not-[]:ps-4">사탕이에게</p>
+                  <div className="h-[calc(100%-100px)] md:h-[calc(100%-160px)]">
+                    <div className="customScrollbar pink overflow-y-auto h-full text-sm md:text-xl px-4">
                       <p>{selectedLetter.content}</p>
                     </div>
                   </div>
-                  <p className="my-3 text-xl text-end px-4">
+                  <p className="my-3 text-sm md:text-xl text-end px-4">
                     {selectedLetter.sender}
                     {' '}
                     보냄
@@ -121,9 +121,9 @@ function MyLetters(): React.JSX.Element {
             </div>
 
             {/* Right side - Letters List */}
-            <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 border-orange-300 overflow-hidden h-full p-4">
-              <div className="p-4 font-[BMJUA] text-2xl">내가 받은 편지들</div>
-              <div className="customScrollbar overflow-y-auto h-[calc(100%-60px)]">
+            <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 border-orange-300 overflow-hidden h-full p-2 md:p-4">
+              <div className="p-2 md:p-4 font-[BMJUA] text-xl md:text-2xl">내가 받은 편지들</div>
+              <div className="customScrollbar yellow overflow-y-auto h-[calc(100%-60px)]">
                 {letters.map((letter) => (
                   <div
                     key={letter.id}
@@ -142,8 +142,8 @@ function MyLetters(): React.JSX.Element {
                     }`}
                   >
                     <div>
-                      <div className="font-[BMJUA] text-lg">{letter.sender}</div>
-                      <div className="text-lg text-gray-500">{letter.date}</div>
+                      <div className="font-[BMJUA] text-sm md:text-lg">{letter.sender}</div>
+                      <div className="text-xs md:text-lg text-gray-500">{letter.date}</div>
                     </div>
                   </div>
                 ))}

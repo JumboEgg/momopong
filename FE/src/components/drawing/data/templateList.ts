@@ -68,16 +68,30 @@ const drawingTemplate: DrawingTemplate[] = [
   {
     storyId: 5,
     templateId: 10,
+    name: '정성스레 지은 과자집',
+    bgSrc: null,
+    olSrc: 'images/coloringTemplates/cookiehouse.webp',
+  },
+  {
+    storyId: 5,
+    templateId: 11,
     name: '헨젤과 그레텔의 마지막 식사',
     bgSrc: null,
     olSrc: 'images/coloringTemplates/boilthewitch.webp',
   },
   {
     storyId: 6,
-    templateId: 11,
+    templateId: 12,
     name: '잭 없는 콩나무',
     bgSrc: null,
     olSrc: 'images/coloringTemplates/peavine.webp',
+  },
+  {
+    storyId: 7,
+    templateId: 13,
+    name: '노릇한 인어공주',
+    bgSrc: null,
+    olSrc: 'images/coloringTemplates/grillthemermaid.webp',
   },
 ];
 

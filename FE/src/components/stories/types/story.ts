@@ -69,5 +69,5 @@ export interface StoryIllustrationProps {
 
 // TogetherMode.tsx
 export interface TogetherModeProps {
-  friendId: string;
+  friend: Friend;
 }

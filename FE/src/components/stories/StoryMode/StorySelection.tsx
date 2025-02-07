@@ -1,10 +1,7 @@
 import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-interface StorySelectionProps {
-  onStorySelect: (storyId: string) => void;
-}
+import { useStory } from '@/stores/storyStore';
 
 const stories = [
   {
@@ -45,8 +42,13 @@ const stories = [
   },
 ];
 
-function StorySelection({ onStorySelect }: StorySelectionProps): JSX.Element {
+function StorySelection(): JSX.Element {
   const navigate = useNavigate();
+
+  const {
+    setStoryId,
+  } = useStory();
+
   const [startIndex, setStartIndex] = useState(0);
 
   const showPrevious = () => {
@@ -93,7 +95,7 @@ function StorySelection({ onStorySelect }: StorySelectionProps): JSX.Element {
             <button
               key={story.id}
               type="button"
-              onClick={() => onStorySelect(story.id)}
+              onClick={() => setStoryId(story.id)}
               className="group relative perspective w-[280px] h-[350px]"
             >
               {/* 배경 효과 (책장 느낌) */}
