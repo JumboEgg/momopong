@@ -23,10 +23,10 @@ public class PresignedUrlService {
     private static String file = "%s/%s.%s";
 
     // Presigned URL - PUT
-    public FileDto getPresignedUrl() {
-        String fileName = "profile/" + UUID.randomUUID() + ".webp";
-//    public FileDto getPresignedUrl(String folder, String extension) {
-//        String fileName = String.format(file, folder, UUID.randomUUID(), extension);
+//    public FileDto getPresignedUrl() {
+//        String fileName = "profile/" + UUID.randomUUID() + ".webp";
+    public FileDto getPresignedUrl(String folder, String extension) {
+        String fileName = String.format(file, folder, UUID.randomUUID(), extension);
 
         GeneratePresignedUrlRequest generatePresignedUrlRequest =
                 new GeneratePresignedUrlRequest(bucket, fileName)
