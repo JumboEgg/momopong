@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('CHILD')")
+@PreAuthorize("hasRole('CHILD')") // 권한이 자식이면 허용 , 부모면 미허용
 @RequestMapping("/api/book")
 public class BookController {
     private final BookService bookService;

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.util.Date;
 
+// 토큰 갱신시 이전 토큰 폐기
 @Service
 @RequiredArgsConstructor
 public class TokenBlacklistService {

@@ -7,16 +7,15 @@ import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 
-
+// STT 를 사용하기 위한 Handler
 @Configuration
 @EnableWebSocket
 @RequiredArgsConstructor
 public class WebSocketConfig implements WebSocketConfigurer {
-    private final WebSocketHandler webSocketHandler;
-
+    private final WebSocketHandler sttWebSocketHandler;
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(webSocketHandler, "/api/book/letter/stt")
+        registry.addHandler(sttWebSocketHandler, "/api/book/letter/stt")
                 .setAllowedOrigins("*");
     }
 }

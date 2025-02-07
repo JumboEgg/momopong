@@ -3,7 +3,6 @@ package com.ssafy.project.controller;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.ssafy.project.domain.Letter;
 import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.LetterService;
 import org.joda.time.DateTime;
@@ -38,32 +37,19 @@ public class LetterController {
         this.amazonS3 = amazonS3;
     }
 
+    //편지 저장용 presigned-url 생성
     @GetMapping("/book/letter/presigned-url")
     public ResponseEntity<Map<String, String>> getPresignedUrl() {
 
-        try {
-            String fileName = "letters/" + UUID.randomUUID().toString() + ".wav";
-
-            GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(bucket, fileName)
-                            .withMethod(HttpMethod.PUT)
-                            .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-            URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("presignedUrl", url.toString());
-            response.put("fileUrl", "https://" + bucket + ".s3.amazonaws.com/" + fileName);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            // 에러 로깅 추가
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        Map<String, String> response = letterService.getPresignedUrl();
+        return ResponseEntity.ok(response);
     }
 
+    @GetMapping("/book/letter/")
 
+
+
+    // gpt api 답장을 받고 편지 DB저장
     @PostMapping("/book/letter/gpt/{childId}")
     public ResponseEntity<Map<String, String>> getGPTResponse(
             @PathVariable("childId") Long childId,
@@ -86,16 +72,16 @@ public class LetterController {
                 gptResponse,
                 request.getBookTitle(),
                 request.getRole(),
-                request.getLetterRecord() // S3 URL
+                request.getLetterFileName()
         );
 
-        // 응답을 JSON 형식으로 감싸기
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("message", gptResponse);
 
         return ResponseEntity.ok(responseMap);
     }
 
+    // 해당 아이의 특정 편지 조회
     @GetMapping("/profile/{childId}/letter/{letterId}")
     public ResponseEntity<LetterDto> getLetter(
             @PathVariable("childId") Long childId,
@@ -109,7 +95,7 @@ public class LetterController {
         }
     }
 
-
+    // 해당 아이의 모든 편지 조회
     @GetMapping("/profile/{childId}/letter")
     public ResponseEntity<List<LetterDto>> getLetterList(
             @PathVariable("childId") Long childId) {

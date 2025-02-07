@@ -2,7 +2,6 @@ package com.ssafy.project.domain;
 
 
 import com.ssafy.project.dto.LetterDto;
-import com.ssafy.project.dto.ParentDto;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,7 +38,7 @@ public class Letter {
 
     private String role;
 
-    private String letterRecord;
+    private String letterFileName;
 
     @CreatedDate
     private LocalDateTime createdAt;
@@ -50,7 +49,7 @@ public class Letter {
                 .bookTitle(letter.bookTitle)
                 .role(letter.role)
                 .content(letter.letter)
-                .letterRecord(letter.letterRecord)
+                .letterFileName(letter.letterFileName)
                 .reply(letter.reply)
                 .createdAt(String.valueOf(letter.createdAt))
                 .build();
