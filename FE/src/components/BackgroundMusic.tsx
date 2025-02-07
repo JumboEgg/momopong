@@ -1,69 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Volume2, VolumeX } from 'lucide-react';
 
-function BackgroundMusic(): React.ReactNode {
+function BackgroundMusic(): JSX.Element | null {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     setIsMounted(true);
-    try {
-      const audio = new Audio(`${window.location.origin}/bgm/background.mp3`);
+    const audioPath = '/audio/bgm/background.mp3';
+    const audio = new Audio(audioPath);
 
-      audio.addEventListener('loadstart', () => {
-        console.log('Started loading audio');
-      });
+    // audio 설정
+    audio.loop = true;
+    audio.volume = 0.3;
 
-      audio.addEventListener('canplaythrough', () => {
-        console.log('Audio is loaded and can play');
-      });
-
-      audio.addEventListener('error', (e) => {
-        console.error('Audio error:', {
-          error: e,
-          networkState: audio.networkState,
-          readyState: audio.readyState,
-          src: audio.src,
-          supported: audio.canPlayType('audio/mpeg'),
-        });
-      });
-
-      audioRef.current = audio;
-      audio.loop = true;
-      audio.volume = 0.3;
-
-      audio.load();
-    } catch (error) {
-      console.error('Error creating audio:', error);
-    }
-
-    const enableAutoplay = () => {
-      const currentAudio = audioRef.current;
-      if (currentAudio && !isPlaying) {
-        currentAudio
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch((error: Error) => {
-            console.log('Autoplay failed:', error.message);
-          });
-      }
-      document.removeEventListener('touchstart', enableAutoplay);
-    };
-
-    document.addEventListener('touchstart', enableAutoplay);
+    // audioRef에 저장
+    audioRef.current = audio;
 
     return () => {
-      const currentAudio = audioRef.current;
-      if (currentAudio) {
-        currentAudio.pause();
-        currentAudio.currentTime = 0;
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
       }
-      document.removeEventListener('touchstart', enableAutoplay);
     };
-  }, [isPlaying]);
+  }, []);
 
   const togglePlay = () => {
     const currentAudio = audioRef.current;
