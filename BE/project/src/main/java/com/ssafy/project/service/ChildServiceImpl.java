@@ -86,7 +86,7 @@ public class ChildServiceImpl implements ChildService {
         ChildDto childDto = ChildDto.builder()
                 .childId(childId)
                 .name(child.getName())
-                .profile(presignedUrlService.getProfile(child.getProfile()))
+                .profile(presignedUrlService.getFile(child.getProfile()))
                 .age(child.getAge())
                 .daysSinceStart(child.getDaysSinceStart())
                 .code(child.getCode())
@@ -131,7 +131,7 @@ public class ChildServiceImpl implements ChildService {
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
         ChildDto childDto = child.entityToDto();
-        childDto.updateProfile(presignedUrlService.getProfile(childDto.getProfile()));
+        childDto.updateProfile(presignedUrlService.getFile(childDto.getProfile()));
         return childDto;
     }
 
@@ -144,7 +144,7 @@ public class ChildServiceImpl implements ChildService {
         child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
 
         ChildDto childDto = child.entityToDto();
-        childDto.updateProfile(presignedUrlService.getProfile(childDto.getProfile()));
+        childDto.updateProfile(presignedUrlService.getFile(childDto.getProfile()));
         return childDto;
     }
 

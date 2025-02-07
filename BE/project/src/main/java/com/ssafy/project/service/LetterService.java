@@ -11,7 +11,6 @@ public interface LetterService {
     // 편지저장
     void saveLetter(Long childId, String content, String reply, String bookTitle, String role, String letterFileName);
 
-    Map<String, String> getPresignedUrl();
 
     // GPT 답장
     String getGPTResponse(String fairyTale, String role, String childName, String content);

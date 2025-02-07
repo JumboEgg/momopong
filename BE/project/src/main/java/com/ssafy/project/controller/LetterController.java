@@ -3,8 +3,10 @@ package com.ssafy.project.controller;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
+import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.LetterService;
+import com.ssafy.project.service.PresignedUrlService;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")  // CORS 설정 추가
 public class LetterController {
     private final LetterService letterService;
+    private final PresignedUrlService presignedUrlService;
     private final AmazonS3 amazonS3;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -32,20 +35,19 @@ public class LetterController {
 
 
     @Autowired
-    public LetterController(LetterService letterService, AmazonS3 amazonS3) {
+    public LetterController(LetterService letterService, PresignedUrlService presignedUrlService, AmazonS3 amazonS3) {
         this.letterService = letterService;
+        this.presignedUrlService = presignedUrlService;
         this.amazonS3 = amazonS3;
     }
 
     //편지 저장용 presigned-url 생성
     @GetMapping("/book/letter/presigned-url")
-    public ResponseEntity<Map<String, String>> getPresignedUrl() {
+    public ResponseEntity<FileDto> getPresignedUrl() {
 
-        Map<String, String> response = letterService.getPresignedUrl();
-        return ResponseEntity.ok(response);
+        FileDto presignedUrl =  presignedUrlService.getPresignedUrl("letter", "wav");
+        return ResponseEntity.ok(presignedUrl);
     }
-
-    @GetMapping("/book/letter/")
 
 
 
