@@ -1,54 +1,72 @@
-import { useState } from 'react';
-import { StoryProvider } from '@/components/stories/contexts/StoryContext';
-import { FriendProvider } from '@/components/stories/contexts/FriendContext';
+import { useEffect } from 'react';
 import ReadingMode from '@/components/stories/StoryMode/ReadingMode';
 import TogetherMode from '@/components/stories/StoryMode/TogetherMode';
 import StorySelection from '@/components/stories/StoryMode/StorySelection';
 import ModeSelection from '@/components/stories/ModeSelection/ModeSelection';
-import { StoryMode } from '@/components/stories/types/story';
+import { useFriends } from '@/stores/friendStore';
+import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
+import { useStory } from '@/stores/storyStore';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import InvitationWaitPage from '@/components/common/multiplayPages/invitationWaitPage';
+import NetworkErrorPage from '@/components/common/multiplayPages/networkerrorPage';
 
 function Story() {
-  const [selectedStory, setSelectedStory] = useState<string | null>(null);
-  const [selectedMode, setSelectedMode] = useState<StoryMode | null>(null);
-  const [selectedFriendId, setSelectedFriendId] = useState<string | null>(null);
+  const {
+    mode, setMode, storyId, setStoryId, setCurrentIndex,
+  } = useStory();
 
-  const handleStorySelect = (storyId: string) => {
-    setSelectedStory(storyId);
-  };
+  useEffect(() => {
+    setMode(null);
+    setStoryId(null);
+    setCurrentIndex(0);
+  }, []);
 
-  const handleModeSelect = (mode: StoryMode, friendId?: string) => {
-    setSelectedMode(mode);
-    if (friendId) {
-      setSelectedFriendId(friendId);
-    }
-  };
+  const {
+    friend, setFriend, isConnected, setIsConnected,
+  } = useFriends();
+
+  const {
+    socket, setConnect,
+  } = useSocketStore();
+
+  useEffect(() => {
+    setConnect(true);
+    setIsConnected(false);
+    setFriend(null);
+  }, [mode]);
 
   const content = () => {
-    if (!selectedStory) {
-      return <StorySelection onStorySelect={handleStorySelect} />;
+    if (!storyId) {
+      return <StorySelection />;
     }
 
-    if (!selectedMode) {
-      return <ModeSelection onModeSelect={handleModeSelect} />;
+    if (!mode) {
+      return <ModeSelection />;
     }
 
-    if (selectedMode === 'reading') {
+    if (mode === 'reading') {
       return <ReadingMode />;
     }
 
-    if (!selectedFriendId) {
-      return <ModeSelection onModeSelect={handleModeSelect} />;
+    if (!friend) {
+      return <FriendSelection />;
     }
 
-    return <TogetherMode friendId={selectedFriendId} />;
+    if (!socket) {
+      return <NetworkErrorPage />;
+    }
+
+    if (!isConnected) {
+      return <InvitationWaitPage />;
+    }
+
+    return <TogetherMode />;
   };
 
   return (
-    <StoryProvider>
-      <FriendProvider>
-        {content()}
-      </FriendProvider>
-    </StoryProvider>
+    <div>
+      {content()}
+    </div>
   );
 }
 

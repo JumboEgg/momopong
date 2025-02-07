@@ -34,7 +34,7 @@ function MyDrawing() {
         variant="action"
         onClick={handleBack}
         icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
-        className="fixed top-5 left-5 z-10"
+        className="fixed top-2 md:top-5 left-2 md:left-5 z-10"
       />
       <ArrowLeft size={24} />
 
@@ -60,15 +60,15 @@ function MyDrawing() {
         </button>
 
         {/* 제목 버튼 */}
-        <div className="translate-y-8">
-          <div className="px-6 py-2 bg-yellow-300 rounded-full font-[BMJUA] text-2xl whitespace-nowrap">
+        <div className="translate-y-2 md:translate-y-4">
+          <div className="px-3 md:px-6 py-1 md:py-2 bg-yellow-300 rounded-full font-[BMJUA] text-xl md:text-2xl whitespace-nowrap">
             {localDrawingList.length ? localDrawingList[currentIndex].title : '아직 그림이 없어요'}
           </div>
         </div>
 
         {/* 그림 프레임 */}
-        <div className="w-full max-w-[60%] md:max-w-[70%] lg:max-w-3xl aspect-video bg-amber-700 rounded-xl p-4 shadow-lg">
-          <div className="w-full h-full bg-gray-100 rounded-lg overflow-hidden">
+        <div className="w-full max-w-[60%] md:max-w-[70%] lg:max-w-3xl aspect-video rounded-lg">
+          <div className="w-full h-full outline-15 outline-amber-700 bg-gray-100 overflow-hidden rounded-xs shadow-2xl">
             {
               localDrawingList.length
                 ? (
