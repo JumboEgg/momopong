@@ -41,7 +41,7 @@ const useSocketStore = create<SocketStore>((set, get) => {
 
     connectSocket: () => {
       if (!socket) {
-        socket = io('http://localhost:3869', { autoConnect: false });
+        socket = io('https://i12d103.p.ssafy.io/socket.io', { autoConnect: false });
         socket.connect();
         socket.on('connect', () => console.log('Connected to socket'));
         socket.on('disconnect', () => console.log('Disconnected from socket'));
