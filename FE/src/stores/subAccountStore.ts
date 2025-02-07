@@ -40,6 +40,7 @@ interface SubAccountState {
   childToken: {
     accessToken: string | null;
   }
+  previewImage: string | null; // 미리보기 URL
 
   // 유틸리티
   canAddMore: () => boolean; // 계정 추가 더 가능한지 확인
@@ -82,6 +83,7 @@ const useSubAccountStore = create<SubAccountState>()(
       childToken: {
         accessToken: null,
       },
+      previewImage: null,
 
       // 폼 초기 상태
       formData: {
@@ -164,8 +166,12 @@ const useSubAccountStore = create<SubAccountState>()(
       uploadProfileImage: async (file: File) => {
         set({ isLoading: true, error: null });
 
+        // 미리보기 URL 생성
+        const previewUrl = URL.createObjectURL(file);
+        set({ previewImage: previewUrl });
+
         try {
-          // 1. 이미지 처리 먼저
+          // 1. 이미지 처리
           const imageBlob: Blob = await new Promise((resolve, reject) => {
             const rawImage = new Image();
             const canvas = document.createElement('canvas');
@@ -229,9 +235,8 @@ const useSubAccountStore = create<SubAccountState>()(
           }
 
           const data = await presignedResponse.json();
-          console.log('Presigned URL response:', data);
 
-          // 3. 즉시 S3 업로드
+          // 3. S3 업로드
           const uploadResponse = await fetch(data.presignedUrl, {
             method: 'PUT',
             body: imageBlob,
@@ -246,16 +251,16 @@ const useSubAccountStore = create<SubAccountState>()(
 
           return data.fileName;
         } catch (error) {
-          console.error('Upload error:', error);
-          const errorMessage = error instanceof Error
-            ? error.message
-            : '이미지 업로드 중 오류가 발생했습니다.';
-          set({ error: errorMessage });
+          // 에러 발생 시 미리보기 제거
+          URL.revokeObjectURL(previewUrl);
+          set({ previewImage: null });
           throw error;
         } finally {
           set({ isLoading: false });
         }
       },
+
+      setPreviewImage: (url: string | null) => set({ previewImage: url }),
 
       // 자식 계정 로그인
       // 중복로그인 방지 생각해보기
@@ -277,6 +282,8 @@ const useSubAccountStore = create<SubAccountState>()(
             },
             isLoading: false,
           });
+
+          console.log('Selected Account after set:', useSubAccountStore.getState().selectedAccount);
 
           // firstLogin이 true인 경우 처리 가능
           return childDto.firstLogin;

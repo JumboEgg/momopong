@@ -7,7 +7,6 @@ interface ImageUploadProps {
   onImageChange: (fileName: string) => void;
   onUploadStart: () => void;
   onUploadComplete: () => void;
-  onError: (error: string) => void;
 }
 
 function ImageUpload({
@@ -15,27 +14,11 @@ function ImageUpload({
   onImageChange,
   onUploadStart,
   onUploadComplete,
-  onError,
+
 }: ImageUploadProps): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-
-  const uploadImage = async (file: File) => {
-    try {
-      onUploadStart();
-      setIsUploading(true);
-
-      const fileName = await useSubAccountStore.getState().uploadProfileImage(file);
-      onImageChange(fileName);
-      onUploadComplete();
-    } catch (error) {
-      console.error('Upload error:', error);
-      const errorMessage = error instanceof Error ? error.message : '이미지 업로드에 실패했습니다.';
-      onError(errorMessage);
-    } finally {
-      setIsUploading(false);
-    }
-  };
+  const [localPreview, setLocalPreview] = useState(currentImage);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -52,10 +35,27 @@ function ImageUpload({
       return;
     }
 
+    // 먼저 로컬 미리보기 설정
+    const previewUrl = URL.createObjectURL(file);
+    setLocalPreview(previewUrl);
+
     try {
-      await uploadImage(file);
+      setIsUploading(true);
+      onUploadStart();
+
+      const fileName = await useSubAccountStore.getState().uploadProfileImage(file);
+      onImageChange(fileName);
+      onUploadComplete();
+
+      // 메모리 해제
+      URL.revokeObjectURL(previewUrl);
     } catch (error) {
       console.error('File upload failed:', error);
+      // 업로드 실패시 미리보기 원복
+      setLocalPreview(currentImage);
+      URL.revokeObjectURL(previewUrl);
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -63,7 +63,7 @@ function ImageUpload({
     <div className="flex flex-col items-center">
       <div className="relative w-32 h-32">
         <ProfileImage
-          src={currentImage}
+          src={localPreview}
           alt="프로필 이미지"
           size="lg"
           shape="square"

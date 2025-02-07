@@ -1,15 +1,20 @@
 import FriendsModal from '@/components/common/modals/FriendsModal';
+import ProfileImage from '@/components/common/ProfileImage';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import useSubAccountStore from '@/stores/subAccountStore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
   const navigate = useNavigate();
+  const { selectedAccount } = useSubAccountStore();
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
+  console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
+  console.log('Profile URL:', selectedAccount?.profile); // profile URL만 따로 확인
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -38,12 +43,14 @@ function HomePage() {
         onClick={() => handleNavigation('/profile')}
         className="fixed top-5 left-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
       >
-        <img
-          src="/images/profileicon.png"
+        <ProfileImage
+          key={selectedAccount?.profile} // URL이 바뀔 때마다 컴포넌트 리렌더링
+          src={selectedAccount?.profile}
           alt="프로필"
-          className="w-[5vw] min-w-10 object-contain"
+          size="sm"
+          shape="circle"
         />
-        <p className="text-xl mt-0.5">프로필</p>
+        <p className="text-xl mt-0.5">{selectedAccount?.name}</p>
       </button>
 
       <button
