@@ -69,10 +69,10 @@ function Parent() {
         />
       </div>
       <div className="w-full h-full flex items-center justify-center p-8">
-        <div className="w-[80%] max-w-4xl min-w-3xl h-[80%] flex flex-col">
+        <div className="w-[80%] max-w-4xl min-w-xl h-[80%] flex flex-col">
           {/* 리포트 제목 */}
           <div
-            className="text-3xl md:text-4xl lg:text-5xl mb-4"
+            className="text-2xl md:text-4xl lg:text-5xl mb-1 md:mb-4"
             style={{
               textShadow: '2px 2px 0px white, -2px -2px 0px white, -2px 2px 0px white, 2px -2px 0px white',
             }}
@@ -80,7 +80,7 @@ function Parent() {
             아이 활동 리포트
           </div>
           {/* 리포트 전체 영역 */}
-          <div className="bg-white rounded-2xl flex-1 overflow-hidden flex flex-col px-10 py-5">
+          <div className="bg-white rounded-2xl min-h-xl max-h-[90%] flex-1 flex flex-col px-4 md:px-10 py-3 md:py-5">
             {/* 아이 선택 탭 */}
             <div className="flex flex-row mb-5">
               {MOCK_CHILDREN_DATA.map((child, idx) => (
@@ -99,8 +99,8 @@ function Parent() {
             </div>
             <div className="flex flex-row flex-1 min-h-0">
               {/* 아이 프로필 영역 */}
-              <div className="flex flex-col flex-1 items-center space-y-2 pe-5">
-                <div className="w-[80%] min-w-20">
+              <div className="flex flex-col flex-1 items-center space-y-0 sm:space-y-1 md:space-y-2 pe-2 md:pe-5">
+                <div className="w-[80%] min-w-20 hidden sm:block">
                   <img
                     src={MOCK_CHILDREN_DATA[childIdx].profileSrc}
                     alt={MOCK_CHILDREN_DATA[childIdx].childName}
@@ -108,11 +108,11 @@ function Parent() {
                   />
                 </div>
                 <div className="text-xl md:text-2xl lg:text-3xl">{MOCK_CHILDREN_DATA[childIdx].childName}</div>
-                <div className="text-xl">
+                <div className="text-sm sm:text-lg md:text-xl">
                   {MOCK_CHILDREN_DATA[childIdx].childAge}
                   세
                 </div>
-                <div className="text-xl">
+                <div className="text-sm sm:text-lg md:text-xl">
                   가입 후
                   {' '}
                   {MOCK_CHILDREN_DATA[childIdx].joinDate}
