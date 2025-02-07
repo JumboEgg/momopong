@@ -1,14 +1,20 @@
-import { useState } from 'react';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
   const navigate = useNavigate();
-
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
     navigate(path);
   };
-
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
+
+  const {
+    setConnect,
+  } = useSocketStore();
+  useEffect(() => {
+    setConnect(true);
+  }, []);
 
   return (
     <div
@@ -21,31 +27,39 @@ function HomePage() {
       <button
         type="button"
         onClick={() => handleNavigation('/profile')}
-        className="fixed top-5 left-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
+        className="fixed top-2 md:top-5 left-2 md:left-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
       >
         <img
           src="/images/profileicon.png"
           alt="프로필"
           className="w-[5vw] min-w-10 object-contain"
         />
-        <p className="text-xl mt-0.5">프로필</p>
+        <p className="text-sm md:text-xl mt-0.5">프로필</p>
       </button>
 
       <button
         type="button"
         onClick={() => handleNavigation('/friends')}
-        className="fixed top-5 right-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
+        className="fixed top-2 md:top-5 right-2 md:right-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
       >
         <img
           src="/images/friendsicon.png"
           alt="친구목록"
           className="w-[5vw] min-w-10 object-contain"
         />
-        <p className="text-xl mt-0.5">친구목록</p>
+        <p className="text-sm md:text-xl mt-0.5">친구목록</p>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => handleNavigation('/test')}
+        className="cursor-pointer flex flex-col items-center"
+      >
+        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">테스트</p>
       </button>
 
       {/* Main Navigation Icons */}
-      <div className="flex justify-center items-center gap-12 font-[BMJUA] text-3xl">
+      <div className="flex justify-center items-center gap-12 font-[BMJUA] text-xl md:text-3xl">
         <button
           type="button"
           onClick={() => handleNavigation('/drawing')}
@@ -59,7 +73,7 @@ function HomePage() {
             alt="그림그리기"
             className="w-[20vw] object-contain"
           />
-          <p className="mt-5">그림그리기</p>
+          <p className="mt-1 md:mt-5">그림그리기</p>
         </button>
 
         <button
@@ -75,7 +89,7 @@ function HomePage() {
             alt="동화읽기"
             className="w-[25vw] object-contain"
           />
-          <p className="mt-0.5">동화읽기</p>
+          <p className="-mt-3.5 md:mt-0.5">동화읽기</p>
         </button>
 
         <button
@@ -91,15 +105,9 @@ function HomePage() {
             alt="나의집"
             className="w-[20vw] object-contain"
           />
-          <p className="mt-5">나의집</p>
+          <p className="mt-1 md:mt-5">나의집</p>
         </button>
-        <button
-          type="button"
-          onClick={() => handleNavigation('/test')}
-          className="cursor-pointer flex flex-col items-center"
-        >
-          <p className="text-center text-xs mt-1 border-2">테스트</p>
-        </button>
+
       </div>
     </div>
   );

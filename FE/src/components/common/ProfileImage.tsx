@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
 type ProfileImgShape = 'circle' | 'square';
 
 interface ProfileImgProps {
