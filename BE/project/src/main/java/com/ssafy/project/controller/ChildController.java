@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@PreAuthorize("hasRole('CHILD')")
 @RequestMapping("/api/children")
 public class ChildController {
 
@@ -37,6 +36,7 @@ public class ChildController {
     }
 
     // 자식 계정 로그아웃
+    @PreAuthorize("hasRole('CHILD')")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> map) {
         Long childId = Long.parseLong(map.get("childId"));
@@ -46,6 +46,7 @@ public class ChildController {
     }
 
     // 자식 정보 조회
+    @PreAuthorize("hasRole('CHILD')")
     @GetMapping("/{childId}")
     public ResponseEntity<ChildDto> findChild(@PathVariable("childId") Long childId) {
         ChildDto childDto = childService.findChild(childId);
@@ -54,6 +55,7 @@ public class ChildController {
     }
 
     // 자식 회원 정보 수정
+    @PreAuthorize("hasRole('CHILD')")
     @PatchMapping("/{childId}")
     public ResponseEntity<ChildDto> updateChild(@PathVariable("childId") Long childId, @RequestBody ChildUpdateRequestDto updateRequestDto) {
         if (!childId.equals(updateRequestDto.getChildId()))
@@ -64,6 +66,7 @@ public class ChildController {
     }
 
     // 자식 삭제
+    @PreAuthorize("hasRole('CHILD')")
     @DeleteMapping("/{childId}")
     public ResponseEntity<Void> deleteChild(@PathVariable("childId") Long childId) {
         childService.deleteChild(childId);
