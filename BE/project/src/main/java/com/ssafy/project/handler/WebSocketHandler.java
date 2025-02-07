@@ -18,10 +18,11 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
-
+// STT 관련 , 소켓 설정
 @Slf4j
-@Component
+@Component("sttWebSocketHandler")
 public class WebSocketHandler extends TextWebSocketHandler {
+
     private final GoogleCloudConfig googleCloudConfig;
     private SpeechClient speechClient;
     private final LetterService letterService;
@@ -32,7 +33,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         this.googleCloudConfig = googleCloudConfig;
         this.letterService = letterService;
     }
-
+    // 초기화
     @PostConstruct
     public void initializeSpeechClient() {
         try {
@@ -47,7 +48,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
             throw new RuntimeException("Could not initialize SpeechClient", e);
         }
     }
-
+    // 클라이언트에게
     private void sendMessageToClient(WebSocketSession session, String message) {
         try {
             // 세션이 열려있는지 확인

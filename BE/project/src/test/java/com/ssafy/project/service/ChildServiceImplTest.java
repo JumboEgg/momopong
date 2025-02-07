@@ -1,5 +1,6 @@
 package com.ssafy.project.service;
 
+import com.ssafy.project.ProjectApplication;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
 import com.ssafy.project.domain.type.GenderType;
@@ -19,11 +20,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@SpringBootTest
+@SpringBootTest(classes = ProjectApplication.class)
 @Transactional
 class ChildServiceImplTest {
     @Autowired
@@ -44,7 +46,7 @@ class ChildServiceImplTest {
     @BeforeEach
     void beforeEach() {
         ParentSignUpRequestDto signUpRequestDto = ParentSignUpRequestDto.builder()
-                .email("hong1@test.com")
+                .email("hong@test.com")
                 .password("1234")
                 .name("홍길동")
                 .phone("010-1111-2222")
@@ -115,7 +117,8 @@ class ChildServiceImplTest {
         Long saved = childService.signUp(signUpRequestDto);
 
         // when
-        ChildDto childDto = childService.login(saved);
+        Map<String, Object> childMap = childService.login(saved);
+        ChildDto childDto = (ChildDto) childMap.get("childDto");
 
         // then
         assertThat(childDto)

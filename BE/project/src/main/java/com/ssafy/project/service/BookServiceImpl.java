@@ -36,7 +36,7 @@ public class BookServiceImpl implements BookService {
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
     private final NotificationService notificationService;
-
+    // Redis 저장
     private static final String CHILD_STATUS_KEY = "child:status:%d";
     private static final String INVITATION_KEY = "book:invitation:%d:%d";
 
@@ -163,6 +163,28 @@ public class BookServiceImpl implements BookService {
 
         NotificationDto notification = NotificationDto.builder()
                 .notificationType(NotificationType.REJECT)
+                .bookId(bookId)
+                .bookTitle(book.getTitle())
+                .inviterId(inviterId)
+                .inviterName(inviter.getName())
+                .inviteeId(inviteeId)
+                .inviteeName(invitee.getName())
+                .build();
+        notificationService.sendNotification(inviterId, notification);
+    }
+    // 초대장 만료
+    @Override
+    public void expireInvitation(Long bookId, Long inviterId, Long inviteeId) {
+        Child inviter = childRepository.findById(inviterId)
+                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+        Child invitee = childRepository.findById(inviteeId)
+                .orElseThrow(() -> new UserNotFoundException("해당 친구를 찾을 수 없습니다"));
+
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
+
+        NotificationDto notification = NotificationDto.builder()
+                .notificationType(NotificationType.EXPIRE)
                 .bookId(bookId)
                 .bookTitle(book.getTitle())
                 .inviterId(inviterId)

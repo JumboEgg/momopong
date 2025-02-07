@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
+// 소켓 IO 로그 , 소켓 IO 서버 생성
 public class SocketIORunner implements CommandLineRunner, DisposableBean {
     private final SocketIOServer server;
 

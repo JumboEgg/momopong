@@ -2,7 +2,10 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.ChildListDto;
+import com.ssafy.project.dto.LoginRequestDto;
+import com.ssafy.project.dto.ParentDto;
+import com.ssafy.project.dto.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
@@ -32,7 +35,9 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
     private final ChildService childService;
+    private final PresignedUrlService presignedUrlService;
 
+    // 부모 회원가입
     @Override
     public Long signup(ParentSignUpRequestDto signUpDto) {
         if (checkDuplicateParent(signUpDto.getEmail()))
@@ -75,7 +80,7 @@ public class ParentServiceImpl implements ParentService {
         Parent parent = parentRepository.findById(parentId)
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
-        return parent.entityToDto(parent);
+        return parent.entityToDto();
     }
 
     @Override
@@ -83,7 +88,7 @@ public class ParentServiceImpl implements ParentService {
         Parent parent = parentRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
-        return parent.entityToDto(parent);
+        return parent.entityToDto();
     }
 
     @Override
@@ -110,7 +115,7 @@ public class ParentServiceImpl implements ParentService {
                 .orElseThrow(() -> new UserNotFoundException("부모 사용자를 찾을 수 없습니다"));
 
         parent.updateParent(parentDto.getName(), parentDto.getPhone());
-        return parent.entityToDto(parent);
+        return parent.entityToDto();
     }
 
     @Override
@@ -123,7 +128,7 @@ public class ParentServiceImpl implements ParentService {
                 .map(child -> ChildListDto.builder()
                         .childId(child.getId())
                         .name(child.getName())
-                        .profile(child.getProfile())
+                        .profile(presignedUrlService.getProfile(child.getProfile()))
                         .build())
                 .collect(Collectors.toList());
     }
@@ -142,8 +147,8 @@ public class ParentServiceImpl implements ParentService {
     }
 
     @Override
-    public void logout(String refreshToken) {
-        String email = jwtTokenProvider.getEmailFromToken(refreshToken);
+    public void logout(String accessToken, String email) {
         jwtTokenProvider.deleteRefreshToken(email);
+        tokenBlacklistService.addBlacklist(accessToken);
     }
 }
