@@ -15,6 +15,7 @@
     "react-hooks"
   ],
   "rules": {
+    "@typescript-eslint/indent": "off",
     "linebreak-style": "off",
     "import/extensions": "off",
     "no-var": "warn", // var 금지
