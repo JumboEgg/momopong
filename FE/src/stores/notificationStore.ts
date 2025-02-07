@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 
 // 타입 정의
 export type NoticeType = 'invite' | 'system';
@@ -54,38 +55,49 @@ const mockData: NotificationData[] = [
   },
 ];
 
-export const useNotificationStore = create<NotificationStore>((set) => ({
-  notifications: mockData,
-  isLoading: false,
-  hasError: false,
+export const useNotificationStore = create<NotificationStore>()(
+  persist(
+    (set) => ({
+      notifications: mockData,
+      isLoading: false,
+      hasError: false,
 
-  fetchNotifications: async () => {
-    set({ isLoading: true });
-    try {
-      await new Promise((resolve) => {
-        setTimeout(resolve, 500);
-      });
-      set({
-        notifications: mockData,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({
-        hasError: true,
-        isLoading: false,
-      });
-    }
-  },
+      fetchNotifications: async () => {
+        set({ isLoading: true });
+        try {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 500);
+          });
+          set({
+            notifications: mockData,
+            isLoading: false,
+          });
+        } catch (error) {
+          set({
+            hasError: true,
+            isLoading: false,
+          });
+        }
+      },
 
-  markAsRead: (id: number) => {
-    set((state) => ({
-      notifications: state.notifications.filter(
-        (notification) => notification.id !== id,
-      ),
-    }));
-  },
+      markAsRead: (id: number) => {
+        set((state) => ({
+          notifications: state.notifications.filter(
+            (notification) => notification.id !== id,
+          ),
+        }));
+      },
 
-  clearAll: () => {
-    set({ notifications: [] });
-  },
-}));
+      clearAll: () => {
+        set({ notifications: [] });
+      },
+    }),
+    {
+      name: 'notification-storage',
+      // isLoading과 hasError는 임시 상태이므로 저장하지 않음
+      partialize: (state) => ({
+        notifications: state.notifications,
+      }),
+    },
+  ),
+);

@@ -4,12 +4,43 @@
 .customScrollbar::-webkit-scrollbar {
     width: 12px;
 }
+
 .customScrollbar::-webkit-scrollbar-thumb {
-    background-color: orange;
+    background-color: gray;
     border-radius: 10px;
 }
 .customScrollbar::-webkit-scrollbar-track {
-    background-color: gold;
+    background-color: gainsboro;
+    border-radius: 10px;
+    box-shadow: inset 0px 0px 5px white;
+}
+
+.customScrollbar.yellow::-webkit-scrollbar-thumb {
+    background-color: sandybrown;
+    border-radius: 10px;
+}
+.customScrollbar.yellow::-webkit-scrollbar-track {
+    background-color: peachpuff;
+    border-radius: 10px;
+    box-shadow: inset 0px 0px 5px white;
+}
+
+.customScrollbar.pink::-webkit-scrollbar-thumb {
+    background-color: salmon;
+    border-radius: 10px;
+}
+.customScrollbar.pink::-webkit-scrollbar-track {
+    background-color: mistyrose;
+    border-radius: 10px;
+    box-shadow: inset 0px 0px 5px white;
+}
+
+.customScrollbar.blue::-webkit-scrollbar-thumb {
+    background-color: skyblue;
+    border-radius: 10px;
+}
+.customScrollbar.blue::-webkit-scrollbar-track {
+    background-color: azure;
     border-radius: 10px;
     box-shadow: inset 0px 0px 5px white;
 }
