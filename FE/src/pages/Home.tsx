@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 function HomePage() {
   const navigate = useNavigate();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test' | '/report'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
@@ -55,7 +55,15 @@ function HomePage() {
         onClick={() => handleNavigation('/test')}
         className="cursor-pointer flex flex-col items-center"
       >
-        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">테스트</p>
+        <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => handleNavigation('/Parent')}
+        className="cursor-pointer flex flex-col items-center"
+      >
+        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">리포트 바로가기</p>
       </button>
 
       {/* Main Navigation Icons */}
