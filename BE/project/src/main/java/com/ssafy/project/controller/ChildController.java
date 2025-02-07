@@ -2,6 +2,7 @@ package com.ssafy.project.controller;
 
 import com.ssafy.project.dto.*;
 import com.ssafy.project.service.ChildService;
+import com.ssafy.project.service.PresignedUrlService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +14,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @RequestMapping("/api/children")
 public class ChildController {
-
+    private final PresignedUrlService presignedUrlService;
     private final ChildService childService;
 
     // 자식 계정 생성
@@ -74,10 +75,10 @@ public class ChildController {
         return ResponseEntity.ok().build();
     }
 
-    // Presigned URL - GEt
+    // Presigned URL - GET
     @GetMapping("/presigned-url")
     public ResponseEntity<FileDto> getPresignedUrl() {
-        FileDto presignedUrl = childService.getPresignedUrl();
+        FileDto presignedUrl = presignedUrlService.getPresignedUrl("profile", "webp");
 
         return ResponseEntity.ok(presignedUrl);
     }
