@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
     private final ParentRepository parentRepository;
-
+    // 로그인 시
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Parent parent = parentRepository.findByEmail(username)
@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         return createUserDetails(parent);
     }
-
+    // 비밀번호 검증
     private UserDetails createUserDetails(Parent parent) {
         return User.builder()
                 .username(parent.getEmail())
