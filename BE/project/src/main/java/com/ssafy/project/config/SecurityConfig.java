@@ -42,7 +42,8 @@ public class SecurityConfig {
                 mvc.pattern("/token"),
                 mvc.pattern("/api/book/letter/**"),
                 mvc.pattern("/api/profile/**"),
-                mvc.pattern("/ws/**")
+                mvc.pattern("/ws/**"),
+                mvc.pattern("/api/children/presigned-url")
         };
 
 

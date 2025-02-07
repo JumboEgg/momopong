@@ -3,6 +3,7 @@ package com.ssafy.project.service;
 import com.ssafy.project.dto.ChildDto;
 import com.ssafy.project.dto.ChildSignUpRequestDto;
 import com.ssafy.project.dto.ChildUpdateRequestDto;
+import com.ssafy.project.dto.FileDto;
 
 import java.util.Map;
 
@@ -25,4 +26,7 @@ public interface ChildService {
 
     // 자식 계정 삭제
     void deleteChild(Long childId);
+
+    // Presigned Url 얻기
+    FileDto getPresignedUrl();
 }

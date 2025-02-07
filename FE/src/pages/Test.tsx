@@ -7,7 +7,8 @@ import ButtonDemo from '@/components/common/buttons/ButtonDemo';
 import TextButton from '@/components/common/buttons/TextButton';
 // import ParentAuthModal from '@/components/common/modals/ParentAuthModal';
 import DialogModal from '@/components/common/modals/DialogModal';
-import NotificationModal from '@/components/common/modals/NotificationModal';
+// import NotificationModal from '@/components/common/modals/NotificationModal';
+// import FriendsModal from '@/components/common/modals/FriendsModal';
 import Timer from '@/components/common/Timer';
 
 function Test() {
@@ -57,9 +58,11 @@ function Test() {
           message1="시간이 초과되어"
           message2="더 이상 사용할 수 없는 초대장이에요"
           onClose={handleCloseModal}
+          onConfirm={() => null}
         />
       )}
-      <NotificationModal />
+      {/* <NotificationModal /> */}
+      {/* <FriendsModal /> */}
     </div>
   );
 }
