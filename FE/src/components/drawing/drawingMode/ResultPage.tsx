@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import DialogModal from '@/components/common/modals/DialogModal';
 import { DrawingData, useDrawing } from '@/stores/drawingStore';
 import { useFriends } from '@/stores/friendStore';
+import uploadImageToS3 from '../utils/drawingUpload';
 
 function ResultPage() {
   const {
@@ -36,23 +37,32 @@ function ResultPage() {
     return () => window.removeEventListener('resize', updateSize); // 클린업
   }, []);
 
-  const onSave = () => {
-    const drawingResult: DrawingData = {
-      title: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
-      date: new Date().getDate(),
-      src: imageData,
-    };
+  const onSave = async () => {
+    try {
+    // Upload image to S3 first
+      const uploadedImageUrl = await uploadImageToS3(imageData);
 
-    console.log(drawingResult);
+      const drawingResult: DrawingData = {
+        title: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
+        date: new Date().getDate(),
+        src: uploadedImageUrl, // Use the returned S3 URL instead of base64
+      };
 
-    setFriend(null);
-    setIsConnected(false);
-    setPenColor('black');
-    setIsErasing(false);
-    addDrawingData(drawingResult);
-    setTemplate(null);
-    setMode(null);
-    setImageData('');
+      console.log(drawingResult);
+
+      // Reset all states after successful upload
+      setFriend(null);
+      setIsConnected(false);
+      setPenColor('black');
+      setIsErasing(false);
+      addDrawingData(drawingResult);
+      setTemplate(null);
+      setMode(null);
+      setImageData('');
+    } catch (error) {
+      console.error('Failed to save drawing:', error);
+    // You might want to show an error modal here
+    }
   };
 
   const onDelete = () => {
