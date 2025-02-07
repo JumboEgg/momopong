@@ -1,4 +1,4 @@
-import { useFriendRequestStore } from '@/stores/friendRequestStore';
+import useFriendRequestStore from '@/stores/friendRequestStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import FriendRequestItem from './FriendRequestItem';
 
