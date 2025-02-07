@@ -4,7 +4,7 @@ type Props = {
   isActive: boolean;
   duration: number;
   onComplete: () => void;
-  onTick: (timeLeft: number) => void;
+  onTick?: (timeLeft: number) => void;
 };
 
 const TOTAL_TIME = 20;
