@@ -82,13 +82,6 @@ function TogetherMode(): JSX.Element {
     return currentContent.type === userRole;
   }, [userRole, currentContent]);
 
-  // const getCurrentSpeaker = useCallback((type: CharacterType) => {
-  //   if (type === 'narration') return '나레이션';
-  //   if (type === 'prince') return `왕자님${userRole === 'prince' ? ' (나)' : ''}`;
-  //   if (type === 'princess') return `신데렐라${userRole === 'princess' ? ' (나)' : ''}`;
-  //   return '등장인물';
-  // }, [userRole]);
-
   const handleNext = useCallback(() => {
     if (!currentPage) return;
 
@@ -185,6 +178,7 @@ function TogetherMode(): JSX.Element {
         isFirst={currentIndex === 0}
         isLast={isStoryEnd}
         userRole={userRole || undefined}
+        currentContent={currentContent}
       />
 
       {/* 녹음 버튼과 오디오 플레이어 */}
