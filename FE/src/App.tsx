@@ -15,6 +15,7 @@ import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory/mybookstory';
 import MyDrawing from './components/myhouse/mydrawing/mydrawing';
 import MyLetters from './components/myhouse/letters/letters';
+import AudioRecorderSTT from './test/AudioRecorderSTT';
 
 function App(): JSX.Element {
   return (
@@ -37,6 +38,7 @@ function App(): JSX.Element {
         <Route path="/house/letters" element={<MyLetters />} />
         <Route path="/house/mybookstory" element={<MyBookStory />} />
         <Route path="/house/mydrawing" element={<MyDrawing />} />
+        <Route path="/audioSTT" element={<AudioRecorderSTT />} />
       </Routes>
     </div>
   );

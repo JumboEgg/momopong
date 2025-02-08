@@ -7,8 +7,6 @@ import {
     RoomEvent,
   } from 'livekit-client';
   import { useState, useRef } from 'react';
-  import VideoComponent from './components/VideoComponent';
-  import AudioComponent from './components/AudioComponent';
 
   type TrackInfo = {
     trackPublication: RemoteTrackPublication;

@@ -4,7 +4,7 @@ import DialogModal from '@/components/common/modals/DialogModal';
 import { useDrawing } from '@/stores/drawingStore';
 import { useFriends } from '@/stores/friendStore';
 import { FrameInfo } from '@/types/frame';
-import uploadImageToS3 from '../../../utils/drawing/drawingUpload';
+import uploadImageToS3 from '../../../utils/drawingS3/drawingUpload';
 
 function ResultPage() {
   const {
@@ -47,9 +47,7 @@ function ResultPage() {
       };
 
     // Upload image to S3 first
-      const uploadedImageUrl = await uploadImageToS3(drawingResult);
-
-      console.log(uploadedImageUrl);
+      await uploadImageToS3(drawingResult);
 
       // Reset all states after successful upload
       setFriend(null);

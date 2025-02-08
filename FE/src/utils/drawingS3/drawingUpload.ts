@@ -89,8 +89,8 @@ const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
           Authorization: `Bearer ${accessToken}`,
           'Content-Type': 'application/json',
         },
-    },
-);
+      },
+    );
 
     if (!uploadResponse.ok) {
       throw new Error(`Upload failed: ${uploadResponse.status}`);

@@ -9,7 +9,8 @@ import BackgroundMusic from '@/components/BackgroundMusic';
 function HomePage() {
   const navigate = useNavigate();
   const { selectedAccount } = useSubAccountStore();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test' | '/Parent'): void => {
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
+     | '/test' | '/Parent' | '/audioSTT'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
@@ -82,6 +83,14 @@ function HomePage() {
         className="cursor-pointer flex flex-col items-center"
       >
         <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">리포트 바로가기</p>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => handleNavigation('/audioSTT')}
+        className="fixed top-5 left-[60%] text-xs mt-1 border-2"
+      >
+        음성인식
       </button>
 
       {isModalOpen && (

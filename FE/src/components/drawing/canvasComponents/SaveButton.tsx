@@ -62,7 +62,6 @@ function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
         tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
         const dataURL = tempCanvas.toDataURL('image/webp');
         setImageData(dataURL);
-        console.log(dataURL);
       };
     }
   }, [canvasRef]);

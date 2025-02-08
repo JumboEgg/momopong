@@ -45,7 +45,6 @@ public class LetterController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/book/letter/")
 
 
 

@@ -1,9 +1,9 @@
 // DrawingModal.tsx
 import TextButton from '@/components/common/buttons/TextButton';
-import { DrawingData } from '@/stores/drawingStore';
+import { FrameInfo } from '@/types/frame';
 
 interface DrawingModalProps {
-  data: DrawingData;
+  data: FrameInfo;
   onClose: () => void;
 }
 
@@ -13,7 +13,7 @@ function DrawingModal({
 }: DrawingModalProps): JSX.Element {
   const handleConvert = () => {
     const img = new Image();
-    img.src = data.src;
+    img.src = data.frameUrl;
 
     img.onload = () => {
       // Canvas 생성
@@ -24,6 +24,8 @@ function DrawingModal({
       canvas.width = img.width;
       canvas.height = img.height;
 
+      if (!ctx) return;
+
       // 이미지 그리기
       ctx.drawImage(img, 0, 0);
 
@@ -33,7 +35,7 @@ function DrawingModal({
       // a 태그를 사용하여 다운로드 링크 생성
       const link = document.createElement('a');
       link.href = convertedDataUrl;
-      link.download = data.title; // 저장할 파일 이름 지정
+      link.download = data.frameTitle; // 저장할 파일 이름 지정
       link.click(); // 다운로드 실행
     };
   };
@@ -44,8 +46,8 @@ function DrawingModal({
   };
 
   return (
-    <button
-      type="button"
+    <div
+      role="presentation"
       className="fixed top-0 left-0 w-full h-full z-30 bg-black/60 flex items-center justify-center"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
@@ -57,11 +59,11 @@ function DrawingModal({
         <div className="flex-grow flex flex-col items-center justify-center font-[BMJUA] w-full">
           <div className="flex flex-col gap-4 w-full">
             <img
-              src={data.src}
-              alt={data.title}
+              src={data.frameUrl}
+              alt={data.frameTitle}
               className="w-full h-auto rounded-xl"
             />
-            <p className="text-center text-3xl break-words">{data.title}</p>
+            <p className="text-center text-3xl break-words">{data.frameTitle}</p>
           </div>
         </div>
         <div className="flex gap-4 mt-6">
@@ -81,7 +83,7 @@ function DrawingModal({
           </TextButton>
         </div>
       </div>
-    </button>
+    </div>
   );
 }
 

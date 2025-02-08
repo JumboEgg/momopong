@@ -7,7 +7,7 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { FrameInfo } from '@/types/frame';
-import loadImagesFromS3 from '@/utils/drawing/drawingLoad';
+import loadImagesFromS3 from '@/utils/drawingS3/drawingLoad';
 
 function MyDrawing() {
   const [currentIndex, setCurrentIndex] = useState(0);

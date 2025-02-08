@@ -11,7 +11,6 @@ const loadImagesFromS3 = async (childId: string): Promise<FrameInfo[]> => {
       throw new Error('Failed to get accessToken');
     }
 
-    // 2. Upload to S3 using presigned URL
     const response = await fetch(
       `${import.meta.env.VITE_API_BASE_URL}/profile/${childId}/frame`,
       {
@@ -29,10 +28,6 @@ const loadImagesFromS3 = async (childId: string): Promise<FrameInfo[]> => {
     const data = await response.json();
 
     return data;
-
-    // const result = await loadImages(data, accessToken);
-
-    // return result;
   } catch (error) {
     console.error('Error uploading image:', error);
     throw error;

@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AxiosError } from 'axios'; // 추후 삭제
 import api from '@/api/axios';
-import { useSubAccountStore } from '@/stores/subAccountStore';
+import useSubAccountStore from './subAccountStore';
 
 interface Letter {
   bookTitle: string;
@@ -16,18 +16,14 @@ interface Letter {
 
 interface LetterState {
   letters: Letter[];
-  currentLetter: number;
+  currentLetter: number | null;
   isLoading: boolean;
   error: string | null;
-  childToken: {
-    accessToken: string | null;
-  }
 
-  sendLetter: (letter: Letter) => Promise<number>;
-  getLetterList: () => Promise<Letter[]>;
-  getLetter: (letterId: number) => Promise<Letter>;
+  sendLetter: (letter: Letter) => Promise<void>;
+  getLetterList: () => Promise<void>;
 
-  setLetter: (data: Letter) => void;
+  setLetter: (idx: number) => void;
   setLoading: (status: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -89,42 +85,7 @@ const useLetterStore = create<LetterState>()(
           const response = await api.get(`/profile/${selectedAccount.childId}/letter`);
           console.log('Server response: ', response);
 
-          set({ letters: response });
-        } catch (error) {
-          // AxiosError 타입 체크
-          if (error instanceof AxiosError) {
-            console.error('Error response:', {
-              status: error.response?.status,
-              data: error.response?.data,
-              headers: error.response?.headers,
-            });
-          } else {
-            console.error('Non-Axios error:', error);
-          }
-
-          const errorMessage = error instanceof Error
-            ? error.message
-            : '편지 조회 중 오류가 발생했습니다.';
-          set({ error: errorMessage, isLoading: false });
-          throw error;
-        } finally {
-          set({ isLoading: false });
-        }
-      },
-      getLetter: async (letterId) => {
-        set({ isLoading: true, error: null });
-
-        try {
-          const { selectedAccount } = useSubAccountStore.getState();
-          if (!selectedAccount) {
-            throw new Error('아이 계정 정보를 찾을 수 없습니다.');
-          }
-
-          console.log('Loading Letter from Server: ', letterId);
-          const response = await api.get(`/profile/${selectedAccount.childId}/letter/${letterId}`);
-          console.log('Server response: ', response);
-
-          set({ letter: response });
+          set({ letters: response.data });
         } catch (error) {
           // AxiosError 타입 체크
           if (error instanceof AxiosError) {
@@ -147,7 +108,7 @@ const useLetterStore = create<LetterState>()(
         }
       },
 
-      setLetter: (data) => set({ currentLetter: data }),
+      setLetter: (idx) => set({ currentLetter: idx }),
       setLoading: (status) => set({ isLoading: status }),
       setError: (error) => set({ error }),
     }),
