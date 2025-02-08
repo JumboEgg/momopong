@@ -10,11 +10,12 @@ import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
 import com.ssafy.project.dto.book.BookDto;
-import com.ssafy.project.dto.invitation.InvitationDto;
 import com.ssafy.project.exception.BookNotFoundException;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvitationExpiredException;
 import com.ssafy.project.exception.UserNotFoundException;
+import com.ssafy.project.firebase.FcmSendDto;
+import com.ssafy.project.firebase.FcmService;
 import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.FriendRepository;
@@ -36,9 +37,11 @@ public class BookServiceImpl implements BookService {
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
     private final NotificationService notificationService;
-    // Redis 저장
-    private static final String CHILD_STATUS_KEY = "child:status:%d";
-    private static final String INVITATION_KEY = "book:invitation:%d:%d";
+    private final FcmService fcmService;
+
+    // Redis 저장을 위한 KEY
+    private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
+    private static final String INVITATION_KEY = "book:invitation:%d:%d"; // 초대 KEY
 
     // 동화 목록
     @Override
@@ -74,7 +77,7 @@ public class BookServiceImpl implements BookService {
 
     // 친구 초대 보내기
     @Override
-    public InvitationDto sendInvitation(Long bookId, Long inviterId, Long inviteeId) { // inviter: 초대한 사람, invitee: 초대받은 사람
+    public NotificationDto sendInvitation(Long bookId, Long inviterId, Long inviteeId) { // inviter: 초대한 사람, invitee: 초대받은 사람
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         if (redisDao.getValues(key) != null) {
             throw new DuplicateException("이미 진행중인 초대가 존재합니다");
@@ -88,7 +91,8 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
-        InvitationDto invitationDto = InvitationDto.builder()
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.INVITE)
                 .inviterId(inviterId)
                 .inviteeId(inviteeId)
                 .inviterName(inviter.getName())
@@ -98,21 +102,16 @@ public class BookServiceImpl implements BookService {
                 .build();
 
         // 초대장 Redis에 저장 (10초간 초대장 유효)
-        redisDao.setValues(key, jsonConverter.toJson(invitationDto), Duration.ofSeconds(10));
+        redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
-        // 웹 소켓으로 초대 알림 실시간 전송
-        NotificationDto notification = NotificationDto.builder()
-                .notificationType(NotificationType.INVITE)
-                .bookId(bookId)
-                .bookTitle(book.getTitle())
-                .inviterId(inviterId)
-                .inviterName(inviter.getName())
-                .inviteeId(inviteeId)
-                .inviteeName(invitee.getName())
+        // FCM으로 초대 알림 전송
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .childId(inviteeId)
+                .notificationDto(notificationDto)
                 .build();
-        notificationService.sendNotification(inviteeId, notification);
+        fcmService.sendMessage(sendDto);
 
-        return invitationDto;
+        return notificationDto;
     }
 
     // 친구 초대 수락하기
@@ -131,8 +130,8 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
-        // 웹 소켓으로 수락 알림 실시간 전송
-        NotificationDto notification = NotificationDto.builder()
+        // FCM으로 수락 알림 전송
+        NotificationDto notificationDto = NotificationDto.builder()
                 .notificationType(NotificationType.ACCEPT)
                 .bookId(bookId)
                 .bookTitle(book.getTitle())
@@ -141,7 +140,12 @@ public class BookServiceImpl implements BookService {
                 .inviteeId(inviteeId)
                 .inviteeName(invitee.getName())
                 .build();
-        notificationService.sendNotification(inviterId, notification);
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .childId(inviteeId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 친구 초대 거절하기
@@ -162,7 +166,8 @@ public class BookServiceImpl implements BookService {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
-        NotificationDto notification = NotificationDto.builder()
+        // FCM으로 거절 알림 전송
+        NotificationDto notificationDto = NotificationDto.builder()
                 .notificationType(NotificationType.REJECT)
                 .bookId(bookId)
                 .bookTitle(book.getTitle())
@@ -171,9 +176,15 @@ public class BookServiceImpl implements BookService {
                 .inviteeId(inviteeId)
                 .inviteeName(invitee.getName())
                 .build();
-        notificationService.sendNotification(inviterId, notification);
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .childId(inviteeId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
-    // 초대장 만료
+
+    // 친구 초대가 만료되었을 때 (10초 제한)
     @Override
     public void expireInvitation(Long bookId, Long inviterId, Long inviteeId) {
         Child inviter = childRepository.findById(inviterId)

@@ -1,8 +1,8 @@
 package com.ssafy.project.controller;
 
 import com.ssafy.project.dto.ChildStatusDto;
+import com.ssafy.project.dto.NotificationDto;
 import com.ssafy.project.dto.book.BookDto;
-import com.ssafy.project.dto.invitation.InvitationDto;
 import com.ssafy.project.service.BookService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -37,16 +37,16 @@ public class BookController {
 
     // 친구 초대 보내기
     @PostMapping("/{bookId}/friend/{inviterId}/invitation")
-    public ResponseEntity<?> sendInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviterId") Long inviterId, @RequestBody Map<String, String> map) {
+    public ResponseEntity<NotificationDto> sendInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviterId") Long inviterId, @RequestBody Map<String, String> map) {
         Long inviteeId = Long.parseLong(map.get("inviteeId"));
-        InvitationDto invitationDto = bookService.sendInvitation(bookId, inviterId, inviteeId);
+        NotificationDto notificationDto = bookService.sendInvitation(bookId, inviterId, inviteeId);
 
-        return ResponseEntity.ok(invitationDto);
+        return ResponseEntity.ok(notificationDto);
     }
 
     // 친구 초대 수락하기
     @PostMapping("/{bookId}/friend/{inviteeId}/invitation/accept")
-    public ResponseEntity<?> acceptInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
+    public ResponseEntity<Void> acceptInvitation(@PathVariable("bookId") Long bookId, @PathVariable("inviteeId") Long inviteeId, @RequestBody Map<String, String> map) {
         Long inviterId = Long.parseLong(map.get("inviterId"));
         bookService.acceptInvitation(bookId, inviterId, inviteeId);
 
