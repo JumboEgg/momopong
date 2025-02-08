@@ -83,19 +83,6 @@ public class LetterController {
         return ResponseEntity.ok(responseMap);
     }
 
-    // 해당 아이의 특정 편지 조회
-    @GetMapping("/profile/{childId}/letter/{letterId}")
-    public ResponseEntity<LetterDto> getLetter(
-            @PathVariable("childId") Long childId,
-            @PathVariable("letterId") Long letterId) {
-        try {
-            LetterDto letter = letterService.getLetter(childId, letterId);
-
-            return ResponseEntity.ok(letter);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
 
     // 해당 아이의 모든 편지 조회
     @GetMapping("/profile/{childId}/letter")
