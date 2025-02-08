@@ -1,4 +1,5 @@
 import { Routes, Route } from 'react-router-dom';
+import ProtectedRoute from './components/ProtectedRoute';
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
@@ -16,27 +17,135 @@ import MyBookStory from './components/myhouse/mybookstory/mybookstory';
 import MyDrawing from './components/myhouse/mydrawing/mydrawing';
 import MyLetters from './components/myhouse/letters/letters';
 
+// 추후 className에 touch-none overflow-hidden 설정시 스크롤이 방지됩니다
 function App(): JSX.Element {
   return (
-    // 추후 className에 touch-none overflow-hidden 설정시 스크롤이 방지됩니다
     <div className="fixed inset-0 overflow-auto">
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Landing />} />
-        <Route path="/parents/login" element={<Login />} />
-        <Route path="/parents/signup" element={<SignUp />} />
-        <Route path="/parents/:parentId/children/*" element={<SubAccountPage />} />
-        <Route path="/children/signup" element={<SubAccountForm />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/drawing" element={<Drawing />} />
-        <Route path="/story/*" element={<Story />} />
-        <Route path="/house" element={<MyHouse />} />
-        <Route path="/profile" element={<Profile />} />
-        <Route path="/friends" element={<Friends />} />
-        <Route path="/parent" element={<Parent />} />
-        <Route path="/test" element={<Test />} />
-        <Route path="/house/letters" element={<MyLetters />} />
-        <Route path="/house/mybookstory" element={<MyBookStory />} />
-        <Route path="/house/mydrawing" element={<MyDrawing />} />
+        <Route
+          path="/parents/login"
+          element={(
+            <ProtectedRoute requireAuth={false}>
+              <Login />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/parents/signup"
+          element={(
+            <ProtectedRoute requireAuth={false}>
+              <SignUp />
+            </ProtectedRoute>
+          )}
+        />
+
+        {/* Protected Routes */}
+        <Route
+          path="/parents/children/*"
+          element={(
+            <ProtectedRoute>
+              <SubAccountPage />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/children/signup"
+          element={(
+            <ProtectedRoute>
+              <SubAccountForm />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/home"
+          element={(
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/drawing"
+          element={(
+            <ProtectedRoute>
+              <Drawing />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/story/*"
+          element={(
+            <ProtectedRoute>
+              <Story />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/house"
+          element={(
+            <ProtectedRoute>
+              <MyHouse />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/profile"
+          element={(
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/friends"
+          element={(
+            <ProtectedRoute>
+              <Friends />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/parent"
+          element={(
+            <ProtectedRoute>
+              <Parent />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/test"
+          element={(
+            <ProtectedRoute>
+              <Test />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/house/letters"
+          element={(
+            <ProtectedRoute>
+              <MyLetters />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/house/mybookstory"
+          element={(
+            <ProtectedRoute>
+              <MyBookStory />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/house/mydrawing"
+          element={(
+            <ProtectedRoute>
+              <MyDrawing />
+            </ProtectedRoute>
+          )}
+        />
       </Routes>
     </div>
   );
