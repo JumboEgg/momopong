@@ -47,7 +47,7 @@ public class FriendServiceImpl implements FriendService {
 
                     // Redis에서 상태 가져오기
                     StatusType status;
-                    String key = String.format(CHILD_STATUS_KEY, friend.getId());
+                    String key = String.format(CHILD_STATUS_KEY, toChild.getId());
                     Object json = redisDao.getValues(key);
                     if (json == null) status = StatusType.OFFLINE;
                     else status = jsonConverter.fromJson((String) json, ChildStatusDto.class).getStatus();
