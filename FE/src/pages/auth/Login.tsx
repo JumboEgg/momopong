@@ -91,7 +91,7 @@ function Login(): JSX.Element {
       setTimeout(() => {
         const { user } = useAuthStore.getState();
         if (user?.parentId) {
-          navigate(`/parents/${user.parentId}/children`);
+          navigate('/parents/children');
         } else {
           console.error('User data not available:', user);
         }

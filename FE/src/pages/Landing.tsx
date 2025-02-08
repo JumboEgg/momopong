@@ -1,11 +1,22 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
+import useAuthStore from '@/stores/authStore';
 
 function Landing(): JSX.Element {
   const navigate = useNavigate();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const { user } = useAuthStore();
 
   const handleStart = () => {
     navigate('/parents/login');
   };
+
+  useEffect(() => {
+    // 인증된 사용자는 서브계정 선택 페이지로 리다이렉션
+    if (isAuthenticated) {
+      navigate(`/parents/${user?.parentId}/children`);
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-r from-blue-500 to-purple-600">
