@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { AxiosError } from 'axios'; // 추후 삭제
 import api from '@/api/axios';
+import { tokenService } from '@/services/tokenService';
 import useAuthStore from './authStore';
 
 interface SubAccount {
@@ -99,18 +100,32 @@ const useSubAccountStore = create<SubAccountState>()(
         set({ isLoading: true, error: null });
 
         try {
-          const { user } = useAuthStore.getState();
+          // 현재 로그인된 계정이 자녀 계정인지 확인
+          const childToken = get().childToken.accessToken;
 
+          if (childToken) {
+            // 자녀 계정으로 로그인된 경우, 부모 계정으로 전환
+            await useAuthStore.getState().setSelectedChildId(null);
+          }
+
+          const { user } = useAuthStore.getState();
           if (!user?.parentId) {
             throw new Error('부모 계정 정보를 찾을 수 없습니다.');
           }
 
           const response = await api.get(`/parents/${user.parentId}/children`);
-
           set({
             subAccounts: response.data,
             isLoading: false,
           });
+
+          // 자녀 계정이었다면 다시 자녀 계정으로 복귀
+          if (childToken) {
+            const { selectedAccount } = get();
+            if (selectedAccount) {
+              await useAuthStore.getState().setSelectedChildId(selectedAccount.childId);
+            }
+          }
         } catch (error) {
           const errorMessage = error instanceof Error
             ? error.message
@@ -274,16 +289,15 @@ const useSubAccountStore = create<SubAccountState>()(
           );
 
           const { childDto, accessToken } = response.data;
+          tokenService.setChildToken(accessToken);
 
           set({
             selectedAccount: childDto,
-            childToken: {
-              accessToken,
-            },
+            childToken: { accessToken },
             isLoading: false,
           });
 
-          console.log('Selected Account after set:', useSubAccountStore.getState().selectedAccount);
+          useAuthStore.getState().setSelectedChildId(childDto.childId);
 
           // firstLogin이 true인 경우 처리 가능
           return childDto.firstLogin;
@@ -298,12 +312,12 @@ const useSubAccountStore = create<SubAccountState>()(
 
       // 자식 계정 로그아웃
       logoutSubAccount: () => {
+        tokenService.setChildToken(null);
         set({
           selectedAccount: null,
-          childToken: {
-            accessToken: null,
-          },
+          childToken: { accessToken: null },
         });
+        useAuthStore.getState().setSelectedChildId(null);
       },
 
       // 유틸리티 메서드

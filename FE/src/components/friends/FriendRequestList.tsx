@@ -1,16 +1,34 @@
-import { useFriendRequestStore } from '@/stores/friendRequestStore';
+import { useEffect } from 'react';
+import useFriendRequestStore from '@/stores/friendRequestStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import FriendRequestItem from './FriendRequestItem';
 
 function FriendRequestList(): JSX.Element {
-  const { requests, acceptRequest, rejectRequest } = useFriendRequestStore();
+  const {
+    requests,
+    fetchRequests,
+    acceptRequest,
+    rejectRequest,
+  } = useFriendRequestStore();
   const { selectedAccount } = useSubAccountStore();
+
+  useEffect(() => { // 요청 목록 가져오기
+    if (selectedAccount?.childId) {
+      fetchRequests(selectedAccount.childId);
+    }
+  }, [selectedAccount?.childId]);
 
   if (!selectedAccount) {
     return <div>로그인된 계정이 없습니다.</div>;
   }
 
   const { childId } = selectedAccount;
+
+  // 로딩 상태
+  const { isLoading } = useFriendRequestStore();
+  if (isLoading) {
+    return <div>요청 목록을 불러오는 중...</div>;
+  }
 
   if (requests.length === 0) {
     return (

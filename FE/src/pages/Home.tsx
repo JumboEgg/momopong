@@ -14,8 +14,8 @@ function HomePage() {
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
-  console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
-  console.log('Profile URL:', selectedAccount?.profile); // profile URL만 따로 확인
+  // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
+  // console.log('Profile URL:', selectedAccount?.profile); // profile URL 확인
 
   const handleOpenModal = () => {
     setIsModalOpen(true);

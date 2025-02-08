@@ -1,5 +1,7 @@
+// components/FriendList.tsx
 import { useEffect } from 'react';
 import { useFriendListStore } from '@/stores/friendListStore';
+import useSubAccountStore from '@/stores/subAccountStore';
 import FriendListItem from './FriendListItem';
 
 function FriendList(): JSX.Element {
@@ -7,9 +9,21 @@ function FriendList(): JSX.Element {
     friends, loading, error, fetchFriends,
   } = useFriendListStore();
 
+  const { selectedAccount } = useSubAccountStore();
+
   useEffect(() => {
-    fetchFriends();
-  }, [fetchFriends]);
+    if (selectedAccount?.childId) {
+      fetchFriends(selectedAccount.childId);
+    }
+  }, [selectedAccount?.childId, fetchFriends]);
+
+  if (!selectedAccount) {
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        로그인이 필요합니다.
+      </div>
+    );
+  }
 
   if (loading) {
     return (
@@ -27,6 +41,14 @@ function FriendList(): JSX.Element {
     );
   }
 
+  if (friends.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64 text-gray-500">
+        아직 친구가 없습니다.
+      </div>
+    );
+  }
+
   return (
     <div className="bg-white rounded-lg p-4 shadow-md">
       <div className="flex justify-between mb-4">
@@ -36,7 +58,7 @@ function FriendList(): JSX.Element {
           명
         </span>
       </div>
-      <div className="divide-y divide-gray-200">
+      <div>
         {friends.map((friend) => (
           <FriendListItem
             key={friend.childId}
