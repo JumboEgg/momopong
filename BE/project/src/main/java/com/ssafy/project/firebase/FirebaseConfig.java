@@ -3,31 +3,33 @@ package com.ssafy.project.firebase;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
-import org.springframework.stereotype.Component;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.io.ByteArrayInputStream;
-import java.util.Base64;
+import java.io.InputStream;
 
-@Component
+// Firebase 초기화 설정 클래스
+@Configuration
 public class FirebaseConfig {
 
+    @Value("${firebase.credentials}")
+    private String firebaseCredentials;
+
     @PostConstruct
-    public void initialize() {
+    public void initalize() {
         try {
             if (FirebaseApp.getApps().isEmpty()) {
-                String firebaseConfigBase64 = System.getenv("FIREBASE_CONFIG");
+                InputStream serviceAccount = new ByteArrayInputStream(firebaseCredentials.getBytes());
 
-                // Base64 디코딩 후 Firebase 초기화
-                byte[] decodedBytes = Base64.getDecoder().decode(firebaseConfigBase64);
-                ByteArrayInputStream serviceAccount = new ByteArrayInputStream(decodedBytes);
                 FirebaseOptions options = new FirebaseOptions.Builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount))
                         .build();
                 FirebaseApp.initializeApp(options);
             }
         } catch (Exception e) {
-            throw new RuntimeException("Firebase 초기화 실패", e);
+            throw new RuntimeException(e);
         }
     }
 }
