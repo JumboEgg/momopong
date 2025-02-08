@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import axios from 'axios';
 
 export interface Friend {
   id: string;
@@ -13,6 +14,7 @@ interface FriendStore {
   isConnected: boolean;
   setIsConnected: (state: boolean) => void;
   friendList: Friend[];
+  fetchFriends: (bookId: string, childId: string) => Promise<void>;
 }
 
 const useFriendStore = create<FriendStore>((set) => ({
@@ -38,6 +40,20 @@ const useFriendStore = create<FriendStore>((set) => ({
       id: '4', name: '태민', avatar: '/images/profileicon.png', status: 'online',
     },
   ],
+
+  // 동화 함께읽기모드 친구목록
+  fetchFriends: async (bookId, childId) => {
+    try {
+      const response = await axios.get(`/api/book/${bookId}/friend/${childId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('childAccessToken')}`,
+        },
+      });
+      set({ friendList: response.data });
+    } catch (error) {
+      console.error('Failed to fetch friends:', error);
+    }
+  },
 }));
 
 export const useFriends = (): FriendStore => useFriendStore();

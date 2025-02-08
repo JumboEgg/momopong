@@ -31,17 +31,22 @@ const useAuthStore = create<AuthState>()(
       error: null,
 
       setTokens: (tokens: JwtToken) => {
-        tokenService.setParentToken(tokens.accessToken);
         set({
           accessToken: tokens.accessToken,
           refreshToken: tokens.refreshToken,
           isAuthenticated: true,
         });
+        // tokenService 업데이트
+        tokenService.syncWithAuth(tokens);
       },
 
       setUser: (user: ParentDto) => set({ user }),
 
-      setSelectedChildId: (childId: number | null) => set({ selectedChildId: childId }),
+      // tokenService 기준으로 업데이트
+      setSelectedChildId: (childId: number | null) => {
+        set({ selectedChildId: childId });
+        tokenService.setCurrentChildId(childId);
+      },
 
       reset: () => {
         clearAuthTokens();
@@ -57,11 +62,22 @@ const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => Object.fromEntries(
-        Object.entries(state)
-          .filter(([key]) => ['isAuthenticated', 'user', 'accessToken', 'refreshToken', 'selectedChildId']
-            .includes(key)),
-      ),
+      partialize: (state) => ({
+        isAuthenticated: state.isAuthenticated,
+        user: state.user,
+        accessToken: state.accessToken,
+        refreshToken: state.refreshToken,
+        selectedChildId: state.selectedChildId,
+      }),
+      onRehydrateStorage: () => (state) => {
+        // 스토리지에서 상태가 복원된 후 tokenService 초기화
+        if (state) {
+          tokenService.syncWithAuth({
+            accessToken: state.accessToken,
+            refreshToken: state.refreshToken,
+          });
+        }
+      },
     },
   ),
 );

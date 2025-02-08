@@ -57,21 +57,25 @@ function StoryIllustration({
       {/* 텍스트 오버레이 */}
       <div className="absolute bottom-8 left-8">
         <div className="bg-black bg-opacity-30 text-white p-6 rounded-lg max-w-xl">
-          {relatedContents.map((content) => (
-            <div
-              key={`${pageNumber}-${content.type}-${content.text.substring(0, 20)}`}
-              className="mb-4 last:mb-0"
-            >
-              {content.type !== 'narration' && (
-                <div className="text-sm font-medium text-gray-300 mb-1">
-                  {getSpeakerName(content.type)}
-                </div>
-              )}
-              <p className="text-xl font-bold tracking-wide leading-relaxed">
-                {content.text}
-              </p>
-            </div>
-          ))}
+          {relatedContents.map((content) => {
+           const isUserTurn = userRole === content.type;
+
+           return (
+             <div
+               key={`${pageNumber}-${content.type}-${content.text.substring(0, 20)}`}
+               className={`mb-4 last:mb-0 ${isUserTurn ? 'border-{yellow}-{100}' : ''}`}
+             >
+               {content.type !== 'narration' && (
+                 <div className="text-sm font-medium text-gray-300 mb-1">
+                   {getSpeakerName(content.type)}
+                 </div>
+               )}
+               <p className={`text-xl font-bold tracking-wide leading-relaxed ${isUserTurn ? 'text-yellow-200' : 'text-white'}`}>
+                 {content.text}
+               </p>
+             </div>
+           );
+         })}
         </div>
       </div>
     </div>
