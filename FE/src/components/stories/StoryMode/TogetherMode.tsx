@@ -6,7 +6,7 @@ import { useStory } from '@/stores/storyStore';
 import storyData from '../data/cinderella';
 import RecordingButton from './RecordingButton';
 import AudioPlayer from '../AudioPlayer';
-import getAudioPath from '../utils/audioHelper';
+import { getAudioUrl } from '../utils/audioUtils';
 import StoryIllustration from './StoryIllustration';
 
 function TogetherMode(): JSX.Element {
@@ -39,14 +39,13 @@ function TogetherMode(): JSX.Element {
 
   const currentContent = currentPage.contents[currentContentIndex];
 
-  // Add isStoryEnd condition with safe checks and last audio completion
   const isStoryEnd = useMemo(() => {
     if (!currentPage || currentIndex !== storyData.length - 1) return false;
     if (currentContentIndex !== currentPage.contents.length - 1) return false;
 
     // 마지막 페이지의 마지막 컨텐츠가 나레이션이고 오디오가 있는 경우
     const isLastContentNarration = currentContent?.type === 'narration'
-      && currentContent?.audioFiles?.length > 0;
+      && currentContent?.audioId;
 
     // 나레이션이 아니거나 오디오가 없는 경우는 바로 종료
     if (!isLastContentNarration) return true;
@@ -55,26 +54,27 @@ function TogetherMode(): JSX.Element {
     return isLastAudioCompleted;
   }, [currentIndex, currentContentIndex, currentPage, currentContent, isLastAudioCompleted]);
 
-  const currentAudioFiles = useMemo(() => {
-    if (!currentContent || !currentContent.audioFiles) {
-      console.log('No content or audio files found');
-      return [];
+  const currentAudioUrl = useMemo(() => {
+    if (!currentContent || !currentContent.audioId) {
+      console.log('No content or audio id found');
+      return '';
     }
 
-    return currentContent.audioFiles.map((fileName: string) => getAudioPath(fileName));
+    return getAudioUrl(currentContent.audioId);
   }, [currentContent]);
 
   useEffect(() => {
     const randomRole = Math.random() < 0.5 ? 'prince' : 'princess';
     setUserRole(randomRole);
+
+    // 디버깅 로그 추가
+    console.log('Randomly Selected Role:', randomRole);
   }, []);
 
-  // Reset isLastAudioCompleted when content changes
   useEffect(() => {
     setIsLastAudioCompleted(false);
     console.log('Current Page:', currentPage);
     console.log('Current Content:', currentContent);
-    console.log('Illustration:', currentContent?.illustration);
   }, [currentIndex, currentContentIndex]);
 
   const isUserTurn = useMemo(() => {
@@ -114,7 +114,6 @@ function TogetherMode(): JSX.Element {
 
   const hasRecording = useCallback((index: number) => recordings.has(index), [recordings]);
 
-  // Show ending screen when story is finished
   if (isStoryEnd) {
     return (
       <div className="max-w-2xl mx-auto p-6">
@@ -179,6 +178,7 @@ function TogetherMode(): JSX.Element {
         isLast={isStoryEnd}
         userRole={userRole || undefined}
         currentContent={currentContent}
+        illustration={currentPage.illustration}
       />
 
       {/* 녹음 버튼과 오디오 플레이어 */}
@@ -194,11 +194,11 @@ function TogetherMode(): JSX.Element {
             )}
           </div>
         ) : (
-          audioEnabled && (
+          audioEnabled && currentAudioUrl && (
             <div className="hidden">
               <AudioPlayer
                 ref={audioRef}
-                audioFiles={currentAudioFiles}
+                audioFiles={[currentAudioUrl]}
                 autoPlay
                 onEnded={handleAudioComplete}
               />

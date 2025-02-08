@@ -8,7 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import storyData from '../data/cinderella';
 import AudioPlayer from '../AudioPlayer';
-import getAudioPath from '../utils/audioHelper';
+import { getAudioUrl } from '../utils/audioUtils';
 import StoryIllustration from './StoryIllustration';
 
 function ReadingMode(): ReactElement {
@@ -32,33 +32,53 @@ function ReadingMode(): ReactElement {
   }, []);
 
   const handleNext = useCallback(() => {
-    if (currentIndex < storyData.length - 1) {
+    const currentPage = storyData[currentIndex];
+
+    // 현재 페이지에 다음 콘텐츠가 있는 경우
+    if (currentContentIndex < currentPage.contents.length - 1) {
+      setCurrentContentIndex(currentContentIndex + 1);
+    } else if (currentIndex < storyData.length - 1) {
       stopCurrentAudio();
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
     } else {
       setShowEndOverlay(true);
     }
-  }, [currentIndex, stopCurrentAudio, setCurrentIndex]);
+  }, [currentIndex, currentContentIndex, stopCurrentAudio, setCurrentIndex]);
 
   const handlePrevious = useCallback(() => {
-    if (currentIndex > 0) {
-      stopCurrentAudio();
-      setCurrentIndex(currentIndex - 1);
-      setCurrentContentIndex(0);
-    }
-  }, [currentIndex, stopCurrentAudio, setCurrentIndex]);
-
-  const handleContentEnd = useCallback(() => {
-    const isLastPage = currentIndex === storyData.length - 1;
-
-    if (isLastPage) {
-      setShowEndOverlay(true);
+    // 첫 번째 콘텐츠가 아니면 이전 콘텐츠로 이동
+    if (currentContentIndex > 0) {
+      setCurrentContentIndex(currentContentIndex - 1);
       return;
     }
 
-    handleNext();
-  }, [currentIndex, handleNext]);
+    // 첫 번째 콘텐츠면 이전 페이지의 마지막 콘텐츠로 이동
+    if (currentIndex > 0) {
+      stopCurrentAudio();
+      setCurrentIndex(currentIndex - 1);
+      const prevPage = storyData[currentIndex - 1];
+      setCurrentContentIndex(prevPage.contents.length - 1);
+    }
+  }, [currentIndex, currentContentIndex, stopCurrentAudio, setCurrentIndex]);
+
+  const handleContentEnd = useCallback(() => {
+    const currentPage = storyData[currentIndex];
+
+    // 현재 페이지의 다음 콘텐츠로 이동 또는 다음 페이지로 전환
+    const hasNextContent = currentContentIndex < currentPage.contents.length - 1;
+    const hasNextPage = currentIndex < storyData.length - 1;
+
+    if (hasNextContent) {
+      setCurrentContentIndex(currentContentIndex + 1);
+    } else if (hasNextPage) {
+      stopCurrentAudio();
+      setCurrentIndex(currentIndex + 1);
+      setCurrentContentIndex(0);
+    } else {
+      setShowEndOverlay(true);
+    }
+  }, [currentIndex, currentContentIndex, stopCurrentAudio, setCurrentIndex]);
 
   const handleRestart = useCallback(() => {
     stopCurrentAudio();
@@ -76,8 +96,8 @@ function ReadingMode(): ReactElement {
   const currentContent = currentPage.contents[currentContentIndex];
   const isLastPage = currentIndex === storyData.length - 1;
 
-  // audioFiles 배열의 각 파일에 대해 getAudioPath 적용
-  const processedAudioFiles = currentContent.audioFiles.map(getAudioPath);
+  // audioId를 이용해 오디오 URL 생성
+  const audioUrl = getAudioUrl(currentContent.audioId);
 
   return (
     <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
@@ -87,7 +107,16 @@ function ReadingMode(): ReactElement {
           {' '}
           <span className="text-base text-gray-600">
             {currentPage.pageNumber}
-            /60
+            /28
+          </span>
+          {' '}
+          <span className="text-sm text-gray-500">
+            (텍스트
+            {' '}
+            {currentContentIndex + 1}
+            /
+            {currentPage.contents.length}
+            )
           </span>
         </h2>
         <button
@@ -106,15 +135,16 @@ function ReadingMode(): ReactElement {
         currentContentIndex={currentContentIndex}
         onPrevious={handlePrevious}
         onNext={handleNext}
-        isFirst={currentIndex === 0}
-        isLast={isLastPage}
+        isFirst={currentIndex === 0 && currentContentIndex === 0}
+        isLast={isLastPage && currentContentIndex === currentPage.contents.length - 1}
         currentContent={currentContent}
+        illustration={currentPage.illustration}
       />
 
-      {audioEnabled && currentContent.audioFiles.length > 0 && (
+      {audioEnabled && currentContent.audioId && (
         <AudioPlayer
           ref={audioRef}
-          audioFiles={processedAudioFiles}
+          audioFiles={[audioUrl]}
           autoPlay
           onEnded={handleContentEnd}
         />
