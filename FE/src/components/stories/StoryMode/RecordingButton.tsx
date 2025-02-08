@@ -32,10 +32,35 @@ function RecordingButton({
     return () => {};
   }, [isRecording, timeLeft]);
 
+  // 컴포넌트 마운트 시 로그
+  useEffect(() => {
+    console.log('RecordingButton Detailed Initialization:', {
+      characterType,
+      storyIndex,
+      isRecording,
+      mediaRecorder: !!mediaRecorder,
+      browserSupport: {
+        getUserMedia: !!navigator.mediaDevices.getUserMedia,
+        mediaRecorder: !!window.MediaRecorder,
+      },
+    });
+  }, [characterType, storyIndex]);
+
   // 녹음 시작
   const startRecording = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('Media Stream Acquired:', {
+        streamActive: stream.active,
+        streamTracks: stream.getTracks().length,
+      });
+
+      // 스트림 확인
+    if (!stream.active) {
+      alert('마이크에 접근할 수 없습니다.');
+      return;
+    }
+
       const recorder = new MediaRecorder(stream);
       const chunks: BlobPart[] = []; // 녹음 데이터를 저장할 배열
 
@@ -58,7 +83,7 @@ function RecordingButton({
       setIsRecording(true);
       setTimeLeft(20); // 타이머 초기화
     } catch (error) {
-      // console.error('Failed to start recording:', error);
+      console.error('Failed to start recording:', error);
     }
   }, [addRecording, characterType, storyIndex, onRecordingComplete]);
 
