@@ -4,7 +4,6 @@ import {
   useState,
   ReactElement,
 } from 'react';
-
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import storyData from '../data/cinderella';
@@ -33,14 +32,14 @@ function ReadingMode(): ReactElement {
   }, []);
 
   const handleNext = useCallback(() => {
-    if (!audioEnabled && currentContentIndex < storyData[currentIndex].contents.length - 1) {
-      setCurrentContentIndex(currentContentIndex + 1);
-    } else if (currentIndex < storyData.length - 1) {
+    if (currentIndex < storyData.length - 1) {
       stopCurrentAudio();
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
+    } else {
+      setShowEndOverlay(true);
     }
-  }, [currentIndex, currentContentIndex, audioEnabled, stopCurrentAudio, setCurrentIndex]);
+  }, [currentIndex, stopCurrentAudio, setCurrentIndex]);
 
   const handlePrevious = useCallback(() => {
     if (currentIndex > 0) {
@@ -52,19 +51,14 @@ function ReadingMode(): ReactElement {
 
   const handleContentEnd = useCallback(() => {
     const isLastPage = currentIndex === storyData.length - 1;
-    const isLastContent = currentContentIndex === storyData[currentIndex].contents.length - 1;
 
-    if (isLastPage && isLastContent) {
+    if (isLastPage) {
       setShowEndOverlay(true);
       return;
     }
 
-    if (currentContentIndex < storyData[currentIndex].contents.length - 1) {
-      setCurrentContentIndex((prev) => prev + 1);
-    } else {
-      handleNext();
-    }
-  }, [currentIndex, currentContentIndex, handleNext, setCurrentIndex]);
+    handleNext();
+  }, [currentIndex, handleNext]);
 
   const handleRestart = useCallback(() => {
     stopCurrentAudio();
@@ -80,12 +74,10 @@ function ReadingMode(): ReactElement {
 
   const currentPage = storyData[currentIndex];
   const currentContent = currentPage.contents[currentContentIndex];
-  const isLastContent = currentIndex === storyData.length - 1
-  && currentContentIndex === storyData[currentIndex].contents.length - 1;
+  const isLastPage = currentIndex === storyData.length - 1;
 
-  const currentAudioFiles = currentContent.audioFiles
-    ? currentContent.audioFiles.map((fileName: string) => getAudioPath(fileName))
-    : [];
+  // audioFiles 배열의 각 파일에 대해 getAudioPath 적용
+  const processedAudioFiles = currentContent.audioFiles.map(getAudioPath);
 
   return (
     <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
@@ -95,7 +87,7 @@ function ReadingMode(): ReactElement {
           {' '}
           <span className="text-base text-gray-600">
             {currentPage.pageNumber}
-            /16
+            /60
           </span>
         </h2>
         <button
@@ -115,13 +107,14 @@ function ReadingMode(): ReactElement {
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFirst={currentIndex === 0}
-        isLast={isLastContent}
+        isLast={isLastPage}
+        currentContent={currentContent}
       />
 
-      {audioEnabled && currentAudioFiles.length > 0 && (
+      {audioEnabled && currentContent.audioFiles.length > 0 && (
         <AudioPlayer
           ref={audioRef}
-          audioFiles={currentAudioFiles}
+          audioFiles={processedAudioFiles}
           autoPlay
           onEnded={handleContentEnd}
         />

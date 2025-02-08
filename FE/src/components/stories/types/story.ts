@@ -65,6 +65,7 @@ export interface StoryIllustrationProps {
   isFirst: boolean;
   isLast: boolean;
   userRole?: 'prince' | 'princess';
+  currentContent: StoryPageContent;
 }
 
 // TogetherMode.tsx
