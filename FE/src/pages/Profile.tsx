@@ -11,14 +11,21 @@ import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 
 function Profile(): JSX.Element {
   const navigate = useNavigate();
-  const { selectedAccount } = useSubAccountStore();
-  //   name: '김과자',
-  //   type: '동화나라 여행자',
-  //   days: 45,
-  //   code: '1234 5678',
-  // };
+  const { selectedAccount, logoutSubAccount } = useSubAccountStore();
 
   const [imgSize, setImgSize] = useState<ProfileImgSize>('xl');
+
+  const handleAccountChange = async () => {
+    try {
+    logoutSubAccount();
+      navigate('/parents/:parent_id/children');
+    } catch (error) {
+      console.error('계정 변경 중 오류 발생:', error);
+      // 에러가 발생해도 계정 선택 페이지로 이동
+      navigate('/parents/:parent_id/children');
+    }
+  };
+
   const handleResize = () => {
     if (window.innerWidth >= 1024) {
       setImgSize('xl');
@@ -52,7 +59,7 @@ function Profile(): JSX.Element {
         <TextButton
           size="md"
           variant="gray"
-          onClick={() => navigate('/parents/:parent_id/children')}
+          onClick={handleAccountChange}
         >
           계정 변경
         </TextButton>

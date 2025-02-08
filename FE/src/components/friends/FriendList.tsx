@@ -6,7 +6,7 @@ import FriendListItem from './FriendListItem';
 
 function FriendList(): JSX.Element {
   const {
-    friends, loading, error, fetchFriends,
+    friends, loading, error, startStatusPolling, stopStatusPolling, fetchFriends,
   } = useFriendListStore();
 
   const { selectedAccount } = useSubAccountStore();
@@ -14,7 +14,13 @@ function FriendList(): JSX.Element {
   useEffect(() => {
     if (selectedAccount?.childId) {
       fetchFriends();
+      startStatusPolling();
+
+      return () => {
+        stopStatusPolling();
+      };
     }
+    return undefined; // 명시적으로 undefined 반환
   }, [selectedAccount?.childId, fetchFriends]);
 
   if (!selectedAccount) {

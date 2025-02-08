@@ -13,13 +13,13 @@ const publicPaths = [
   '/children/presigned-url',
 ];
 
-const parentAuthPaths = [ // 여기로 이동
+const parentAuthPaths = [
   '/parents',
   '/children/signup',
   '/children/login',
+  '/children/logout',
   '/parents/children',
-  '/parents/children/all',
-  '/children/presigned-url',
+  '/parents/:parent_id/children',
 ];
 
 const api = axios.create({

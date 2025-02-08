@@ -323,17 +323,46 @@ const useSubAccountStore = create<SubAccountState>()(
       },
 
       // 자식 계정 로그아웃
-      logoutSubAccount: () => {
-        // tokenService 초기화를 먼저 수행
-        tokenService.setChildToken(null);
-        tokenService.setCurrentChildId(null);
+      logoutSubAccount: async () => {
+        try {
+          const { selectedAccount } = get();
+          if (selectedAccount?.childId) {
+            const token = tokenService.getActiveToken(true);
+            console.log('Logout 요청 전 토큰:', token);
+            console.log('Logout 요청 childId:', selectedAccount.childId);
 
-        set({
-          selectedAccount: null,
-          childToken: { accessToken: null },
-        });
+            const response = await api.post('/children/logout', {
+              childId: selectedAccount.childId.toString(),
+            });
 
-        useAuthStore.getState().setSelectedChildId(null);
+            console.log('Logout 응답:', response);
+          }
+
+          // tokenService 초기화
+          tokenService.setChildToken(null);
+          tokenService.setCurrentChildId(null);
+
+          // 현재 선택된 계정과 토큰 정보만 초기화
+          set({
+            selectedAccount: null,
+            childToken: { accessToken: null },
+          });
+
+          useAuthStore.getState().setSelectedChildId(null);
+        } catch (error: any) { // AxiosError 타입 명시
+          console.error('Logout 에러 상세:', {
+            status: error?.response?.status,
+            data: error?.response?.data,
+            headers: error?.config?.headers,
+          });
+
+          // 에러가 발생하더라도 로컬 상태는 초기화
+          set({
+            selectedAccount: null,
+            childToken: { accessToken: null },
+          });
+          useAuthStore.getState().setSelectedChildId(null);
+        }
       },
 
       // 유틸리티 메서드
