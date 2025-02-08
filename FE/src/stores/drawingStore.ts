@@ -1,4 +1,5 @@
 import { DrawingMode } from '@/components/drawing/types/drawing';
+import { FrameInfo } from '@/types/frame';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -7,12 +8,6 @@ export interface TemplateData {
   name: string;
   backgroundSrc: string | null;
   outlineSrc: string;
-}
-
-export interface DrawingData {
-  title: string;
-  date: number;
-  src: string;
 }
 
 // Drawing 상태 관리 스토어
@@ -27,8 +22,8 @@ interface DrawingStore {
   setIsErasing: (isErasing: boolean) => void;
   imageData: string;
   setImageData: (data: string) => void;
-  localDrawingList: DrawingData[];
-  addDrawingData: (data: DrawingData) => void;
+  drawingList: FrameInfo[];
+  setDrawingData: (data: FrameInfo[]) => void;
 }
 
 // Zustand 상태 훅 생성
@@ -50,10 +45,12 @@ const useDrawingStore = create<DrawingStore>()(
       imageData: '',
       setImageData: (data) => set({ imageData: data }),
 
-      localDrawingList: [],
-      addDrawingData: (data) => set((state) => ({
-        localDrawingList: [...state.localDrawingList, data],
-      })),
+      drawingList: [],
+      setDrawingData: (data) => {
+        set({ drawingList: data });
+        // console.log('setDrawingData on Store: ', data);
+        // console.log('setDrawingData on Store: ', get().drawingList);
+      },
     }),
     {
       name: 'drawing-storage',

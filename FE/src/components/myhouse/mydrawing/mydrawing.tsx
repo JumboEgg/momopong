@@ -1,30 +1,53 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDrawing } from '@/stores/drawingStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import loadImagesFromS3 from '@/utils/drawing/drawingLoad';
+import { FrameInfo } from '@/types/frame';
+import useSubAccountStore from '@/stores/subAccountStore';
 
 function MyDrawing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigate = useNavigate();
 
   const {
-    localDrawingList,
+    drawingList, setDrawingData,
   } = useDrawing();
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : localDrawingList.length - 1));
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : drawingList.length - 1));
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev < localDrawingList.length - 1 ? prev + 1 : 0));
+    setCurrentIndex((prev) => (prev < drawingList.length - 1 ? prev + 1 : 0));
   };
 
   const handleBack = () => {
     navigate('/house');
   };
+
+  const childId = useSubAccountStore.getState().selectedAccount?.childId;
+
+  const fetchData = async () => {
+    if (!childId) return;
+    try {
+      const data: FrameInfo[] = await loadImagesFromS3(childId.toString());
+      setDrawingData(data);
+    } catch (error) {
+      console.error('Error loading images: ', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  useEffect(() => {
+    console.log(drawingList);
+  }, [drawingList]);
 
   return (
     <div className="flex flex-col min-h-screen bg-yellow-100 p-8">
@@ -62,7 +85,7 @@ function MyDrawing() {
         {/* 제목 버튼 */}
         <div className="translate-y-2 md:translate-y-4">
           <div className="px-3 md:px-6 py-1 md:py-2 bg-yellow-300 rounded-full font-[BMJUA] text-xl md:text-2xl whitespace-nowrap">
-            {localDrawingList.length ? localDrawingList[currentIndex].title : '아직 그림이 없어요'}
+            {drawingList.length ? drawingList[currentIndex].frameTitle : '아직 그림이 없어요'}
           </div>
         </div>
 
@@ -70,11 +93,11 @@ function MyDrawing() {
         <div className="w-full max-w-[60%] md:max-w-[70%] lg:max-w-3xl aspect-video rounded-lg">
           <div className="w-full h-full outline-15 outline-amber-700 bg-gray-100 overflow-hidden rounded-xs shadow-2xl">
             {
-              localDrawingList.length
+              drawingList.length
                 ? (
                   <img
-                    src={localDrawingList[currentIndex].src}
-                    alt={localDrawingList[currentIndex].title}
+                    src={drawingList[currentIndex].frameUrl}
+                    alt={drawingList[currentIndex].frameTitle}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -85,7 +108,7 @@ function MyDrawing() {
           </div>
         </div>
         <p className="text-center mt-8 text-gray-600 text-xl">
-          {localDrawingList.length
+          {drawingList.length
             ? '좌우로 이동하며 내가 그린 그림들을 구경하세요!'
             : '그림을 그리거나 함께 동화를 읽으며 내가 그린 그림을 모아보세요!'}
         </p>

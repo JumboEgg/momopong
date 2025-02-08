@@ -1,9 +1,10 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useEffect, useState } from 'react';
 import DialogModal from '@/components/common/modals/DialogModal';
-import { DrawingData, useDrawing } from '@/stores/drawingStore';
+import { useDrawing } from '@/stores/drawingStore';
 import { useFriends } from '@/stores/friendStore';
-import uploadImageToS3 from '../utils/drawingUpload';
+import { FrameInfo } from '@/types/frame';
+import uploadImageToS3 from '../../../utils/drawing/drawingUpload';
 
 function ResultPage() {
   const {
@@ -15,7 +16,6 @@ function ResultPage() {
     setIsErasing,
     imageData,
     setImageData,
-    addDrawingData,
   } = useDrawing();
 
   const {
@@ -39,23 +39,23 @@ function ResultPage() {
 
   const onSave = async () => {
     try {
-    // Upload image to S3 first
-      const uploadedImageUrl = await uploadImageToS3(imageData);
-
-      const drawingResult: DrawingData = {
-        title: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
-        date: new Date().getDate(),
-        src: uploadedImageUrl, // Use the returned S3 URL instead of base64
+      const drawingResult: FrameInfo = {
+        frameTitle: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
+        frameUrl: imageData,
+        frameFileName: '',
+        createdAt: '',
       };
 
-      console.log(drawingResult);
+    // Upload image to S3 first
+      const uploadedImageUrl = await uploadImageToS3(drawingResult);
+
+      console.log(uploadedImageUrl);
 
       // Reset all states after successful upload
       setFriend(null);
       setIsConnected(false);
       setPenColor('black');
       setIsErasing(false);
-      addDrawingData(drawingResult);
       setTemplate(null);
       setMode(null);
       setImageData('');
