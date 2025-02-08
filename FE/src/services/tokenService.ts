@@ -1,3 +1,5 @@
+import useAuthStore from '@/stores/authStore';
+
 // services/tokenService.ts
 interface TokenState {
   parentToken: string | null;
@@ -14,6 +16,27 @@ class TokenService {
     currentChildId: null,
   };
 
+  getActiveToken(forceParent: boolean = false): string | null {
+    if (forceParent) {
+      // authStore에서 직접 토큰 가져오기
+      const parentToken = useAuthStore.getState().accessToken;
+      return parentToken;
+    }
+    return this.state.childToken || useAuthStore.getState().accessToken;
+  }
+
+  getChildToken(): string | null {
+    return this.state.childToken;
+  }
+
+  getCurrentChildId(): number | null {
+  return this.state.currentChildId;
+}
+
+  getRefreshToken(): string | null {
+    return this.state.refreshToken;
+  }
+
   setParentToken(token: string | null) {
     this.state.parentToken = token;
   }
@@ -22,20 +45,12 @@ class TokenService {
     this.state.childToken = token;
   }
 
+  setCurrentChildId(childId: number | null) {
+    this.state.currentChildId = childId;
+  }
+
   setRefreshToken(token: string | null) {
     this.state.refreshToken = token;
-  }
-
-  getActiveToken() {
-    return this.state.childToken || this.state.parentToken;
-  }
-
-  getRefreshToken() {
-    return this.state.refreshToken;
-  }
-
-  getCurrentChildId() {
-    return this.state.currentChildId;
   }
 
   clearAllTokens() {

@@ -100,37 +100,47 @@ const useSubAccountStore = create<SubAccountState>()(
         set({ isLoading: true, error: null });
 
         try {
-          // 현재 로그인된 계정이 자녀 계정인지 확인
-          const childToken = get().childToken.accessToken;
+          const childToken = tokenService.getChildToken();
+          console.log('Child Token:', childToken);
 
           if (childToken) {
-            // 자녀 계정으로 로그인된 경우, 부모 계정으로 전환
-            await useAuthStore.getState().setSelectedChildId(null);
+            useAuthStore.getState().setSelectedChildId(null);
           }
 
           const { user } = useAuthStore.getState();
+          console.log('Current User:', user);
+
           if (!user?.parentId) {
             throw new Error('부모 계정 정보를 찾을 수 없습니다.');
           }
 
+          const parentToken = tokenService.getActiveToken(true);
+          console.log('Parent Token for request:', parentToken);
+
           const response = await api.get(`/parents/${user.parentId}/children`);
+          console.log('API Response:', response.data);
+
+          // 데이터 설정과 함께 로딩 상태 false로 변경
           set({
             subAccounts: response.data,
-            isLoading: false,
+            isLoading: false, // 여기에 추가
           });
 
-          // 자녀 계정이었다면 다시 자녀 계정으로 복귀
+          // 자녀 계정 복귀 로직이 있다면 여기서 실행
           if (childToken) {
             const { selectedAccount } = get();
             if (selectedAccount) {
-              await useAuthStore.getState().setSelectedChildId(selectedAccount.childId);
+              useAuthStore.getState().setSelectedChildId(selectedAccount.childId);
             }
           }
         } catch (error) {
           const errorMessage = error instanceof Error
             ? error.message
             : '계정 목록 조회 중 오류가 발생했습니다.';
-          set({ error: errorMessage, isLoading: false });
+          set({
+            error: errorMessage,
+            isLoading: false, // 에러 발생시에도 로딩 상태 false로 변경
+          });
         }
       },
 
