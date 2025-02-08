@@ -13,7 +13,7 @@ function FriendList(): JSX.Element {
 
   useEffect(() => {
     if (selectedAccount?.childId) {
-      fetchFriends(selectedAccount.childId);
+      fetchFriends();
     }
   }, [selectedAccount?.childId, fetchFriends]);
 

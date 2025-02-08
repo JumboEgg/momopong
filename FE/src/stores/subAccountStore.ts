@@ -299,7 +299,10 @@ const useSubAccountStore = create<SubAccountState>()(
           );
 
           const { childDto, accessToken } = response.data;
+
+          // tokenService 업데이트를 먼저 수행
           tokenService.setChildToken(accessToken);
+          tokenService.setCurrentChildId(childDto.childId);
 
           set({
             selectedAccount: childDto,
@@ -309,7 +312,6 @@ const useSubAccountStore = create<SubAccountState>()(
 
           useAuthStore.getState().setSelectedChildId(childDto.childId);
 
-          // firstLogin이 true인 경우 처리 가능
           return childDto.firstLogin;
         } catch (error) {
           const errorMessage = error instanceof Error
@@ -322,11 +324,15 @@ const useSubAccountStore = create<SubAccountState>()(
 
       // 자식 계정 로그아웃
       logoutSubAccount: () => {
+        // tokenService 초기화를 먼저 수행
         tokenService.setChildToken(null);
+        tokenService.setCurrentChildId(null);
+
         set({
           selectedAccount: null,
           childToken: { accessToken: null },
         });
+
         useAuthStore.getState().setSelectedChildId(null);
       },
 
@@ -374,6 +380,16 @@ const useSubAccountStore = create<SubAccountState>()(
         selectedAccount: state.selectedAccount,
         childToken: state.childToken,
       }),
+      // onRehydrateStorage 추가
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // 스토리지에서 복원된 상태로 tokenService 초기화
+          if (state.selectedAccount && state.childToken.accessToken) {
+            tokenService.setChildToken(state.childToken.accessToken);
+            tokenService.setCurrentChildId(state.selectedAccount.childId);
+          }
+        }
+      },
     },
   ),
 );

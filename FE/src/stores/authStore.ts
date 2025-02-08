@@ -42,7 +42,11 @@ const useAuthStore = create<AuthState>()(
 
       setUser: (user: ParentDto) => set({ user }),
 
-      setSelectedChildId: (childId: number | null) => set({ selectedChildId: childId }),
+      // tokenService 기준으로 업데이트
+      setSelectedChildId: (childId: number | null) => {
+        set({ selectedChildId: childId });
+        tokenService.setCurrentChildId(childId);
+      },
 
       reset: () => {
         clearAuthTokens();
