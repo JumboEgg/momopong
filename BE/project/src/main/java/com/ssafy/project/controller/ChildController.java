@@ -36,7 +36,8 @@ public class ChildController {
     }
 
     // 자식 계정 로그아웃
-    @PreAuthorize("hasRole('CHILD')")
+    @PreAuthorize("hasRole('PARENT')")
+//    @PreAuthorize("hasRole('CHILD')")
     @PostMapping("/logout")
     public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> map) {
         Long childId = Long.parseLong(map.get("childId"));
