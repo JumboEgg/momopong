@@ -68,6 +68,9 @@ dependencies {
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-common:2.2.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.2.0'
+
+	// Firebase 설정 (FCM을 위해 추가)
+	implementation 'com.google.firebase:firebase-admin:9.4.3'
 }
 
 tasks.named('test') {
