@@ -1,5 +1,3 @@
-import useAuthStore from '@/stores/authStore';
-
 // services/tokenService.ts
 interface TokenState {
   parentToken: string | null;
@@ -7,22 +5,31 @@ interface TokenState {
   refreshToken: string | null;
   currentChildId: number | null;
 }
-
 class TokenService {
   private state: TokenState = {
-    parentToken: null,
+    parentToken: localStorage.getItem('auth-storage')
+      ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state?.accessToken || null : null,
     childToken: null,
-    refreshToken: null,
+    refreshToken: localStorage.getItem('auth-storage')
+      ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state?.refreshToken || null : null,
     currentChildId: null,
   };
 
+  // authStore의 상태 변경을 구독하는 메서드
+  syncWithAuth(tokens: { accessToken: string | null, refreshToken: string | null }) {
+    this.state.parentToken = tokens.accessToken;
+    this.state.refreshToken = tokens.refreshToken;
+    console.log('TokenService synced:', {
+      parentToken: !!this.state.parentToken,
+      refreshToken: !!this.state.refreshToken,
+    });
+  }
+
   getActiveToken(forceParent: boolean = false): string | null {
     if (forceParent) {
-      // authStore에서 직접 토큰 가져오기
-      const parentToken = useAuthStore.getState().accessToken;
-      return parentToken;
+      return this.state.parentToken;
     }
-    return this.state.childToken || useAuthStore.getState().accessToken;
+    return this.state.childToken || this.state.parentToken;
   }
 
   getChildToken(): string | null {
