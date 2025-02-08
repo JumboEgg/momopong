@@ -23,8 +23,6 @@ public class PresignedUrlService {
     private static String file = "%s/%s.%s";
 
     // Presigned URL - PUT
-//    public FileDto getPresignedUrl() {
-//        String fileName = "profile/" + UUID.randomUUID() + ".webp";
     public FileDto getPresignedUrl(String folder, String extension) {
         String fileName = String.format(file, folder, UUID.randomUUID(), extension);
 
@@ -45,7 +43,7 @@ public class PresignedUrlService {
     public String getFile(String fileName) {
         GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
                 .withMethod(HttpMethod.GET)
-                .withExpiration(DateTime.now().plusMinutes(5).toDate());
+                .withExpiration(DateTime.now().plusDays(1).toDate());
 
         URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
         System.out.println("url.toString() = " + url.toString());
