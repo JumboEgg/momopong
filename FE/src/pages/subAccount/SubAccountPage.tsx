@@ -9,12 +9,13 @@ import SubAccountForm from './SubAccountForm';
 function SubAccountPage(): React.ReactElement | null {
   const navigate = useNavigate();
   const { user } = useAuthStore();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleAddAccount = () => {
-    navigate('/children/signup');
+    const parentId = user?.parentId;
+    navigate(`/parents/${parentId}/children/signup`);
   };
 
-  // 부모 계정 정보가 없으면 로그인 페이지로 리다이렉트
   useEffect(() => {
     if (!user?.parentId) {
       navigate('/parents/login');
@@ -22,14 +23,13 @@ function SubAccountPage(): React.ReactElement | null {
   }, [user, navigate]);
 
   if (!user?.parentId) {
-    return null; // 또는 로딩 상태 표시
+    return null;
   }
-
-  const [isModalOpen, setIsModalOpen] = useState(false); // 키패드 모달 상태
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
   };
+
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
@@ -40,16 +40,11 @@ function SubAccountPage(): React.ReactElement | null {
         <TextButton
           size="md"
           variant="gray"
-          className=""
           onClick={handleOpenModal}
         >
           보호자 계정
         </TextButton>
-        {isModalOpen && (
-          <ParentAuthModal
-            onClose={handleCloseModal}
-          />
-        )}
+        {isModalOpen && <ParentAuthModal onClose={handleCloseModal} />}
       </div>
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
         <Routes>
@@ -58,7 +53,7 @@ function SubAccountPage(): React.ReactElement | null {
             element={<SubAccountGrid onAdd={handleAddAccount} />}
           />
           <Route
-            path="/create"
+            path="signup"
             element={<SubAccountForm />}
           />
         </Routes>

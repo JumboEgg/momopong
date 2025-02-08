@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import FriendList from '@/components/friends/FriendList';
 import FriendRequestList from '@/components/friends/FriendRequestList';
 import AddFriendModal from './AddFriendModal';
@@ -16,9 +16,16 @@ type TabType = 'list' | 'request';
 function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabType>('list');
   const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
+  const [focusedButton, setFocusedButton] = useState<TabType>('list'); // 포커스 상태 추가
+
+  // 컴포넌트 마운트 시 'list' 버튼에 포커스
+  useEffect(() => {
+    setFocusedButton('list');
+  }, []);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
+    setFocusedButton(tab); // 탭 변경 시 포커스도 변경
   };
 
   const handleOpenAddFriendModal = () => {
@@ -45,7 +52,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           <TextButton
             size="lg"
             variant="white"
-            hasFocus={activeTab === 'list'}
+            hasFocus={focusedButton === 'list'}
             onClick={() => handleTabChange('list')}
           >
             친구 목록
@@ -53,7 +60,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           <TextButton
             size="lg"
             variant="white"
-            hasFocus={activeTab === 'request'}
+            hasFocus={focusedButton === 'request'}
             onClick={() => handleTabChange('request')}
           >
             친구 요청

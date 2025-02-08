@@ -60,12 +60,12 @@ function ImageUpload({
   };
 
   return (
-    <div className="flex flex-col items-center">
+    <div className="">
       <div className="relative w-32 h-32">
         <ProfileImage
           src={localPreview}
           alt="프로필 이미지"
-          size="lg"
+          size="xl"
           shape="square"
           border
           className={`cursor-pointer ${isUploading ? 'opacity-50' : ''}`}

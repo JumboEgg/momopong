@@ -10,6 +10,7 @@ import DialogModal from '@/components/common/modals/DialogModal';
 // import NotificationModal from '@/components/common/modals/NotificationModal';
 // import FriendsModal from '@/components/common/modals/FriendsModal';
 import Timer from '@/components/common/Timer';
+import PopText from '@/components/common/PopText';
 
 function Test() {
   const [isTimerActive, setIsTimerActive] = useState(false);
@@ -63,6 +64,14 @@ function Test() {
       )}
       {/* <NotificationModal /> */}
       {/* <FriendsModal /> */}
+      <PopText
+        strokeWidth={25}
+        strokeColor="black"
+        fontSize="6xl"
+        className="font-[BMJUA] text-lavender-rose-400 text-8xl"
+      >
+        신데렐라
+      </PopText>
     </div>
   );
 }

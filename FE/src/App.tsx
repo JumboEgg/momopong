@@ -4,7 +4,7 @@ import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
 import SubAccountPage from './pages/subAccount/SubAccountPage';
-import SubAccountForm from './pages/subAccount/SubAccountForm';
+// import SubAccountForm from './pages/subAccount/SubAccountForm';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -40,24 +40,32 @@ function App(): JSX.Element {
             </ProtectedRoute>
           )}
         />
+        <Route
+          path="/test"
+          element={(
+            <ProtectedRoute requireAuth={false}>
+              <Test />
+            </ProtectedRoute>
+          )}
+        />
 
         {/* Protected Routes */}
         <Route
-          path="/parents/children/*"
+          path="/parents/:parent_id/children/*"
           element={(
             <ProtectedRoute>
               <SubAccountPage />
             </ProtectedRoute>
           )}
         />
-        <Route
+        {/* <Route
           path="/children/signup"
           element={(
             <ProtectedRoute>
               <SubAccountForm />
             </ProtectedRoute>
           )}
-        />
+        /> */}
         <Route
           path="/home"
           element={(
@@ -111,14 +119,6 @@ function App(): JSX.Element {
           element={(
             <ProtectedRoute>
               <Parent />
-            </ProtectedRoute>
-          )}
-        />
-        <Route
-          path="/test"
-          element={(
-            <ProtectedRoute>
-              <Test />
             </ProtectedRoute>
           )}
         />
