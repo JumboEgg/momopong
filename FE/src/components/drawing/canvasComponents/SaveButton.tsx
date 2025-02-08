@@ -48,9 +48,6 @@ function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
           tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
           const dataURL = tempCanvas.toDataURL('image/webp');
 
-          // TODO : 로컬 대신 서버에 전송하는 로직으로 대체
-          // or 동화읽기가 끝나면 마지막 그림을 삭제
-          console.log(dataURL);
           setImageData(dataURL);
         };
       };
@@ -65,6 +62,7 @@ function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
         tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
         const dataURL = tempCanvas.toDataURL('image/webp');
         setImageData(dataURL);
+        console.log(dataURL);
       };
     }
   }, [canvasRef]);

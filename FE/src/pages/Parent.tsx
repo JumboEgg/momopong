@@ -7,9 +7,16 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
 import '@/components/common/scrollbar.css';
+import { useEffect, useState } from 'react';
+import useSubAccountStore from '@/stores/subAccountStore';
 
 function Parent() {
   const navigate = useNavigate();
+  const [childId, setChildId] = useState<number>(0);
+
+  useEffect(() => {
+    setChildId(useSubAccountStore.getState().selectedAccount?.childId ?? 0);
+  }, []);
 
   const {
     childIdx, setChildIdx, reportTab, setReportTab,
@@ -53,7 +60,7 @@ function Parent() {
     }
 
     return (
-      <CraftsTab childName={MOCK_CHILDREN_DATA[childIdx].childName} />
+      <CraftsTab childId={childId} childName={MOCK_CHILDREN_DATA[childIdx].childName} />
     );
   };
 

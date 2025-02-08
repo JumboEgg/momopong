@@ -2,36 +2,35 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import { FrameInfo } from '@/types/frame';
 
 // Helper function to convert base64 to blob
-// const base64ToBlob = async (base64String: string): Promise<Blob> => {
-//   // Extract actual base64 data (remove data URL prefix if present)
-//   const base64Data = base64String.split(',')[1] || base64String;
+const base64ToBlob = async (base64String: string): Promise<Blob> => {
+  // Extract actual base64 data (remove data URL prefix if present)
+  const base64Data = base64String.split(',')[1] || base64String;
 
-//   // Convert base64 to byte array
-//   const byteCharacters = atob(base64Data);
-//   const byteArrays = [];
+  // Convert base64 to byte array
+  const byteCharacters = atob(base64Data);
+  const byteArrays = [];
 
-//   for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-//     const slice = byteCharacters.slice(offset, offset + 512);
-//     const byteNumbers = new Array(slice.length);
+  for (let offset = 0; offset < byteCharacters.length; offset += 512) {
+    const slice = byteCharacters.slice(offset, offset + 512);
+    const byteNumbers = new Array(slice.length);
 
-//     // eslint-disable-next-line no-plusplus
-//     for (let i = 0; i < slice.length; i++) {
-//       byteNumbers[i] = slice.charCodeAt(i);
-//     }
+    // eslint-disable-next-line no-plusplus
+    for (let i = 0; i < slice.length; i++) {
+      byteNumbers[i] = slice.charCodeAt(i);
+    }
 
-//     const byteArray = new Uint8Array(byteNumbers);
-//     byteArrays.push(byteArray);
-//   }
+    const byteArray = new Uint8Array(byteNumbers);
+    byteArrays.push(byteArray);
+  }
 
-//   return new Blob(byteArrays, { type: 'image/webp' });
-// };
+  return new Blob(byteArrays, { type: 'image/webp' });
+};
 
 // Main upload function
 const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
   try {
     // Convert base64 to blob
-    // -> JSON으로 전송 시 base64로 전송
-    // const imageBlob = await base64ToBlob(imageData.src);
+    const imageBlob = await base64ToBlob(imageData.frameUrl);
 
     // child token 얻기
     const { accessToken } = useSubAccountStore.getState().childToken;
@@ -50,13 +49,23 @@ const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
       },
     );
 
-    console.log(presignedResponse);
-
     if (!presignedResponse.ok) {
       throw new Error(`Failed to get presigned URL: ${presignedResponse.status}`);
     }
 
-    const { fileName } = await presignedResponse.json();
+    const { fileName, presignedUrl } = await presignedResponse.json();
+
+    const uploadToS3Response = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: imageBlob,
+      headers: {
+        'Content-Type': 'image/webp',
+      },
+    });
+
+    if (!uploadToS3Response.ok) {
+      throw new Error(`Failed to upload to S3: ${uploadToS3Response.status}`);
+    }
 
     // child id 얻기
     const childId = useSubAccountStore.getState().selectedAccount?.childId;
@@ -73,7 +82,7 @@ const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
         body: JSON.stringify({
           frameTitle: imageData.frameTitle,
           frameFileName: fileName,
-          frameUrl: imageData.frameUrl,
+          frameUrl: presignedUrl,
           createdAt: '',
         }),
         headers: {
@@ -82,8 +91,6 @@ const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
         },
     },
 );
-
-    console.log(uploadResponse);
 
     if (!uploadResponse.ok) {
       throw new Error(`Upload failed: ${uploadResponse.status}`);

@@ -5,9 +5,9 @@ import { useDrawing } from '@/stores/drawingStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import loadImagesFromS3 from '@/utils/drawing/drawingLoad';
-import { FrameInfo } from '@/types/frame';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { FrameInfo } from '@/types/frame';
+import loadImagesFromS3 from '@/utils/drawing/drawingLoad';
 
 function MyDrawing() {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -31,10 +31,10 @@ function MyDrawing() {
 
   const childId = useSubAccountStore.getState().selectedAccount?.childId;
 
-  const fetchData = async () => {
-    if (!childId) return;
+  const fetchData = async (id: number) => {
+    if (!id) return;
     try {
-      const data: FrameInfo[] = await loadImagesFromS3(childId.toString());
+      const data: FrameInfo[] = await loadImagesFromS3(id.toString());
       setDrawingData(data);
     } catch (error) {
       console.error('Error loading images: ', error);
@@ -42,12 +42,9 @@ function MyDrawing() {
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    console.log(drawingList);
-  }, [drawingList]);
+    if (!childId) return;
+    fetchData(childId);
+  }, [childId]);
 
   return (
     <div className="flex flex-col min-h-screen bg-yellow-100 p-8">

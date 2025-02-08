@@ -1,7 +1,8 @@
-// CraftsTab.tsx
-import { useDrawing, DrawingData } from '@/stores/drawingStore';
+import { useDrawing } from '@/stores/drawingStore';
 import '@/components/common/scrollbar.css';
 import { useState, useEffect } from 'react';
+import { FrameInfo } from '@/types/frame';
+import loadImagesFromS3 from '@/utils/drawing/drawingLoad';
 import DrawingModal from '../../common/modals/DrawingModal';
 
 const books = [
@@ -77,18 +78,36 @@ const letters = [
 ];
 
 interface CraftsTabProps {
+  childId: number;
   childName: string;
 }
 
-function CraftsTab({ childName }: CraftsTabProps) {
-  const { localDrawingList } = useDrawing();
-  const [selectedData, setSelectedData] = useState<DrawingData | null>(null);
+function CraftsTab({ childId, childName }: CraftsTabProps) {
+  const {
+    drawingList, setDrawingData,
+  } = useDrawing();
+  const [selectedData, setSelectedData] = useState<FrameInfo | null>(null);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
   const [history, setHistory] = useState<JSX.Element[]>([]);
 
-  const showImg = (data: DrawingData) => {
-    console.log(data.src);
+  const fetchData = async (id: number) => {
+    if (!id) return;
+    try {
+      const data: FrameInfo[] = await loadImagesFromS3(id.toString());
+      setDrawingData(data);
+    } catch (error) {
+      console.error('Error loading images: ', error);
+    }
+  };
+
+  useEffect(() => {
+    if (!childId) return;
+    fetchData(childId);
+  }, [childId]);
+
+  const showImg = (data: FrameInfo) => {
+    console.log(data.frameUrl);
     setSelectedData(data);
     setIsModalOpen(true);
   };
@@ -105,16 +124,16 @@ function CraftsTab({ childName }: CraftsTabProps) {
     </button>
   ));
 
-  const drawingHistory = localDrawingList.map((data) => (
+  const drawingHistory = drawingList.map((data) => (
     <button
       type="button"
-      key={data.src}
+      key={data.frameUrl}
       className="w-full p-1"
       onClick={() => showImg(data)}
     >
       <img
-        src={data.src}
-        alt={data.title}
+        src={data.frameUrl}
+        alt={data.frameTitle}
         className="bg-white rounded-lg w-full"
       />
     </button>
