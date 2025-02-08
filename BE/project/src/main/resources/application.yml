@@ -90,3 +90,6 @@ cloud:
       bucket: ${AWS_S3_BUCKET}
     stack:
       auto: false
+
+firebase:
+  credentials: ${FIREBASE_CREDENTIALS}
