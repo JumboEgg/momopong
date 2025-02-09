@@ -11,6 +11,11 @@ export interface ParentDto {
   phone: string;
 }
 
+// interface ParentStorageDto { // 로컬 저장용 Dto
+//   id: number;
+//   name: string; // 화면 표시용
+// }
+
 export interface RefreshResponse {
   jwtToken: JwtToken;
 }

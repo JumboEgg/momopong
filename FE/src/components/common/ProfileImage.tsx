@@ -34,7 +34,7 @@ function ProfileImage({
   const sizeClasses = {
     sm: 'w-15 h-15', // 친구목록
     md: 'w-20 h-20', // 프로필카드 이동
-    lg: 'w-50 h-50', // 서브계정 그리드
+    lg: 'w-65 h-65', // 서브계정 그리드
     xl: 'w-100 h-100', // 프로필카드, 서브계정 가입
   } as const;
 
