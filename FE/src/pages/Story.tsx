@@ -12,12 +12,12 @@ import NetworkErrorPage from '@/components/common/multiplayPages/networkerrorPag
 
 function Story() {
   const {
-    mode, setMode, storyId, setStoryId, setCurrentIndex,
+    mode, setMode, bookId, setBookId, setCurrentIndex,
   } = useStory();
 
   useEffect(() => {
     setMode(null);
-    setStoryId(null);
+    setBookId(null);
     setCurrentIndex(0);
   }, []);
 
@@ -36,7 +36,7 @@ function Story() {
   }, [mode]);
 
   const content = () => {
-    if (!storyId) {
+    if (!bookId) {
       return <StorySelection />;
     }
 

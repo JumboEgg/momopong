@@ -1,62 +1,86 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
-import { getOnlineFriends, inviteFriendToPlay, saveFCMToken } from '@/api/storyApi';
-import { HandleAllowNotification, messaging } from '@/services/firebaseService';
-
-import { getToken } from 'firebase/messaging';
+import { getOnlineFriends, inviteFriendToPlay } from '@/api/storyApi';
+import { HandleAllowNotification, onMessageListener } from '@/services/firebaseService';
+import type { Friend } from '@/api/storyApi';
 import { useStory } from '@/stores/storyStore';
-import type { Friend } from '@/types/friend';
 
 function FriendSelection(): JSX.Element {
   const navigate = useNavigate();
-  const { bookId } = useStory();
+  const { bookId } = useStory(); // useParams 대신 useStory 사용
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // FCM 토큰 등록
+  // FCM 메시지 리스너 설정
   useEffect(() => {
-    const registerFCMToken = async () => {
+    const unsubscribe = onMessageListener().then((payload: any) => {
+      console.log('메시지 수신:', payload);
+      // 필요한 경우 여기서 알림 상태 처리
+    }).catch((err) => console.log('failed: ', err));
+
+    return () => {
+      // 클린업
+      if (typeof unsubscribe === 'function') {
+        unsubscribe();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const fetchOnlineFriends = async () => {
+      console.log('현재 bookId:', bookId);
+
+      if (!bookId) {
+        console.log('bookId가 없음');
+        setError('책 정보가 없습니다.');
+        return;
+      }
+
+      const currentChildId = tokenService.getCurrentChildId();
+      console.log('현재 currentChildId:', currentChildId);
+
+      if (!currentChildId) {
+        console.log('currentChildId가 없음');
+        setError('로그인이 필요합니다.');
+        return;
+      }
+
       try {
-        const currentChildId = tokenService.getCurrentChildId();
-        if (!currentChildId) {
-          throw new Error('로그인이 필요합니다.');
-        }
-
-        // FCM 권한 요청
-        await HandleAllowNotification();
-
-        // FCM 토큰 가져오기
-        const fcmToken = await getToken(messaging, {
-          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        setLoading(true);
+        console.log('친구 목록 API 호출 시작', {
+          bookId,
+          childId: String(currentChildId),
         });
 
-        if (!fcmToken) {
-          throw new Error('FCM 토큰을 가져오지 못했습니다.');
+        const response = await getOnlineFriends(
+          bookId,
+          String(currentChildId),
+        );
+
+        console.log('받아온 친구 목록:', response);
+
+        // 응답 데이터 유효성 검사
+        if (!Array.isArray(response)) {
+          console.error('Invalid response format:', response);
+          throw new Error('서버 응답 형식이 올바르지 않습니다.');
         }
 
-        // FCM 토큰을 서버에 등록
-        await saveFCMToken(currentChildId, fcmToken);
-        console.log('FCM 토큰 등록 완료');
-
-        // 온라인 친구 목록 가져오기
-        const onlineFriends = await getOnlineFriends(bookId, currentChildId);
-        setFriends(onlineFriends);
+        setFriends(response);
       } catch (err) {
-        console.error('초기화 실패:', err);
-        if (err instanceof Error) {
-          setError(err.message);
-        }
+        console.error('친구 목록 조회 실패:', err);
+        setError('친구 목록을 불러오는데 실패했습니다.');
+        setFriends([]); // 에러 시 빈 배열로 초기화
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (bookId) {
-      registerFCMToken();
-    }
+    fetchOnlineFriends();
   }, [bookId]);
 
-  const handleInviteFriend = async (inviteeId: number) => {
+  const handleInviteFriend = async (inviteeId: string) => {
     if (!bookId) {
       setError('책 정보가 없습니다.');
       return;
@@ -70,31 +94,39 @@ function FriendSelection(): JSX.Element {
 
     try {
       setLoading(true);
-      setError(null);
+      console.log('친구 초대 API 호출', {
+        bookId,
+        inviterId: String(currentChildId),
+        inviteeId,
+      });
+
+      // FCM 권한 요청 및 토큰 설정
+      await HandleAllowNotification();
 
       // 초대 API 호출
       await inviteFriendToPlay(
-        bookId,
-        currentChildId,
+        String(bookId),
+        String(currentChildId),
         inviteeId,
       );
 
       console.log('초대 성공');
-      navigate('/waiting-room');
+      // navigate(`/invitation-waiting/${bookId}`); // 라우팅 제거
     } catch (err) {
       console.error('친구 초대 실패:', err);
-
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('친구 초대에 실패했습니다.');
-      }
+      setError('친구 초대에 실패했습니다.');
     } finally {
       setLoading(false);
     }
   };
 
-  // 렌더링 부분은 동일하게 유지...
+  console.log('렌더링 상태:', {
+    bookId,
+    friendsCount: friends.length,
+    loading,
+    error,
+  });
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

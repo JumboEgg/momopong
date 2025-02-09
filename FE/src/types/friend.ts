@@ -1,10 +1,12 @@
 export type StatusType = 'OFFLINE' | 'ONLINE' | 'MATCHING' | 'READING' | 'DRAWING';
 
 export interface Friend {
+  id: number;
   childId: number;
   name: string;
   profile: string;
   status: StatusType;
+  avatar: string;
 }
 
 export interface FriendRequest {
