@@ -14,8 +14,10 @@ interface FriendList {
   friends: Friend[];
   loading: boolean;
   error: string | null;
-  fetchFriends: () => Promise<void>; // childId 파라미터 제거
+  fetchFriends: () => Promise<void>;
   updateFriendStatus: (friendId: number, status: Friend['status']) => void;
+  startStatusPolling: () => void;
+  stopStatusPolling: () => void;
 }
 
 export const useFriendListStore = create<FriendList>()((set) => ({
@@ -49,5 +51,22 @@ export const useFriendListStore = create<FriendList>()((set) => ({
           friend.childId === friendId ? { ...friend, status } : friend)),
       ),
     }));
+  },
+
+  startStatusPolling: () => {
+    const pollInterval = setInterval(() => {
+      const currentChildId = tokenService.getCurrentChildId();
+      if (currentChildId) {
+        // 기존의 fetchFriends 재사용
+        useFriendListStore.getState().fetchFriends();
+      }
+    }, 30000);
+
+    (window as any).friendStatusPolling = pollInterval;
+  },
+  stopStatusPolling: () => {
+    if ((window as any).friendStatusPolling) {
+      clearInterval((window as any).friendStatusPolling);
+    }
   },
 }));
