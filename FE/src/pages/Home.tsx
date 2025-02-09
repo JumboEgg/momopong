@@ -1,8 +1,7 @@
 import FriendsModal from '@/components/common/modals/FriendsModal';
 import ProfileImage from '@/components/common/ProfileImage';
-import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 
@@ -24,13 +23,6 @@ function HomePage() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
-
-  const {
-    setConnect,
-  } = useSocketStore();
-  useEffect(() => {
-    setConnect(true);
-  }, []);
 
   return (
     <div
