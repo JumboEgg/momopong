@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useStory } from '@/stores/storyStore';
-import { RecordingButtonProps } from '../types/story';
+import { RecordingButtonProps } from '../stories/types/story';
 
 function RecordingButton({
   characterType,

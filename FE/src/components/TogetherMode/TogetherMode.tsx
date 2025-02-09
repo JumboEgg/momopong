@@ -3,11 +3,11 @@ import {
 } from 'react';
 import { useFriends } from '@/stores/friendStore';
 import { useStory } from '@/stores/storyStore';
-import storyData from '../data/cinderella';
+import storyData from '../stories/data/cinderella';
 import RecordingButton from './RecordingButton';
-import AudioPlayer from '../AudioPlayer';
-import { getAudioUrl } from '../utils/audioUtils';
-import StoryIllustration from './StoryIllustration';
+import AudioPlayer from '../stories/AudioPlayer';
+import { getAudioUrl } from '../stories/utils/audioUtils';
+import StoryIllustration from '../stories/StoryMode/StoryIllustration';
 
 function TogetherMode(): JSX.Element {
   const {

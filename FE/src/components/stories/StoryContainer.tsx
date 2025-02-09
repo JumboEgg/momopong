@@ -1,6 +1,6 @@
 import { StoryMode } from '@/components/stories/types/story';
 import ReadingMode from './StoryMode/ReadingMode';
-import TogetherMode from './StoryMode/TogetherMode';
+import TogetherMode from '../TogetherMode/TogetherMode';
 
 // 스토리 컨테이너 컴포넌트의 프로퍼티 인터페이스
 interface StoryContainerProps {
