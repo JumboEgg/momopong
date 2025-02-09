@@ -1,8 +1,8 @@
-// 프로필 선택 페이지
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import ProfileImage from '@/components/common/ProfileImage';
+import PopText from '@/components/common/PopText';
 
 interface SubAccountGridProps {
   onAdd: () => void;
@@ -55,33 +55,38 @@ function SubAccountGrid({ onAdd }: SubAccountGridProps): JSX.Element {
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">계정 선택</h1>
-      <div className="grid grid-cols-3 gap-4">
+      <h1 className="text-4xl font-bold mb-6 font-[BMJUA] text-">계정 선택</h1>
+      <div className="grid grid-cols-2 gap-4">
         {subAccounts.map((account) => (
-          <button
-            key={account.childId}
-            type="button"
-            onClick={() => handleAccountSelect(account.childId)}
-            disabled={isLoading}
-            className="aspect-square w-50 h-50 rounded-lg border-2 border-gray-200 p-4 flex flex-col items-center justify-center hover:border-blue-500 disabled:opacity-50"
-          >
+          <div className="relative" key={account.childId}>
             <ProfileImage
               src={account.profile || '/default-profile.png'}
               alt={`${account.name}의 프로필`}
               size="lg"
               shape="square"
               onClick={() => handleAccountSelect(account.childId)}
+              className="rounded-lg border-5 border-white"
             />
-            <span className="font-medium text-gray-900">{account.name}</span>
-          </button>
+            <div className="absolute top-2 left-0 right-0 flex justify-center">
+              <PopText
+                strokeWidth={8}
+                strokeColor="white"
+                textColor="black"
+                fontSize="xl"
+                className="bottom-4 font-[BMJUA]"
+              >
+                {account.name}
+              </PopText>
+            </div>
+          </div>
         ))}
         {canAddMore() && (
         <button
           type="button"
           onClick={onAdd}
-          className="aspect-square rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-blue-500"
+          className="aspect-square w-65 h-65 bg-white rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-blue-500"
         >
-          <span className="text-4xl text-gray-400">+</span>
+          <span className="text-4xl text-gray-400 font-[BMJUA]">+</span>
         </button>
         )}
       </div>

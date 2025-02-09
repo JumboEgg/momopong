@@ -97,14 +97,14 @@ const useSubAccountStore = create<SubAccountState>()(
 
       // API 액션
       fetchSubAccounts: async () => {
-        console.log('Active Token:', tokenService.getActiveToken());
-        console.log('Child Token:', localStorage.getItem('childAccessToken'));
-        console.log('Parent Token:', localStorage.getItem('accessToken'));
+        // console.log('Active Token:', tokenService.getActiveToken());
+        // console.log('Child Token:', localStorage.getItem('childAccessToken'));
+        // console.log('Parent Token:', localStorage.getItem('accessToken'));
         set({ isLoading: true, error: null });
 
         try {
           const childToken = tokenService.getChildToken();
-          console.log('Child Token:', childToken);
+          // console.log('Child Token:', childToken);
 
           if (childToken) {
             useAuthStore.getState().setSelectedChildId(null);
