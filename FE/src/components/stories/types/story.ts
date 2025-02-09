@@ -34,13 +34,13 @@ export interface StoryContextType {
 export interface StoryPageContent {
   type: CharacterType;
   text: string;
-  audioFiles: string[];
-  illustration: string;
+  audioId: string;
+  illustration?: string;
 }
 
 export interface StoryPage {
   pageNumber: number;
-  illustration?: string;
+  illustration: string;
   contents: StoryPageContent[];
 }
 
@@ -66,6 +66,7 @@ export interface StoryIllustrationProps {
   isLast: boolean;
   userRole?: 'prince' | 'princess';
   currentContent: StoryPageContent;
+  illustration: string;
 }
 
 // TogetherMode.tsx

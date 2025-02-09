@@ -12,13 +12,13 @@ function StoryIllustration({
 }: StoryIllustrationProps) {
   const page = storyData.find((p) => p.pageNumber === pageNumber);
 
-  if (!page?.contents) return null;
+  if (!page) return null;
 
-  const currentContent = page.contents[currentContentIndex];
-  const illustration = currentContent?.illustration;
+  const { contents, illustration } = page;
 
-  if (!illustration) return null;
+  if (!contents) return null;
 
+  const currentContent = contents[currentContentIndex];
   const relatedContents = [currentContent];
 
   const getSpeakerName = (type: CharacterType) => {
