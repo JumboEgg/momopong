@@ -6,6 +6,7 @@ import com.google.firebase.messaging.Message;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.exception.NotFoundException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;
 import jakarta.transaction.Transactional;
@@ -44,8 +45,11 @@ public class FcmService {
     // 초대 알림 보내기
     public void sendMessage(FcmSendDto sendDto) {
         // 알림 받을 사용자의 VAPID 토큰 얻기
-        String key = String.format(CHILD_VAPID_TOKEN, sendDto.getChildId());
+        String key = String.format(CHILD_VAPID_TOKEN, sendDto.getInviteeId());
         String token = (String) redisDao.getValues(key);
+        if (token == null) {
+            throw new NotFoundException("해당 사용자의 토큰이 존재하지 않습니다");
+        }
 
         // 전송할 정보 Map으로 변환
         NotificationDto notificationDto = sendDto.getNotificationDto();
@@ -54,8 +58,9 @@ public class FcmService {
                 "inviteeId", notificationDto.getInviteeId().toString(),
                 "inviterName", notificationDto.getInviterName(),
                 "inviteeName", notificationDto.getInviteeName(),
-                "bookId", notificationDto.getBookId().toString(),
-                "bookTitle", notificationDto.getBookTitle()
+                "contentId", notificationDto.getContentId().toString(),
+                "contentTitle", notificationDto.getContentTitle(),
+                "contentType",notificationDto.getContentType().toString()
         );
 
         // 알림 메시지 구성하기 (Firebase의 Message)

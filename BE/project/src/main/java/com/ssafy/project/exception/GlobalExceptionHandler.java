@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     }
 
     // 리소스를 찾을 수 없는 예외
-    @ExceptionHandler({UserNotFoundException.class, FriendNotFoundException.class, BookNotFoundException.class})
+    @ExceptionHandler({UserNotFoundException.class, FriendNotFoundException.class, BookNotFoundException.class, NotFoundException.class})
     public ResponseEntity<String> handleNotFoundException(Exception e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("리소스를 찾을 수 없습니다: " + e.getMessage());
     }

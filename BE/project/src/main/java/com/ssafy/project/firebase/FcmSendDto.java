@@ -15,14 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FcmSendDto {
 
-    @Schema(description = "알림 받을 자식 ID")
-    private Long childId;
-
-    @Schema(description = "알림 메시지 제목")
-    private String title;
-
-    @Schema(description = "알림 메시지 내용")
-    private String content;
+    @Schema(description = "초대 받은 아이의 ID")
+    private Long inviteeId;
 
     @Schema(description = "알림 관련 정보")
     private NotificationDto notificationDto;
