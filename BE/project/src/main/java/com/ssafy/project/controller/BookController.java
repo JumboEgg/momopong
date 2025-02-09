@@ -2,6 +2,8 @@ package com.ssafy.project.controller;
 
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.book.BookListDto;
+import com.ssafy.project.dto.book.PageDto;
 import com.ssafy.project.dto.book.BookDto;
 import com.ssafy.project.service.BookService;
 import lombok.RequiredArgsConstructor;
@@ -25,6 +27,14 @@ public class BookController {
         List<BookDto> bookList = bookService.bookList();
 
         return ResponseEntity.ok(bookList);
+    }
+
+    // 동화 상세 페이지 조회 (동화 읽기)
+    @GetMapping("/{bookId}")
+    public ResponseEntity<BookListDto> readBook(@PathVariable("bookId") Long bookId) {
+        BookListDto pageDtoList = bookService.readBook(bookId);
+
+        return ResponseEntity.ok(pageDtoList);
     }
 
     // 플레이 가능한 친구 목록

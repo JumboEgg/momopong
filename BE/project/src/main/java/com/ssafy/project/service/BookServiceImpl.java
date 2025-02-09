@@ -4,20 +4,23 @@ import com.ssafy.project.common.JsonConverter;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Friend;
-import com.ssafy.project.domain.Sketch;
 import com.ssafy.project.domain.book.Book;
+import com.ssafy.project.domain.book.Page;
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.ChildStatusDto;
-import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.book.AudioDto;
 import com.ssafy.project.dto.book.BookDto;
+import com.ssafy.project.dto.book.BookListDto;
+import com.ssafy.project.dto.book.PageDto;
 import com.ssafy.project.exception.*;
 import com.ssafy.project.firebase.FcmSendDto;
 import com.ssafy.project.firebase.FcmService;
 import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.FriendRepository;
+import com.ssafy.project.repository.PageRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,7 +38,6 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
-    private final NotificationService notificationService;
     private final FcmService fcmService;
 
     // Redis 저장을 위한 KEY
@@ -50,6 +52,48 @@ public class BookServiceImpl implements BookService {
         return bookList.stream()
                 .map(Book::entityToDto)
                 .collect(Collectors.toList());
+    }
+
+    // 동화 상세 페이지 조회 (동화 읽기)
+    @Override
+    public BookListDto readBook(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
+
+        // 동화 페이지 조회
+        List<Page> pageList = book.getPageList();
+        List<PageDto> pageDtoList = pageList.stream()
+                .map(page -> {
+                    List<AudioDto> audioDtoList = page.getAudioList().stream()
+                            // TODO: 나중에 audio path에 CloudFront URL 받아와서 넣어줘야 함
+                            .map(audio -> AudioDto.builder()
+                                    .order(audio.getAudioNumber())
+                                    .role(audio.getRole())
+                                    .text(audio.getText())
+                                    .path(audio.getAudioPath())
+                                    .build())
+                            .toList();
+
+                    PageDto pageDto = PageDto.builder()
+                            .pageId(page.getId())
+                            .pageNumber(page.getPageNumber())
+                            .pagePath(page.getPagePath())
+                            .audios(audioDtoList)
+                            .sketch("")
+                            .build();
+
+                    return pageDto;
+                })
+                .toList();
+
+        return BookListDto.builder()
+                .bookId(bookId)
+                .bookTitle(book.getTitle())
+                .role1(book.getRole1())
+                .role2(book.getRole2())
+                .totalPage(pageList.size())
+                .pages(pageDtoList)
+                .build();
     }
 
     // 플레이 가능한 친구 목록
