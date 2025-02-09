@@ -4,6 +4,7 @@ import { FrameInfo } from '@/types/frame';
 import loadImagesFromS3 from '@/utils/drawingS3/drawingLoad';
 import { LetterInfo } from '@/types/letter';
 import loadLettersFromS3 from '@/utils/voiceS3/letterLoad';
+import LetterModal from '@/components/common/modals/LetterModal';
 import DrawingModal from '../../common/modals/DrawingModal';
 
 const books = [
@@ -39,55 +40,6 @@ const books = [
   },
 ];
 
-// const letters = [
-//   {
-//     id: 1,
-//     sender: '<신데렐라>의 <왕자>',
-//     date: '2024-02-01',
-//     content: '내가 오늘 평생 갈 사랑을 찾았다!!!! 네 덕분이다!!!!! 고맙다!!!!',
-//   },
-//   {
-//     id: 2,
-//     sender: '<신데렐라>의 <신데렐라>',
-//     date: '2024-01-25',
-//     content: '저희 결혼식에 와주셔서 정말 감사합니다. 그날 함께해주셔서 너무 행복했어요.',
-//   },
-//   {
-//     id: 3,
-//     sender: '<프랑켄슈타인>의 <프랑켄슈타인 박사>',
-//     date: '2024-01-15',
-//     content: '최근에 새로운 프로젝트를 시작했어요. 언제 한번 이야기 나누고 싶습니다.',
-//   },
-//   {
-//     id: 4,
-//     sender: '<지킬 박사와 하이드>의 <지킬 박사>',
-//     date: '2024-01-10',
-//     content: '오랜만에 만나서 커피 한잔 하고 싶어요. 요즘 너무 바빠서 연락을 못 드렸네요.',
-//   },
-//   {
-//     id: 5,
-//     sender: '<해와 달이 된 오누이>의 <동생>',
-//     date: '2024-01-05',
-//     content: '새해 복 많이 받으세요. 항상 건강하시고 좋은 일만 가득하길 바랍니다.',
-//   },
-//   {
-//     id: 6,
-//     sender: '???',
-//     date: '2025-02-03',
-//     content: 'Lorem ipsum dolor sit,
-//  amet consectetur adipisicing elit. Quas facere v
-// oluptas magnam, dolor exercitationem amet neque iure dolore
-//  molestias possimus consequatur cupiditate optio impedit veniam
-//  consequuntur nesciunt voluptate ex. Iusto sunt accusamus vero at la
-// bore, distinctio repellendus ad numquam neque ea quasi, possimus delenit
-// i sit ipsam magni? Obcaecati, ipsa. Quia at perspiciatis incidunt, possimus e
-// rror ipsam omnis veniam iusto debitis repellendus a. Doloribus autem qui modi fu
-// giat architecto. Vel laborum sunt quas eligendi? Alias accusamus, magnam quam face
-// re odit a natus minus fuga ab, explicabo doloremque repellat ipsa quos molestias moles
-// tiae magni quasi officiis, suscipit enim quas beatae. Iure, reiciendis.',
-//   },
-// ];
-
 interface CraftsTabProps {
   childId: string;
   childName: string;
@@ -96,10 +48,14 @@ interface CraftsTabProps {
 function CraftsTab({ childId, childName }: CraftsTabProps) {
   const [drawingList, setDrawingList] = useState<FrameInfo[]>([]);
   const [letterList, setLetterList] = useState<LetterInfo[]>([]);
-  const [selectedData, setSelectedData] = useState<FrameInfo | null>(null);
+
+  const [selectedIdx, setSelectedIdx] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
   const [history, setHistory] = useState<JSX.Element[]>([]);
+
+  const [modal, setModal] = useState<JSX.Element | null>(null);
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -119,34 +75,49 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
     fetchData(childId);
   }, [childId]);
 
-  // useEffect(() => {
-  //   console.log(letterList);
-  // }, [letterList]);
+  const openModal = (idx: number) => {
+    setSelectedIdx(idx);
 
-  const showImg = (data: FrameInfo) => {
-    console.log(data.frameUrl);
-    setSelectedData(data);
+    if (selectedCraftsTab === 'reading') {
+      setModal(null);
+    } else if (selectedCraftsTab === 'drawing') {
+      setModal(
+        <DrawingModal
+          data={drawingList[selectedIdx]}
+          onClose={() => setIsModalOpen(false)}
+        />,
+      );
+    } else {
+      setModal(
+        <LetterModal
+          childName={childName}
+          data={letterList[selectedIdx]}
+          onClose={() => setIsModalOpen(false)}
+        />,
+      );
+    }
+
     setIsModalOpen(true);
   };
 
-  const readingHistory = books.map((book) => (
+  const readingHistory = books.map((book, idx) => (
     <button
       type="button"
       key={book.id}
       className="w-full p-1"
-      onClick={() => console.log(book.title)}
+      onClick={() => openModal(idx)}
     >
       <div className={`${book.color} aspect-8/5`} />
       <div className="font-[BMJUA]">{book.title}</div>
     </button>
   ));
 
-  const drawingHistory = drawingList.map((data) => (
+  const drawingHistory = drawingList.map((data, idx) => (
     <button
       type="button"
       key={data.frameUrl}
       className="w-full p-1"
-      onClick={() => showImg(data)}
+      onClick={() => openModal(idx)}
     >
       <img
         src={data.frameUrl}
@@ -156,12 +127,12 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
     </button>
   ));
 
-  const letterHistory = letterList.map((letter) => (
+  const letterHistory = letterList.map((letter, idx) => (
     <button
       type="button"
       key={letter.letterFileName}
       className="w-full aspect-square p-1 bg-pink-100 "
-      onClick={() => console.log(letter.role)}
+      onClick={() => openModal(idx)}
     >
       {letter.role}
     </button>
@@ -211,12 +182,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
           </div>
         </div>
       </div>
-      {isModalOpen && selectedData && (
-        <DrawingModal
-          data={selectedData}
-          onClose={() => setIsModalOpen(false)}
-        />
-      )}
+      {isModalOpen ? modal : null}
     </div>
   );
 }

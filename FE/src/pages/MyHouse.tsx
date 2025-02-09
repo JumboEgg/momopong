@@ -49,12 +49,6 @@ function MyHouse() {
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
           <p className="text-sm whitespace-nowrap">내가 받은 편지함</p>
         </div>
-        {/* {hoveredItem === 'letter' && (
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
-          bg-white px-3 py-1 rounded-full shadow-lg">
-            <p className="text-sm whitespace-nowrap">내가 받은 편지함</p>
-          </div>
-        )} */}
       </button>
 
       {/* 책장 이미지 */}
@@ -86,12 +80,6 @@ function MyHouse() {
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
           <p className="text-sm whitespace-nowrap">내가 읽은 동화</p>
         </div>
-        {/* {hoveredItem === 'book' && (
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
-          bg-white px-3 py-1 rounded-full shadow-lg">
-            <p className="text-sm whitespace-nowrap">내가 읽은 동화</p>
-          </div>
-        )} */}
       </button>
 
       {/* 액자 이미지 */}
@@ -118,12 +106,6 @@ function MyHouse() {
         <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-white px-3 py-1 rounded-full shadow-lg">
           <p className="text-sm whitespace-nowrap">내가 그린 그림들</p>
         </div>
-        {/* {hoveredItem === 'frame' && (
-          <div className="absolute -bottom-8 left-1/2 -translate-x-1/2
-          bg-white px-3 py-1 rounded-full shadow-lg">
-            <p className="text-sm whitespace-nowrap">내가 그린 그림들</p>
-          </div>
-        )} */}
       </button>
     </div>
   );

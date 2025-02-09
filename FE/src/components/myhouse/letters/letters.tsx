@@ -1,66 +1,48 @@
-import React, { useState, KeyboardEvent } from 'react';
+import React, { useState, KeyboardEvent, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { faArrowLeft, faVolumeHigh } from '@fortawesome/free-solid-svg-icons';
 import { TextCircleButton, IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@/components/common/scrollbar.css';
-
-interface Letter {
-  id: number;
-  sender: string;
-  date: string;
-  content: string;
-}
-
-const initialLetters: Letter[] = [
-  {
-    id: 1,
-    sender: '<신데렐라>의 <왕자>',
-    date: '2024-02-01',
-    content: '내가 오늘 평생 갈 사랑을 찾았다!!!! 네 덕분이다!!!!! 고맙다!!!!',
-  },
-  {
-    id: 2,
-    sender: '<신데렐라>의 <신데렐라>',
-    date: '2024-01-25',
-    content: '저희 결혼식에 와주셔서 정말 감사합니다. 그날 함께해주셔서 너무 행복했어요.',
-  },
-  {
-    id: 3,
-    sender: '<프랑켄슈타인>의 <프랑켄슈타인 박사>',
-    date: '2024-01-15',
-    content: '최근에 새로운 프로젝트를 시작했어요. 언제 한번 이야기 나누고 싶습니다.',
-  },
-  {
-    id: 4,
-    sender: '<지킬 박사와 하이드>의 <지킬 박사>',
-    date: '2024-01-10',
-    content: '오랜만에 만나서 커피 한잔 하고 싶어요. 요즘 너무 바빠서 연락을 못 드렸네요.',
-  },
-  {
-    id: 5,
-    sender: '<해와 달이 된 오누이>의 <동생>',
-    date: '2024-01-05',
-    content: '새해 복 많이 받으세요. 항상 건강하시고 좋은 일만 가득하길 바랍니다.',
-  },
-  {
-    id: 6,
-    sender: '???',
-    date: '2025-02-03',
-    content: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Quas facere voluptas magnam, dolor exercitationem amet neque iure dolore molestias possimus consequatur cupiditate optio impedit veniam consequuntur nesciunt voluptate ex. Iusto sunt accusamus vero at labore, distinctio repellendus ad numquam neque ea quasi, possimus deleniti sit ipsam magni? Obcaecati, ipsa. Quia at perspiciatis incidunt, possimus error ipsam omnis veniam iusto debitis repellendus a. Doloribus autem qui modi fugiat architecto. Vel laborum sunt quas eligendi? Alias accusamus, magnam quam facere odit a natus minus fuga ab, explicabo doloremque repellat ipsa quos molestias molestiae magni quasi officiis, suscipit enim quas beatae. Iure, reiciendis.',
-  },
-];
+import { LetterInfo } from '@/types/letter';
+import loadLettersFromS3 from '@/utils/voiceS3/letterLoad';
+import useSubAccountStore from '@/stores/subAccountStore';
 
 function MyLetters(): React.JSX.Element {
-  const [letters] = useState<Letter[]>(initialLetters);
-  const [selectedLetter, setSelectedLetter] = useState<Letter | null>(null);
+  const [childId, setChildId] = useState<number>(0);
+
+  const [letterList, setLetterList] = useState<LetterInfo[]>([]);
+  const [selectedLetter, setSelectedLetter] = useState<LetterInfo | null>(null);
   const navigate = useNavigate();
 
-  function handleLetterSelect(letter: Letter | null): void {
+  const fetchData = async (id: string) => {
+    if (!id) return;
+    try {
+      const letterData: LetterInfo[] = await loadLettersFromS3(id);
+      setLetterList(letterData);
+    } catch (error) {
+      console.error('Error loading images: ', error);
+    }
+  };
+
+  useEffect(() => {
+    setChildId(useSubAccountStore.getState().selectedAccount?.childId ?? 0);
+  }, []);
+
+  useEffect(() => {
+    if (!childId) return;
+    fetchData(childId.toString());
+  }, [childId]);
+
+  const playMyLetter = () => {
+    console.log(selectedLetter?.bookTitle);
+  };
+
+  function handleLetterSelect(letter: LetterInfo | null): void {
     setSelectedLetter(letter);
   }
 
-  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>, letter: Letter): void {
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>, letter: LetterInfo): void {
     if (event.key === 'Enter' || event.key === ' ') {
       handleLetterSelect(letter);
     }
@@ -99,16 +81,17 @@ function MyLetters(): React.JSX.Element {
                       size="sm"
                       variant="action"
                       className="text-2xl"
+                      onClick={playMyLetter}
                     />
                   </span>
-                  <p className="my-3 text-lg md:text-xl ps-2 md:not-[]:ps-4">사탕이에게</p>
+                  <p className="my-3 text-xl md:text-2xl ps-2 md:not-[]:ps-4">사탕이에게</p>
                   <div className="h-[calc(100%-100px)] md:h-[calc(100%-160px)]">
-                    <div className="customScrollbar pink overflow-y-auto h-full text-sm md:text-xl px-4">
-                      <p>{selectedLetter.content}</p>
+                    <div className="customScrollbar pink overflow-y-auto h-full text-lg md:text-2xl px-4">
+                      <p>{selectedLetter.reply}</p>
                     </div>
                   </div>
-                  <p className="my-3 text-sm md:text-xl text-end px-4">
-                    {selectedLetter.sender}
+                  <p className="my-3 text-xl md:text-2xl text-end px-4">
+                    {selectedLetter.role}
                     {' '}
                     보냄
                   </p>
@@ -124,13 +107,14 @@ function MyLetters(): React.JSX.Element {
             <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 border-orange-300 overflow-hidden h-full p-2 md:p-4">
               <div className="p-2 md:p-4 font-[BMJUA] text-xl md:text-2xl">내가 받은 편지들</div>
               <div className="customScrollbar yellow overflow-y-auto h-[calc(100%-60px)]">
-                {letters.map((letter) => (
+                {letterList.map((letter) => (
                   <div
-                    key={letter.id}
+                    key={letter.letterFileName}
                     role="button"
                     tabIndex={0}
                     onClick={() => {
-                      if (!selectedLetter || letter.id !== selectedLetter.id) {
+                      if (!selectedLetter
+                        || letter.letterFileName !== selectedLetter.letterFileName) {
                         handleLetterSelect(letter);
                       } else {
                         handleLetterSelect(null);
@@ -138,12 +122,20 @@ function MyLetters(): React.JSX.Element {
                     }}
                     onKeyDown={(e) => handleKeyDown(e, letter)}
                     className={`p-4 bg-[#FBB787] hover:bg-orange-200 cursor-pointer flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-orange-500 mx-3 mb-3 rounded-2xl ${
-                      selectedLetter && selectedLetter.id === letter.id ? 'bg-orange-300' : ''
+                      selectedLetter && letter.letterFileName === selectedLetter.letterFileName ? 'bg-orange-300' : ''
                     }`}
                   >
                     <div>
-                      <div className="font-[BMJUA] text-sm md:text-lg">{letter.sender}</div>
-                      <div className="text-xs md:text-lg text-gray-500">{letter.date}</div>
+                      <div className="font-[BMJUA] text-sm md:text-lg">
+                        {'<'}
+                        {letter.bookTitle}
+                        {'>'}
+                        의
+                        {' '}
+                        {letter.role}
+                        (이)가 보낸 편지
+                      </div>
+                      <div className="text-xs md:text-lg text-gray-500">{letter.createdAt.substring(0, 10)}</div>
                     </div>
                   </div>
                 ))}
