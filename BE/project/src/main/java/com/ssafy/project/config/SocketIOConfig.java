@@ -70,8 +70,6 @@ public class SocketIOConfig {
             }
         });
 
-
-
         // 그림 데이터 전송 (같은 방의 사용자끼리)
         server.addEventListener("message", DrawingDto.class, (client, data, ackRequest) -> {
             System.out.println(" Drawing data received from: " + client.getSessionId());
