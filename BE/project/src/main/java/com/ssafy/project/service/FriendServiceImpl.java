@@ -55,7 +55,7 @@ public class FriendServiceImpl implements FriendService {
                     return  FriendListDto.builder()
                             .childId(toChild.getId())
                             .name(toChild.getName())
-                            .profile(presignedUrlService.getProfile(toChild.getProfile()))
+                            .profile(presignedUrlService.getFile(toChild.getProfile()))
                             .status(status).build();
                 })
                 .collect(Collectors.toList());
@@ -89,7 +89,7 @@ public class FriendServiceImpl implements FriendService {
                         .friendId(request.getId())
                         .fromId(request.getFrom().getId())
                         .fromName(request.getFrom().getName())
-                        .fromProfile(presignedUrlService.getProfile(request.getFrom().getProfile()))
+                        .fromProfile(presignedUrlService.getFile(request.getFrom().getProfile()))
                         .toId(request.getTo().getId()).build())
                 .collect(Collectors.toList());
     }
@@ -129,7 +129,7 @@ public class FriendServiceImpl implements FriendService {
                 .friendId(saved.getId())
                 .fromId(fromChild.getId())
                 .fromName(fromChild.getName())
-                .fromProfile(presignedUrlService.getProfile(fromChild.getProfile()))
+                .fromProfile(presignedUrlService.getFile(fromChild.getProfile()))
                 .toId(toChild.getId()).build();
     }
 

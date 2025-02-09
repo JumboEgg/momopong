@@ -6,7 +6,7 @@ import { useEffect } from 'react';
 
 function DrawingModeSelection(): JSX.Element {
   const {
-    setTemplateId, setMode, mode,
+    setTemplate, setMode, mode,
   } = useDrawing();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ function DrawingModeSelection(): JSX.Element {
           size="sm"
           variant="action"
           className=""
-          onClick={() => setTemplateId(0)}
+          onClick={() => setTemplate(null)}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
         />
         <button type="button" onClick={() => setMode('story')}>스토리 모드 테스트</button>

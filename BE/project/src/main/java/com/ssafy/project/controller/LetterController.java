@@ -3,9 +3,10 @@ package com.ssafy.project.controller;
 import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
-import com.ssafy.project.domain.Letter;
+import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.LetterService;
+import com.ssafy.project.service.PresignedUrlService;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +27,7 @@ import java.util.UUID;
 @CrossOrigin(origins = "*")  // CORS 설정 추가
 public class LetterController {
     private final LetterService letterService;
+    private final PresignedUrlService presignedUrlService;
     private final AmazonS3 amazonS3;
 
     @Value("${cloud.aws.s3.bucket}")
@@ -33,37 +35,23 @@ public class LetterController {
 
 
     @Autowired
-    public LetterController(LetterService letterService, AmazonS3 amazonS3) {
+    public LetterController(LetterService letterService, PresignedUrlService presignedUrlService, AmazonS3 amazonS3) {
         this.letterService = letterService;
+        this.presignedUrlService = presignedUrlService;
         this.amazonS3 = amazonS3;
     }
 
+    //편지 저장용 presigned-url 생성
     @GetMapping("/book/letter/presigned-url")
-    public ResponseEntity<Map<String, String>> getPresignedUrl() {
+    public ResponseEntity<FileDto> getPresignedUrl() {
 
-        try {
-            String fileName = "letters/" + UUID.randomUUID().toString() + ".wav";
-
-            GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                    new GeneratePresignedUrlRequest(bucket, fileName)
-                            .withMethod(HttpMethod.PUT)
-                            .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-            URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("presignedUrl", url.toString());
-            response.put("fileUrl", "https://" + bucket + ".s3.amazonaws.com/" + fileName);
-
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            // 에러 로깅 추가
-
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        FileDto presignedUrl =  presignedUrlService.getPresignedUrl("letter", "wav");
+        return ResponseEntity.ok(presignedUrl);
     }
 
 
+
+    // gpt api 답장을 받고 편지 DB저장
     @PostMapping("/book/letter/gpt/{childId}")
     public ResponseEntity<Map<String, String>> getGPTResponse(
             @PathVariable("childId") Long childId,
@@ -86,30 +74,17 @@ public class LetterController {
                 gptResponse,
                 request.getBookTitle(),
                 request.getRole(),
-                request.getLetterRecord() // S3 URL
+                request.getLetterFileName()
         );
 
-        // 응답을 JSON 형식으로 감싸기
         Map<String, String> responseMap = new HashMap<>();
         responseMap.put("message", gptResponse);
 
         return ResponseEntity.ok(responseMap);
     }
 
-    @GetMapping("/profile/{childId}/letter/{letterId}")
-    public ResponseEntity<LetterDto> getLetter(
-            @PathVariable("childId") Long childId,
-            @PathVariable("letterId") Long letterId) {
-        try {
-            LetterDto letter = letterService.getLetter(childId, letterId);
 
-            return ResponseEntity.ok(letter);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
-    }
-
-
+    // 해당 아이의 모든 편지 조회
     @GetMapping("/profile/{childId}/letter")
     public ResponseEntity<List<LetterDto>> getLetterList(
             @PathVariable("childId") Long childId) {

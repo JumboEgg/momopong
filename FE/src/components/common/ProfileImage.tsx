@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
 type ProfileImgShape = 'circle' | 'square';
 
 interface ProfileImgProps {
-  src: string;
+  src: string | undefined;
   alt?: string;
   size?: ProfileImgSize;
   shape?: ProfileImgShape;
@@ -25,6 +25,11 @@ function ProfileImage({
   const [imageError, setImageError] = useState(false);
   const defaultImage = '/images/default-profile.jpg';
   const imageSrc = imageError || !src ? defaultImage : src;
+
+  // src가 변경될 때마다 error 상태 초기화
+  useEffect(() => {
+    setImageError(false);
+  }, [src]);
 
   const sizeClasses = {
     sm: 'w-15 h-15', // 친구목록

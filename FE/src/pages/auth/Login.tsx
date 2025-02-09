@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomInput from '@/components/auth/CustomInput';
 import TextButton from '@/components/common/buttons/TextButton';
-import useLoginStore from '@/stores/loginStore';
-import type { LoginRequest } from '@/stores/loginStore';
+import useAuthStore from '@/stores/authStore';
+import { useLoginStore } from '@/stores/loginStore';
+import type { LoginRequest } from '@/types/auth';
 
 // 유효성 검사를 위한 인터페이스
 interface FormErrors {
@@ -24,13 +25,6 @@ function Login(): JSX.Element {
   const login = useLoginStore((state) => state.login);
   const isLoading = useLoginStore((state) => state.isLoading);
   const error = useLoginStore((state) => state.error);
-  const isAuthenticated = useLoginStore((state) => state.isAuthenticated);
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      navigate('/home');
-    }
-  }, [isAuthenticated, navigate]);
 
   const validateEmail = (email: string): string | undefined => {
     if (!email) return '이메일은 필수입니다';
@@ -93,6 +87,15 @@ function Login(): JSX.Element {
 
     try {
       await login(formData);
+      // login이 완료된 후 약간의 딜레이를 두고 라우팅
+      setTimeout(() => {
+        const { user } = useAuthStore.getState();
+        if (user?.parentId) {
+          navigate(`/parents/${user.parentId}/children`);
+        } else {
+          console.error('User data not available:', user);
+        }
+      }, 1000); // 1초 딜레이 추가
     } catch (err) {
       console.error('Login failed:', err);
     }

@@ -1,14 +1,35 @@
-import { useState } from 'react';
+import FriendsModal from '@/components/common/modals/FriendsModal';
+import ProfileImage from '@/components/common/ProfileImage';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import useSubAccountStore from '@/stores/subAccountStore';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import BackgroundMusic from '@/components/BackgroundMusic';
 
 function HomePage() {
   const navigate = useNavigate();
-
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
+  const { selectedAccount } = useSubAccountStore();
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test' | '/Parent'): void => {
     navigate(path);
   };
-
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
+  console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
+  console.log('Profile URL:', selectedAccount?.profile); // profile URL만 따로 확인
+
+  const handleOpenModal = () => {
+    setIsModalOpen(true);
+  };
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
+  const {
+    setConnect,
+  } = useSocketStore();
+  useEffect(() => {
+    setConnect(true);
+  }, []);
 
   return (
     <div
@@ -18,22 +39,25 @@ function HomePage() {
         backgroundSize: '100% 100%',
       }}
     >
+      <BackgroundMusic />
       <button
         type="button"
         onClick={() => handleNavigation('/profile')}
-        className="fixed top-5 left-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
+        className="fixed top-2 md:top-5 left-2 md:left-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
       >
-        <img
-          src="/images/profileicon.png"
+        <ProfileImage
+          key={selectedAccount?.profile} // URL이 바뀔 때마다 컴포넌트 리렌더링
+          src={selectedAccount?.profile}
           alt="프로필"
-          className="w-[5vw] min-w-10 object-contain"
+          size="sm"
+          shape="circle"
         />
-        <p className="text-xl mt-0.5">프로필</p>
+        <p className="text-xl mt-0.5">{selectedAccount?.name}</p>
       </button>
 
       <button
         type="button"
-        onClick={() => handleNavigation('/friends')}
+        onClick={handleOpenModal}
         className="fixed top-5 right-5 flex flex-col items-center bg-transparent border-0 p-0 m-0"
       >
         <img
@@ -41,11 +65,33 @@ function HomePage() {
           alt="친구목록"
           className="w-[5vw] min-w-10 object-contain"
         />
-        <p className="text-xl mt-0.5">친구목록</p>
+        <p className="text-sm md:text-xl mt-0.5">친구목록</p>
       </button>
 
+      <button
+        type="button"
+        onClick={() => handleNavigation('/test')}
+        className="cursor-pointer flex flex-col items-center"
+      >
+        <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => handleNavigation('/Parent')}
+        className="cursor-pointer flex flex-col items-center"
+      >
+        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">리포트 바로가기</p>
+      </button>
+
+      {isModalOpen && (
+        <FriendsModal
+          onClose={handleCloseModal}
+        />
+      )}
+
       {/* Main Navigation Icons */}
-      <div className="flex justify-center items-center gap-12 font-[BMJUA] text-3xl">
+      <div className="flex justify-center items-center gap-12 font-[BMJUA] text-xl md:text-3xl">
         <button
           type="button"
           onClick={() => handleNavigation('/drawing')}
@@ -59,7 +105,7 @@ function HomePage() {
             alt="그림그리기"
             className="w-[20vw] object-contain"
           />
-          <p className="mt-5">그림그리기</p>
+          <p className="mt-1 md:mt-5">그림그리기</p>
         </button>
 
         <button
@@ -75,7 +121,7 @@ function HomePage() {
             alt="동화읽기"
             className="w-[25vw] object-contain"
           />
-          <p className="mt-0.5">동화읽기</p>
+          <p className="-mt-3.5 md:mt-0.5">동화읽기</p>
         </button>
 
         <button
@@ -91,15 +137,9 @@ function HomePage() {
             alt="나의집"
             className="w-[20vw] object-contain"
           />
-          <p className="mt-5">나의집</p>
+          <p className="mt-1 md:mt-5">나의집</p>
         </button>
-        <button
-          type="button"
-          onClick={() => handleNavigation('/test')}
-          className="cursor-pointer flex flex-col items-center"
-        >
-          <p className="text-center text-xs mt-1 border-2">테스트</p>
-        </button>
+
       </div>
     </div>
   );
