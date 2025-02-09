@@ -1,15 +1,6 @@
-import {
-    LocalVideoTrack,
-    RemoteParticipant,
-    RemoteTrack,
-    RemoteTrackPublication,
-    Room,
-    RoomEvent,
-  } from 'livekit-client';
   import { useState, useRef } from 'react';
 
   type TrackInfo = {
-    trackPublication: RemoteTrackPublication;
     participantIdentity: string;
   };
 
@@ -44,15 +35,6 @@ import {
   configureUrls();
 
   function App() {
-    const [room, setRoom] = useState<Room | undefined>(undefined);
-    const [localTrack, setLocalTrack] = useState<LocalVideoTrack | undefined>(
-      undefined,
-    );
-    const [remoteTracks, setRemoteTracks] = useState<TrackInfo[]>([]);
-    const [participantName, setParticipantName] = useState(
-      `Participant${Math.floor(Math.random() * 100)}`,
-    );
-    const [roomName, setRoomName] = useState('Test Room');
     const [isRecording, setIsRecording] = useState(false);
     const [voiceText, setVoiceText] = useState('');
     const webSocket = useRef<WebSocket>();
@@ -63,32 +45,14 @@ import {
     const audioChunks = useRef<Uint8Array[]>([]);
     const [gptResponse, setGptResponse] = useState('');
     const [finalTranscript, setFinalTranscript] = useState('');
-    const [isComplete, setIsComplete] = useState(false); // 새로운 state 추가
     const child_id = 1; // 테스트용
 
     // 저장된 음성 듣기위해
-    const [savedAudioUrl, setSavedAudioUrl] = useState<string>('');
     const [isSavedPlaying, setIsSavedPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
     const savedAudioRef = useRef<HTMLAudioElement | null>(null);
 
     // 녹음
     const recordingBlob = useRef<Blob | null>(null);
-
-    // GPT 요청을 위한 인터페이스
-    interface GPTRequest {
-      fairyTale: string;
-      role: string;
-      childName: string;
-      content: string;
-      letterRecord?: string;
-    }
-
-    // S3 응답 인터페이스
-    interface PresignedUrlResponse {
-      presignedUrl: string;
-      fileName: string;
-    }
 
     const closeWebSocket = () => {
       if (webSocket.current) {
@@ -165,14 +129,6 @@ import {
             }
 
             analyser.getByteFrequencyData(dataArray);
-            // const avgVolume =
-            //   dataArray.reduce((sum, value) => sum + value, 0) / dataArray.length;
-
-            // if (avgVolume > 50) {
-            //   setIsTalking(true);
-            // } else {
-            //   setIsTalking(false);
-            // }
 
             requestAnimationFrame(detectTalking);
           };
@@ -206,7 +162,6 @@ import {
             if (receivedData.isFinal) {
               // 백엔드에서 isFinal flag 추가 필요
               setFinalTranscript(receivedData.transcript);
-              setIsComplete(true);
             }
           }
         } catch (error) {
@@ -298,7 +253,7 @@ import {
 
         try {
           // Blob이 생성될 때까지 잠시 대기
-          await new Promise((resolve) => setTimeout(resolve, 100));
+          await new Promise((resolve) => { setTimeout(resolve, 100); });
 
           if (voiceText && recordingBlob.current) {
             // S3에 업로드
@@ -400,8 +355,6 @@ import {
             const audio = new Audio();
             audio.src = url;
             savedAudioRef.current = audio;
-            setSavedAudioUrl(url);
-
             return url;
           }
         }
@@ -411,136 +364,13 @@ import {
         return null;
       }
   };
-    async function joinRoom() {
-      const room = new Room();
-      setRoom(room);
-
-      room.on(
-        RoomEvent.TrackSubscribed,
-        (
-          _track: RemoteTrack,
-          publication: RemoteTrackPublication,
-          participant: RemoteParticipant,
-        ) => {
-          setRemoteTracks((prev) => [
-            ...prev,
-            {
-              trackPublication: publication,
-              participantIdentity: participant.identity,
-            },
-          ]);
-        },
-      );
-
-      room.on(
-        RoomEvent.TrackUnsubscribed,
-        (_track: RemoteTrack, publication: RemoteTrackPublication) => {
-          setRemoteTracks((prev) => prev.filter(
-              (track) => track.trackPublication.trackSid !== publication.trackSid,
-            ));
-        },
-      );
-
-      try {
-        const token = await getToken(roomName, participantName);
-        await room.connect(LIVEKIT_URL, token);
-        await room.localParticipant.enableCameraAndMicrophone();
-        setLocalTrack(
-          room.localParticipant.videoTrackPublications.values().next().value
-            .videoTrack,
-        );
-      } catch (error) {
-        console.log(
-          'There was an error connecting to the room:',
-          (error as Error).message,
-        );
-        await leaveRoom();
-      }
-    }
-
-    async function leaveRoom() {
-      await room?.disconnect();
-      setRoom(undefined);
-      setLocalTrack(undefined);
-      setRemoteTracks([]);
-    }
-
-    async function getToken(roomName: string, participantName: string) {
-      const response = await fetch(`${APPLICATION_SERVER_URL}token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ roomName, participantName }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(`Failed to get token: ${error.errorMessage}`);
-      }
-
-      const data = await response.json();
-      return data.token;
-    }
 
     return (
       <div>
-        {!room ? (
-          <div id="join">
-            <div id="join-dialog">
-              <h2>Join a Video Room</h2>
-              <form
-                onSubmit={(e) => {
-                  joinRoom();
-                  e.preventDefault();
-                }}
-              >
-                <div>
-                  <label htmlFor="participant-name">Participant</label>
-                  <input
-                    id="participant-name"
-                    className="form-control"
-                    type="text"
-                    value={participantName}
-                    onChange={(e) => setParticipantName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div>
-                  <label htmlFor="room-name">Room</label>
-                  <input
-                    id="room-name"
-                    className="form-control"
-                    type="text"
-                    value={roomName}
-                    onChange={(e) => setRoomName(e.target.value)}
-                    required
-                  />
-                </div>
-                <button
-                  className="btn btn-lg btn-success"
-                  type="submit"
-                  disabled={!roomName || !participantName}
-                >
-                  Join!
-                </button>
-              </form>
-            </div>
-          </div>
-        ) : (
-          <div id="room">
-            <div id="room-header">
-              <h2 id="room-title">{roomName}</h2>
-              <button
-                type="button"
-                className="btn btn-danger"
-                id="leave-room-button"
-                onClick={leaveRoom}
-              >
-                Leave Room
-              </button>
-            </div>
-            <div id="layout-container">
-              <div
-                style={{
+        <div id="room">
+          <div id="layout-container">
+            <div
+              style={{
                   position: 'fixed',
                   bottom: '60px',
                   left: '50%',
@@ -551,12 +381,12 @@ import {
                   borderRadius: '4px',
                   display: voiceText ? 'block' : 'none',
                 }}
-              >
-                {voiceText}
-              </div>
-              {gptResponse && (
-                <div
-                  style={{
+            >
+              {voiceText}
+            </div>
+            {gptResponse && (
+            <div
+              style={{
                     position: 'fixed',
                     bottom: '100px', // voiceText보다 위에 표시
                     left: '50%',
@@ -568,15 +398,15 @@ import {
                     maxWidth: '80%',
                     width: '600px',
                   }}
-                >
-                  <strong>GPT 응답:</strong>
-                  {' '}
-                  {gptResponse}
-                </div>
+            >
+              <strong>GPT 응답:</strong>
+              {' '}
+              {gptResponse}
+            </div>
               )}
-              <button
-                type="button"
-                style={{
+            <button
+              type="button"
+              style={{
                   position: 'fixed',
                   bottom: '20px',
                   left: '50%',
@@ -588,14 +418,14 @@ import {
                   borderRadius: '4px',
                   cursor: 'pointer',
                 }}
-                onClick={handleRecordClick}
-              >
-                녹음
-              </button>
+              onClick={handleRecordClick}
+            >
+              녹음
+            </button>
 
-              <button
-                type="button"
-                style={{
+            <button
+              type="button"
+              style={{
                   position: 'fixed',
                   bottom: '20px',
                   left: 'calc(50% + 200px)', // 이전 버튼들 오른쪽에 위치
@@ -607,7 +437,7 @@ import {
                   borderRadius: '4px',
                   cursor: 'pointer',
                 }}
-                onClick={async () => {
+              onClick={async () => {
                   try {
                     if (isSavedPlaying && savedAudioRef.current) {
                       savedAudioRef.current.pause();
@@ -625,34 +455,13 @@ import {
                     alert('음성 재생 중 오류가 발생했습니다.');
                   }
                 }}
-              >
-                저장된 녹음
-                {' '}
-                {isSavedPlaying ? '정지' : '재생'}
-              </button>
-
-              {localTrack && (
-                <VideoComponent
-                  track={localTrack}
-                  participantIdentity={participantName}
-                  local
-                />
-              )}
-              {remoteTracks.map((remoteTrack) => (remoteTrack.trackPublication.kind === 'video' ? (
-                <VideoComponent
-                  key={remoteTrack.trackPublication.trackSid}
-                  track={remoteTrack.trackPublication.videoTrack!}
-                  participantIdentity={remoteTrack.participantIdentity}
-                />
-                ) : (
-                  <AudioComponent
-                    key={remoteTrack.trackPublication.trackSid}
-                    track={remoteTrack.trackPublication.audioTrack!}
-                  />
-                )))}
-            </div>
+            >
+              저장된 녹음
+              {' '}
+              {isSavedPlaying ? '정지' : '재생'}
+            </button>
           </div>
-        )}
+        </div>
       </div>
     );
   }

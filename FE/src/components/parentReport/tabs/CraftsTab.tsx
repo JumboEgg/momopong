@@ -89,7 +89,7 @@ const books = [
 // ];
 
 interface CraftsTabProps {
-  childId: number;
+  childId: string;
   childName: string;
 }
 
@@ -101,13 +101,13 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
   const [history, setHistory] = useState<JSX.Element[]>([]);
 
-  const fetchData = async (id: number) => {
+  const fetchData = async (id: string) => {
     if (!id) return;
     try {
-      const drawingData: FrameInfo[] = await loadImagesFromS3(id.toString());
+      const drawingData: FrameInfo[] = await loadImagesFromS3(id);
       setDrawingList(drawingData);
 
-      const letterData: LetterInfo[] = await loadLettersFromS3(id.toString());
+      const letterData: LetterInfo[] = await loadLettersFromS3(id);
       setLetterList(letterData);
     } catch (error) {
       console.error('Error loading images: ', error);
@@ -119,9 +119,9 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
     fetchData(childId);
   }, [childId]);
 
-  useEffect(() => {
-    console.log(letterList);
-  }, [letterList]);
+  // useEffect(() => {
+  //   console.log(letterList);
+  // }, [letterList]);
 
   const showImg = (data: FrameInfo) => {
     console.log(data.frameUrl);

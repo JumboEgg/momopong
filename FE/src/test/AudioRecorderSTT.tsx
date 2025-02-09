@@ -1,186 +1,184 @@
-import React, { useState, useRef } from 'react';
-import { Mic, StopCircle } from 'lucide-react';
+import { LetterInfo } from '@/types/letter';
+import uploadLetterToS3 from '@/utils/voiceS3/letterUpload';
+import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function BatchAudioSTT() {
+function STTComponent() {
   const [isRecording, setIsRecording] = useState(false);
-  const [transcription, setTranscription] = useState('');
+  const [voiceText, setVoiceText] = useState('');
   const [error, setError] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [finalTranscript, setFinalTranscript] = useState('');
 
+  const webSocket = useRef<WebSocket | null>(null);
+  const audioContext = useRef<AudioContext | null>(null);
+  const audioChunks = useRef<Uint8Array[]>([]);
+  const processor = useRef<AudioWorkletNode | null>();
   const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const audioChunks = useRef<Blob[]>([]);
+  const recordingBlob = useRef<Blob | null>(null);
 
-  const processAudioData = async () => {
-    if (audioChunks.current.length === 0) return;
+  const navigate = useNavigate();
 
-    const audioBlob = new Blob(audioChunks.current, {
-      type: 'audio/webm;codecs=opus',
-    });
+  // WebSocket 연결 및 STT 시작
+  const setupWebSocket = async () => {
+    if (webSocket.current) webSocket.current.close();
 
-    try {
-      const config = {
-        encoding: 'WEBM_OPUS',
-        sampleRateHertz: 48000,
-        languageCode: 'ko-KR',
-        enableAutomaticPunctuation: true,
+    webSocket.current = new WebSocket('ws://localhost:8081/api/book/letter/stt');
+
+    webSocket.current.onopen = async () => {
+      try {
+        const sampleRate = 16000;
+
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            sampleRate,
+            channelCount: 1,
+            echoCancellation: true,
+          },
+        });
+
+        mediaRecorder.current = new MediaRecorder(stream);
+        mediaRecorder.current.ondataavailable = (event) => {
+          if (event.data.size > 0) {
+            recordingBlob.current = event.data;
+          }
+        };
+        mediaRecorder.current.start();
+
+        audioContext.current = new AudioContext({ sampleRate });
+        await audioContext.current.audioWorklet.addModule(
+          './linear16-processor.js', // 무슨 모듈...
+        );
+        const source = audioContext.current.createMediaStreamSource(stream);
+        processor.current = new AudioWorkletNode(
+          audioContext.current,
+          'linear16-processor',
+        );
+
+        // STT용 청크 처리
+        processor.current.port.onmessage = (event) => {
+          if (webSocket.current) {
+            if (webSocket.current.readyState === WebSocket.OPEN) {
+              webSocket.current.send(event.data);
+              audioChunks.current.push(
+                new Int16Array(event.data) as unknown as Uint8Array,
+              );
+            }
+          }
+        };
+
+        const analyser = audioContext.current.createAnalyser();
+        analyser.fftSize = 256;
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+        source.connect(processor.current);
+        processor.current.connect(audioContext.current.destination);
+        source.connect(analyser);
+
+        const detectAudio = () => {
+          if (!webSocket.current) {
+            return;
+          }
+
+          analyser.getByteFrequencyData(dataArray);
+          requestAnimationFrame(detectAudio);
+        };
+        detectAudio();
+
+        mediaRecorder.current.onstop = () => {
+          if (processor.current && audioContext.current) {
+            stream.getTracks().forEach((track) => track.stop());
+            source.disconnect(processor.current);
+            processor.current.disconnect(audioContext.current.destination);
+          }
+        };
+      } catch (err) {
+        console.log(err);
+        setError('마이크 사용 권한을 확인해주세요.');
+      }
+    };
+
+    webSocket.current.onmessage = (event) => {
+      try {
+        console.log('Received from server:', event.data);
+        const receivedData = JSON.parse(event.data);
+        if (receivedData.transcript) {
+          // 임시 텍스트는 voiceText에만 저장
+          setVoiceText(receivedData.transcript);
+
+          // 최종 결과일 때만 finalTranscript 업데이트
+          if (receivedData.isFinal) {
+            // 백엔드에서 isFinal flag 추가 필요
+            setFinalTranscript(receivedData.transcript);
+          }
+        }
+      } catch (err) {
+        console.error('Error parsing message:', err);
+      }
+    };
+
+    webSocket.current.onerror = () => {
+      console.error('WebSocket error:', error);
+      setVoiceText('');
+    };
+
+    webSocket.current.onclose = () => {
+      console.log('WebSocket closed');
+      if (processor.current) {
+        processor.current.disconnect();
+        processor.current = null;
+      }
+      if (audioContext.current) {
+        audioContext.current.close();
+        audioContext.current = null;
+      }
+      if (mediaRecorder.current) {
+        mediaRecorder.current.stop();
+        mediaRecorder.current = null;
+      }
+
+      console.log('오디오 전송 종료');
+
+      const letter: LetterInfo = {
+        bookTitle: '흥부와 놀부',
+        role: '흥부',
+        childName: '놀부',
+        content: finalTranscript,
+        letterFileName: '',
+        letterUrl: '',
+        reply: '',
+        createdAt: '',
       };
 
-      const ws = new WebSocket('ws://localhost:8081/api/book/letter/stt');
+      const audioBlob = recordingBlob.current ?? new Blob();
 
-      // Promise를 반환하여 WebSocket 통신이 완료될 때까지 기다림
-      const data = new Promise((resolve, reject) => {
-        // 연결이 열리면 순차적으로 데이터 전송
-        ws.onopen = async () => {
-          console.log('WebSocket 연결');
-          try {
-            // 먼저 설정 정보 전송
-            ws.send(JSON.stringify({
-              type: 'config',
-              config,
-            }));
-
-            // 잠시 대기하여 서버가 설정을 처리할 시간을 줌
-            await new Promise((rsv) => { setTimeout(rsv, 100); });
-
-            // 그 다음 오디오 데이터 전송
-            const arrayBuffer = await audioBlob.arrayBuffer();
-            ws.send(arrayBuffer);
-          } catch (err) {
-            reject(err);
-            ws.close();
-          }
-        };
-
-        ws.onmessage = (event) => {
-          console.log('응답 수신');
-          try {
-            const response = JSON.parse(event.data);
-            console.log('서버 응답:', response);
-
-            if (response.transcription) {
-              setTranscription(response.transcription);
-            }
-
-            if (response.status === 'completed') {
-              resolve(response);
-              ws.close();
-            }
-          } catch (err) {
-            console.error('응답 처리 중 에러:', err);
-            reject(err);
-          }
-        };
-
-        ws.onerror = (e) => {
-          console.error('WebSocket 에러:', e);
-          setError('서버 통신 중 에러가 발생했습니다.');
-          reject(e);
-        };
-
-        ws.onclose = () => {
-          console.log('WebSocket 연결 종료');
-        };
-      });
-      console.log(data);
-    } catch (err) {
-      setError('오디오 변환 중 에러가 발생했습니다.');
-      throw err;
-    }
+      uploadLetterToS3({ letter, audioBlob });
+    };
   };
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          sampleRate: 48000,
-          channelCount: 1,
-          echoCancellation: true,
-          noiseSuppression: true,
-        },
-      });
-
-      const newMediaRecorder = new MediaRecorder(stream);
-
-      newMediaRecorder.addEventListener('dataavailable', (event: BlobEvent) => {
-        if (event.data.size > 0) {
-          audioChunks.current.push(event.data);
-        }
-      });
-
-      newMediaRecorder.addEventListener('stop', async () => {
-        try {
-          setIsProcessing(true);
-          await processAudioData();
-        } catch (err) {
-          console.error('오디오 처리 중 에러:', err);
-          setError('오디오 처리 중 에러가 발생했습니다.');
-        } finally {
-          setIsProcessing(false);
-        }
-      });
-
-      mediaRecorder.current = newMediaRecorder;
-      audioChunks.current = [];
-      newMediaRecorder.start();
-      console.log('start recording');
-      setIsRecording(true);
-      setError('');
-      setTranscription('');
-    } catch (err) {
-      setError('마이크 접근 권한이 필요합니다.');
-      console.error('녹음 시작 에러:', err);
-    }
-  };
-
-  const stopRecording = () => {
-    if (mediaRecorder.current && isRecording) {
-      mediaRecorder.current.stop();
-      mediaRecorder.current.stream.getTracks().forEach((track) => track.stop());
+  // 녹음 시작/중지 버튼
+  const handleRecordClick = () => {
+    if (isRecording) {
+      mediaRecorder.current?.stop();
       setIsRecording(false);
+      webSocket.current?.close();
+    } else {
+      setIsRecording(true);
+      setupWebSocket();
     }
   };
 
   return (
-    <div className="p-4 space-y-4">
-      <div className="flex gap-4">
-        <button
-          type="button"
-          onClick={isRecording ? stopRecording : startRecording}
-          disabled={isProcessing}
-          className={`flex items-center gap-2 ${
-            isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-          }`}
-        >
-          {isRecording ? (
-            <>
-              <StopCircle className="w-4 h-4" />
-              녹음 중지
-            </>
-          ) : (
-            <>
-              <Mic className="w-4 h-4" />
-              녹음 시작
-            </>
-          )}
-        </button>
+    <div style={{ textAlign: 'center', padding: '20px' }}>
+      <button type="button" onClick={() => navigate('/Parent')}>리포트</button>
+      <button type="button" onClick={handleRecordClick} style={{ padding: '10px 20px' }}>
+        {isRecording ? 'Stop Recording' : 'Start Recording'}
+      </button>
+      <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 'bold' }}>
+        {isRecording ? voiceText : 'Click the button to start recording'}
       </div>
-
-      {isProcessing && (
-        <div>
-          오디오 처리 중입니다...
-        </div>
-      )}
-
-      {error || null}
-
-      {transcription && (
-        <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-          <h3 className="font-semibold mb-2">변환된 텍스트:</h3>
-          <p>{transcription}</p>
-        </div>
-      )}
+      {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
     </div>
   );
 }
 
-export default BatchAudioSTT;
+export default STTComponent;

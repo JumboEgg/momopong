@@ -29,12 +29,10 @@ const uploadAudioToS3 = async ({ accessToken, audioBlob }: UploadAudioToS3Props)
 
         const { presignedUrl, fileName } = await presignedResponse.json();
 
+        // header가 없어야 정상 동작
         const uploadResponse = await fetch(presignedUrl, {
-            method: 'POST',
+            method: 'PUT',
             body: audioBlob,
-            headers: {
-                'Content-Type': 'audio/wav',
-            },
         });
 
         if (!uploadResponse.ok) {
@@ -90,6 +88,8 @@ const uploadLetterToS3 = async ({ letter, audioBlob }: UploadLetterToS3Props) =>
         if (!response.ok) {
             throw new Error(`Upload failed: ${response.status}`);
         }
+
+        console.log(response);
     } catch (error) {
         throw new Error('Failed to upload letter');
     }

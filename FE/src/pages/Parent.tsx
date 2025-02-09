@@ -60,7 +60,7 @@ function Parent() {
     }
 
     return (
-      <CraftsTab childId={childId} childName={MOCK_CHILDREN_DATA[childIdx].childName} />
+      <CraftsTab childId={childId.toString()} childName={MOCK_CHILDREN_DATA[childIdx].childName} />
     );
   };
 
