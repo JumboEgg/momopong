@@ -83,7 +83,7 @@ function Drawing() {
   };
 
   return (
-    <div className="w-full h-full">
+    <div className="w-screen h-screen">
       {content()}
     </div>
   );

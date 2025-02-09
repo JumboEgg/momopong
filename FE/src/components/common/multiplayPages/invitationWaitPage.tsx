@@ -4,9 +4,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useFriends } from '@/stores/friendStore';
 import { useEffect } from 'react';
+import CircularTimer from '../Timer';
 
 function InvitationWaitPage() {
-  // const navigate = useNavigate();
   const {
     setFriend, setIsConnected,
   } = useFriends();
@@ -34,8 +34,9 @@ function InvitationWaitPage() {
         alt="networkerror"
         className="w-full h-full object-cover object-center"
       />
-      <div className="fixed bottom-10 right-10 text-white text-2xl md:text-3xl font-[BMJUA]">
+      <div className="fixed bottom-10 right-10 text-white text-2xl md:text-3xl font-[BMJUA] flex space-x-5 justify-center items-center">
         친구에게 초대장을 보내고 있어요
+        <CircularTimer isActive duration={10} onComplete={() => setFriend(null)} />
       </div>
     </div>
   );

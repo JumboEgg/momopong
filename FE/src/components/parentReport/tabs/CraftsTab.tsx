@@ -49,7 +49,6 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
   const [drawingList, setDrawingList] = useState<FrameInfo[]>([]);
   const [letterList, setLetterList] = useState<LetterInfo[]>([]);
 
-  const [selectedIdx, setSelectedIdx] = useState<number>(0);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
@@ -76,14 +75,14 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
   }, [childId]);
 
   const openModal = (idx: number) => {
-    setSelectedIdx(idx);
+    console.log(idx);
 
     if (selectedCraftsTab === 'reading') {
       setModal(null);
     } else if (selectedCraftsTab === 'drawing') {
       setModal(
         <DrawingModal
-          data={drawingList[selectedIdx]}
+          data={drawingList[idx]}
           onClose={() => setIsModalOpen(false)}
         />,
       );
@@ -91,7 +90,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
       setModal(
         <LetterModal
           childName={childName}
-          data={letterList[selectedIdx]}
+          data={letterList[idx]}
           onClose={() => setIsModalOpen(false)}
         />,
       );

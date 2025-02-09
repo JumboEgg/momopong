@@ -46,10 +46,8 @@ function ResultPage() {
         createdAt: '',
       };
 
-    // Upload image to S3 first
       await uploadImageToS3(drawingResult);
 
-      // Reset all states after successful upload
       setFriend(null);
       setIsConnected(false);
       setPenColor('black');
@@ -59,7 +57,6 @@ function ResultPage() {
       setImageData('');
     } catch (error) {
       console.error('Failed to save drawing:', error);
-    // You might want to show an error modal here
     }
   };
 

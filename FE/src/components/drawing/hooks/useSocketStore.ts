@@ -41,7 +41,6 @@ const useSocketStore = create<SocketStore>((set, get) => {
 
     connectSocket: () => {
       if (!socket) {
-        // TODO : socket.io 서버 수정
         socket = io('wss://i12d103.p.ssafy.io', { autoConnect: false });
         socket.connect();
         socket.on('connect', () => console.log('Connected to socket'));

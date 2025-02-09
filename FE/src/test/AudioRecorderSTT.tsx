@@ -3,7 +3,7 @@ import uploadLetterToS3 from '@/utils/voiceS3/letterUpload';
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function STTComponent() {
+function AudioRecorderSTT() {
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [error, setError] = useState('');
@@ -46,7 +46,7 @@ function STTComponent() {
 
         audioContext.current = new AudioContext({ sampleRate });
         await audioContext.current.audioWorklet.addModule(
-          './linear16-processor.js', // 무슨 모듈...
+          './linear16-processor.js',
         );
         const source = audioContext.current.createMediaStreamSource(stream);
         processor.current = new AudioWorkletNode(
@@ -139,9 +139,9 @@ function STTComponent() {
       console.log('오디오 전송 종료');
 
       const letter: LetterInfo = {
-        bookTitle: '흥부와 놀부',
-        role: '흥부',
-        childName: '놀부',
+        bookTitle: '사람은 무엇으로 사는가',
+        role: '천사',
+        childName: '김가브리엘',
         content: finalTranscript,
         letterFileName: '',
         letterUrl: '',
@@ -181,4 +181,4 @@ function STTComponent() {
   );
 }
 
-export default STTComponent;
+export default AudioRecorderSTT;

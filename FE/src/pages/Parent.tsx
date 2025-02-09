@@ -65,7 +65,7 @@ function Parent() {
   };
 
   return (
-    <div className="w-full h-full relative bg-pink-200 flex font-[BMJUA]">
+    <div className="w-screen h-screen relative bg-pink-200 flex font-[BMJUA]">
       <div className="absolute top-5 left-5">
         <IconCircleButton
           size="sm"

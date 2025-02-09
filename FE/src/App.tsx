@@ -16,6 +16,7 @@ import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory/mybookstory';
 import MyDrawing from './components/myhouse/mydrawing/mydrawing';
 import MyLetters from './components/myhouse/letters/letters';
+import AudioRecorderSTT from './test/AudioRecorderSTT';
 
 // 추후 className에 touch-none overflow-hidden 설정시 스크롤이 방지됩니다
 function App(): JSX.Element {
@@ -143,6 +144,14 @@ function App(): JSX.Element {
           element={(
             <ProtectedRoute>
               <MyDrawing />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/audioSTT"
+          element={(
+            <ProtectedRoute>
+              <AudioRecorderSTT />
             </ProtectedRoute>
           )}
         />
