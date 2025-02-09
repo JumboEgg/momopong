@@ -7,7 +7,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import storyData from '../data/cinderella';
-import AudioPlayer from '../AudioPlayer';
+import AudioPlayer from './AudioPlayer';
 import { getAudioUrl } from '../utils/audioUtils';
 import StoryIllustration from './StoryIllustration';
 
