@@ -5,52 +5,40 @@ import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Friend;
 import com.ssafy.project.domain.Sketch;
-import com.ssafy.project.domain.book.Book;
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
-import com.ssafy.project.dto.book.BookDto;
-import com.ssafy.project.exception.*;
+import com.ssafy.project.exception.DuplicateException;
+import com.ssafy.project.exception.InvitationExpiredException;
+import com.ssafy.project.exception.NotFoundException;
+import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.firebase.FcmSendDto;
 import com.ssafy.project.firebase.FcmService;
-import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.FriendRepository;
+import com.ssafy.project.repository.SketchRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
-public class BookServiceImpl implements BookService {
-    private final FriendRepository friendRepository;
+public class SketchServiceImpl implements SketchService {
     private final ChildRepository childRepository;
-    private final BookRepository bookRepository;
-    private final RedisDao redisDao;
+    private final FriendRepository friendRepository;
+    private final SketchRepository sketchRepository;
     private final JsonConverter jsonConverter;
-    private final NotificationService notificationService;
+    private final RedisDao redisDao;
     private final FcmService fcmService;
 
-    // Redis 저장을 위한 KEY
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
-    private static final String INVITATION_KEY = "book:invitation:%d:%d"; // 초대 KEY
-
-    // 동화 목록
-    @Override
-    public List<BookDto> bookList() {
-        List<Book> bookList = bookRepository.findAll();
-
-        return bookList.stream()
-                .map(Book::entityToDto)
-                .collect(Collectors.toList());
-    }
+    private static final String INVITATION_KEY = "sketch:invitation:%d:%d"; // 초대 KEY
 
     // 플레이 가능한 친구 목록
     @Override
@@ -58,10 +46,10 @@ public class BookServiceImpl implements BookService {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
-        // 1. 나와 친구인 사람 (Friend 테이블에서 찾아야 함)
+        // 친구인 사람 목록
         List<Friend> friendList = friendRepository.findAllByFrom(child);
 
-        // 2. 상태가 온라인인 사람
+        // 상태 온라인인 사람
         return friendList.stream()
                 .map(friend -> {
                     String key = String.format(CHILD_STATUS_KEY, friend.getTo().getId());
@@ -74,71 +62,70 @@ public class BookServiceImpl implements BookService {
                 .toList();
     }
 
-    // 친구 초대 보내기
+    // 방에 친구 초대하기
     @Override
-    public NotificationDto sendInvitation(Long bookId, Long inviterId, Long inviteeId) { // inviter: 초대한 사람, invitee: 초대받은 사람
+    public NotificationDto sendInvitation(Long sketchId, Long inviterId, Long inviteeId) {
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         if (redisDao.getValues(key) != null) {
             throw new DuplicateException("이미 진행중인 초대가 존재합니다");
         }
 
         Child inviter = childRepository.findById(inviterId)
-                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new NotFoundException("자식 사용자를 찾을 수 없습니다"));
         Child invitee = childRepository.findById(inviteeId)
-                .orElseThrow(() -> new UserNotFoundException("해당 친구를 찾을 수 없습니다"));
+                .orElseThrow(() -> new NotFoundException("해당 친구를 찾을 수 없습니다"));
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
+        Sketch sketch = sketchRepository.findById(sketchId)
+                .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
         NotificationDto notificationDto = NotificationDto.builder()
                 .notificationType(NotificationType.INVITE)
                 .inviterId(inviterId)
-                .inviteeId(inviteeId)
                 .inviterName(inviter.getName())
+                .inviteeId(inviteeId)
                 .inviteeName(invitee.getName())
-                .contentTitle(book.getTitle())
-                .contentId(bookId)
-                .contentType(ContentType.BOOK)
+                .contentId(sketchId)
+                .contentTitle(sketch.getSketchTitle())
+                .contentType(ContentType.SKETCH)
                 .build();
 
-        // 초대장 Redis에 저장 (10초간 초대장 유효)
+        // 초대 Redis에 저장
         redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
-        // FCM으로 초대 알림 전송
+        // 초대 알림 전송
         sendMessage(inviteeId, notificationDto);
 
         return notificationDto;
     }
 
-    // 친구 초대 수락하기
+    // 초대 수락하기
     @Override
-    public void acceptInvitation(Long bookId, Long inviterId, Long inviteeId) { // 초대받은 아이 입장에서 수락
+    public void acceptInvitation(Long sketchId, Long inviterId, Long inviteeId) {
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         if (redisDao.getValues(key) == null) {
             throw new InvitationExpiredException("이미 만료된 초대장입니다");
         }
-        // 수락한 초대장 삭제
-        redisDao.deleteValues(key);
 
         Child inviter = childRepository.findById(inviterId)
-                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
+                .orElseThrow(() -> new NotFoundException("자식 사용자를 찾을 수 없습니다"));
         Child invitee = childRepository.findById(inviteeId)
-                .orElseThrow(() -> new UserNotFoundException("해당 친구를 찾을 수 없습니다"));
+                .orElseThrow(() -> new NotFoundException("해당 친구를 찾을 수 없습니다"));
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
+        Sketch sketch = sketchRepository.findById(sketchId)
+                .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
-        // FCM으로 수락 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.ACCEPT);
+        // 수락 알림 전송
+        sendNotification(inviter, invitee, sketch, NotificationType.ACCEPT);
     }
 
-    // 친구 초대 거절하기
+    // 초대 거절하기
     @Override
-    public void rejectInvitation(Long bookId, Long inviterId, Long inviteeId) { // 초대받은 아이 입장에서 거절
+    public void rejectInvitation(Long sketchId, Long inviterId, Long inviteeId) {
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         if (redisDao.getValues(key) == null) {
             throw new InvitationExpiredException("이미 만료된 초대장입니다");
         }
+
         // 수락한 초대장 삭제
         redisDao.deleteValues(key);
 
@@ -147,39 +134,24 @@ public class BookServiceImpl implements BookService {
         Child invitee = childRepository.findById(inviteeId)
                 .orElseThrow(() -> new NotFoundException("해당 친구를 찾을 수 없습니다"));
 
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
+        Sketch sketch = sketchRepository.findById(sketchId)
+                .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
-        // FCM으로 거절 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.REJECT);
-    }
-
-    // 친구 초대가 만료되었을 때 (10초 제한)
-    @Override
-    public void expireInvitation(Long bookId, Long inviterId, Long inviteeId) {
-        Child inviter = childRepository.findById(inviterId)
-                .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
-        Child invitee = childRepository.findById(inviteeId)
-                .orElseThrow(() -> new UserNotFoundException("해당 친구를 찾을 수 없습니다"));
-
-        Book book = bookRepository.findById(bookId)
-                .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
-
-        // 만료 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.REJECT);
+        // 거절 알림 전송
+        sendNotification(inviter, invitee, sketch, NotificationType.REJECT);
     }
 
     // Notification 생성 후 알림 전송
-    private void sendNotification(Child inviter, Child invitee, Book book, NotificationType notificationType) {
+    private void sendNotification(Child inviter, Child invitee, Sketch sketch, NotificationType notificationType) {
         NotificationDto notificationDto = NotificationDto.builder()
                 .notificationType(notificationType)
                 .inviterId(inviter.getId())
                 .inviterName(inviter.getName())
                 .inviteeId(invitee.getId())
                 .inviteeName(invitee.getName())
-                .contentId(book.getId())
-                .contentTitle(book.getTitle())
-                .contentType(ContentType.BOOK)
+                .contentId(sketch.getId())
+                .contentTitle(sketch.getSketchTitle())
+                .contentType(ContentType.SKETCH)
                 .build();
 
         sendMessage(invitee.getId(), notificationDto);
