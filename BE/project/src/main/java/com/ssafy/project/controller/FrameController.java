@@ -35,7 +35,7 @@ public class FrameController {
 
 
     //그림(서브컨텐츠) 저장용 presigned-url 생성
-    @GetMapping("/draw/presigned-url")
+    @GetMapping("/sketch/presigned-url")
     public ResponseEntity<FileDto> getPresignedUrl() {
         FileDto presignedUrl = presignedUrlService.getPresignedUrl("audio", "webp");
         return ResponseEntity.ok(presignedUrl);
@@ -43,7 +43,7 @@ public class FrameController {
 
 
     //그림(서브컨텐츠) 저장
-    @PostMapping("/draw/{childId}")
+    @PostMapping("/sketch/{childId}")
     public ResponseEntity<Void> saveFrame(
             @PathVariable("childId") Long childId,
             @RequestBody FrameDto framedto){
