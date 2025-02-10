@@ -1,10 +1,11 @@
-import type { Toast as ToastType, ToastType as ToastVariant } from '@/hooks/useFirebaseMessaging';
+// src/components/common/Toast.tsx
+import type { Toast, NotificationType } from '@/types/notification';
 
 interface ToastProps {
-  toast: ToastType;
+  toast: Toast;
 }
 
-const toastBackgroundColors: Record<ToastVariant, string> = {
+const toastBackgroundColors: Record<NotificationType, string> = {
   error: 'bg-red-500',
   success: 'bg-green-500',
   invitation: 'bg-blue-500',

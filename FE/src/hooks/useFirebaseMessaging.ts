@@ -3,6 +3,8 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { initializeApp } from 'firebase/app';
 import { tokenService } from '@/services/tokenService';
 import useFCMStore from '@/stores/useFCMStore';
+import { useFriendListStore } from '@/stores/friendListStore';
+import useToastStore from '@/stores/toastStore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -32,22 +34,45 @@ const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 export const useFirebaseMessaging = () => {
+  const { setFCMToken } = useFCMStore();
+  const { rejectInvitation, acceptInvitation } = useFriendListStore();
+  const [showLiveKitRoom, setShowLiveKitRoom] = useState(false);
+  const [roomInfo, setRoomInfo] = useState<{
+    roomName: string;
+    participantName: string;
+  } | null>(null);
   const [invitationModal, setInvitationModal] = useState<InvitationModal>({
     isOpen: false,
     data: null,
   });
-  const { setFCMToken } = useFCMStore();
 
   const handleInvitationAccept = async () => {
     if (!invitationModal.data) return;
 
-    // TODO: 초대 수락 로직 구현
-    console.log('초대 수락:', invitationModal.data);
+    const { inviterId, inviteeId, contentId: bookId } = invitationModal.data;
+
+    try {
+      await acceptInvitation(bookId, inviteeId, inviterId);
+
+      // LiveKit 룸 정보 설정
+      setRoomInfo({
+        roomName: `book-${bookId}`,
+        participantName: invitationModal.data.inviteeName,
+      });
+      setShowLiveKitRoom(true);
+    } catch (error) {
+      console.error('Failed to accept invitation:', error);
+    }
 
     setInvitationModal({ isOpen: false, data: null });
   };
 
-  const handleInvitationReject = () => {
+  const handleInvitationReject = async () => {
+    if (!invitationModal.data) return;
+
+    const { inviterId, inviteeId, contentId: bookId } = invitationModal.data;
+
+    await rejectInvitation(bookId, inviteeId, inviterId);
     setInvitationModal({ isOpen: false, data: null });
   };
 
@@ -79,27 +104,38 @@ export const useFirebaseMessaging = () => {
 
     const handleMessage = onMessage(messaging, (payload) => {
       console.log('전체 payload:', payload);
+      const { showToast } = useToastStore.getState();
 
       if (payload.data) {
+        // 초대 거절 알림을 받은 경우
+        if (payload.data.type === 'invitation_rejected') {
+          showToast({
+            type: 'reject',
+            message: `${payload.data.inviteeName}님이 초대를 거절했습니다.`,
+          });
+          return;
+        }
+
+        // 초대장을 받은 경우
         const {
-            inviterId,
-            inviteeId,
-            inviterName,
-            inviteeName,
-            contentId,
-            contentTitle,
+          inviterId,
+          inviteeId,
+          inviterName,
+          inviteeName,
+          contentId,
+          contentTitle,
         } = payload.data;
 
         setInvitationModal({
-            isOpen: true,
-            data: {
-                inviterId: Number(inviterId),
-                inviterName,
-                inviteeId: Number(inviteeId),
-                inviteeName,
-                contentId: Number(contentId),
-                contentTitle,
-            },
+          isOpen: true,
+          data: {
+            inviterId: Number(inviterId),
+            inviterName,
+            inviteeId: Number(inviteeId),
+            inviteeName,
+            contentId: Number(contentId),
+            contentTitle,
+          },
         });
       }
     });
@@ -115,5 +151,7 @@ export const useFirebaseMessaging = () => {
     invitationModal,
     handleInvitationAccept,
     handleInvitationReject,
+    showLiveKitRoom,
+    roomInfo,
   };
 };

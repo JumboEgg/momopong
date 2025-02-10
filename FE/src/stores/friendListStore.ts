@@ -4,6 +4,7 @@ import type { Friend } from '@/types/friend';
 import type { FriendInvitation } from '@/types/invitation';
 import api from '@/api/axios';
 import { tokenService } from '@/services/tokenService';
+import useToastStore from './toastStore';
 
 const sortByOnlineStatus = (friends: Friend[]) => friends.sort((a, b) => {
   if (a.status === 'ONLINE') return -1;
@@ -27,6 +28,9 @@ interface FriendList {
   fetchFriends: () => Promise<void>;
   fetchBookFriends: (bookId: number) => Promise<void>;
   inviteFriend: (invitation: FriendInvitation) => Promise<void>;
+  acceptInvitation: (bookId: number, inviteeId: number, inviterId: number) => Promise<void>;
+  rejectInvitation: (bookId: number, inviteeId: number, inviterId: number) => Promise<void>;
+  expireInvitation: (bookId: number, inviteeId: number, inviterId: number) => Promise<void>;
   updateFriendStatus: (friendId: number, status: Friend['status']) => void;
 
   // 폴링
@@ -86,19 +90,107 @@ export const useFriendListStore = create<FriendList>()((set) => ({
   },
 
   inviteFriend: async ({ bookId, inviterId, inviteeId }: FriendInvitation) => {
+    const { showToast } = useToastStore.getState();
     set({ loading: true, error: null });
     try {
       await api.post(
         `/book/${bookId}/friend/${inviterId}/invitation`,
         { inviteeId },
       );
+
+      showToast({
+        type: 'success',
+        message: '친구에게 초대장을 보냈어요!',
+      });
     } catch (error) {
       console.error('Failed to invite friend:', error);
       const errorMessage = error instanceof Error ? error.message : '친구 초대에 실패했습니다.';
       set({ error: errorMessage });
+      showToast({
+        type: 'error',
+        message: '초대장을 보내지 못했어요',
+      });
       throw error;
     } finally {
       set({ loading: false });
+    }
+  },
+
+  acceptInvitation: async (bookId, inviteeId, inviterId) => {
+    const { showToast } = useToastStore.getState();
+
+    try {
+      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/accept`, {
+        inviterId,
+      });
+
+      showToast({
+        type: 'success',
+        message: '친구와 만나러 가고 있어요',
+      });
+    } catch (error) {
+      console.error('Failed to accept invitation:', error);
+      showToast({
+        type: 'error',
+        message: '지금은 함께 여행할 수 없어요',
+      });
+    }
+  },
+
+  rejectInvitation: async (bookId, inviteeId, inviterId) => {
+    const { showToast } = useToastStore.getState();
+
+    try {
+      // 초대 거절 API 호출
+      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/reject`, {
+        inviterId,
+      });
+
+      // // FCM으로 초대한 사람에게 거절 알림 보내기
+      // await api.post('/api/notification/send', {
+      //   targetUserId: inviterId,
+      //   type: 'invitation_rejected',
+      //   message: '지금은 .',
+      //   data: {
+      //     type: 'invitation_rejected',
+      //     inviteeId,
+      //     inviteeName: '상대방', // 실제 이름으로 대체 필요
+      //     contentId: bookId,
+      //   },
+      // });
+
+      // 거절한 사람에게 토스트 표시
+      showToast({
+        type: 'reject',
+        message: '다음에 여행하기로 했어요',
+      });
+    } catch (error) {
+      console.error('Failed to reject invitation:', error);
+      showToast({
+        type: 'error',
+        message: '답장을 보내지 못했어요',
+      });
+    }
+  },
+
+  expireInvitation: async (bookId, inviteeId, inviterId) => {
+    const { showToast } = useToastStore.getState();
+
+    try {
+      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/expire`, {
+        inviterId,
+      });
+
+      showToast({
+        type: 'reject',
+        message: '초대가 만료되었습니다.',
+      });
+    } catch (error) {
+      console.error('Failed to expire invitation:', error);
+      showToast({
+        type: 'error',
+        message: '초대 만료 처리 중 오류가 발생했습니다.',
+      });
     }
   },
 
@@ -132,7 +224,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
 export const useFriendInvitation = () => {
   const {
- inviteFriend, loading, error, clearError,
+  inviteFriend, loading, error, clearError,
 } = useFriendListStore();
 
   const handleInvitation = async (bookId: number, inviterId: number, inviteeId: number) => {

@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom'; // Router 제거
 // import ToastMessage from '@/components/common/Toast';
+import ToastContainer from '@/components/common/ToastContainer';
 import { useFirebaseMessaging } from './hooks/useFirebaseMessaging';
 
 // 보호된 라우트
@@ -171,7 +172,7 @@ function App(): JSX.Element {
           onClose={handleInvitationReject}
         />
       )}
-      {/* {toast && <ToastMessage toast={toast} />} */}
+      <ToastContainer />
     </div>
   );
 }
