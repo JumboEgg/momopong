@@ -15,27 +15,41 @@ const firebaseConfig = {
 };
 
 export interface InvitationData {
-  inviterId: string;
+  inviterId: number;
   inviterName: string;
-  inviteeId: string;
-  bookId: string;
-  bookTitle: string;
+  inviteeId: number;
+  inviteeName: string;
+  contentId: number;
+  contentTitle: string;
 }
 
-export type ToastType = 'error' | 'success' | 'invitation' | 'accept' | 'reject';
-
-export interface Toast {
-  type: ToastType;
-  message: string;
-  data?: InvitationData;
-}
+export interface InvitationModal {
+    isOpen: boolean;
+    data: InvitationData | null;
+  }
 
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 export const useFirebaseMessaging = () => {
-  const [toast, setToast] = useState<Toast | null>(null);
+  const [invitationModal, setInvitationModal] = useState<InvitationModal>({
+    isOpen: false,
+    data: null,
+  });
   const { setFCMToken } = useFCMStore();
+
+  const handleInvitationAccept = async () => {
+    if (!invitationModal.data) return;
+
+    // TODO: 초대 수락 로직 구현
+    console.log('초대 수락:', invitationModal.data);
+
+    setInvitationModal({ isOpen: false, data: null });
+  };
+
+  const handleInvitationReject = () => {
+    setInvitationModal({ isOpen: false, data: null });
+  };
 
   useEffect(() => {
     const handleAllowNotification = async () => {
@@ -68,23 +82,24 @@ export const useFirebaseMessaging = () => {
 
       if (payload.data) {
         const {
-          inviterId,
-          inviterName,
-          inviteeId,
-          bookId,
-          bookTitle,
+            inviterId,
+            inviteeId,
+            inviterName,
+            inviteeName,
+            contentId,
+            contentTitle,
         } = payload.data;
 
-        setToast({
-          type: 'invitation',
-          message: `${inviterName}님이 초대했습니다.`,
-          data: {
-            inviterId,
-            inviterName,
-            inviteeId,
-            bookId,
-            bookTitle,
-          },
+        setInvitationModal({
+            isOpen: true,
+            data: {
+                inviterId: Number(inviterId),
+                inviterName,
+                inviteeId: Number(inviteeId),
+                inviteeName,
+                contentId: Number(contentId),
+                contentTitle,
+            },
         });
       }
     });
@@ -96,5 +111,9 @@ export const useFirebaseMessaging = () => {
     };
   }, [setFCMToken]);
 
-  return { toast, setToast };
+  return {
+    invitationModal,
+    handleInvitationAccept,
+    handleInvitationReject,
+  };
 };

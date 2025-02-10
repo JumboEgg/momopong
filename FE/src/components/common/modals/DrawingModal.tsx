@@ -25,7 +25,7 @@ function DrawingModal({
       canvas.height = img.height;
 
       // 이미지 그리기
-      ctx.drawImage(img, 0, 0);
+      ctx?.drawImage(img, 0, 0);
 
       // 변환된 이미지 데이터 URL 생성 (JPG 또는 PNG)
       const convertedDataUrl = canvas.toDataURL('image/png');

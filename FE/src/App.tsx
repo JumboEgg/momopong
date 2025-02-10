@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'; // Router 제거
-import ToastMessage from '@/components/common/Toast'; // 추가
+// import ToastMessage from '@/components/common/Toast';
 import { useFirebaseMessaging } from './hooks/useFirebaseMessaging';
 
 // 보호된 라우트
@@ -22,11 +22,21 @@ import MyBookStory from './components/myhouse/mybookstory/mybookstory';
 import MyLetters from './components/myhouse/letters/letters';
 import MyDrawing from './components/myhouse/mydrawing/mydrawing';
 
+// 모달 컴포넌트
+import DialogModal from './components/common/modals/DialogModal';
+
 // 비디오 룸 컴포넌트 경로 확인
 import VideoRoom from './components/video/VideoRoom'; // 경로 수정
 
 function App(): JSX.Element {
-  const { toast } = useFirebaseMessaging();
+  // 토스트 알림 추가할시 활성화하여 사용
+  // const { toast } = useFirebaseMessaging();
+
+  const {
+    invitationModal,
+    handleInvitationAccept,
+    handleInvitationReject,
+  } = useFirebaseMessaging();
 
   return (
     <div className="fixed inset-0 overflow-auto">
@@ -152,7 +162,16 @@ function App(): JSX.Element {
         <Route path="/video-room" element={<VideoRoom />} />
       </Routes>
 
-      {toast && <ToastMessage toast={toast} />}
+      {invitationModal.isOpen && invitationModal.data && (
+        <DialogModal
+          type="confirm"
+          message1={`${invitationModal.data.inviterName}이(가)`}
+          message2={`${invitationModal.data.contentTitle}를 같이 읽고 싶어해요`}
+          onConfirm={handleInvitationAccept}
+          onClose={handleInvitationReject}
+        />
+      )}
+      {/* {toast && <ToastMessage toast={toast} />} */}
     </div>
   );
 }
