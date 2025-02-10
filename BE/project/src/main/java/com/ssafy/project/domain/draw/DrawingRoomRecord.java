@@ -39,11 +39,12 @@ public class DrawingRoomRecord {
     // Entity to Dto
     public DrawingParticipationDto entityToDto() {
         return DrawingParticipationDto.builder()
-                .drawingParticipationId(this.getId())
-                .child_id(this.getChild().getId())
-                .startTime(this.getStartTime())
-                .endTime(this.getEndTime())
-                .mode(this.getMode())
+                .drawingParticipationId(this.id)
+                .childId(this.child.getId())
+                .startTime(this.startTime)
+                .endTime(this.endTime)
+                .mode(this.mode)
                 .build();
     }
+
 }

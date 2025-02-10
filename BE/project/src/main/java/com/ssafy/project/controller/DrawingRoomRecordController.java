@@ -21,7 +21,7 @@ public class DrawingRoomRecordController {
 
     private final DrawingRoomRecordService drawingRoomRecordService;
 
-    @PostMapping("/save")
+    @PostMapping
     @Operation(summary = "그림 참여 기록 저장", description = "사용자의 그림 참여 기록을 저장합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "참여 기록 저장 성공"),

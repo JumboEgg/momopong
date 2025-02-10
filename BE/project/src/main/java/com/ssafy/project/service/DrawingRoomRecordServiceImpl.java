@@ -7,6 +7,7 @@ import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.DrawingRoomRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,10 +17,10 @@ public class DrawingRoomRecordServiceImpl implements DrawingRoomRecordService {
     private final ChildRepository childRepository;
 
     @Override
+    @Transactional
     public DrawingParticipationDto  save(DrawingParticipationDto recordDto) {
 
-        Child child = childRepository.findById(recordDto.getChild_id())
-                .orElseThrow(() -> new IllegalArgumentException("해당 childId가 존재하지 않습니다."));
+        Child child = childRepository.getReferenceById(recordDto.getChildId());
 
         DrawingRoomRecord roomRecord = DrawingRoomRecord.builder()
                 .child(child)
