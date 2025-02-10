@@ -131,6 +131,15 @@ export const inviteFriendToPlay = async (
       inviteeId,
     });
 
+    console.log('API 요청 디버그:', {
+      bookId,
+      inviterId,
+      inviteeId,
+      fullUrl: `/api/book/${bookId}/friend/${inviterId}/invitation`,
+      token: token ? `Bearer ${token.substring(0, 10)}...` : 'missing',
+      requestBody: { inviteeId },
+    });
+
     const response = await api.post(
       `/api/book/${bookId}/friend/${inviterId}/invitation`,
       {
