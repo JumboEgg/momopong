@@ -5,15 +5,18 @@ import { TextCircleButton, IconCircleButton } from '@/components/common/buttons/
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@/components/common/scrollbar.css';
 import { LetterInfo } from '@/types/letter';
-import loadLettersFromS3 from '@/utils/voiceS3/letterLoad';
+import loadLettersFromS3 from '@/utils/audioS3/letterLoad';
 import useSubAccountStore from '@/stores/subAccountStore';
+import fetchSavedAudio from '../../../utils/audioS3/audioLoad';
 
 function MyLetters(): React.JSX.Element {
   const [childId, setChildId] = useState<number>(0);
 
   const [letterList, setLetterList] = useState<LetterInfo[]>([]);
   const [selectedLetter, setSelectedLetter] = useState<LetterInfo | null>(null);
+  const [letterAudio, setLetterAudio] = useState<Audio>();
   const navigate = useNavigate();
+  const myLetterAudio = new Audio();
 
   const fetchData = async (id: string) => {
     if (!id) return;
@@ -34,13 +37,29 @@ function MyLetters(): React.JSX.Element {
     fetchData(childId.toString());
   }, [childId]);
 
-  const playMyLetter = () => {
-    console.log(selectedLetter?.bookTitle);
-  };
-
   function handleLetterSelect(letter: LetterInfo | null): void {
     setSelectedLetter(letter);
   }
+
+  useEffect(() => {
+    if (!selectedLetter) return;
+
+    const loadAudio = async () => {
+      const audioUrl = await fetchSavedAudio(selectedLetter.letterUrl);
+      myLetterAudio.src = audioUrl;
+      setLetterAudio(myLetterAudio);
+    };
+
+    loadAudio();
+  }, [selectedLetter]);
+
+  const playMyLetter = () => {
+    if (letterAudio.paused) {
+      letterAudio.play();
+    } else {
+      letterAudio.pause();
+    }
+  };
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>, letter: LetterInfo): void {
     if (event.key === 'Enter' || event.key === ' ') {

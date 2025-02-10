@@ -1,13 +1,12 @@
 import { LetterInfo } from '@/types/letter';
-import uploadLetterToS3 from '@/utils/voiceS3/letterUpload';
-import { useState, useRef } from 'react';
+import uploadLetterToS3 from '@/utils/audioS3/letterUpload';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function AudioRecorderSTT() {
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [error, setError] = useState('');
-  const [finalTranscript, setFinalTranscript] = useState('');
 
   const webSocket = useRef<WebSocket | null>(null);
   const audioContext = useRef<AudioContext | null>(null);
@@ -22,7 +21,11 @@ function AudioRecorderSTT() {
   const setupWebSocket = async () => {
     if (webSocket.current) webSocket.current.close();
 
-    webSocket.current = new WebSocket('ws://localhost:8081/api/book/letter/stt');
+    // TODO : 경로 변경 후 정상 동작 확인
+    const base_url = 'ws://localhost:8081/api/book/letter/stt';
+    // const base_url = 'https://i12d103.p.ssafy.io/api/book/letter/stt';
+    // const base_url = `${import.meta.env.VITE_API_BASE_URL}/book/letter/stt`;
+    webSocket.current = new WebSocket(base_url);
 
     webSocket.current.onopen = async () => {
       try {
@@ -104,12 +107,6 @@ function AudioRecorderSTT() {
         if (receivedData.transcript) {
           // 임시 텍스트는 voiceText에만 저장
           setVoiceText(receivedData.transcript);
-
-          // 최종 결과일 때만 finalTranscript 업데이트
-          if (receivedData.isFinal) {
-            // 백엔드에서 isFinal flag 추가 필요
-            setFinalTranscript(receivedData.transcript);
-          }
         }
       } catch (err) {
         console.error('Error parsing message:', err);
@@ -137,21 +134,6 @@ function AudioRecorderSTT() {
       }
 
       console.log('오디오 전송 종료');
-
-      const letter: LetterInfo = {
-        bookTitle: '사람은 무엇으로 사는가',
-        role: '천사',
-        childName: '김가브리엘',
-        content: finalTranscript,
-        letterFileName: '',
-        letterUrl: '',
-        reply: '',
-        createdAt: '',
-      };
-
-      const audioBlob = recordingBlob.current ?? new Blob();
-
-      uploadLetterToS3({ letter, audioBlob });
     };
   };
 
@@ -166,6 +148,26 @@ function AudioRecorderSTT() {
       setupWebSocket();
     }
   };
+
+  useEffect(() => {
+    if (isRecording) return;
+    console.log(voiceText);
+
+    const letter: LetterInfo = {
+      bookTitle: '사람은 무엇으로 사는가',
+      role: '천사',
+      childName: '김가브리엘',
+      content: voiceText,
+      letterFileName: '',
+      letterUrl: '',
+      reply: '',
+      createdAt: '',
+    };
+
+    const audioBlob = recordingBlob.current ?? new Blob();
+
+    uploadLetterToS3({ letter, audioBlob });
+  }, [isRecording]);
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
