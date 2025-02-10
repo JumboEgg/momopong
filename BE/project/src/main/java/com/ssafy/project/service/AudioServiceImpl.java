@@ -2,7 +2,6 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.service.AudioService;
 import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,12 +43,12 @@ public class AudioServiceImpl implements AudioService {
     private String privateKeyContent;
     private File privateKeyFile;
 
-    private final CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();  // 클래스 레벨에서 한 번만 생성
-
 
     @PostConstruct
     public void init() {
         try {
+
+
             // 임시 파일 생성
             privateKeyFile = File.createTempFile("cloudfront-private-key", ".pem");
             privateKeyFile.deleteOnExit(); // 애플리케이션 종료시 삭제
@@ -75,7 +74,7 @@ public class AudioServiceImpl implements AudioService {
 
     @Override
     public String getSignedUrl(String audioKey) throws Exception {
-
+        CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();
         Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);    //유효기간 7일
 
         String resourceUrl = domain + "/" + audioKey;
@@ -90,8 +89,6 @@ public class AudioServiceImpl implements AudioService {
         SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCannedPolicy(cannedRequest);
         String url = signedUrl.url();
         log.info("Generated signed URL: {}", url);
-
-
 
 
         return url;
