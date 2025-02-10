@@ -1,5 +1,6 @@
 package com.ssafy.project.service;
 
+
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,11 +16,10 @@ import java.nio.file.Files;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class AudioServiceImpl implements AudioService {
+public class CloudFrontService {
 
     @Value("${cloud.aws.cloudfront.domain}")
     private String domain;
@@ -30,7 +30,6 @@ public class AudioServiceImpl implements AudioService {
     @Value("${cloud.aws.cloudfront.private-key}")
     private String privateKeyContent;
     private File privateKeyFile;
-
 
     @PostConstruct
     public void init() {
@@ -58,26 +57,31 @@ public class AudioServiceImpl implements AudioService {
         }
     }
 
-    @Override
-    public String getSignedUrl(String audioKey) throws Exception {
-        CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();
-        Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);    //유효기간 7일
+    public String getSignedUrl(String audioUrl) {
+        try {
+            CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();
+            Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);    //유효기간 7일
 
-        String resourceUrl = domain + "/" + audioKey;
+            String resourceUrl = domain + "/" + audioUrl;
 
-        CannedSignerRequest cannedRequest = CannedSignerRequest.builder()
-                .resourceUrl(resourceUrl)
-                .privateKey(privateKeyFile.toPath())  // 임시 파일 사용
-                .keyPairId(keyPairId)
-                .expirationDate(expirationDate)
-                .build();
+            CannedSignerRequest cannedRequest = CannedSignerRequest.builder()
+                    .resourceUrl(resourceUrl)
+                    .privateKey(privateKeyFile.toPath())  // 임시 파일 사용
+                    .keyPairId(keyPairId)
+                    .expirationDate(expirationDate)
+                    .build();
 
-        SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCannedPolicy(cannedRequest);
-        String url = signedUrl.url();
-        log.info("Generated signed URL: {}", url);
+            SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCannedPolicy(cannedRequest);
+            String url = signedUrl.url();
+            log.info("Generated signed URL: {}", url);
 
+            return url;
 
-        return url;
+        } catch (Exception e) {
+            log.error("Failed to generate signed URL: {}", e.getMessage(), e);
+            throw new RuntimeException("Failed to generate CloudFront signed URL", e);
+        }
     }
+
 
 }

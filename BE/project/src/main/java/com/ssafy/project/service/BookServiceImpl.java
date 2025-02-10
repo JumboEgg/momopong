@@ -39,6 +39,7 @@ public class BookServiceImpl implements BookService {
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
     private final FcmService fcmService;
+    private final CloudFrontService cloudFrontService;
 
     // Redis 저장을 위한 KEY
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
@@ -70,7 +71,7 @@ public class BookServiceImpl implements BookService {
                                     .order(audio.getAudioNumber())
                                     .role(audio.getRole())
                                     .text(audio.getText())
-                                    .path(audio.getAudioPath())
+                                    .path(cloudFrontService.getSignedUrl(audio.getAudioPath()))
                                     .build())
                             .toList();
 
