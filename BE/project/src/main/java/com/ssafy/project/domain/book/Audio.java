@@ -1,5 +1,14 @@
 package com.ssafy.project.domain.book;
 
+import jakarta.persistence.*;
+import lombok.*;
+
+@Entity
+@Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class Audio {
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -16,10 +25,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name="audio")
-@EntityListeners(AuditingEntityListener.class)
 public class Audio {
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,16 +34,15 @@ public class Audio {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "page_id")
-    private Page page; // 페이지 아이디
+    private Page page;
 
-    private String audioUrl; // Cloud Front를 위한 거
+    private String audioPath; // 음성 파일 경로
+    private String role; // 역할
+    private String text; // 대사
+    private int audioNumber; // 음성 순서
 
-//    private String audioFileName; //CF 안쓰면 필요한거
-
-    private String role; // 음성의 역할
-
-    private String text; // 음성의 대사 이거필요한거임???
-
-    @CreatedDate
-    private LocalDate regDate; // 등록일
+    public void addAudio(Page page) {
+        this.page = page;
+        page.getAudioList().add(this);
+    }
 }

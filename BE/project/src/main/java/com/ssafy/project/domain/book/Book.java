@@ -24,20 +24,20 @@ public class Book {
     private Long id;
 
     private String title; // 동화 제목
+    private String bookPath; // 동화 이미지 경로
+    private String role1;
+    private String role2;
 
-    private String thumbnail; // 썸네일 URL
-
-    private int totalPage; // 총 페이지 수
-
-    @CreatedDate
-    private LocalDate regDate; // 등록일
+    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
+    @OrderBy("pageNumber asc")
+    private List<Page> pageList = new ArrayList<>();
 
     // Entity to Dto
     public BookDto entityToDto() {
         return BookDto.builder()
                 .bookId(this.getId())
                 .title(this.getTitle())
-                .thumbnail(this.getThumbnail())
+                .bookPath(this.getBookPath())
                 .build();
     }
 }
