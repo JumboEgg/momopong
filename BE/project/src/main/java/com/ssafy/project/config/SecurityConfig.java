@@ -43,6 +43,7 @@ public class SecurityConfig {
                 mvc.pattern("/api/book/letter/**"),
                 mvc.pattern("/api/profile/**"),
                 mvc.pattern("/ws/**"),
+                mvc.pattern("/wss/**"),
                 mvc.pattern("/api/children/presigned-url"),
                 mvc.pattern("/api/audio/**")
         };
