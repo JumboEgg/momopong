@@ -11,6 +11,7 @@ const publicPaths = [
   '/parents/signin',
   '/parents/refresh-token',
   '/children/presigned-url',
+  '/fcm/save-token',
 ];
 
 const parentAuthPaths = [

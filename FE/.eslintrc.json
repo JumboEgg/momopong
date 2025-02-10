@@ -41,14 +41,18 @@
     ],
     "import/prefer-default-export": "off",
     "import/no-extraneous-dependencies": ["error", {
-      "devDependencies": true
+      "devDependencies": true,
+      "peerDependencies": true,
+      "optionalDependencies": true,
+      "bundledDependencies": true,
+      "packageDir": "./"
     }],
     "no-console": "off", // console.log 허용
     "no-alert": "off" // alert 허용
   },
   "overrides": [
     {
-      "files": ["vite.config.ts", "tailwind.config.js", "postcss.config.js"],
+      "files": ["vite.config.ts", "tailwind.config.js", "postcss.config.js", "public/firebase-messaging-sw.js"],
       "parserOptions": {
         "project": null
       }

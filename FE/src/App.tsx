@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom'; // Router 제거
 import { initializeApp } from 'firebase/app';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { initializeFirebaseMessaging } from './services/firebase';
 
 // 보호된 라우트
 import ProtectedRoute from './components/ProtectedRoute';
@@ -40,6 +41,20 @@ const app = initializeApp(config);
 const messaging = getMessaging(app);
 
 function App(): JSX.Element {
+  useEffect(() => {
+    const initNotifications = async () => {
+      try {
+        const token = await initializeFirebaseMessaging();
+        console.log('FCM Token:', token);
+        // 토큰을 서버에 전송하는 로직
+      } catch (error) {
+        console.error('푸시 토큰 가져오는 중에 에러 발생', error);
+      }
+    };
+
+    initNotifications();
+  }, []);
+
   const [toast, setToast] = useState<{
     type: 'error' | 'success' | 'invitation' | 'accept' | 'reject';
     message: string;

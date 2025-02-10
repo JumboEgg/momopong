@@ -2,16 +2,23 @@
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js');
 
-const firebaseConfig = {
-    apiKey: "AIzaSyBiZRjxbM62LZ-DwwYZDTn3dfcgiEUWQr4",
-    authDomain: "d103-952ab.firebaseapp.com",
-    projectId: "d103-952ab",
-    storageBucket: "d103-952ab.firebaseapp.com",
-    messagingSenderId: "12084198220",
-    appId: "1:12084198220:web:9ad530873935a6e10a2de9",
-    measurementId: "G-BGMK297J5C"
-};
+let firebaseConfig = null;
 
-firebase.initializeApp(firebaseConfig);
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'FIREBASE_CONFIG') {
+    firebaseConfig = event.data.config;
+    // Firebase가 이미 초기화되지 않았다면 초기화
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  }
+});
 
+// Firebase Messaging 초기화
 const messaging = firebase.messaging();
+
+// 백그라운드 메시지 핸들링
+messaging.onBackgroundMessage((payload) => {
+  console.log('Received background message:', payload);
+  // 필요한 알림 로직 구현
+});
