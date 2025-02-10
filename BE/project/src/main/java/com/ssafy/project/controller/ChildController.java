@@ -29,8 +29,8 @@ public class ChildController {
     // 자식 계정 로그인
     @PreAuthorize("hasRole('PARENT')")
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> map) {
-        Long childId = Long.parseLong(map.get("childId"));
+    public ResponseEntity<Map<String, Object>> login(@RequestBody ChildIdDto childIdDto) {
+        Long childId = childIdDto.getChildId();
         Map<String, Object> childMap = childService.login(childId);
 
         return ResponseEntity.ok(childMap);
@@ -38,10 +38,9 @@ public class ChildController {
 
     // 자식 계정 로그아웃
     @PreAuthorize("hasRole('PARENT')")
-//    @PreAuthorize("hasRole('CHILD')")
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization, @RequestBody Map<String, String> map) {
-        Long childId = Long.parseLong(map.get("childId"));
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorization, @RequestBody ChildIdDto childIdDto) {
+        Long childId = childIdDto.getChildId();
         childService.logout(authorization, childId);
 
         return ResponseEntity.ok().build();
