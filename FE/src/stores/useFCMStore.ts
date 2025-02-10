@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import axios from 'axios';
-import { tokenService } from '@/services/tokenService';
+import api from '@/api/axios';
+// import { tokenService } from '@/services/tokenService';
 
 interface FCMState {
   fcmToken: string | null;
@@ -12,14 +12,7 @@ interface FCMState {
   clearError: () => void;
 }
 
-const api = axios.create({
-  baseURL: 'https://i12d103.p.ssafy.io',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-export const useFCMStore = create<FCMState>()(
+const useFCMStore = create<FCMState>()(
   devtools((set) => ({
     fcmToken: null,
     isLoading: false,
@@ -28,25 +21,18 @@ export const useFCMStore = create<FCMState>()(
     setFCMToken: async (childId: number, token: string) => {
       try {
         set({ isLoading: true, error: null });
-        const accessToken = tokenService.getAccessToken();
 
-        if (!accessToken) {
-          throw new Error('인증 토큰이 없습니다.');
-        }
-
-        await api.post(
-          '/api/fcm/save-token',
-          { childId, token },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          },
-        );
+        await api.post('/api/fcm/save-token', {
+          childId,
+          token,
+        });
 
         set({ fcmToken: token });
       } catch (error) {
-        set({ error: 'FCM 토큰 저장에 실패했습니다.' });
+        const errorMessage = error instanceof Error
+          ? error.message
+          : 'FCM 토큰 저장에 실패했습니다.';
+        set({ error: errorMessage });
         throw error;
       } finally {
         set({ isLoading: false });
@@ -56,25 +42,17 @@ export const useFCMStore = create<FCMState>()(
     deleteFCMToken: async (childId: number) => {
       try {
         set({ isLoading: true, error: null });
-        const accessToken = tokenService.getAccessToken();
 
-        if (!accessToken) {
-          throw new Error('인증 토큰이 없습니다.');
-        }
-
-        await api.post(
-          '/api/fcm/delete-token',
-          { childId },
-          {
-            headers: {
-              Authorization: `Bearer ${accessToken}`,
-            },
-          },
-        );
+        await api.post('/api/fcm/delete-token', {
+          childId,
+        });
 
         set({ fcmToken: null });
       } catch (error) {
-        set({ error: 'FCM 토큰 삭제에 실패했습니다.' });
+        const errorMessage = error instanceof Error
+          ? error.message
+          : 'FCM 토큰 삭제에 실패했습니다.';
+        set({ error: errorMessage });
         throw error;
       } finally {
         set({ isLoading: false });
@@ -84,3 +62,5 @@ export const useFCMStore = create<FCMState>()(
     clearError: () => set({ error: null }),
   })),
 );
+
+export default useFCMStore;

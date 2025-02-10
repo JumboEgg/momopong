@@ -6,7 +6,6 @@ export interface Friend {
   name: string;
   profile: string;
   status: StatusType;
-  avatar: string;
 }
 
 export interface FriendRequest {
