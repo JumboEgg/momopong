@@ -34,6 +34,7 @@ function MyLetters(): React.JSX.Element {
 
   useEffect(() => {
     if (!childId) return;
+    console.log('fetch Data from child ', childId);
     fetchData(childId.toString());
   }, [childId]);
 
@@ -47,6 +48,8 @@ function MyLetters(): React.JSX.Element {
     const loadAudio = async () => {
       const audioUrl = await fetchSavedAudio(selectedLetter.letterUrl);
       myLetterAudio.src = audioUrl;
+      // myLetterAudio.src = selectedLetter.letterUrl;
+      myLetterAudio.type = 'audio/webm';
       setLetterAudio(myLetterAudio);
     };
 
@@ -55,6 +58,7 @@ function MyLetters(): React.JSX.Element {
 
   const playMyLetter = () => {
     if (letterAudio.paused) {
+      console.log(letterAudio.src);
       letterAudio.play();
     } else {
       letterAudio.pause();

@@ -7,13 +7,14 @@ function AudioRecorderSTT() {
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [error, setError] = useState('');
+  const [recordingBlob, setRecordingBlob] = useState<Blob | null>(null);
 
   const webSocket = useRef<WebSocket | null>(null);
   const audioContext = useRef<AudioContext | null>(null);
-  const audioChunks = useRef<Uint8Array[]>([]);
   const processor = useRef<AudioWorkletNode | null>();
   const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const recordingBlob = useRef<Blob | null>(null);
+  const audioChunks = useRef<Blob[]>([]);
+  // const recordingBlob = useRef<Blob | null>(null);
 
   const navigate = useNavigate();
 
@@ -23,8 +24,6 @@ function AudioRecorderSTT() {
 
     // TODO : 경로 변경 후 정상 동작 확인
     const base_url = 'ws://localhost:8081/api/book/letter/stt';
-    // const base_url = 'https://i12d103.p.ssafy.io/api/book/letter/stt';
-    // const base_url = `${import.meta.env.VITE_API_BASE_URL}/book/letter/stt`;
     webSocket.current = new WebSocket(base_url);
 
     webSocket.current.onopen = async () => {
@@ -39,10 +38,14 @@ function AudioRecorderSTT() {
           },
         });
 
-        mediaRecorder.current = new MediaRecorder(stream);
+        const options = {
+          mimeType: 'audio/webm',
+        };
+
+        mediaRecorder.current = new MediaRecorder(stream, options);
         mediaRecorder.current.ondataavailable = (event) => {
           if (event.data.size > 0) {
-            recordingBlob.current = event.data;
+            audioChunks.current.push(event.data);
           }
         };
         mediaRecorder.current.start();
@@ -62,9 +65,6 @@ function AudioRecorderSTT() {
           if (webSocket.current) {
             if (webSocket.current.readyState === WebSocket.OPEN) {
               webSocket.current.send(event.data);
-              audioChunks.current.push(
-                new Int16Array(event.data) as unknown as Uint8Array,
-              );
             }
           }
         };
@@ -78,9 +78,7 @@ function AudioRecorderSTT() {
         source.connect(analyser);
 
         const detectAudio = () => {
-          if (!webSocket.current) {
-            return;
-          }
+          if (!webSocket.current) return;
 
           analyser.getByteFrequencyData(dataArray);
           requestAnimationFrame(detectAudio);
@@ -89,6 +87,10 @@ function AudioRecorderSTT() {
 
         mediaRecorder.current.onstop = () => {
           if (processor.current && audioContext.current) {
+            const completeAudioBlob = new Blob(audioChunks.current, { type: 'audio/webm' });
+            setRecordingBlob(completeAudioBlob);
+            audioChunks.current = [];
+
             stream.getTracks().forEach((track) => track.stop());
             source.disconnect(processor.current);
             processor.current.disconnect(audioContext.current.destination);
@@ -105,7 +107,6 @@ function AudioRecorderSTT() {
         console.log('Received from server:', event.data);
         const receivedData = JSON.parse(event.data);
         if (receivedData.transcript) {
-          // 임시 텍스트는 voiceText에만 저장
           setVoiceText(receivedData.transcript);
         }
       } catch (err) {
@@ -150,13 +151,13 @@ function AudioRecorderSTT() {
   };
 
   useEffect(() => {
-    if (isRecording) return;
+    if (!recordingBlob) return;
     console.log(voiceText);
 
     const letter: LetterInfo = {
-      bookTitle: '사람은 무엇으로 사는가',
-      role: '천사',
-      childName: '김가브리엘',
+      bookTitle: '라이언 일병 구하기',
+      role: '라이언 일병',
+      childName: '김이병',
       content: voiceText,
       letterFileName: '',
       letterUrl: '',
@@ -164,17 +165,26 @@ function AudioRecorderSTT() {
       createdAt: '',
     };
 
-    const audioBlob = recordingBlob.current ?? new Blob();
+    const audioBlob = recordingBlob ?? new Blob();
 
     uploadLetterToS3({ letter, audioBlob });
-  }, [isRecording]);
+  }, [recordingBlob]);
+
+  const listenRecord = () => {
+    // Blob URL 생성
+    const blobUrl = URL.createObjectURL(recordingBlob);
+
+    // Audio 객체 생성 및 재생
+    new Audio(blobUrl).play();
+  };
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
-      <button type="button" onClick={() => navigate('/Parent')}>리포트</button>
+      <button type="button" onClick={() => navigate('/home')}>홈으로 가기</button>
       <button type="button" onClick={handleRecordClick} style={{ padding: '10px 20px' }}>
         {isRecording ? 'Stop Recording' : 'Start Recording'}
       </button>
+      <button type="button" onClick={listenRecord}>녹음 듣기</button>
       <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 'bold' }}>
         {isRecording ? voiceText : 'Click the button to start recording'}
       </div>

@@ -29,10 +29,13 @@ const uploadAudioToS3 = async ({ accessToken, audioBlob }: UploadAudioToS3Props)
 
         const { presignedUrl, fileName } = await presignedResponse.json();
 
-        // header가 없어야 정상 동작
+        console.log('upload blob: ', audioBlob.type);
         const uploadResponse = await fetch(presignedUrl, {
             method: 'PUT',
             body: audioBlob,
+            headers: {
+                'Content-Type': 'audio/webm',
+            },
         });
 
         if (!uploadResponse.ok) {
@@ -54,12 +57,17 @@ const uploadLetterToS3 = async ({ letter, audioBlob }: UploadLetterToS3Props) =>
         }
 
         const { presignedUrl, fileName } = await uploadAudioToS3({ accessToken, audioBlob });
-        // const content = getContentFromAudio(audioBlob);
+
+        const child = useSubAccountStore.getState().selectedAccount;
+
+        if (!child) {
+        throw new Error('Failed to get child');
+        }
 
         const data: LetterInfo = {
             bookTitle: letter.bookTitle,
             role: letter.role,
-            childName: letter.childName,
+            childName: child.name,
             content: letter.content,
             letterFileName: fileName,
             letterUrl: presignedUrl,
@@ -67,14 +75,8 @@ const uploadLetterToS3 = async ({ letter, audioBlob }: UploadLetterToS3Props) =>
             createdAt: '',
         };
 
-        const childId = useSubAccountStore.getState().selectedAccount?.childId;
-
-        if (!childId) {
-        throw new Error('Failed to get childId');
-        }
-
         const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/book/letter/gpt/${childId}`,
+            `${import.meta.env.VITE_API_BASE_URL}/book/letter/gpt/${child.childId}`,
             {
                 method: 'POST',
                 body: JSON.stringify(data),
