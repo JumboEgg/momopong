@@ -1,24 +1,10 @@
 package com.ssafy.project.domain.book;
 
 import jakarta.persistence.*;
-import lombok.*;
-
-@Entity
-@Getter
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Audio {
-
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
-import java.time.LocalDate;
 
 @Entity
 @Getter
