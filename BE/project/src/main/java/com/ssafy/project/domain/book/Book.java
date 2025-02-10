@@ -1,12 +1,11 @@
 package com.ssafy.project.domain.book;
 
+import com.ssafy.project.domain.Sketch;
 import com.ssafy.project.dto.book.BookDto;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +26,9 @@ public class Book {
     private String bookPath; // 동화 이미지 경로
     private String role1;
     private String role2;
+
+    @OneToOne(mappedBy = "book", fetch = FetchType.LAZY)
+    private Sketch sketch;
 
     @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
     @OrderBy("pageNumber asc")

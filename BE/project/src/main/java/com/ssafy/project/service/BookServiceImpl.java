@@ -20,7 +20,6 @@ import com.ssafy.project.firebase.FcmService;
 import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.FriendRepository;
-import com.ssafy.project.repository.PageRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -66,7 +65,6 @@ public class BookServiceImpl implements BookService {
         List<PageDto> pageDtoList = pageList.stream()
                 .map(page -> {
                     List<AudioDto> audioDtoList = page.getAudioList().stream()
-                            // TODO: 나중에 audio path에 CloudFront URL 받아와서 넣어줘야 함
                             .map(audio -> AudioDto.builder()
                                     .order(audio.getAudioNumber())
                                     .role(audio.getRole())
@@ -75,15 +73,12 @@ public class BookServiceImpl implements BookService {
                                     .build())
                             .toList();
 
-                    PageDto pageDto = PageDto.builder()
+                    return PageDto.builder()
                             .pageId(page.getId())
                             .pageNumber(page.getPageNumber())
                             .pagePath(page.getPagePath())
                             .audios(audioDtoList)
-                            .sketch("")
                             .build();
-
-                    return pageDto;
                 })
                 .toList();
 
@@ -94,6 +89,7 @@ public class BookServiceImpl implements BookService {
                 .role2(book.getRole2())
                 .totalPage(pageList.size())
                 .pages(pageDtoList)
+                .sketch(book.getSketch().getSketchPath())
                 .build();
     }
 
