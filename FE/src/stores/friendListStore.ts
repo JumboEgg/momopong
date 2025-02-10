@@ -75,7 +75,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         throw new Error('선택된 자녀가 없습니다.');
       }
 
-      const response = await api.get(`/api/book/${bookId}/friend/${currentChildId}`);
+      const response = await api.get(`/book/${bookId}/friend/${currentChildId}`);
       const sortedFriends = sortByOnlineStatus(response.data);
       set({ friends: sortedFriends, loading: false });
     } catch (error) {
@@ -89,7 +89,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     set({ loading: true, error: null });
     try {
       await api.post(
-        `/api/book/${bookId}/friend/${inviterId}/invitation`,
+        `/book/${bookId}/friend/${inviterId}/invitation`,
         { inviteeId },
       );
     } catch (error) {
