@@ -75,6 +75,10 @@ dependencies {
 
 	// Firebase 설정 (FCM을 위해 추가)
 	implementation 'com.google.firebase:firebase-admin:9.4.3'
+
+	// CloudFront
+	implementation 'software.amazon.awssdk:cloudfront:2.25.11'
+
 }
 
 tasks.named('test') {
