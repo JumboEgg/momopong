@@ -78,7 +78,7 @@ openai:
 
 
 
-# AWS
+# AWS S3+CloudFront
 cloud:
   aws:
     credentials:
@@ -90,6 +90,14 @@ cloud:
       bucket: ${AWS_S3_BUCKET}
     stack:
       auto: false
+    cloudfront:
+      domain: https://d1qz3s5mayhuzt.cloudfront.net
+      key-pair-id: K3JZAMKJ5YK7SL
+      private-key: ${CLOUDFRONT_PRIVATE_KEY}
+
 
 firebase:
   credentials: ${FIREBASE_CREDENTIALS}
+
+
+

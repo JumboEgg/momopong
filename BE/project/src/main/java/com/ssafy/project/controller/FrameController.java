@@ -37,7 +37,7 @@ public class FrameController {
     //그림(서브컨텐츠) 저장용 presigned-url 생성
     @GetMapping("/draw/presigned-url")
     public ResponseEntity<FileDto> getPresignedUrl() {
-        FileDto presignedUrl = presignedUrlService.getPresignedUrl("frame", "webp");
+        FileDto presignedUrl = presignedUrlService.getPresignedUrl("audio", "webp");
         return ResponseEntity.ok(presignedUrl);
     }
 

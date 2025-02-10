@@ -43,6 +43,19 @@ public class Letter {
     @CreatedDate
     private LocalDateTime createdAt;
 
+    @Override
+    public String toString() {
+        return "Letter{" +
+                "letterId=" + letterId +
+                ", child=" + child +
+                ", letter='" + letter + '\'' +
+                ", reply='" + reply + '\'' +
+                ", bookTitle='" + bookTitle + '\'' +
+                ", role='" + role + '\'' +
+                ", letterFileName='" + letterFileName + '\'' +
+                ", createdAt=" + createdAt +
+                '}';
+    }
 
     public static LetterDto entityToDto(Letter letter) {
         return LetterDto.builder()
