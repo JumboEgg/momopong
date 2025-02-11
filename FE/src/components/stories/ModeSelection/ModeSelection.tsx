@@ -4,6 +4,8 @@ function ModeSelection(): JSX.Element {
   const {
     setMode,
   } = useStory();
+  const { bookId } = useStory();
+  console.log('ModeSelection에서의 bookId:', bookId);
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">

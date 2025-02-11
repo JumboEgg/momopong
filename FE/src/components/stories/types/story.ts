@@ -2,16 +2,18 @@ export type StoryMode = 'reading' | 'together';
 
 export type CharacterType = 'narration' | 'prince' | 'princess';
 
+export interface Friend {
+  id: number;
+  childId: number;
+  name: string;
+  profile: string;
+  avatar: string;
+}
+
 export interface StoryLine {
   type: CharacterType;
   text: string;
   audioFiles: string[];
-}
-
-export interface Friend {
-  id: string;
-  name: string;
-  avatar: string;
 }
 
 export interface RecordingData {
@@ -46,7 +48,7 @@ export interface StoryPage {
 
 // FriendSelection.tsx
 export interface FriendSelectionProps {
-  onFriendSelect: (friendId: string) => void;
+  onFriendSelect: (friendId: number) => void;
 }
 
 // RecordingButton.tsx
@@ -72,4 +74,11 @@ export interface StoryIllustrationProps {
 // TogetherMode.tsx
 export interface TogetherModeProps {
   friend: Friend;
+}
+
+export interface Story {
+  id: number;
+  title: string;
+  image: string;
+  ageRange: string;
 }

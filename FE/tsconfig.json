@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES2020",
     "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2020", "DOM", "DOM.Iterable", "WebWorker"],
+    "types": ["vite/client"],
     "module": "ESNext",
     "skipLibCheck": true,
 
@@ -26,6 +27,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src/**/*", "vite.config.ts", "public/linear16-processor.js"],
+  "include": ["src", "src/**/*", "vite.config.ts", "public/linear16-processor.js", "public/firebase-messaging-sw.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

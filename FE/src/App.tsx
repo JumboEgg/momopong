@@ -1,10 +1,16 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom'; // Router 제거
+// import ToastMessage from '@/components/common/Toast';
+import ToastContainer from '@/components/common/ToastContainer';
+import { useFirebaseMessaging } from './hooks/useFirebaseMessaging';
+
+// 보호된 라우트
 import ProtectedRoute from './components/ProtectedRoute';
+
+// 페이지 컴포넌트들
 import Landing from './pages/Landing';
 import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
 import SubAccountPage from './pages/subAccount/SubAccountPage';
-// import SubAccountForm from './pages/subAccount/SubAccountForm';
 import Home from './pages/Home';
 import Drawing from './pages/Drawing';
 import Story from './pages/Story';
@@ -14,12 +20,24 @@ import Friends from './pages/Friends';
 import Parent from './pages/Parent';
 import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory/mybookstory';
-import MyDrawing from './components/myhouse/mydrawing/mydrawing';
 import MyLetters from './components/myhouse/letters/letters';
 import AudioRecorderSTT from './test/AudioRecorderSTT';
+import MyDrawing from './components/myhouse/mydrawing/mydrawing';
+import TogetherMode from './components/stories/StoryMode/TogetherMode';
 
-// 추후 className에 touch-none overflow-hidden 설정시 스크롤이 방지됩니다
+// 모달 컴포넌트
+import DialogModal from './components/common/modals/DialogModal';
+
 function App(): JSX.Element {
+  // 토스트 알림 추가할시 활성화하여 사용
+  // const { toast } = useFirebaseMessaging();
+
+  const {
+    invitationModal,
+    handleInvitationAccept,
+    handleInvitationReject,
+  } = useFirebaseMessaging();
+
   return (
     <div className="fixed inset-0 overflow-auto">
       <Routes>
@@ -59,14 +77,6 @@ function App(): JSX.Element {
             </ProtectedRoute>
           )}
         />
-        {/* <Route
-          path="/children/signup"
-          element={(
-            <ProtectedRoute>
-              <SubAccountForm />
-            </ProtectedRoute>
-          )}
-        /> */}
         <Route
           path="/home"
           element={(
@@ -155,7 +165,29 @@ function App(): JSX.Element {
             </ProtectedRoute>
           )}
         />
+
+        {/* 동화 같이읽기 라우팅, 필요시 수정하여 사용 */}
+        <Route
+          path="/book/:bookId/together"
+          element={(
+            <ProtectedRoute>
+              <TogetherMode />
+            </ProtectedRoute>
+          )}
+        />
+
       </Routes>
+
+      {invitationModal.isOpen && invitationModal.data && (
+        <DialogModal
+          type="confirm"
+          message1={`${invitationModal.data.inviterName}이(가)`}
+          message2={`${invitationModal.data.contentTitle}을(를) 같이 읽고 싶어해요`}
+          onConfirm={handleInvitationAccept}
+          onClose={handleInvitationReject}
+        />
+      )}
+      <ToastContainer />
     </div>
   );
 }
