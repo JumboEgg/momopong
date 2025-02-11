@@ -1,8 +1,8 @@
-package com.ssafy.project.domain.draw;
+package com.ssafy.project.domain.record;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.type.ParticipationMode;
-import com.ssafy.project.dto.draw.SketchParticipationDto;
+import com.ssafy.project.dto.record.SketchParticipationRecordDto;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class SketchRoomRecord {
+public class SketchParticipationRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,8 +37,8 @@ public class SketchRoomRecord {
     private ParticipationMode mode;   // 참여 모드
 
     // Entity to Dto
-    public SketchParticipationDto entityToDto() {
-        return SketchParticipationDto.builder()
+    public SketchParticipationRecordDto entityToDto() {
+        return SketchParticipationRecordDto.builder()
                 .drawingParticipationId(this.id)
                 .childId(this.child.getId())
                 .startTime(this.startTime)
