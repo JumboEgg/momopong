@@ -1,4 +1,4 @@
-package com.ssafy.project.dto.draw;
+package com.ssafy.project.dto.record;
 
 import com.ssafy.project.domain.type.ParticipationMode;
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class SketchParticipationDto {
+public class SketchParticipationRecordDto {
     private Long drawingParticipationId;  // 참가기록
     private Long childId;  // 유저 id
     private LocalDateTime startTime;  // 시작 시간

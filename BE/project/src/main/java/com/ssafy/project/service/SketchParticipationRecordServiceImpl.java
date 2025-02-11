@@ -1,35 +1,35 @@
 package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
-import com.ssafy.project.domain.draw.SketchRoomRecord;
-import com.ssafy.project.dto.draw.SketchParticipationDto;
+import com.ssafy.project.domain.record.SketchParticipationRecord;
+import com.ssafy.project.dto.record.SketchParticipationRecordDto;
 import com.ssafy.project.repository.ChildRepository;
-import com.ssafy.project.repository.SketchRoomRecordRepository;
+import com.ssafy.project.repository.SketchParticipationRecordRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class SketchRoomRecordServiceImpl implements SketchRoomRecordService {
+public class SketchParticipationRecordServiceImpl implements SketchParticipationRecordService {
 
-    private final SketchRoomRecordRepository sketchRoomRecordRepository;
+    private final SketchParticipationRecordRepository sketchParticipationRecordRepository;
     private final ChildRepository childRepository;
 
     @Override
     @Transactional
-    public SketchParticipationDto save(SketchParticipationDto recordDto) {
+    public SketchParticipationRecordDto save(SketchParticipationRecordDto recordDto) {
 
         Child child = childRepository.getReferenceById(recordDto.getChildId());
 
-        SketchRoomRecord roomRecord = SketchRoomRecord.builder()
+        SketchParticipationRecord roomRecord = SketchParticipationRecord.builder()
                 .child(child)
                 .startTime(recordDto.getStartTime())
                 .endTime(recordDto.getEndTime())
                 .mode(recordDto.getMode())
                 .build();
 
-        SketchRoomRecord savedRecord = sketchRoomRecordRepository.save(roomRecord);
+        SketchParticipationRecord savedRecord = sketchParticipationRecordRepository.save(roomRecord);
 
         return savedRecord.entityToDto();
     }
