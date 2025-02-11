@@ -6,6 +6,8 @@ function ModeSelection(): JSX.Element {
   const {
     setMode,
   } = useStory();
+  const { bookId } = useStory();
+  console.log('ModeSelection에서의 bookId:', bookId);
 
   const {
     setRoomId,

@@ -5,8 +5,8 @@ import { create } from 'zustand';
 interface StoryStore {
   mode: StoryMode | null;
   setMode: (m: StoryMode | null) => void;
-  storyId: string | null;
-  setStoryId: (id: string | null) => void;
+  bookId: number | null; // storyId -> bookId, null 허용
+  setBookId: (id: number | null) => void // 타입 수정
   currentIndex: number;
   setCurrentIndex: (idx: number) => void;
   recordings: Map<number, RecordingData>;
@@ -20,8 +20,8 @@ const useStoryStore = create<StoryStore>((set, get) => ({
   mode: null,
   setMode: (m) => set({ mode: m }),
 
-  storyId: null,
-  setStoryId: (id) => set({ storyId: id }),
+  bookId: null, // storyId -> bookId
+  setBookId: (id) => set({ bookId: id }), // 구현 수정
 
   currentIndex: 0,
   setCurrentIndex: (idx) => set({ currentIndex: idx }),

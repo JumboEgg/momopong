@@ -15,6 +15,11 @@ class TokenService {
     currentChildId: null,
   };
 
+  // getAccessToken 메소드 추가
+  getAccessToken(forceParent: boolean = false): string | null {
+    return this.getActiveToken(forceParent);
+  }
+
   // authStore의 상태 변경을 구독하는 메서드
   syncWithAuth(tokens: { accessToken: string | null, refreshToken: string | null }) {
     this.state.parentToken = tokens.accessToken;
