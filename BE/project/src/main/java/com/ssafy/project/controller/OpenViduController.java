@@ -13,6 +13,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/api")
 public class OpenViduController {
 
 	@Value("${livekit.api.key}")
@@ -21,10 +22,6 @@ public class OpenViduController {
 	@Value("${livekit.api.secret}")
 	private String LIVEKIT_API_SECRET;
 
-	/**
-	 * @param params JSON object with roomName and participantName
-	 * @return JSON object with the JWT token
-	 */
 	@PostMapping(value = "/token")
 	public ResponseEntity<Map<String, String>> createToken(@RequestBody Map<String, String> params) {
 		String roomName = params.get("roomName");
@@ -38,7 +35,7 @@ public class OpenViduController {
 		token.setName(participantName);
 		token.setIdentity(participantName);
 		token.addGrants(new RoomJoin(true), new RoomName(roomName));
-
+		System.out.println(token);
 		return ResponseEntity.ok(Map.of("token", token.toJwt()));
 	}
 
@@ -47,7 +44,6 @@ public class OpenViduController {
 		WebhookReceiver webhookReceiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
 		try {
 			WebhookEvent event = webhookReceiver.receive(body, authHeader);
-			System.out.println("LiveKit Webhook: " + event.toString());
 		} catch (Exception e) {
 			System.err.println("Error validating webhook event: " + e.getMessage());
 		}
