@@ -108,6 +108,8 @@ export const useFirebaseMessaging = () => {
 
     const handleMessage = onMessage(messaging, (payload) => {
       const currentChildId = tokenService.getCurrentChildId();
+      const { showToast } = useToastStore.getState();
+
       if (!payload.data || !currentChildId) return;
 
       const {
@@ -120,8 +122,15 @@ export const useFirebaseMessaging = () => {
         notificationType,
       } = payload.data;
 
-      // 초대장을 받은 경우 (초대받은 사람)
-      if (Number(inviteeId) === currentChildId) {
+      console.log('FCM Message received:', {
+        currentChildId,
+        inviterId,
+        inviteeId,
+        notificationType,
+      });
+
+      // 초대장을 받은 경우
+      if (notificationType === 'INVITE' && Number(inviteeId) === currentChildId) {
         setInvitationModal({
           isOpen: true,
           data: {
@@ -133,21 +142,25 @@ export const useFirebaseMessaging = () => {
             contentTitle,
           },
         });
-      } else if (Number(inviterId) === currentChildId && notificationType === 'REJECT') {
-        setInvitationModal({
-          isOpen: true,
-          data: {
-            inviterId: Number(inviterId),
-            inviterName,
-            inviteeId: Number(inviteeId),
-            inviteeName,
-            contentId: Number(contentId),
-            contentTitle,
-          },
+
+        showToast({
+          type: 'invitation',
+          message: `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`,
+        });
+      } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
+        // 초대 수락을 받은 경우
+        showToast({
+          type: 'accept',
+          message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
+        });
+      } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
+        // 초대 거절을 받은 경우
+        showToast({
+          type: 'reject',
+          message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
         });
       }
     });
-
     handleAllowNotification();
 
     return () => {
