@@ -120,7 +120,11 @@ public class SketchServiceImpl implements SketchService {
         redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
         // 초대 알림 전송
-        sendMessage(inviteeId, notificationDto);
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviteeId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
 
         return notificationDto;
     }
@@ -142,7 +146,22 @@ public class SketchServiceImpl implements SketchService {
                 .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
         // 수락 알림 전송
-        sendNotification(inviter, invitee, sketch, NotificationType.ACCEPT);
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.ACCEPT)
+                .inviterId(inviter.getId())
+                .inviterName(inviter.getName())
+                .inviteeId(invitee.getId())
+                .inviteeName(invitee.getName())
+                .contentId(sketch.getId())
+                .contentTitle(sketch.getSketchTitle())
+                .contentType(ContentType.SKETCH)
+                .build();
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviterId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 초대 거절하기
@@ -165,13 +184,8 @@ public class SketchServiceImpl implements SketchService {
                 .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
         // 거절 알림 전송
-        sendNotification(inviter, invitee, sketch, NotificationType.REJECT);
-    }
-
-    // Notification 생성 후 알림 전송
-    private void sendNotification(Child inviter, Child invitee, Sketch sketch, NotificationType notificationType) {
         NotificationDto notificationDto = NotificationDto.builder()
-                .notificationType(notificationType)
+                .notificationType(NotificationType.REJECT)
                 .inviterId(inviter.getId())
                 .inviterName(inviter.getName())
                 .inviteeId(invitee.getId())
@@ -181,13 +195,8 @@ public class SketchServiceImpl implements SketchService {
                 .contentType(ContentType.SKETCH)
                 .build();
 
-        sendMessage(invitee.getId(), notificationDto);
-    }
-
-    // 알림 전송
-    private void sendMessage(Long inviteeId, NotificationDto notificationDto) {
         FcmSendDto sendDto = FcmSendDto.builder()
-                .inviteeId(inviteeId)
+                .receiveId(inviterId)
                 .notificationDto(notificationDto)
                 .build();
         fcmService.sendMessage(sendDto);
