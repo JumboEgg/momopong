@@ -178,7 +178,6 @@ function AudioRecorderSTT() {
       mediaRecorder.current?.stop();
       setIsRecording(false);
       webSocket.current?.close();
-      setIsLoading(true);
     }
     return () => {};
   }, [isRecording, timeLeft]);

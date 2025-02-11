@@ -3,47 +3,12 @@ import { useState } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
-
-const stories = [
-  {
-    id: 1,
-    title: '신데렐라',
-    image: '/images/cinderella.jpg',
-    ageRange: '5-7세',
-  },
-  {
-    id: 2,
-    title: '흥부놀부',
-    image: '/images/heungbu.jpg',
-    ageRange: '5-7세',
-  },
-  {
-    id: 3,
-    title: '백설공주',
-    image: '/images/snowwhite.jpg',
-    ageRange: '5-7세',
-  },
-  {
-    id: 4,
-    title: '인어공주',
-    image: '/images/mermaid.jpg',
-    ageRange: '5-7세',
-  },
-  {
-    id: 5,
-    title: '견우와 직녀',
-    image: '/images/daily.jpg',
-    ageRange: '5-7세',
-  },
-  {
-    id: 6,
-    title: '빨간망토',
-    image: '/images/red-riding-hood.jpg',
-    ageRange: '5-7세',
-  },
-];
+import { useBookList } from '@/stores/bookListStore';
 
 function StorySelection(): JSX.Element {
+  const {
+    bookList,
+  } = useBookList();
   const navigate = useNavigate();
   const { setBookId } = useStory();
   const [startIndex, setStartIndex] = useState(0);
@@ -55,7 +20,7 @@ function StorySelection(): JSX.Element {
   };
 
   const showNext = () => {
-    setStartIndex((current) => Math.min(stories.length - 6, current + 6));
+    setStartIndex((current) => Math.min(bookList.length - 6, current + 6));
   };
 
   const handleStorySelect = (bookId: number) => { // storyId: string -> bookId: number
@@ -117,11 +82,11 @@ function StorySelection(): JSX.Element {
 
         {/* 책 표지 그리드 */}
         <div className="flex-1 h-[750px] grid grid-rows-2 grid-cols-3 gap-x-4 gap-y-16 place-items-center">
-          {stories.slice(startIndex, startIndex + 6).map((story) => (
+          {bookList.slice(startIndex, startIndex + 6).map((book) => (
             <button
-              key={story.id}
+              key={book.bookId}
               type="button"
-              onClick={() => handleStorySelect(story.id)}
+              onClick={() => handleStorySelect(book.bookId)}
               disabled={isLoading}
               className="group relative perspective w-[280px] h-[350px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -136,8 +101,8 @@ function StorySelection(): JSX.Element {
                   rotate-y-3 bg-gradient-to-br from-white to-gray-50"
                 >
                   <img
-                    src={story.image}
-                    alt={story.title}
+                    src={book.bookPath}
+                    alt={book.title}
                     className="w-full h-full object-cover rounded-lg opacity-95"
                   />
                   <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-black/20 rounded-lg" />
@@ -173,7 +138,7 @@ function StorySelection(): JSX.Element {
         <button
           type="button"
           onClick={showNext}
-          disabled={startIndex >= stories.length - 6 || isLoading}
+          disabled={startIndex >= bookList.length - 6 || isLoading}
           className="disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="w-8 h-8 bg-purple-600 text-white flex items-center justify-center rounded-full">

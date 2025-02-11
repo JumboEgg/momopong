@@ -4,13 +4,12 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
-import LettersModal from '@/components/common/modals/LettersModal';
+import NotificationModal from '@/components/common/modals/NotificationModal';
 
 function HomePage() {
   const navigate = useNavigate();
   const { selectedAccount } = useSubAccountStore();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
-     | '/test' | '/Parent' | '/audioSTT'): void => {
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
@@ -136,7 +135,7 @@ function HomePage() {
       </button>
 
       {isLettersModalOpen && (
-        <LettersModal
+        <NotificationModal
           onClose={() => setIsLettersModalOpen(false)}
         />
       )}

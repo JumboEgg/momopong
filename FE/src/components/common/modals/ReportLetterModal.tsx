@@ -12,12 +12,12 @@ interface LetterModalProps {
   onClose: () => void;
 }
 
-function LetterModal({
+function ReportLetterModal({
   childName,
   data,
   onClose,
 }: LetterModalProps): JSX.Element {
-  const [letterAudio, setLetterAudio] = useState<Audio>();
+  const [letterAudio, setLetterAudio] = useState<HTMLAudioElement>();
   const myLetterAudio = new Audio();
 
   const onSave = () => {
@@ -30,7 +30,7 @@ function LetterModal({
 
     const loadAudio = async () => {
       const audioUrl = await fetchSavedAudio(data.letterUrl);
-      myLetterAudio.src = audioUrl;
+      myLetterAudio.src = audioUrl ?? '';
       setLetterAudio(myLetterAudio);
     };
 
@@ -38,6 +38,7 @@ function LetterModal({
   }, []);
 
   const playMyLetter = () => {
+    if (!letterAudio) return;
     if (letterAudio.paused) {
       letterAudio.play();
     } else {
@@ -102,4 +103,4 @@ function LetterModal({
   );
 }
 
-export default LetterModal;
+export default ReportLetterModal;

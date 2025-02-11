@@ -4,6 +4,7 @@ import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useDrawingHistory } from '@/stores/drawingHistoyStore';
+import useLetterStore from '@/stores/letterStore';
 
 function MyHouse() {
   const navigate = useNavigate();
@@ -13,12 +14,17 @@ function MyHouse() {
     setDrawingList,
   } = useDrawingHistory();
 
+  const {
+    setLetterList,
+  } = useLetterStore();
+
   const handleBack = () => {
     navigate('/home');
   };
 
   useEffect(() => {
     setDrawingList();
+    setLetterList();
   }, []);
 
   return (

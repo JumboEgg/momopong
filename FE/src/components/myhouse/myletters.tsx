@@ -5,38 +5,21 @@ import { TextCircleButton, IconCircleButton } from '@/components/common/buttons/
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@/components/common/scrollbar.css';
 import { LetterInfo } from '@/types/letter';
-import loadLettersFromS3 from '@/utils/audioS3/letterLoad';
 import useSubAccountStore from '@/stores/subAccountStore';
 import useLetterStore from '@/stores/letterStore';
 import fetchSavedAudio from '@/utils/audioS3/audioLoad';
 
 function MyLetters(): React.JSX.Element {
   const {
-    letters, setLetters, selectedLetter, setSelectedLetter,
+    letterList: letters, selectedLetter, setSelectedLetter,
   } = useLetterStore();
 
   // const [letterList, setLetterList] = useState<LetterInfo[]>([]);
   // const [selectedLetter, setSelectedLetter] = useState<LetterInfo | null>(null);
-  const [letterAudio, setLetterAudio] = useState<Audio>();
+  const [letterAudio, setLetterAudio] = useState<HTMLAudioElement>();
   const navigate = useNavigate();
   const myLetterAudio = new Audio();
   const child = useSubAccountStore.getState().selectedAccount;
-
-  // TODO : 새로운 편지가 왔을 때 리스트 갱신
-  const fetchData = async (id: string) => {
-    if (!id) return;
-    try {
-      const letterData: LetterInfo[] = await loadLettersFromS3(id);
-      setLetters(letterData);
-    } catch (error) {
-      console.error('Error loading images: ', error);
-    }
-  };
-
-  useEffect(() => {
-    if (!child || !child.childId) return;
-    fetchData(child.childId.toString());
-  }, []);
 
   function handleLetterSelect(letter: LetterInfo | null): void {
     setSelectedLetter(letter);
@@ -47,8 +30,7 @@ function MyLetters(): React.JSX.Element {
 
     const loadAudio = async () => {
       const audioUrl = await fetchSavedAudio(selectedLetter.letterUrl);
-      myLetterAudio.src = audioUrl;
-      myLetterAudio.type = 'audio/webm';
+      myLetterAudio.src = audioUrl ?? '';
       setLetterAudio(myLetterAudio);
     };
 
@@ -56,6 +38,7 @@ function MyLetters(): React.JSX.Element {
   }, [selectedLetter]);
 
   const playMyLetter = () => {
+    if (!letterAudio) return;
     if (letterAudio.paused) {
       letterAudio.play();
     } else {

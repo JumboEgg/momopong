@@ -1,22 +1,22 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { SketchInfo } from '@/types/sketch';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { BookInfo } from '@/types/book';
 
-interface SketchListStore {
-  sketchList: SketchInfo[];
-  setSketchList: () => void;
+interface BookListStore {
+  bookList: BookInfo[];
+  setBookList: () => void;
 }
 
-const useSketchListStore = create<SketchListStore>()(
+const useBookListStore = create<BookListStore>()(
   persist(
     (set) => ({
-      sketchList: [],
-      setSketchList: async () => {
+      bookList: [],
+      setBookList: async () => {
         try {
           const { accessToken } = useSubAccountStore.getState().childToken;
             const response = await fetch(
-              `${import.meta.env.VITE_API_BASE_URL}/sketch`,
+              `${import.meta.env.VITE_API_BASE_URL}/book`,
               {
                 method: 'GET',
                 headers: {
@@ -31,7 +31,9 @@ const useSketchListStore = create<SketchListStore>()(
 
             const data = await response.json();
 
-            set({ sketchList: data });
+            console.log(data);
+
+            set({ bookList: data });
         } catch (error) {
           console.error('Error uploading image:', error);
           throw error;
@@ -49,4 +51,4 @@ const useSketchListStore = create<SketchListStore>()(
   ),
 );
 
-export const useSketchList = (): SketchListStore => useSketchListStore();
+export const useBookList = (): BookListStore => useBookListStore();

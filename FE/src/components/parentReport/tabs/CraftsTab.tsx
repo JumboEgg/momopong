@@ -4,7 +4,7 @@ import { FrameInfo } from '@/types/frame';
 import loadImagesFromS3 from '@/utils/drawingS3/drawingLoad';
 import { LetterInfo } from '@/types/letter';
 import loadLettersFromS3 from '@/utils/audioS3/letterLoad';
-import LetterModal from '@/components/common/modals/LetterModal';
+import ReportLetterModal from '@/components/common/modals/ReportLetterModal';
 import DrawingModal from '../../common/modals/DrawingModal';
 
 const books = [
@@ -87,7 +87,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
       );
     } else {
       setModal(
-        <LetterModal
+        <ReportLetterModal
           childName={childName}
           data={letterList[idx]}
           onClose={() => setIsModalOpen(false)}

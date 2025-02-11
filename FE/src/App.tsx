@@ -21,7 +21,7 @@ import Parent from './pages/Parent';
 import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory';
 import MyDrawing from './components/myhouse/mydrawing';
-import MyLetters from './components/myhouse/letters';
+import MyLetters from './components/myhouse/myletters';
 import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 

@@ -1,25 +1,17 @@
+import { LetterInfo } from '@/types/letter';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-interface Letter {
-  bookTitle: string;
-  role: string;
-  childName: string | null;
-  content: string;
-  letterRecord: string;
-  reply: string | null;
-  createdAt: string;
-}
+import useSubAccountStore from './subAccountStore';
 
 interface LetterState {
-  letters: Letter[];
-  selectedLetter: Letter | null;
+  letterList: LetterInfo[];
+  selectedLetter: LetterInfo | null;
   isLoading: boolean;
   error: string | null;
 
-  setLetters: (letters: Letter[]) => void;
+  setLetterList: () => void;
 
-  setSelectedLetter: (letter: Letter) => void;
+  setSelectedLetter: (letter: LetterInfo | null) => void;
   setIsLoading: (status: boolean) => void;
   setError: (error: string | null) => void;
 }
@@ -27,21 +19,52 @@ interface LetterState {
 const useLetterStore = create<LetterState>()(
   persist(
     (set) => ({
-      letters: [],
+      letterList: [],
       selectedLetter: null,
       isLoading: false,
       error: null,
 
-      setLetters: (letters) => set({ letters }),
+      setLetterList: async () => {
+        try {
+          // child token 얻기
+          const account = useSubAccountStore.getState().selectedAccount;
+          const { accessToken } = useSubAccountStore.getState().childToken;
 
-      setSelectedLetter: (idx) => set({ selectedLetter: idx }),
+          if (!accessToken) {
+            throw new Error('Failed to get accessToken');
+          }
+
+          const response = await fetch(
+            `${import.meta.env.VITE_API_BASE_URL}/profile/${account?.childId}/letter`,
+            {
+              method: 'GET',
+              headers: {
+                Authorization: `Bearer ${accessToken}`,
+              },
+            },
+          );
+
+          if (!response.ok) {
+            throw new Error(`Upload failed: ${response.status}`);
+          }
+
+          const data = await response.json();
+
+          set({ letterList: data });
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          throw error;
+        }
+      },
+
+      setSelectedLetter: (letter) => set({ selectedLetter: letter }),
       setIsLoading: (status) => set({ isLoading: status }),
       setError: (error) => set({ error }),
     }),
     {
       name: 'letter-storage',
       partialize: (state) => ({
-        letterx: state.letters,
+        letterx: state.letterList,
         selectedLetter: state.selectedLetter,
       }),
     },
