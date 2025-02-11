@@ -6,6 +6,7 @@ import com.ssafy.project.domain.type.ParticipationMode;
 import com.ssafy.project.dto.record.BookParticipationRecordDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class BookParticipationRecord{
     private Book book;
 
     @Column(name = "created_at", nullable = false, updatable = false)
+    @CreatedDate
     private LocalDateTime createdAt;
 
     @Column(name = "role", nullable = false)
@@ -40,7 +42,8 @@ public class BookParticipationRecord{
     @Column(name = "early_exit", nullable = false)
     private boolean earlyExit = true;
 
-    @Column(name = "start_time", nullable = false)
+    @CreatedDate
+    @Column(name = "start_time", nullable = false, updatable = false)
     private LocalDateTime startTime;
 
     @Column(name = "end_time")
@@ -63,5 +66,9 @@ public class BookParticipationRecord{
                 .endTime(this.endTime)
                 .mode(this.mode)
                 .build();
+    }
+
+    public void updateExitStatus(boolean status) {
+        this.earlyExit = status;
     }
 }

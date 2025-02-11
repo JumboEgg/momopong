@@ -22,6 +22,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
     @Override
     @Transactional
     public BookParticipationRecordDto save(BookParticipationRecordDto bookParticipationRecordDto) {
+
         Child child = childRepository.findById(bookParticipationRecordDto.getChildId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid child ID"));
 
@@ -41,5 +42,17 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
 
         bookParticipationRecordRepository.save(savedRecord);
         return savedRecord.entityToDto();
+    }
+
+    @Override
+    @Transactional
+    public BookParticipationRecordDto updateExitStatus(Long recordId) {
+        BookParticipationRecord record = bookParticipationRecordRepository.findById(recordId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid record ID"));
+
+        record.updateExitStatus(false);
+        bookParticipationRecordRepository.save(record);
+
+        return record.entityToDto();
     }
 }
