@@ -13,7 +13,7 @@ import java.util.Map;
 
 @CrossOrigin(origins = "*")
 @RestController
-@RequestMapping
+@RequestMapping("/api")
 public class OpenViduController {
 
 	@Value("${livekit.api.key}")
