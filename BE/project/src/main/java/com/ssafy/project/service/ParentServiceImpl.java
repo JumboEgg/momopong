@@ -63,6 +63,7 @@ public class ParentServiceImpl implements ParentService {
         return parentRepository.findByEmail(email).isPresent();
     }
 
+    // 부모 로그인
     @Override
     public JwtToken login(LoginRequestDto loginDto) {
         // Authentication 객체 생성
@@ -75,6 +76,7 @@ public class ParentServiceImpl implements ParentService {
         return jwtTokenProvider.generateTokenWithAuthentication(authentication);
     }
 
+    // 부모 사용자 조회
     @Override
     public ParentDto readParentById(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
@@ -118,6 +120,7 @@ public class ParentServiceImpl implements ParentService {
         return parent.entityToDto();
     }
 
+    // 전체 자식 목록
     @Override
     public List<ChildListDto> childrenList(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
@@ -129,6 +132,8 @@ public class ParentServiceImpl implements ParentService {
                         .childId(child.getId())
                         .name(child.getName())
                         .profile(presignedUrlService.getFile(child.getProfile()))
+                        .age(child.getAge())
+                        .createdAt(child.getCreatedAt())
                         .build())
                 .collect(Collectors.toList());
     }
