@@ -1,6 +1,7 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
+import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -20,8 +21,8 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
   let outlineImgSrc = '';
 
   if (template) {
-    bgImgSrc = template.backgroundSrc ?? '';
-    outlineImgSrc = template.outlineSrc ?? '';
+    bgImgSrc = getBackgroundPath(template.sketchPath);
+    outlineImgSrc = getOutlinePath(template.sketchPath);
   }
 
   const saveCanvas = useCallback(() => {

@@ -8,6 +8,7 @@ import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage'
 import { useDrawing } from '@/stores/drawingStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
+import { useSketchList } from '@/stores/sketchListStore';
 import InvitationWaitPage from '../components/common/multiplayPages/invitationWaitPage';
 import NetworkErrorPage from '../components/common/multiplayPages/networkerrorPage';
 
@@ -16,12 +17,17 @@ function Drawing() {
     mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
   } = useDrawing();
 
+  const {
+    setSketchList,
+  } = useSketchList();
+
   useEffect(() => {
     setMode(null);
     setTemplate(null);
     setPenColor('black');
     setIsErasing(false);
     setImageData('');
+    setSketchList();
   }, []);
 
   const {

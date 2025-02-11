@@ -1,16 +1,25 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { useDrawingHistory } from '@/stores/drawingHistoyStore';
 
 function MyHouse() {
   const navigate = useNavigate();
   const [hoveredItem, setHoveredItem] = useState<'letter' | 'frame' | 'book' | null>(null);
 
+  const {
+    setDrawingList,
+  } = useDrawingHistory();
+
   const handleBack = () => {
     navigate('/home');
   };
+
+  useEffect(() => {
+    setDrawingList();
+  }, []);
 
   return (
     <div

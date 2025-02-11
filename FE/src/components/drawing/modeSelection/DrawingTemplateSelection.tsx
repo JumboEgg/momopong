@@ -3,41 +3,41 @@ import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useDrawing } from '@/stores/drawingStore';
-import drawingTemplate from '../data/templateList';
+import { useSketchList } from '@/stores/sketchListStore';
 import '@/components/common/scrollbar.css';
+import { getOutlinePath } from '@/utils/format/imgPath';
 
 function DrawingSelection(): JSX.Element {
   const {
     setTemplate,
   } = useDrawing();
 
+  const {
+    sketchList,
+  } = useSketchList();
+
   const navigate = useNavigate();
 
-  const drawingImgList: JSX.Element[] = drawingTemplate.map((template) => (
+  const drawingImgList: JSX.Element[] = sketchList.map((template) => (
     <button
       type="button"
-      key={template.templateId}
+      key={template.sketchId}
       onClick={() => {
-        setTemplate({
-          id: template.templateId,
-          name: template.name,
-          backgroundSrc: template.bgSrc,
-          outlineSrc: template.olSrc,
-        });
+        setTemplate(template);
       }}
       className="text-center min-w-10 w-[40%] sm:w-[30%] md:w-[20%] m-2"
     >
       <div>
         <img
-          src={template.olSrc ?? ''}
-          alt={template.name}
+          src={getOutlinePath(template.sketchPath) ?? ''}
+          alt={template.sketchTitle}
           className="w-full bg-white rounded-2xl"
         />
       </div>
       <div
         className="mt-2 md:text-xl"
       >
-        {template.name}
+        {template.sketchTitle}
       </div>
     </button>
   ));

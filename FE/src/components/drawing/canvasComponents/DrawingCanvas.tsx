@@ -2,6 +2,7 @@ import {
   useState, useRef, useEffect, useCallback,
 } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
+import { getOutlinePath } from '@/utils/format/imgPath';
 import useSocketStore from '../hooks/useSocketStore';
 
 const baseWidth: number = 1600;
@@ -46,7 +47,7 @@ function DrawingCanvas({
   } = useSocketStore();
 
   const containerRef = useRef<HTMLDivElement>(null); // 캔버스 영역 div
-  const outlineImgSrc = template ? template.outlineSrc : '';
+  const outlineImgSrc = template ? getOutlinePath(template.sketchPath) : '';
 
   const outlineCanvasRef = useRef<HTMLCanvasElement>(null); // 그림 윤곽선 레이어
   const canvasRef = useRef<HTMLCanvasElement>(null); // 그림 그리기 레이어

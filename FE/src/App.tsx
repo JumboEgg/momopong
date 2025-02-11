@@ -13,9 +13,9 @@ import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import Parent from './pages/Parent';
 import Test from './pages/Test';
-import MyBookStory from './components/myhouse/mybookstory/mybookstory';
-import MyDrawing from './components/myhouse/mydrawing/mydrawing';
-import MyLetters from './components/myhouse/letters/letters';
+import MyBookStory from './components/myhouse/mybookstory';
+import MyDrawing from './components/myhouse/mydrawing';
+import MyLetters from './components/myhouse/letters';
 import LetterPage from './components/stories/StoryMode/LetterPage';
 
 // 추후 className에 touch-none overflow-hidden 설정시 스크롤이 방지됩니다

@@ -40,7 +40,7 @@ function ResultPage() {
   const onSave = async () => {
     try {
       const drawingResult: FrameInfo = {
-        frameTitle: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.name : ''}`,
+        frameTitle: `${mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`} ${template ? template.sketchTitle : ''}`,
         frameUrl: imageData,
         frameFileName: '',
         createdAt: '',
@@ -77,14 +77,14 @@ function ResultPage() {
           <img
             className="outline-amber-900 outline-8 md:outline-12 max-w-[80%] max-h-[80vh] border-8 md:border-12 border-amber-700 shadow-2xl bg-white mx-auto"
             src={imageData}
-            alt={template ? template.name : ''}
+            alt={template ? template.sketchTitle : ''}
           />
         </div>
         <div className="text-center mt-[-16px]">
           <p className="bg-amber-400 font-bold md:text-xl p-1 ps-5 pe-5 rounded-md shadow-md">
             {mode === 'single' ? '내가 그린' : `${friend ? friend.name : '친구'}와 그린`}
             {' '}
-            {template ? template.name : ''}
+            {template ? template.sketchTitle : ''}
           </p>
         </div>
         <div className="text-center mt-4 md:mt-10 space-x-4">

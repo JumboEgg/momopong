@@ -18,8 +18,8 @@ const loadImagesFromS3 = async (childId: string): Promise<FrameInfo[]> => {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
-    },
-);
+      },
+    );
 
     if (!response.ok) {
       throw new Error(`Upload failed: ${response.status}`);

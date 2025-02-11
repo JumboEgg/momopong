@@ -4,6 +4,7 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
+import LettersModal from '@/components/common/modals/LettersModal';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -14,6 +15,7 @@ function HomePage() {
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
+  const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
   // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
   // console.log('Profile URL:', selectedAccount?.profile); // profile URL 확인
 
@@ -67,22 +69,6 @@ function HomePage() {
         className="cursor-pointer flex flex-col items-center"
       >
         <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleNavigation('/Parent')}
-        className="cursor-pointer flex flex-col items-center"
-      >
-        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">리포트 바로가기</p>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleNavigation('/audioSTT')}
-        className="fixed top-5 left-[60%] text-xs mt-1 border-2"
-      >
-        음성인식
       </button>
 
       {isModalOpen && (
@@ -140,8 +126,20 @@ function HomePage() {
           />
           <p className="mt-1 md:mt-5">나의집</p>
         </button>
-
       </div>
+
+      <button
+        type="button"
+        onClick={() => setIsLettersModalOpen(true)}
+      >
+        편지함
+      </button>
+
+      {isLettersModalOpen && (
+        <LettersModal
+          onClose={() => setIsLettersModalOpen(false)}
+        />
+      )}
     </div>
   );
 }
