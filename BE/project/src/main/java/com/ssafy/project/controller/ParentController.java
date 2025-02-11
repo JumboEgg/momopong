@@ -24,7 +24,8 @@ public class ParentController {
     private final ParentService parentService;
 
     // 회원가입
-    @Operation(summary = "부모 회원가입", responses = {
+    @Operation(summary = "부모 회원가입",
+            responses = {
             @ApiResponse(responseCode = "200", description = "회원가입 성공"),
             @ApiResponse(responseCode = "409", description = "중복된 로그인")
     })
@@ -37,7 +38,9 @@ public class ParentController {
     }
 
     // 로그인
-    @Operation(summary = "부모 로그인",responses = {
+    @Operation(summary = "부모 로그인",
+            description = "이메일과 비밀번호로 로그인합니다.",
+            responses = {
             @ApiResponse(responseCode = "200", description = "로그인 성공"),
             @ApiResponse(responseCode = "403", description = "로그인 실패"),
             @ApiResponse(responseCode = "410", description = "회원탈퇴 후 로그인")
@@ -53,7 +56,9 @@ public class ParentController {
     }
 
     // Refresh Token 재발급
-    @Operation(summary = "Token 재발급", description = "Access Token이 만료되었을 때 Access Token과 Refresh Token을 재발급합니다.", responses = {
+    @Operation(summary = "Token 재발급",
+            description = "Access Token이 만료되었을 때 Access Token과 Refresh Token을 재발급합니다.",
+            responses = {
             @ApiResponse(responseCode = "200", description = "로그아웃 성공"),
             @ApiResponse(responseCode = "403", description = "로그아웃 ")
     })
@@ -85,6 +90,7 @@ public class ParentController {
     }
 
     // 전체 자식 조회
+    @Operation(summary = "전체 자식 조회", description = "부모가 등록한 자식들을 조회한다.")
     @PreAuthorize("hasRole('PARENT')")
     @GetMapping("/{parentId}/children")
     public ResponseEntity<List<ChildListDto>> childrenList(@PathVariable("parentId") Long parentId) {
@@ -94,6 +100,7 @@ public class ParentController {
     }
 
     // 회원 정보 수정
+    @Operation(summary = "부모 회원 정보 수정", description = "부모 회원 정보를 수정한다.")
     @PreAuthorize("hasRole('PARENT')")
     @PatchMapping("/{parentId}")
     public ResponseEntity<ParentDto> updateParent(@PathVariable("parentId") Long parentId, @RequestBody ParentDto parentDto) {
@@ -105,6 +112,7 @@ public class ParentController {
     }
 
     // 회원 탈퇴
+    @Operation(summary = "부모 회원 탈퇴", description = "부모 계정을 탈퇴한다.")
     @PreAuthorize("hasRole('PARENT')")
     @DeleteMapping("/{parentId}")
     public ResponseEntity<Void> deleteParent(@PathVariable("parentId") Long parentId) {

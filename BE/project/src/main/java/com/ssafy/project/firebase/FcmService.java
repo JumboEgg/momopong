@@ -42,10 +42,9 @@ public class FcmService {
         redisDao.deleteValues(key);
     }
 
-    // 초대 알림 보내기
     public void sendMessage(FcmSendDto sendDto) {
         // 알림 받을 사용자의 VAPID 토큰 얻기
-        String key = String.format(CHILD_VAPID_TOKEN, sendDto.getInviteeId());
+        String key = String.format(CHILD_VAPID_TOKEN, sendDto.getReceiveId());
         String token = (String) redisDao.getValues(key);
         if (token == null) {
             throw new NotFoundException("해당 사용자의 토큰이 존재하지 않습니다");

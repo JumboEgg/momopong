@@ -9,7 +9,8 @@ import com.ssafy.project.domain.book.Page;
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.ChildStatusDto;
+import com.ssafy.project.dto.NotificationDto;
 import com.ssafy.project.dto.book.AudioDto;
 import com.ssafy.project.dto.book.BookDto;
 import com.ssafy.project.dto.book.BookListDto;
@@ -146,7 +147,11 @@ public class BookServiceImpl implements BookService {
         redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
         // FCM으로 초대 알림 전송
-        sendMessage(inviteeId, notificationDto);
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviteeId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
 
         return notificationDto;
     }
@@ -170,7 +175,22 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
         // FCM으로 수락 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.ACCEPT);
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.ACCEPT)
+                .inviterId(inviter.getId())
+                .inviterName(inviter.getName())
+                .inviteeId(invitee.getId())
+                .inviteeName(invitee.getName())
+                .contentId(book.getId())
+                .contentTitle(book.getTitle())
+                .contentType(ContentType.BOOK)
+                .build();
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviterId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 친구 초대 거절하기
@@ -192,7 +212,22 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
 
         // FCM으로 거절 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.REJECT);
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.REJECT)
+                .inviterId(inviter.getId())
+                .inviterName(inviter.getName())
+                .inviteeId(invitee.getId())
+                .inviteeName(invitee.getName())
+                .contentId(book.getId())
+                .contentTitle(book.getTitle())
+                .contentType(ContentType.BOOK)
+                .build();
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviterId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 친구 초대가 만료되었을 때 (10초 제한)
@@ -207,13 +242,8 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
         // 만료 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.REJECT);
-    }
-
-    // Notification 생성 후 알림 전송
-    private void sendNotification(Child inviter, Child invitee, Book book, NotificationType notificationType) {
         NotificationDto notificationDto = NotificationDto.builder()
-                .notificationType(notificationType)
+                .notificationType(NotificationType.EXPIRE)
                 .inviterId(inviter.getId())
                 .inviterName(inviter.getName())
                 .inviteeId(invitee.getId())
@@ -223,13 +253,8 @@ public class BookServiceImpl implements BookService {
                 .contentType(ContentType.BOOK)
                 .build();
 
-        sendMessage(invitee.getId(), notificationDto);
-    }
-
-    // 알림 전송
-    private void sendMessage(Long inviteeId, NotificationDto notificationDto) {
         FcmSendDto sendDto = FcmSendDto.builder()
-                .inviteeId(inviteeId)
+                .receiveId(inviterId)
                 .notificationDto(notificationDto)
                 .build();
         fcmService.sendMessage(sendDto);

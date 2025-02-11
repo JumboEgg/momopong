@@ -10,6 +10,7 @@ import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.SketchDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvitationExpiredException;
 import com.ssafy.project.exception.NotFoundException;
@@ -39,6 +40,32 @@ public class SketchServiceImpl implements SketchService {
 
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
     private static final String INVITATION_KEY = "sketch:invitation:%d:%d"; // 초대 KEY
+
+    // 도안 목록
+    @Override
+    public List<SketchDto> sketchList() {
+        List<Sketch> sketchList = sketchRepository.findAll();
+        return sketchList.stream()
+                .map(sketch -> SketchDto.builder()
+                        .sketchId(sketch.getId())
+                        .sketchTitle(sketch.getSketchTitle())
+                        .sketchPath(sketch.getSketchPath())
+                        .build())
+                .toList();
+    }
+
+    // 도안 조회
+    @Override
+    public SketchDto getSketch(Long sketchId) {
+        Sketch sketch = sketchRepository.findById(sketchId)
+                .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
+
+        return SketchDto.builder()
+                .sketchId(sketchId)
+                .sketchTitle(sketch.getSketchTitle())
+                .sketchPath(sketch.getSketchPath())
+                .build();
+    }
 
     // 플레이 가능한 친구 목록
     @Override
@@ -93,7 +120,11 @@ public class SketchServiceImpl implements SketchService {
         redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
         // 초대 알림 전송
-        sendMessage(inviteeId, notificationDto);
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviteeId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
 
         return notificationDto;
     }
@@ -115,7 +146,22 @@ public class SketchServiceImpl implements SketchService {
                 .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
         // 수락 알림 전송
-        sendNotification(inviter, invitee, sketch, NotificationType.ACCEPT);
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.ACCEPT)
+                .inviterId(inviter.getId())
+                .inviterName(inviter.getName())
+                .inviteeId(invitee.getId())
+                .inviteeName(invitee.getName())
+                .contentId(sketch.getId())
+                .contentTitle(sketch.getSketchTitle())
+                .contentType(ContentType.SKETCH)
+                .build();
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviterId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 초대 거절하기
@@ -138,13 +184,8 @@ public class SketchServiceImpl implements SketchService {
                 .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
 
         // 거절 알림 전송
-        sendNotification(inviter, invitee, sketch, NotificationType.REJECT);
-    }
-
-    // Notification 생성 후 알림 전송
-    private void sendNotification(Child inviter, Child invitee, Sketch sketch, NotificationType notificationType) {
         NotificationDto notificationDto = NotificationDto.builder()
-                .notificationType(notificationType)
+                .notificationType(NotificationType.REJECT)
                 .inviterId(inviter.getId())
                 .inviterName(inviter.getName())
                 .inviteeId(invitee.getId())
@@ -154,13 +195,8 @@ public class SketchServiceImpl implements SketchService {
                 .contentType(ContentType.SKETCH)
                 .build();
 
-        sendMessage(invitee.getId(), notificationDto);
-    }
-
-    // 알림 전송
-    private void sendMessage(Long inviteeId, NotificationDto notificationDto) {
         FcmSendDto sendDto = FcmSendDto.builder()
-                .inviteeId(inviteeId)
+                .receiveId(inviterId)
                 .notificationDto(notificationDto)
                 .build();
         fcmService.sendMessage(sendDto);
