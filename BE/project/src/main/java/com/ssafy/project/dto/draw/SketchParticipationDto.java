@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter
 @Builder
-public class DrawingParticipationDto {
+public class SketchParticipationDto {
     private Long drawingParticipationId;  // 참가기록
     private Long childId;  // 유저 id
     private LocalDateTime startTime;  // 시작 시간
