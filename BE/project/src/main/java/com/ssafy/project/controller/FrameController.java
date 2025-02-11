@@ -8,6 +8,7 @@ import com.ssafy.project.dto.FrameDto;
 import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.FrameService;
 import com.ssafy.project.service.PresignedUrlService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+
+@Tag(name = "서브컨텐츠 작품 컨트롤러", description = "아이의 작품을 조회, 저장")
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -35,7 +38,7 @@ public class FrameController {
 
 
     //그림(서브컨텐츠) 저장용 presigned-url 생성
-    @GetMapping("/draw/presigned-url")
+    @GetMapping("/frame/presigned-url")
     public ResponseEntity<FileDto> getPresignedUrl() {
         FileDto presignedUrl = presignedUrlService.getPresignedUrl("audio", "webp");
         return ResponseEntity.ok(presignedUrl);
@@ -43,7 +46,7 @@ public class FrameController {
 
 
     //그림(서브컨텐츠) 저장
-    @PostMapping("/draw/{childId}")
+    @PostMapping("/frame/{childId}")
     public ResponseEntity<Void> saveFrame(
             @PathVariable("childId") Long childId,
             @RequestBody FrameDto framedto){
