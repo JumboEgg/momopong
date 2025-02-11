@@ -1,8 +1,8 @@
 import { RecordingData, StoryMode } from '@/components/stories/types/story';
 import { create } from 'zustand';
 
+// Drawing 상태 관리 스토어
 interface StoryStore {
-  // 기존 스토리 상태
   mode: StoryMode | null;
   setMode: (m: StoryMode | null) => void;
   storyId: string | null;
@@ -13,16 +13,10 @@ interface StoryStore {
   addRecording: (idx: number, record: RecordingData) => void;
   audioEnabled: boolean;
   toggleAudio: () => void;
-
-  // LiveKit 관련 상태
-  livekitToken: string | null;
-  livekitServerUrl: string | null;
-  setLivekitConfig: (token: string, serverUrl: string) => void;
 }
 
 // Zustand 상태 훅 생성
 const useStoryStore = create<StoryStore>((set, get) => ({
-  // 기존 스토리 상태 초기화
   mode: null,
   setMode: (m) => set({ mode: m }),
 
@@ -41,14 +35,6 @@ const useStoryStore = create<StoryStore>((set, get) => ({
 
   audioEnabled: true,
   toggleAudio: () => set({ audioEnabled: !get().audioEnabled }),
-
-  // LiveKit 관련 상태 초기화
-  livekitToken: null,
-  livekitServerUrl: null,
-  setLivekitConfig: (token, serverUrl) => set({
-    livekitToken: token,
-    livekitServerUrl: serverUrl,
-  }),
 }));
 
 // Zustand에서 상태를 가져오는 커스텀 훅
