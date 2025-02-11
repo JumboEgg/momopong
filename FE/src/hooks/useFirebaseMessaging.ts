@@ -153,6 +153,14 @@ export const useFirebaseMessaging = () => {
           type: 'accept',
           message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
         });
+
+        // 초대자도 TogetherMode로 이동
+        navigate(`/book/${contentId}/together`, {
+          state: {
+          roomName: `book-${contentId}`,
+          participantName: inviterName,
+          },
+        });
       } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
         // 초대 거절을 받은 경우
         showToast({
