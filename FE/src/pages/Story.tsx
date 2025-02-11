@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import ReadingMode from '@/components/stories/StoryMode/ReadingMode';
-import TogetherMode from '@/components/stories/StoryMode/TogetherMode';
+import TogetherMode from '@/components/stories/TogetherMode/TogetherMode';
 import StorySelection from '@/components/stories/StoryMode/StorySelection';
 import ModeSelection from '@/components/stories/ModeSelection/ModeSelection';
 import { useFriends } from '@/stores/friendStore';

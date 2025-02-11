@@ -1,27 +1,32 @@
 import {
-  useState, useEffect, useRef, useCallback, useMemo,
+  useState, useEffect, useCallback, useMemo,
 } from 'react';
-import { useFriends } from '@/stores/friendStore';
+/* eslint-disable import/no-extraneous-dependencies */
+// import {
+//   useRoom, // Room 객체에 접근하기 위한 훅
+//   useParticipants, // 참가자 목록을 가져오기 위한 훅
+//   LiveKitRoom, // Room Provider 컴포넌트
+// } from '@livekit/components-react';
+// import { useFriends } from '@/stores/friendStore';
 import { useStory } from '@/stores/storyStore';
+import { useMultiplayStore } from '@/stores/multiplayStore';
 import storyData from '../data/cinderella';
-import RecordingButton from './RecordingButton';
-import AudioPlayer from '../AudioPlayer';
-import { getAudioUrl } from '../utils/audioUtils';
-import StoryIllustration from './StoryIllustration';
+// import RecordingButton from './RecordingButton';
+// import AudioPlayer from '../AudioPlayer';
+// import { getAudioUrl } from '../utils/audioUtils';
+import StoryIllustration from '../StoryMode/StoryIllustration';
+import { StoryEndOverlay } from './StoryEndOverlay';
 
 function TogetherMode(): JSX.Element {
+  const { currentIndex, setCurrentIndex } = useStory();
   const {
-    currentIndex, setCurrentIndex, recordings, audioEnabled,
-  } = useStory();
+    userRole,
+    currentContentIndex,
+    setCurrentContentIndex,
+  } = useMultiplayStore();
 
-  const {
-    friend,
-  } = useFriends();
-
-  const [userRole, setUserRole] = useState<'prince' | 'princess' | null>(null);
-  const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [isLastAudioCompleted, setIsLastAudioCompleted] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
+  // const audioRef = useRef<HTMLAudioElement>(null);
 
   const currentPage = storyData[currentIndex];
 
@@ -54,18 +59,18 @@ function TogetherMode(): JSX.Element {
     return isLastAudioCompleted;
   }, [currentIndex, currentContentIndex, currentPage, currentContent, isLastAudioCompleted]);
 
-  const currentAudioUrl = useMemo(() => {
-    if (!currentContent || !currentContent.audioId) {
-      console.log('No content or audio id found');
-      return '';
-    }
+  // const currentAudioUrl = useMemo(() => {
+  //   if (!currentContent || !currentContent.audioId) {
+  //     console.log('No content or audio id found');
+  //     return '';
+  //   }
 
-    return getAudioUrl(currentContent.audioId);
-  }, [currentContent]);
+  //   return getAudioUrl(currentContent.audioId);
+  // }, [currentContent]);
 
   useEffect(() => {
     const randomRole = Math.random() < 0.5 ? 'prince' : 'princess';
-    setUserRole(randomRole);
+    // setUserRole(randomRole);
 
     // 디버깅 로그 추가
     console.log('Randomly Selected Role:', randomRole);
@@ -77,10 +82,10 @@ function TogetherMode(): JSX.Element {
     console.log('Current Content:', currentContent);
   }, [currentIndex, currentContentIndex]);
 
-  const isUserTurn = useMemo(() => {
-    if (!userRole || !currentContent) return false;
-    return currentContent.type === userRole;
-  }, [userRole, currentContent]);
+  // const isUserTurn = useMemo(() => {
+  //   if (!userRole || !currentContent) return false;
+  //   return currentContent.type === userRole;
+  // }, [userRole, currentContent]);
 
   const handleNext = useCallback(() => {
     if (!currentPage) return;
@@ -93,26 +98,26 @@ function TogetherMode(): JSX.Element {
     }
   }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
 
-  const handleRecordingComplete = useCallback(() => {
-    setTimeout(handleNext, 1000);
-  }, [handleNext]);
+  // const handleRecordingComplete = useCallback(() => {
+  //   setTimeout(handleNext, 1000);
+  // }, [handleNext]);
 
   const handleHomeClick = useCallback(() => {
     window.location.href = '/home';
   }, []);
 
-  const handleAudioComplete = useCallback(() => {
-    if (
-      currentIndex === storyData.length - 1
-      && currentContentIndex === currentPage.contents.length - 1
-    ) {
-      setIsLastAudioCompleted(true);
-    } else {
-      handleNext();
-    }
-  }, [currentIndex, currentContentIndex, currentPage.contents.length, handleNext]);
+  // const handleAudioComplete = useCallback(() => {
+  //   if (
+  //     currentIndex === storyData.length - 1
+  //     && currentContentIndex === currentPage.contents.length - 1
+  //   ) {
+  //     setIsLastAudioCompleted(true);
+  //   } else {
+  //     handleNext();
+  //   }
+  // }, [currentIndex, currentContentIndex, currentPage.contents.length, handleNext]);
 
-  const hasRecording = useCallback((index: number) => recordings.has(index), [recordings]);
+  // const hasRecording = useCallback((index: number) => recordings.has(index), [recordings]);
 
   if (isStoryEnd) {
     return (
@@ -127,7 +132,8 @@ function TogetherMode(): JSX.Element {
           <button
             type="button"
             onClick={handleHomeClick}
-            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors duration-200 text-lg font-medium"
+            className="px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600
+transition-colors duration-200 text-lg font-medium"
           >
             홈으로 가기
           </button>
@@ -157,10 +163,6 @@ function TogetherMode(): JSX.Element {
             내 역할:
             {userRole === 'prince' ? '왕자님' : '신데렐라'}
           </p>
-          <p className="text-gray-600">
-            함께 읽는 친구:
-            {friend ? friend.name : ''}
-          </p>
         </div>
       </div>
 
@@ -182,7 +184,7 @@ function TogetherMode(): JSX.Element {
       />
 
       {/* 녹음 버튼과 오디오 플레이어 */}
-      <div className="mt-4 flex justify-center">
+      {/* <div className="mt-4 flex justify-center">
         {isUserTurn ? (
           <div className="mt-4">
             {!hasRecording(currentIndex) && (
@@ -205,29 +207,18 @@ function TogetherMode(): JSX.Element {
             </div>
           )
         )}
-      </div>
+      </div> */}
 
-      {/* 이야기 종료시 나타날 오버레이 */}
-      {isStoryEnd && (
-        <div className="fixed inset-0 flex items-center justify-center z-50">
-          <div className="fixed inset-0 bg-black opacity-50" />
-          <div className="bg-white rounded-lg p-8 shadow-xl max-w-sm w-full mx-4 z-50 relative">
-            <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-              함께했던 스토리는 나의집에서 다시볼수있어!
-            </h3>
-            <p className="text-gray-600 mb-8 text-center">
-              다음에 또만나자~
-            </p>
-            <button
-              type="button"
-              onClick={handleHomeClick}
-              className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-lg font-medium"
-            >
-              홈으로 가기
-            </button>
-          </div>
-        </div>
-      )}
+      <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
+        {/* <Header /> */}
+        {/* <StoryIllustration {illustrationProps} /> */}
+        {/* <AudioController
+          isUserTurn={isUserTurn}
+          currentContent={currentContent}
+          onComplete={handleAudioComplete}
+        /> */}
+        {isStoryEnd && <StoryEndOverlay />}
+      </div>
     </div>
   );
 }

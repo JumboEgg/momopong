@@ -10,6 +10,10 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_MEASUREMENT_ID: string;
   readonly VITE_FIREBASE_VAPID_KEY: string;
   // 다른 환경변수들도 필요에 따라 추가
+
+  // LiveKit
+  readonly VITE_LIVEKIT_API_KEY: string
+  readonly VITE_LIVEKIT_SERVER_URL: string
 }
 
 interface ImportMeta {

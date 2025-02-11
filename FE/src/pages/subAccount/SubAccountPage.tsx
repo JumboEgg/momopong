@@ -4,7 +4,6 @@ import TextButton from '@/components/common/buttons/TextButton';
 import ParentAuthModal from '@/components/common/modals/ParentAuthModal';
 import useAuthStore from '@/stores/authStore';
 import SubAccountGrid from './SubAccountGrid';
-import SubAccountForm from './SubAccountForm';
 
 function SubAccountPage(): React.ReactElement | null {
   const navigate = useNavigate();
@@ -46,15 +45,11 @@ function SubAccountPage(): React.ReactElement | null {
         </TextButton>
         {isModalOpen && <ParentAuthModal onClose={handleCloseModal} />}
       </div>
-      <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md">
+      <div className="max-w-6xl mx-auto">
         <Routes>
           <Route
             path="/"
             element={<SubAccountGrid onAdd={handleAddAccount} />}
-          />
-          <Route
-            path="signup"
-            element={<SubAccountForm />}
           />
         </Routes>
       </div>
