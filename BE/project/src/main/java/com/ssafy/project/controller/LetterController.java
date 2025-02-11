@@ -111,4 +111,17 @@ public class LetterController {
         }
     }
 
+
+    // 해당 아이의 오늘 편지 조회
+    @GetMapping("/letter/today/{childId}")
+    public ResponseEntity<List<LetterDto>> getTodayLetterList(
+            @PathVariable("childId") Long childId) {
+        try {
+            List<LetterDto> todayLetters = letterService.getTodayLettersByChildId(childId);
+            return ResponseEntity.ok(todayLetters);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 }

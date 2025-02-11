@@ -160,4 +160,17 @@ public class LetterServiceImpl implements LetterService {
         return Letter.entityToDto(letter);
     }
 
+    //아이의 오늘쓴 편지 dto 담은 list return
+    @Override
+    public List<LetterDto> getTodayLettersByChildId(Long childId) {
+        List<Letter> todayLetters = letterRepository.findTodayLettersByChildId(childId);
+        return todayLetters.stream()
+                .map(letter -> {
+                    LetterDto letterDto = Letter.entityToDto(letter);
+                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
+                    return letterDto;
+                })
+                .collect(Collectors.toList());
+    }
+
 }

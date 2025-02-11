@@ -19,4 +19,6 @@ public interface LetterService {
     List<LetterDto> getLettersByChildId(Long childId);
     // 편지 상세 조회
     LetterDto getLetter(Long childId, Long letterId);
+    // 아이의 오늘 편지 조회
+    List<LetterDto> getTodayLettersByChildId(Long childId);
 }

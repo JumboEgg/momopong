@@ -12,4 +12,8 @@ public interface LetterRepository extends JpaRepository<Letter, Long> {
 
     @Query("SELECT l FROM Letter l WHERE l.child.id = :childId ORDER BY l.createdAt DESC")
     List<Letter> findAllByChildId(@Param("childId") Long childId);
+
+    @Query("SELECT l FROM Letter l WHERE l.child.id = :childId AND DATE(l.createdAt) = CURRENT_DATE ORDER BY l.createdAt DESC")
+    List<Letter> findTodayLettersByChildId(@Param("childId") Long childId);
+
 }
