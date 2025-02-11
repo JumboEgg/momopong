@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDate;
+
 @Getter
 @Builder
 @AllArgsConstructor
@@ -13,4 +15,6 @@ public class ChildListDto {
     private Long childId;
     private String name;
     private String profile;
+    private int age; // 나이
+    private LocalDate createdAt; // 가입일
 }
