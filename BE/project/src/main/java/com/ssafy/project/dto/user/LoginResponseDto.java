@@ -1,4 +1,4 @@
-package com.ssafy.project.dto;
+package com.ssafy.project.dto.user;
 
 import com.ssafy.project.security.JwtToken;
 import lombok.*;

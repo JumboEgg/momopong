@@ -1,4 +1,4 @@
-package com.ssafy.project.dto;
+package com.ssafy.project.dto.invitation;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

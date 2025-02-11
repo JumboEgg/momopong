@@ -5,7 +5,7 @@ import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Friend;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.ChildStatusDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.dto.friend.FriendDto;
 import com.ssafy.project.dto.friend.FriendListDto;
 import com.ssafy.project.exception.friend.AlreadyAcceptedException;

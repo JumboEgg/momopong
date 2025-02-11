@@ -1,4 +1,4 @@
-package com.ssafy.project.dto;
+package com.ssafy.project.dto.invitation;
 
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;

@@ -1,13 +1,12 @@
-package com.ssafy.project.dto;
+package com.ssafy.project.dto.invitation;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-// 명확하게 확인하기 위해 ID DTO 생성
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ChildIdDto {
-    private Long childId;
+public class InviterIdDto {
+    private Long inviterId;
 }

@@ -5,7 +5,7 @@ import com.google.firebase.messaging.FirebaseMessagingException;
 import com.google.firebase.messaging.Message;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
-import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.invitation.NotificationDto;
 import com.ssafy.project.exception.NotFoundException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;

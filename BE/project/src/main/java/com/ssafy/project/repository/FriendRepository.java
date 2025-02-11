@@ -12,7 +12,7 @@ import java.util.Optional;
 public interface FriendRepository extends JpaRepository<Friend, Long> {
     Optional<Friend> findByFromAndTo(Child from, Child to);
 
-    @Query(value = "SELECT f FROM Friend f where f.from = :from and f.status = true")
+    @Query(value = "SELECT f FROM Friend f WHERE f.from = :from AND f.status = true")
     List<Friend> findAllByFrom(@Param("from") Child from);
 
     List<Friend> findAllByToAndStatusIs(Child to, boolean status);

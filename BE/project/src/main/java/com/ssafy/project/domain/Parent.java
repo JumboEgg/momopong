@@ -1,7 +1,7 @@
 package com.ssafy.project.domain;
 
 import com.ssafy.project.domain.type.RoleType;
-import com.ssafy.project.dto.ParentDto;
+import com.ssafy.project.dto.user.ParentDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
