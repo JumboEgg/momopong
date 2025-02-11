@@ -10,6 +10,7 @@ import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.SketchDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvitationExpiredException;
 import com.ssafy.project.exception.NotFoundException;
@@ -39,6 +40,32 @@ public class SketchServiceImpl implements SketchService {
 
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
     private static final String INVITATION_KEY = "sketch:invitation:%d:%d"; // 초대 KEY
+
+    // 도안 목록
+    @Override
+    public List<SketchDto> sketchList() {
+        List<Sketch> sketchList = sketchRepository.findAll();
+        return sketchList.stream()
+                .map(sketch -> SketchDto.builder()
+                        .sketchId(sketch.getId())
+                        .sketchTitle(sketch.getSketchTitle())
+                        .sketchPath(sketch.getSketchPath())
+                        .build())
+                .toList();
+    }
+
+    // 도안 조회
+    @Override
+    public SketchDto getSketch(Long sketchId) {
+        Sketch sketch = sketchRepository.findById(sketchId)
+                .orElseThrow(() -> new NotFoundException("해당 도안을 찾을 수 없습니다"));
+
+        return SketchDto.builder()
+                .sketchId(sketchId)
+                .sketchTitle(sketch.getSketchTitle())
+                .sketchPath(sketch.getSketchPath())
+                .build();
+    }
 
     // 플레이 가능한 친구 목록
     @Override
