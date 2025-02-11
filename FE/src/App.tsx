@@ -22,12 +22,10 @@ import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory/mybookstory';
 import MyLetters from './components/myhouse/letters/letters';
 import MyDrawing from './components/myhouse/mydrawing/mydrawing';
+import TogetherMode from './components/stories/StoryMode/TogetherMode';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
-
-// 비디오 룸 컴포넌트 경로 확인
-import VideoRoom from './components/video/VideoRoom'; // 경로 수정
 
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
@@ -159,15 +157,23 @@ function App(): JSX.Element {
           )}
         />
 
-        {/* 비디오 룸 라우트 추가 */}
-        <Route path="/video-room" element={<VideoRoom />} />
+        {/* 동화 같이읽기 라우팅, 필요시 수정하여 사용 */}
+        <Route
+          path="/book/:bookId/together"
+          element={(
+            <ProtectedRoute>
+              <TogetherMode />
+            </ProtectedRoute>
+          )}
+        />
+
       </Routes>
 
       {invitationModal.isOpen && invitationModal.data && (
         <DialogModal
           type="confirm"
           message1={`${invitationModal.data.inviterName}이(가)`}
-          message2={`${invitationModal.data.contentTitle}를 같이 읽고 싶어해요`}
+          message2={`${invitationModal.data.contentTitle}을(를) 같이 읽고 싶어해요`}
           onConfirm={handleInvitationAccept}
           onClose={handleInvitationReject}
         />

@@ -1,19 +1,23 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
-import { getOnlineFriends, inviteFriendToPlay, saveFCMToken } from '@/api/storyApi';
+import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 
 import { getToken } from 'firebase/messaging';
 import { useStory } from '@/stores/storyStore';
-import type { Friend } from '@/types/friend';
+import { useFriendListStore } from '@/stores/friendListStore';
 
 function FriendSelection(): JSX.Element {
   const navigate = useNavigate();
   const { bookId } = useStory();
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    friends,
+    loading,
+    error,
+    fetchBookFriends,
+    inviteFriend,
+  } = useFriendListStore();
 
   // FCM 토큰 등록
   useEffect(() => {
@@ -41,60 +45,42 @@ function FriendSelection(): JSX.Element {
         console.log('FCM 토큰 등록 완료');
 
         // 온라인 친구 목록 가져오기
-        const onlineFriends = await getOnlineFriends(bookId, currentChildId);
-        setFriends(onlineFriends);
+        if (bookId) {
+          await fetchBookFriends(bookId);
+        }
       } catch (err) {
         console.error('초기화 실패:', err);
-        if (err instanceof Error) {
-          setError(err.message);
-        }
       }
     };
 
-    if (bookId) {
-      registerFCMToken();
-    }
-  }, [bookId]);
+    registerFCMToken();
+  }, [bookId, fetchBookFriends]);
 
   const handleInviteFriend = async (inviteeId: number) => {
     if (!bookId) {
-      setError('책 정보가 없습니다.');
       return;
     }
 
     const currentChildId = tokenService.getCurrentChildId();
     if (!currentChildId) {
-      setError('로그인이 필요합니다.');
       return;
     }
 
     try {
-      setLoading(true);
-      setError(null);
-
-      // 초대 API 호출
-      await inviteFriendToPlay(
+      // store의 inviteFriend 사용
+      await inviteFriend({
         bookId,
-        currentChildId,
+        inviterId: currentChildId,
         inviteeId,
-      );
+      });
 
       console.log('초대 성공');
       navigate('/waiting-room');
     } catch (err) {
       console.error('친구 초대 실패:', err);
-
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError('친구 초대에 실패했습니다.');
-      }
-    } finally {
-      setLoading(false);
     }
   };
 
-  // 렌더링 부분은 동일하게 유지...
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">

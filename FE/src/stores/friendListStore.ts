@@ -5,12 +5,22 @@ import type { FriendInvitation } from '@/types/invitation';
 import api from '@/api/axios';
 import { tokenService } from '@/services/tokenService';
 import useToastStore from './toastStore';
+import { useRoleStore, type StoryRole, STORY_ROLES } from './roleStore';
 
 const sortByOnlineStatus = (friends: Friend[]) => friends.sort((a, b) => {
   if (a.status === 'ONLINE') return -1;
   if (b.status === 'ONLINE') return 1;
   return 0;
 });
+
+const assignRandomRoles = (): [StoryRole, StoryRole] => {
+  const roles = [STORY_ROLES.PRINCESS, STORY_ROLES.PRINCE];
+  const randomIndex = Math.floor(Math.random() * roles.length);
+  return [
+    roles[randomIndex],
+    roles[(randomIndex + 1) % roles.length],
+  ];
+};
 
 interface FriendList {
   friends: Friend[];
@@ -91,11 +101,28 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
   inviteFriend: async ({ bookId, inviterId, inviteeId }: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
+    const { setRoles } = useRoleStore.getState();
     set({ loading: true, error: null });
+
     try {
+      // 역할 랜덤 배정
+      const [inviterRole, inviteeRole] = assignRandomRoles();
+      console.log('Before setting roles:', { inviterRole, inviteeRole, bookId }); // 추가
+
+      // 역할 정보 저장
+      setRoles(inviterRole, inviteeRole, bookId);
+      console.log('After setting roles:', useRoleStore.getState()); // 추가
+
+      // API 호출 시 역할 정보 포함
       await api.post(
         `/book/${bookId}/friend/${inviterId}/invitation`,
-        { inviteeId },
+        {
+          inviteeId,
+          roleInfo: {
+            inviterRole,
+            inviteeRole,
+          },
+        },
       );
 
       showToast({
@@ -116,62 +143,64 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     }
   },
 
-  acceptInvitation: async (bookId, inviteeId, inviterId) => {
-    const { showToast } = useToastStore.getState();
+  // friendListStore.ts
+acceptInvitation: async (bookId, inviteeId, inviterId) => {
+  const { showToast } = useToastStore.getState();
 
-    try {
-      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/accept`, {
-        inviterId,
-      });
+  try {
+    // 1. 저장된 역할 정보 가져오기
+    const roleState = useRoleStore.getState();
 
-      showToast({
-        type: 'success',
-        message: '친구와 만나러 가고 있어요',
-      });
-    } catch (error) {
-      console.error('Failed to accept invitation:', error);
-      showToast({
-        type: 'error',
-        message: '지금은 함께 여행할 수 없어요',
-      });
-    }
-  },
+    await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/accept`, {
+      inviterId,
+      // 2. 역할 정보도 함께 전송
+      roleInfo: {
+        inviterRole: roleState.inviterRole,
+        inviteeRole: roleState.inviteeRole,
+      },
+    });
 
-  rejectInvitation: async (bookId, inviteeId, inviterId) => {
-    const { showToast } = useToastStore.getState();
+    showToast({
+      type: 'success',
+      message: '친구와 만나러 가고 있어요',
+    });
+  } catch (error) {
+    console.error('Failed to accept invitation:', error);
+    showToast({
+      type: 'error',
+      message: '지금은 함께 여행할 수 없어요',
+    });
+  }
+},
 
-    try {
-      // 초대 거절 API 호출
-      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/reject`, {
-        inviterId,
-      });
+rejectInvitation: async (bookId, inviteeId, inviterId) => {
+  const { showToast } = useToastStore.getState();
 
-      // // FCM으로 초대한 사람에게 거절 알림 보내기
-      // await api.post('/api/notification/send', {
-      //   targetUserId: inviterId,
-      //   type: 'invitation_rejected',
-      //   message: '지금은 .',
-      //   data: {
-      //     type: 'invitation_rejected',
-      //     inviteeId,
-      //     inviteeName: '상대방', // 실제 이름으로 대체 필요
-      //     contentId: bookId,
-      //   },
-      // });
+  try {
+    // 초대 거절 API 호출
+    const response = await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/reject`, {
+      inviterId,
+    });
 
-      // 거절한 사람에게 토스트 표시
-      showToast({
-        type: 'reject',
-        message: '다음에 여행하기로 했어요',
-      });
-    } catch (error) {
-      console.error('Failed to reject invitation:', error);
-      showToast({
-        type: 'error',
-        message: '답장을 보내지 못했어요',
-      });
-    }
-  },
+    // 거절당한 사람(초대자)에게 토스트 띄우기
+    showToast({
+      type: 'reject',
+      message: `${response.data.inviteeName}님이 "${response.data.contentTitle}" 여행 초대를 거절했어요`,
+    });
+
+    // 거절한 사람에게도 토스트 띄우기
+    showToast({
+      type: 'reject',
+      message: '다음에 여행하기로 했어요',
+    });
+  } catch (error) {
+    console.error('Failed to reject invitation:', error);
+    showToast({
+      type: 'error',
+      message: '답장을 보내지 못했어요',
+    });
+  }
+},
 
   expireInvitation: async (bookId, inviteeId, inviterId) => {
     const { showToast } = useToastStore.getState();

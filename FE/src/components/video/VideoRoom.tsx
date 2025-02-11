@@ -17,13 +17,8 @@ type TrackInfo = {
 };
 
 // Constants
-const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:8081/'
-  : `https://${window.location.hostname}:6443/`;
-
-const LIVEKIT_URL = window.location.hostname === 'localhost'
-  ? 'ws://localhost:7880/'
-  : `wss://${window.location.hostname}:7443/`;
+const APPLICATION_SERVER_URL = import.meta.env.VITE_API_URL;
+const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 
 function VideoRoom(): JSX.Element {
   const { state } = useLocation();
@@ -88,7 +83,7 @@ function VideoRoom(): JSX.Element {
   const setupWebSocket = useCallback(async () => {
     closeWebSocket();
 
-    const ws = new WebSocket('ws://localhost:8081/api/book/letter/stt');
+    const ws = new WebSocket(`${APPLICATION_SERVER_URL}/api/book/letter/stt`);
 
     ws.onopen = async () => {
       try {
@@ -199,7 +194,7 @@ function VideoRoom(): JSX.Element {
 
   const uploadToS3 = async (audioBlob: Blob): Promise<string> => {
     try {
-      const presignedResponse = await fetch('http://localhost:8081/api/book/letter/presigned-url');
+      const presignedResponse = await fetch(`${APPLICATION_SERVER_URL}/api/book/letter/presigned-url`);
 
       if (!presignedResponse.ok) {
         throw new Error(`Failed to get presigned URL: ${presignedResponse.status}`);
@@ -250,7 +245,7 @@ function VideoRoom(): JSX.Element {
           };
 
           const response = await fetch(
-            `${APPLICATION_SERVER_URL}api/book/letter/gpt/${child_id}`,
+            `${APPLICATION_SERVER_URL}/book/letter/gpt/${child_id}`,
             {
               method: 'POST',
               headers: {
