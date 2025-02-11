@@ -56,6 +56,7 @@ public class LetterServiceImpl implements LetterService {
                         "3. 4줄로 적어줘 " +
                         "4. 끝인사를 넣어줘 " +
                         "5. 보낸사람의 이름도 답장에 넣어줘 " +
+                        "6. 답장만 작성해줘. 다른 정보는 포함하지 마. " +
                         "###정보### " +
                         "동화: \"%s\" " +
                         "역할: \"%s\" " +
@@ -85,7 +86,23 @@ public class LetterServiceImpl implements LetterService {
         Map body = response.getBody();
         List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
         Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-        return (String) message.get("content");
+        String fullResponse = (String) message.get("content");
+
+        // "편지 내용:" 이후의 텍스트를 찾아서 추출
+        String[] parts = fullResponse.split("편지 내용: ");
+        if (parts.length > 1) {
+            String tempResponse = parts[1];
+            // 다음 줄바꿈 이후의 텍스트가 실제 답장
+            String[] responseParts = tempResponse.split("\n", 2);
+            if (responseParts.length > 1) {
+                return responseParts[1]
+                        .replaceAll("---", "")  // --- 제거
+                        .replaceAll("^\n+|\n+$", "")  // 시작과 끝의 개행문자 제거
+                        .trim();  // 앞뒤 공백 제거
+            }
+        }
+
+        return fullResponse; // 파싱 실패시 전체 응답 반환
     }
 
     // 편지 DB에 저장
@@ -95,6 +112,14 @@ public class LetterServiceImpl implements LetterService {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
+
+//        System.out.println(child + content + reply + bookTitle + role + letterFileName);
+//        System.out.println(child);
+//        System.out.println(content);
+//        System.out.println(reply);
+//        System.out.println(bookTitle);
+//        System.out.println(role);
+//        System.out.println(letterFileName);
         Letter letter = Letter.builder()
                 .child(child)
                 .letter(content)
@@ -102,8 +127,11 @@ public class LetterServiceImpl implements LetterService {
                 .bookTitle(bookTitle)
                 .role(role)
                 .letterFileName(letterFileName)
-                .createdAt(LocalDateTime.now())
                 .build();
+
+        System.out.println(letter);
+
+        letterRepository.save(letter);
     }
 
     // 아이의 편지를 dto를 list에 담아서 return

@@ -2,6 +2,8 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.book.BookListDto;
+import com.ssafy.project.dto.book.PageDto;
 import com.ssafy.project.dto.book.BookDto;
 
 import java.util.List;
@@ -9,6 +11,9 @@ import java.util.List;
 public interface BookService {
     // 동화 목록
     List<BookDto> bookList();
+
+    // 동화 조회
+    BookListDto readBook(Long bookId);
 
     // 플레이 가능한 친구 목록
     List<ChildStatusDto> playAvailableList(Long childId);

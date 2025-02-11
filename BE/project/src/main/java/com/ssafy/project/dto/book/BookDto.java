@@ -11,6 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BookDto {
     private Long bookId;
-    private String title;
-    private String thumbnail;
+    private String title; // 동화 제목
+    private String bookPath; // 동화 이미지 경로
 }

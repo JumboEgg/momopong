@@ -4,14 +4,17 @@ import com.ssafy.project.common.JsonConverter;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Friend;
-import com.ssafy.project.domain.Sketch;
 import com.ssafy.project.domain.book.Book;
+import com.ssafy.project.domain.book.Page;
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.ChildStatusDto;
 import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.book.AudioDto;
 import com.ssafy.project.dto.book.BookDto;
+import com.ssafy.project.dto.book.BookListDto;
+import com.ssafy.project.dto.book.PageDto;
 import com.ssafy.project.exception.*;
 import com.ssafy.project.firebase.FcmSendDto;
 import com.ssafy.project.firebase.FcmService;
@@ -35,8 +38,8 @@ public class BookServiceImpl implements BookService {
     private final BookRepository bookRepository;
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
-    private final NotificationService notificationService;
     private final FcmService fcmService;
+    private final CloudFrontService cloudFrontService;
 
     // Redis 저장을 위한 KEY
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
@@ -50,6 +53,45 @@ public class BookServiceImpl implements BookService {
         return bookList.stream()
                 .map(Book::entityToDto)
                 .collect(Collectors.toList());
+    }
+
+    // 동화 상세 페이지 조회 (동화 읽기)
+    @Override
+    public BookListDto readBook(Long bookId) {
+        Book book = bookRepository.findById(bookId)
+                .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
+
+        // 동화 페이지 조회
+        List<Page> pageList = book.getPageList();
+        List<PageDto> pageDtoList = pageList.stream()
+                .map(page -> {
+                    List<AudioDto> audioDtoList = page.getAudioList().stream()
+                            .map(audio -> AudioDto.builder()
+                                    .order(audio.getAudioNumber())
+                                    .role(audio.getRole())
+                                    .text(audio.getText())
+                                    .path(cloudFrontService.getSignedUrl(audio.getAudioPath()))
+                                    .build())
+                            .toList();
+
+                    return PageDto.builder()
+                            .pageId(page.getId())
+                            .pageNumber(page.getPageNumber())
+                            .pagePath(page.getPagePath())
+                            .audios(audioDtoList)
+                            .build();
+                })
+                .toList();
+
+        return BookListDto.builder()
+                .bookId(bookId)
+                .bookTitle(book.getTitle())
+                .role1(book.getRole1())
+                .role2(book.getRole2())
+                .totalPage(pageList.size())
+                .pages(pageDtoList)
+                .sketch(book.getSketch().getSketchPath())
+                .build();
     }
 
     // 플레이 가능한 친구 목록
@@ -105,7 +147,11 @@ public class BookServiceImpl implements BookService {
         redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
         // FCM으로 초대 알림 전송
-        sendMessage(inviteeId, notificationDto);
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviteeId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
 
         return notificationDto;
     }
@@ -129,7 +175,22 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
         // FCM으로 수락 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.ACCEPT);
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.ACCEPT)
+                .inviterId(inviter.getId())
+                .inviterName(inviter.getName())
+                .inviteeId(invitee.getId())
+                .inviteeName(invitee.getName())
+                .contentId(book.getId())
+                .contentTitle(book.getTitle())
+                .contentType(ContentType.BOOK)
+                .build();
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviterId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 친구 초대 거절하기
@@ -151,7 +212,22 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
 
         // FCM으로 거절 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.REJECT);
+        NotificationDto notificationDto = NotificationDto.builder()
+                .notificationType(NotificationType.REJECT)
+                .inviterId(inviter.getId())
+                .inviterName(inviter.getName())
+                .inviteeId(invitee.getId())
+                .inviteeName(invitee.getName())
+                .contentId(book.getId())
+                .contentTitle(book.getTitle())
+                .contentType(ContentType.BOOK)
+                .build();
+
+        FcmSendDto sendDto = FcmSendDto.builder()
+                .receiveId(inviterId)
+                .notificationDto(notificationDto)
+                .build();
+        fcmService.sendMessage(sendDto);
     }
 
     // 친구 초대가 만료되었을 때 (10초 제한)
@@ -166,13 +242,8 @@ public class BookServiceImpl implements BookService {
                 .orElseThrow(() -> new BookNotFoundException("해당 책을 찾을 수 없습니다"));
 
         // 만료 알림 전송
-        sendNotification(inviter, invitee, book, NotificationType.REJECT);
-    }
-
-    // Notification 생성 후 알림 전송
-    private void sendNotification(Child inviter, Child invitee, Book book, NotificationType notificationType) {
         NotificationDto notificationDto = NotificationDto.builder()
-                .notificationType(notificationType)
+                .notificationType(NotificationType.EXPIRE)
                 .inviterId(inviter.getId())
                 .inviterName(inviter.getName())
                 .inviteeId(invitee.getId())
@@ -182,13 +253,8 @@ public class BookServiceImpl implements BookService {
                 .contentType(ContentType.BOOK)
                 .build();
 
-        sendMessage(invitee.getId(), notificationDto);
-    }
-
-    // 알림 전송
-    private void sendMessage(Long inviteeId, NotificationDto notificationDto) {
         FcmSendDto sendDto = FcmSendDto.builder()
-                .inviteeId(inviteeId)
+                .receiveId(inviterId)
                 .notificationDto(notificationDto)
                 .build();
         fcmService.sendMessage(sendDto);
