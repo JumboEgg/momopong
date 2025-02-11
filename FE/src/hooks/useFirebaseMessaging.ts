@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { initializeApp } from 'firebase/app';
 import { tokenService } from '@/services/tokenService';
@@ -34,13 +35,10 @@ const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
 export const useFirebaseMessaging = () => {
+  const navigate = useNavigate();
   const { setFCMToken } = useFCMStore();
   const { rejectInvitation, acceptInvitation } = useFriendListStore();
-  const [showLiveKitRoom, setShowLiveKitRoom] = useState(false);
-  const [roomInfo, setRoomInfo] = useState<{
-    roomName: string;
-    participantName: string;
-  } | null>(null);
+
   const [invitationModal, setInvitationModal] = useState<InvitationModal>({
     isOpen: false,
     data: null,
@@ -50,18 +48,24 @@ export const useFirebaseMessaging = () => {
     if (!invitationModal.data) return;
 
     const { inviterId, inviteeId, contentId: bookId } = invitationModal.data;
+    const { showToast } = useToastStore.getState();
 
     try {
       await acceptInvitation(bookId, inviteeId, inviterId);
 
-      // LiveKit 룸 정보 설정
-      setRoomInfo({
-        roomName: `book-${bookId}`,
-        participantName: invitationModal.data.inviteeName,
+      // TogetherMode로 이동하면서 state로 정보 전달
+      navigate(`/book/${bookId}/together`, {
+        state: {
+          roomName: `book-${bookId}`,
+          participantName: invitationModal.data.inviteeName,
+        },
       });
-      setShowLiveKitRoom(true);
     } catch (error) {
       console.error('Failed to accept invitation:', error);
+      showToast({
+        type: 'error',
+        message: '초대 수락 처리 중 오류가 발생했습니다.',
+      });
     }
 
     setInvitationModal({ isOpen: false, data: null });
@@ -103,29 +107,30 @@ export const useFirebaseMessaging = () => {
     };
 
     const handleMessage = onMessage(messaging, (payload) => {
-      console.log('전체 payload:', payload);
+      const currentChildId = tokenService.getCurrentChildId();
       const { showToast } = useToastStore.getState();
 
-      if (payload.data) {
-        // 초대 거절 알림을 받은 경우
-        if (payload.data.type === 'invitation_rejected') {
-          showToast({
-            type: 'reject',
-            message: `${payload.data.inviteeName}님이 초대를 거절했습니다.`,
-          });
-          return;
-        }
+      if (!payload.data || !currentChildId) return;
 
-        // 초대장을 받은 경우
-        const {
-          inviterId,
-          inviteeId,
-          inviterName,
-          inviteeName,
-          contentId,
-          contentTitle,
-        } = payload.data;
+      const {
+        inviterId,
+        inviteeId,
+        inviterName,
+        inviteeName,
+        contentId,
+        contentTitle,
+        notificationType,
+      } = payload.data;
 
+      console.log('FCM Message received:', {
+        currentChildId,
+        inviterId,
+        inviteeId,
+        notificationType,
+      });
+
+      // 초대장을 받은 경우
+      if (notificationType === 'INVITE' && Number(inviteeId) === currentChildId) {
         setInvitationModal({
           isOpen: true,
           data: {
@@ -137,9 +142,33 @@ export const useFirebaseMessaging = () => {
             contentTitle,
           },
         });
+
+        showToast({
+          type: 'invitation',
+          message: `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`,
+        });
+      } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
+        // 초대 수락을 받은 경우
+        showToast({
+          type: 'accept',
+          message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
+        });
+
+        // 초대자도 TogetherMode로 이동
+        navigate(`/book/${contentId}/together`, {
+          state: {
+          roomName: `book-${contentId}`,
+          participantName: inviterName,
+          },
+        });
+      } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
+        // 초대 거절을 받은 경우
+        showToast({
+          type: 'reject',
+          message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
+        });
       }
     });
-
     handleAllowNotification();
 
     return () => {
@@ -151,7 +180,6 @@ export const useFirebaseMessaging = () => {
     invitationModal,
     handleInvitationAccept,
     handleInvitationReject,
-    showLiveKitRoom,
-    roomInfo,
+
   };
 };

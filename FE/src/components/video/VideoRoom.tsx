@@ -16,16 +16,19 @@ type TrackInfo = {
   participantIdentity: string;
 };
 
+interface VideoRoomProps {
+  roomName?: string;
+  participantName?: string;
+}
+
 // Constants
-const APPLICATION_SERVER_URL = window.location.hostname === 'localhost'
-  ? 'http://localhost:8081/'
-  : `https://${window.location.hostname}:6443/`;
+const APPLICATION_SERVER_URL = import.meta.env.VITE_API_URL;
+const LIVEKIT_URL = import.meta.env.VITE_LIVEKIT_URL;
 
-const LIVEKIT_URL = window.location.hostname === 'localhost'
-  ? 'ws://localhost:7880/'
-  : `wss://${window.location.hostname}:7443/`;
-
-function VideoRoom(): JSX.Element {
+function VideoRoom({
+  roomName: propRoomName,
+  participantName: propParticipantName,
+}: VideoRoomProps) {
   const { state } = useLocation();
   const [currentRoom, setCurrentRoom] = useState<Room>();
   const [localTrack, setLocalTrack] = useState<LocalVideoTrack>();
@@ -33,11 +36,10 @@ function VideoRoom(): JSX.Element {
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [gptResponse, setGptResponse] = useState('');
-  const [roomName, setRoomName] = useState<string>(state?.roomName || 'Test Room');
+  const [roomName, setRoomName] = useState<string>(propRoomName || state?.roomName || 'Test Room');
   const [participantName, setParticipantName] = useState<string>(
-    state?.participantName || 'Test Name',
+    propParticipantName || state?.participantName || 'Test Name',
   );
-
   const webSocket = useRef<WebSocket | null>(null);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioContext = useRef<AudioContext | null>(null);
@@ -64,7 +66,7 @@ function VideoRoom(): JSX.Element {
 
   const handleGetToken = useCallback(async (roomId: string, participantId: string) => {
     try {
-      const response = await fetch(`${APPLICATION_SERVER_URL}token`, {
+      const response = await fetch(`${APPLICATION_SERVER_URL}/api/token`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -88,7 +90,7 @@ function VideoRoom(): JSX.Element {
   const setupWebSocket = useCallback(async () => {
     closeWebSocket();
 
-    const ws = new WebSocket('ws://localhost:8081/api/book/letter/stt');
+    const ws = new WebSocket(`${APPLICATION_SERVER_URL}/api/book/letter/stt`);
 
     ws.onopen = async () => {
       try {
@@ -199,7 +201,7 @@ function VideoRoom(): JSX.Element {
 
   const uploadToS3 = async (audioBlob: Blob): Promise<string> => {
     try {
-      const presignedResponse = await fetch('http://localhost:8081/api/book/letter/presigned-url');
+      const presignedResponse = await fetch(`${APPLICATION_SERVER_URL}/api/book/letter/presigned-url`);
 
       if (!presignedResponse.ok) {
         throw new Error(`Failed to get presigned URL: ${presignedResponse.status}`);
@@ -250,7 +252,7 @@ function VideoRoom(): JSX.Element {
           };
 
           const response = await fetch(
-            `${APPLICATION_SERVER_URL}api/book/letter/gpt/${child_id}`,
+            `${APPLICATION_SERVER_URL}/book/letter/gpt/${child_id}`,
             {
               method: 'POST',
               headers: {
@@ -303,12 +305,28 @@ function VideoRoom(): JSX.Element {
           (track) => track.trackPublication.trackSid !== publication.trackSid,
         ));
       });
+
+      // 연결 상태 변화 감지 추가
+      newRoom.on(RoomEvent.Disconnected, () => {
+        if (isMounted) {
+          console.log('Room disconnected');
+        }
+      });
     };
 
     const connectToRoom = async () => {
-      if (!roomName || !participantName) return;
+      if (!roomName || !participantName) {
+        console.log('Missing room info:', { roomName, participantName });
+        return;
+      }
 
       try {
+        // 이미 연결된 경우 처리
+        if (currentRoom?.state === 'connected') {
+          console.log('Already connected to room');
+          return;
+        }
+
         const token = await handleGetToken(roomName, participantName);
         if (!isMounted) return;
 
@@ -326,7 +344,6 @@ function VideoRoom(): JSX.Element {
 
         setupRoomEvents(newRoom);
         await newRoom.connect(LIVEKIT_URL, token);
-        await newRoom.localParticipant.enableCameraAndMicrophone();
 
         if (!isMounted) {
           await newRoom.disconnect();
@@ -334,6 +351,9 @@ function VideoRoom(): JSX.Element {
         }
 
         setCurrentRoom(newRoom);
+
+        // 카메라/마이크 활성화는 room 연결 후에
+        await newRoom.localParticipant.enableCameraAndMicrophone();
 
         if (newRoom.localParticipant) {
           const videoTrack = Array.from(
@@ -344,7 +364,7 @@ function VideoRoom(): JSX.Element {
       } catch (error) {
         console.error('Room connection error:', error);
         if (isMounted) {
-          await handleLeaveRoom();
+          handleLeaveRoom();
         }
       }
     };
@@ -353,91 +373,69 @@ function VideoRoom(): JSX.Element {
 
     return () => {
       isMounted = false;
-      handleLeaveRoom();
+      if (currentRoom) {
+        currentRoom.disconnect();
+      }
     };
-  }, [roomName, participantName, handleGetToken, handleLeaveRoom]);
+  }, [roomName, participantName]);
 
   return (
-    <div id="room">
-      <div id="room-header">
-        <h2 id="room-title">{roomName}</h2>
-        <button
-          type="button"
-          className="btn btn-danger"
-          id="leave-room-button"
-          onClick={handleLeaveRoom}
-        >
-          Leave Room
-        </button>
-      </div>
-      <div id="layout-container">
-        <div
-          style={{
-            position: 'fixed',
-            bottom: '60px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(0,0,0,0.7)',
-            color: 'white',
-            padding: '10px',
-            borderRadius: '4px',
-            display: voiceText ? 'block' : 'none',
-          }}
-        >
-          {voiceText}
-        </div>
-        {gptResponse && (
-          <div
-            style={{
-              position: 'fixed',
-              bottom: '100px',
-              left: '50%',
-              transform: 'translateX(-50%)',
-              backgroundColor: 'rgba(0,0,0,0.7)',
-              color: 'white',
-              padding: '10px',
-              borderRadius: '4px',
-              maxWidth: '80%',
-              width: '600px',
-            }}
-          >
-            <strong>GPT 응답:</strong>
+    <div className="w-full h-screen relative">
+      {/* 비디오 레이아웃 컨테이너 */}
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between">
+        {' '}
+        {/* padding 증가 */}
+        {/* 왼쪽 로컬 비디오 */}
+        {localTrack && (
+          <div className="w-[25rem] h-[15rem]">
             {' '}
-            {gptResponse}
+            {/* 크기 증가 */}
+            <VideoComponent
+              track={localTrack}
+              participantIdentity={participantName}
+              local
+            />
           </div>
         )}
-        <button
-          type="button"
-          style={{
-            position: 'fixed',
-            bottom: '20px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            padding: '8px 16px',
-            backgroundColor: isRecording ? '#ff4444' : '#ffffff',
-            color: isRecording ? '#ffffff' : '#000000',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-          onClick={handleRecordClick}
-        >
-          녹음
-        </button>
-        {localTrack && (
-          <VideoComponent
-            track={localTrack}
-            participantIdentity={participantName}
-            local
-          />
-        )}
+
+        {/* 녹음 버튼 - 중앙 하단에 absolute로 배치 */}
+        <div className="absolute left-1/2 -translate-x-1/2 bottom-12">
+          {' '}
+          {/* bottom 값 증가 */}
+          {voiceText && (
+            <div className="bg-black bg-opacity-70 text-white p-2 rounded mb-2">
+              {voiceText}
+            </div>
+          )}
+          {gptResponse && (
+            <div className="bg-black bg-opacity-70 text-white p-2 rounded mb-2">
+              <strong>GPT 응답:</strong>
+              {' '}
+              {gptResponse}
+            </div>
+          )}
+          <button
+            type="button"
+            className={`px-4 py-2 rounded ${
+              isRecording ? 'bg-red-500 text-white' : 'bg-white text-black'
+            }`}
+            onClick={handleRecordClick}
+          >
+            녹음
+          </button>
+        </div>
+
+        {/* 오른쪽 원격 비디오 */}
         {remoteTracks.map((remoteTrack) => (
           remoteTrack.trackPublication.kind === 'video' ? (
-            <VideoComponent
-              key={remoteTrack.trackPublication.trackSid}
-              track={remoteTrack.trackPublication.videoTrack!}
-              participantIdentity={remoteTrack.participantIdentity}
-            />
+            <div key={remoteTrack.trackPublication.trackSid} className="w-[25em] h-[15rem]">
+              {' '}
+              {/* 크기 증가 */}
+              <VideoComponent
+                track={remoteTrack.trackPublication.videoTrack!}
+                participantIdentity={remoteTrack.participantIdentity}
+              />
+            </div>
           ) : (
             <AudioComponent
               key={remoteTrack.trackPublication.trackSid}

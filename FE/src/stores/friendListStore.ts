@@ -5,12 +5,22 @@ import type { FriendInvitation } from '@/types/invitation';
 import api from '@/api/axios';
 import { tokenService } from '@/services/tokenService';
 import useToastStore from './toastStore';
+import { useRoleStore, type StoryRole, STORY_ROLES } from './roleStore';
 
 const sortByOnlineStatus = (friends: Friend[]) => friends.sort((a, b) => {
   if (a.status === 'ONLINE') return -1;
   if (b.status === 'ONLINE') return 1;
   return 0;
 });
+
+const assignRandomRoles = (): [StoryRole, StoryRole] => {
+  const roles = [STORY_ROLES.PRINCESS, STORY_ROLES.PRINCE];
+  const randomIndex = Math.floor(Math.random() * roles.length);
+  return [
+    roles[randomIndex],
+    roles[(randomIndex + 1) % roles.length],
+  ];
+};
 
 interface FriendList {
   friends: Friend[];
@@ -91,11 +101,25 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
   inviteFriend: async ({ bookId, inviterId, inviteeId }: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
+    const { setRoles } = useRoleStore.getState();
     set({ loading: true, error: null });
+
     try {
+      const [inviterRole, inviteeRole] = assignRandomRoles();
+
+      setRoles(inviterRole, inviteeRole, bookId);
+
       await api.post(
         `/book/${bookId}/friend/${inviterId}/invitation`,
-        { inviteeId },
+        {
+          inviteeId,
+          roleInfo: {
+            inviterRole,
+            inviteeRole,
+          },
+          notificationType: 'INVITATION', // 추가
+          contentType: 'BOOK', // 추가
+        },
       );
 
       showToast({
@@ -116,13 +140,23 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     }
   },
 
+  // friendListStore.ts
   acceptInvitation: async (bookId, inviteeId, inviterId) => {
     const { showToast } = useToastStore.getState();
+    const roleState = useRoleStore.getState(); // 추가: roleState 가져오기
 
     try {
-      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/accept`, {
+      const response = await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/accept`, {
         inviterId,
+        roleInfo: {
+          inviterRole: roleState.inviterRole,
+          inviteeRole: roleState.inviteeRole,
+        },
+        notificationType: 'ACCEPT',
+        contentType: 'BOOK',
       });
+
+      console.log('Accept invitation response:', response.data);
 
       showToast({
         type: 'success',
@@ -141,25 +175,14 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     const { showToast } = useToastStore.getState();
 
     try {
-      // 초대 거절 API 호출
-      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/reject`, {
+      const response = await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/reject`, {
         inviterId,
+        notificationType: 'REJECT',
+        contentType: 'BOOK',
       });
 
-      // // FCM으로 초대한 사람에게 거절 알림 보내기
-      // await api.post('/api/notification/send', {
-      //   targetUserId: inviterId,
-      //   type: 'invitation_rejected',
-      //   message: '지금은 .',
-      //   data: {
-      //     type: 'invitation_rejected',
-      //     inviteeId,
-      //     inviteeName: '상대방', // 실제 이름으로 대체 필요
-      //     contentId: bookId,
-      //   },
-      // });
+      console.log('Reject invitation response:', response.data);
 
-      // 거절한 사람에게 토스트 표시
       showToast({
         type: 'reject',
         message: '다음에 여행하기로 했어요',

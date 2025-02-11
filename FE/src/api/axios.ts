@@ -30,21 +30,21 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  console.log('Request Config:', {
-    url: config.url,
-    method: config.method,
-    headers: config.headers ? { ...config.headers } : {},
-  });
+  // console.log('Request Config:', {
+  //   url: config.url,
+  //   method: config.method,
+  //   headers: config.headers ? { ...config.headers } : {},
+  // });
 
   if (publicPaths.includes(config.url || '')) {
     return config;
   }
 
   const needsParentAuth = parentAuthPaths.some((path) => config.url?.includes(path));
-  console.log('Needs Parent Auth:', needsParentAuth);
+  // console.log('Needs Parent Auth:', needsParentAuth);
 
   const token = tokenService.getActiveToken(needsParentAuth);
-  console.log('Token being used:', token ? 'Token exists' : 'No token');
+  // console.log('Token being used:', token ? 'Token exists' : 'No token');
 
   if (!token) return config;
 
@@ -78,14 +78,14 @@ const processQueue = (error: Error | null = null) => {
 api.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
-    console.log('Response Error Details:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      headers: error.config?.headers
-        ? Object.fromEntries(error.config.headers.entries())
-        : null,
-      url: error.config?.url,
-    });
+    // console.log('Response Error Details:', {
+    //   status: error.response?.status,
+    //   data: error.response?.data,
+    //   headers: error.config?.headers
+    //     ? Object.fromEntries(error.config.headers.entries())
+    //     : null,
+    //   url: error.config?.url,
+    // });
 
     const originalRequest = error.config as InternalAxiosRequestConfig & { retry?: boolean };
 

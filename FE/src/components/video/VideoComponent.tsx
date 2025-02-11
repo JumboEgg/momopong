@@ -35,6 +35,7 @@ function VideoComponent({ track, participantIdentity, local = false }: VideoComp
           autoPlay
           playsInline
           muted={local}
+          style={{ transform: local ? 'scaleX(-1)' : 'none' }} // 여기에 style 추가
           aria-label={`${participantIdentity}'s video stream`}
         >
           <track
@@ -45,6 +46,6 @@ function VideoComponent({ track, participantIdentity, local = false }: VideoComp
         </video>
       </div>
     );
-}
+  }
 
 export default VideoComponent;
