@@ -1,8 +1,8 @@
 package com.ssafy.project.service;
 
-import com.ssafy.project.dto.ChildStatusDto;
-import com.ssafy.project.dto.NotificationDto;
-import com.ssafy.project.dto.SketchDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
+import com.ssafy.project.dto.invitation.NotificationDto;
+import com.ssafy.project.dto.book.SketchDto;
 
 import java.util.List;
 

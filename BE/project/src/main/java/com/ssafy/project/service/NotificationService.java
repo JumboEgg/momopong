@@ -1,6 +1,6 @@
 package com.ssafy.project.service;
 
-import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.invitation.NotificationDto;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;

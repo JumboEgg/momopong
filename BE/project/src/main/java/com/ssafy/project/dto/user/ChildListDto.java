@@ -1,4 +1,4 @@
-package com.ssafy.project.dto;
+package com.ssafy.project.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

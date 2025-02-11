@@ -2,9 +2,9 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Parent;
 import com.ssafy.project.domain.type.RoleType;
-import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.ParentDto;
-import com.ssafy.project.dto.ParentSignUpRequestDto;
+import com.ssafy.project.dto.user.LoginRequestDto;
+import com.ssafy.project.dto.user.ParentDto;
+import com.ssafy.project.dto.user.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ParentRepository;
