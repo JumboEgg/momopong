@@ -99,7 +99,9 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     }
   },
 
-  inviteFriend: async ({ bookId, inviterId, inviteeId }: FriendInvitation) => {
+  inviteFriend: async ({
+ bookId, inviterId, inviteeId, contentType,
+}: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
     const { setRoles } = useRoleStore.getState();
     set({ loading: true, error: null });
@@ -109,18 +111,19 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
       setRoles(inviterRole, inviteeRole, bookId);
 
-      await api.post(
-        `/book/${bookId}/friend/${inviterId}/invitation`,
-        {
+      const endpoint = contentType === 'SKETCH'
+      ? `/sketch/${bookId}/friend/${inviterId}/invitation`
+      : `/book/${bookId}/friend/${inviterId}/invitation`;
+
+      await api.post(endpoint, {
           inviteeId,
           roleInfo: {
             inviterRole,
             inviteeRole,
           },
           notificationType: 'INVITATION', // 추가
-          contentType: 'BOOK', // 추가
-        },
-      );
+          contentType: 'BOOK',
+        });
 
       showToast({
         type: 'success',
@@ -252,7 +255,9 @@ export const useFriendInvitation = () => {
 
   const handleInvitation = async (bookId: number, inviterId: number, inviteeId: number) => {
     try {
-      await inviteFriend({ bookId, inviterId, inviteeId });
+      await inviteFriend({
+        bookId, inviterId, inviteeId, contentType: 'BOOK',
+      });
     } catch (err) {
       console.error('친구 초대 처리 중 오류:', err);
     }
