@@ -133,10 +133,11 @@ public class ParentServiceImpl implements ParentService {
                         .name(child.getName())
                         .profile(presignedUrlService.getFile(child.getProfile()))
                         .age(child.getAge())
-                        .createdAt(child.getCreatedAt())
+                        .daysSinceStart(child.getDaysSinceStart())
                         .build())
                 .collect(Collectors.toList());
     }
+
     @Override
     public void deleteParent(Long parentId) {
         // 논리적 삭제
