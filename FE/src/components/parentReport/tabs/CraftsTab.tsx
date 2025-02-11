@@ -56,6 +56,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
 
   const [modal, setModal] = useState<JSX.Element | null>(null);
 
+  // TODO : 리포트 API 생성 후 부모 조회 기능으로 교체
   const fetchData = async (id: string) => {
     if (!id) return;
     try {
@@ -75,8 +76,6 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
   }, [childId]);
 
   const openModal = (idx: number) => {
-    console.log(idx);
-
     if (selectedCraftsTab === 'reading') {
       setModal(null);
     } else if (selectedCraftsTab === 'drawing') {

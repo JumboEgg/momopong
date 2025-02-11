@@ -1,9 +1,15 @@
 import { useStory } from '@/stores/storyStore';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import MakeRandomCode from '../../../utils/format/randomString';
 
 function ModeSelection(): JSX.Element {
   const {
     setMode,
   } = useStory();
+
+  const {
+    setRoomId,
+  } = useSocketStore();
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -19,7 +25,10 @@ function ModeSelection(): JSX.Element {
           </button>
           <button
             type="button"
-            onClick={() => setMode('together')}
+            onClick={() => {
+              setMode('together');
+              setRoomId(MakeRandomCode());
+            }}
             className="py-4 px-6 text-lg font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
           >
             함께 읽기 모드

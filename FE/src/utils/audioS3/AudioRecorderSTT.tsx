@@ -2,6 +2,9 @@ import { LetterInfo } from '@/types/letter';
 import uploadLetterToS3 from '@/utils/audioS3/letterUpload';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 
 function AudioRecorderSTT() {
   const [isRecording, setIsRecording] = useState(false);
@@ -14,7 +17,8 @@ function AudioRecorderSTT() {
   const processor = useRef<AudioWorkletNode | null>();
   const mediaRecorder = useRef<MediaRecorder | null>(null);
   const audioChunks = useRef<Blob[]>([]);
-  // const recordingBlob = useRef<Blob | null>(null);
+
+  const [timeLeft, setTimeLeft] = useState(20);
 
   const navigate = useNavigate();
 
@@ -22,7 +26,6 @@ function AudioRecorderSTT() {
   const setupWebSocket = async () => {
     if (webSocket.current) webSocket.current.close();
 
-    // TODO : 경로 변경 후 정상 동작 확인
     const base_url = 'ws://localhost:8081/api/book/letter/stt';
     webSocket.current = new WebSocket(base_url);
 
@@ -104,7 +107,6 @@ function AudioRecorderSTT() {
 
     webSocket.current.onmessage = (event) => {
       try {
-        console.log('Received from server:', event.data);
         const receivedData = JSON.parse(event.data);
         if (receivedData.transcript) {
           setVoiceText(receivedData.transcript);
@@ -120,7 +122,6 @@ function AudioRecorderSTT() {
     };
 
     webSocket.current.onclose = () => {
-      console.log('WebSocket closed');
       if (processor.current) {
         processor.current.disconnect();
         processor.current = null;
@@ -133,8 +134,6 @@ function AudioRecorderSTT() {
         mediaRecorder.current.stop();
         mediaRecorder.current = null;
       }
-
-      console.log('오디오 전송 종료');
     };
   };
 
@@ -152,7 +151,6 @@ function AudioRecorderSTT() {
 
   useEffect(() => {
     if (!recordingBlob) return;
-    console.log(voiceText);
 
     const letter: LetterInfo = {
       bookTitle: '라이언 일병 구하기',
@@ -168,27 +166,34 @@ function AudioRecorderSTT() {
     const audioBlob = recordingBlob ?? new Blob();
 
     uploadLetterToS3({ letter, audioBlob });
+    navigate('/home');
   }, [recordingBlob]);
 
-  const listenRecord = () => {
-    // Blob URL 생성
-    const blobUrl = URL.createObjectURL(recordingBlob);
-
-    // Audio 객체 생성 및 재생
-    new Audio(blobUrl).play();
-  };
+  useEffect(() => {
+    if (isRecording && timeLeft > 0) {
+      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+    if (isRecording && timeLeft === 0) {
+      mediaRecorder.current?.stop();
+      setIsRecording(false);
+      webSocket.current?.close();
+      setIsLoading(true);
+    }
+    return () => {};
+  }, [isRecording, timeLeft]);
 
   return (
-    <div style={{ textAlign: 'center', padding: '20px' }}>
-      <button type="button" onClick={() => navigate('/home')}>홈으로 가기</button>
-      <button type="button" onClick={handleRecordClick} style={{ padding: '10px 20px' }}>
-        {isRecording ? 'Stop Recording' : 'Start Recording'}
-      </button>
-      <button type="button" onClick={listenRecord}>녹음 듣기</button>
-      <div style={{ marginTop: '20px', fontSize: '18px', fontWeight: 'bold' }}>
-        {isRecording ? voiceText : 'Click the button to start recording'}
-      </div>
-      {error && <div style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
+    <div className="flex flex-col items-center gap-2">
+      {/* 녹음버튼 */}
+      <IconCircleButton
+        size="lg"
+        variant="story"
+        className=""
+        hasFocus
+        icon={<FontAwesomeIcon icon={faMicrophone} />}
+        onClick={handleRecordClick}
+      />
     </div>
   );
 }

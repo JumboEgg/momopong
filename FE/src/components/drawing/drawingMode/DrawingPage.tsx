@@ -36,8 +36,6 @@ function DrawingPage(): JSX.Element {
       <div className="w-full h-20 flex justify-between m-0 p-0">
         <span className="mt-4 ms-4">
           <SaveButton
-            canvasWidth={canvasWidth}
-            canvasHeight={canvasHeight}
             canvasRef={canvasRef}
           />
         </span>

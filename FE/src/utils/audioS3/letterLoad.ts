@@ -25,10 +25,7 @@ const loadLettersFromS3 = async (childId: string): Promise<LetterInfo[]> => {
       throw new Error(`Upload failed: ${response.status}`);
     }
 
-    console.log(response);
     const data = await response.json();
-
-    console.log(data);
 
     return data;
   } catch (error) {

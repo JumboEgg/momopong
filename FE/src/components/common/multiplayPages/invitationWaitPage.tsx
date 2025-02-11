@@ -18,7 +18,7 @@ function InvitationWaitPage() {
   });
 
   return (
-    <div className="w-full h-full">
+    <div className="w-screen h-screen">
       <div className="fixed top-5 left-5">
         <IconCircleButton
           size="sm"

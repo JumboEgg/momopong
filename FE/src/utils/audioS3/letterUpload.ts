@@ -29,7 +29,6 @@ const uploadAudioToS3 = async ({ accessToken, audioBlob }: UploadAudioToS3Props)
 
         const { presignedUrl, fileName } = await presignedResponse.json();
 
-        console.log('upload blob: ', audioBlob.type);
         const uploadResponse = await fetch(presignedUrl, {
             method: 'PUT',
             body: audioBlob,
@@ -91,7 +90,7 @@ const uploadLetterToS3 = async ({ letter, audioBlob }: UploadLetterToS3Props) =>
             throw new Error(`Upload failed: ${response.status}`);
         }
 
-        console.log(response);
+        console.log('letter uploaded');
     } catch (error) {
         throw new Error('Failed to upload letter');
     }

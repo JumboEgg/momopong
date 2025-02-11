@@ -3,17 +3,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawingStore';
 
 export interface SaveButtonProps {
-  canvasWidth: number;
-  canvasHeight: number;
   canvasRef: HTMLCanvasElement | null;
 }
 
-function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
+function SaveButton({ canvasRef }: SaveButtonProps) {
   const {
     mode, template, setImageData,
   } = useDrawing();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
+
+  const canvasWidth = 1600;
+  const canvasHeight = 1000;
 
   let bgImgSrc = '';
   let outlineImgSrc = '';
@@ -40,7 +41,7 @@ function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
       bgImg.src = bgImgSrc;
       bgImg.onload = () => {
         tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
-        tempCtx.drawImage(currentCanvas, 0, 0);
+        tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
 
         const outlineImg = new Image();
         outlineImg.src = outlineImgSrc;
@@ -54,7 +55,7 @@ function SaveButton({ canvasWidth, canvasHeight, canvasRef }: SaveButtonProps) {
     } else {
       tempCtx.fillStyle = 'white';
       tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
-      tempCtx.drawImage(currentCanvas, 0, 0);
+      tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
 
       const outlineImg = new Image();
       outlineImg.src = outlineImgSrc;

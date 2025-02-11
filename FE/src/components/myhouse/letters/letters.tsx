@@ -7,36 +7,36 @@ import '@/components/common/scrollbar.css';
 import { LetterInfo } from '@/types/letter';
 import loadLettersFromS3 from '@/utils/audioS3/letterLoad';
 import useSubAccountStore from '@/stores/subAccountStore';
-import fetchSavedAudio from '../../../utils/audioS3/audioLoad';
+import useLetterStore from '@/stores/letterStore';
+import fetchSavedAudio from '@/utils/audioS3/audioLoad';
 
 function MyLetters(): React.JSX.Element {
-  const [childId, setChildId] = useState<number>(0);
+  const {
+    letters, setLetters, selectedLetter, setSelectedLetter,
+  } = useLetterStore();
 
-  const [letterList, setLetterList] = useState<LetterInfo[]>([]);
-  const [selectedLetter, setSelectedLetter] = useState<LetterInfo | null>(null);
+  // const [letterList, setLetterList] = useState<LetterInfo[]>([]);
+  // const [selectedLetter, setSelectedLetter] = useState<LetterInfo | null>(null);
   const [letterAudio, setLetterAudio] = useState<Audio>();
   const navigate = useNavigate();
   const myLetterAudio = new Audio();
+  const child = useSubAccountStore.getState().selectedAccount;
 
+  // TODO : 새로운 편지가 왔을 때 리스트 갱신
   const fetchData = async (id: string) => {
     if (!id) return;
     try {
       const letterData: LetterInfo[] = await loadLettersFromS3(id);
-      setLetterList(letterData);
+      setLetters(letterData);
     } catch (error) {
       console.error('Error loading images: ', error);
     }
   };
 
   useEffect(() => {
-    setChildId(useSubAccountStore.getState().selectedAccount?.childId ?? 0);
+    if (!child || !child.childId) return;
+    fetchData(child.childId.toString());
   }, []);
-
-  useEffect(() => {
-    if (!childId) return;
-    console.log('fetch Data from child ', childId);
-    fetchData(childId.toString());
-  }, [childId]);
 
   function handleLetterSelect(letter: LetterInfo | null): void {
     setSelectedLetter(letter);
@@ -48,7 +48,6 @@ function MyLetters(): React.JSX.Element {
     const loadAudio = async () => {
       const audioUrl = await fetchSavedAudio(selectedLetter.letterUrl);
       myLetterAudio.src = audioUrl;
-      // myLetterAudio.src = selectedLetter.letterUrl;
       myLetterAudio.type = 'audio/webm';
       setLetterAudio(myLetterAudio);
     };
@@ -58,7 +57,6 @@ function MyLetters(): React.JSX.Element {
 
   const playMyLetter = () => {
     if (letterAudio.paused) {
-      console.log(letterAudio.src);
       letterAudio.play();
     } else {
       letterAudio.pause();
@@ -107,7 +105,9 @@ function MyLetters(): React.JSX.Element {
                       onClick={playMyLetter}
                     />
                   </span>
-                  <p className="my-3 text-xl md:text-2xl ps-2 md:not-[]:ps-4">사탕이에게</p>
+                  <p className="my-3 text-xl md:text-2xl ps-2 md:not-[]:ps-4">
+                    { child ? `${child.name}(이)에게` : '나의 소중한 친구에게'}
+                  </p>
                   <div className="h-[calc(100%-100px)] md:h-[calc(100%-160px)]">
                     <div className="customScrollbar pink overflow-y-auto h-full text-lg md:text-2xl px-4">
                       <p>{selectedLetter.reply}</p>
@@ -130,7 +130,7 @@ function MyLetters(): React.JSX.Element {
             <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 border-orange-300 overflow-hidden h-full p-2 md:p-4">
               <div className="p-2 md:p-4 font-[BMJUA] text-xl md:text-2xl">내가 받은 편지들</div>
               <div className="customScrollbar yellow overflow-y-auto h-[calc(100%-60px)]">
-                {letterList.map((letter) => (
+                {letters.map((letter) => (
                   <div
                     key={letter.letterFileName}
                     role="button"
