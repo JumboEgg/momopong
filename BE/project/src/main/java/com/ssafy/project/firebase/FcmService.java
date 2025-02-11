@@ -59,8 +59,10 @@ public class FcmService {
                 "inviteeName", notificationDto.getInviteeName(),
                 "contentId", notificationDto.getContentId().toString(),
                 "contentTitle", notificationDto.getContentTitle(),
-                "contentType",notificationDto.getContentType().toString()
+                "contentType",notificationDto.getContentType().toString(),
+                "notificationType", notificationDto.getNotificationType().toString()
         );
+
 
         // 알림 메시지 구성하기 (Firebase의 Message)
         Message message = Message.builder()
