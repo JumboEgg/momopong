@@ -34,6 +34,9 @@ public class SketchParticipationRecord {
     @Column(name = "end_time")
     private LocalDateTime endTime;    // 종료 시간
 
+    @Column(name = "early_exit", nullable = false)
+    private boolean earlyExit = true;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private ParticipationMode mode;   // 참여 모드
@@ -41,7 +44,7 @@ public class SketchParticipationRecord {
     // Entity to Dto
     public SketchParticipationRecordDto entityToDto() {
         return SketchParticipationRecordDto.builder()
-                .drawingParticipationId(this.id)
+                .sketch_participation_id(this.id)
                 .childId(this.child.getId())
                 .startTime(this.startTime)
                 .endTime(this.endTime)
@@ -49,4 +52,11 @@ public class SketchParticipationRecord {
                 .build();
     }
 
+    public void updateExitStatus(boolean status) {
+        this.earlyExit = status;
+    }
+
+    public void setEndTimeNow() {
+        this.endTime = LocalDateTime.now();
+    }
 }

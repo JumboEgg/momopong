@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class BookParticipationRecord{
+public class BookParticipationRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,10 +31,6 @@ public class BookParticipationRecord{
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @CreatedDate
-    private LocalDateTime createdAt;
 
     @Column(name = "role", nullable = false)
     private String role;
@@ -59,7 +55,6 @@ public class BookParticipationRecord{
                 .bookRecordId(this.id)
                 .childId(this.child.getId())
                 .bookId(this.book.getId())
-                .createdAt(this.createdAt)
                 .role(this.role)
                 .earlyExit(this.earlyExit)
                 .startTime(this.startTime)
@@ -70,5 +65,9 @@ public class BookParticipationRecord{
 
     public void updateExitStatus(boolean status) {
         this.earlyExit = status;
+    }
+
+    public void setEndTimeNow() {
+        this.endTime = LocalDateTime.now();
     }
 }

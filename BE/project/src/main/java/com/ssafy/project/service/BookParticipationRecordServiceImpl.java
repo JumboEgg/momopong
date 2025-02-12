@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 public class BookParticipationRecordServiceImpl implements BookParticipationRecordService {
@@ -21,23 +23,21 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
 
     @Override
     @Transactional
-    public BookParticipationRecordDto save(BookParticipationRecordDto bookParticipationRecordDto) {
-
-        Child child = childRepository.findById(bookParticipationRecordDto.getChildId())
+    public BookParticipationRecordDto save(BookParticipationRecordDto recordDto) {
+        Child child = childRepository.findById(recordDto.getChildId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid child ID"));
 
-        Book book = bookRepository.findById(bookParticipationRecordDto.getBookId())
+        Book book = bookRepository.findById(recordDto.getBookId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
 
         BookParticipationRecord savedRecord = BookParticipationRecord.builder()
                 .child(child)
                 .book(book)
-                .createdAt(bookParticipationRecordDto.getCreatedAt())
-                .role(bookParticipationRecordDto.getRole())
-                .earlyExit(bookParticipationRecordDto.isEarlyExit())
-                .startTime(bookParticipationRecordDto.getStartTime())
-                .endTime(bookParticipationRecordDto.getEndTime())
-                .mode(bookParticipationRecordDto.getMode())
+                .role(recordDto.getRole())
+                .earlyExit(recordDto.getEarlyExit() != null ? recordDto.getEarlyExit() : true)
+                .startTime(recordDto.getStartTime())
+                .endTime(recordDto.getEndTime())
+                .mode(recordDto.getMode())
                 .build();
 
         bookParticipationRecordRepository.save(savedRecord);
@@ -46,11 +46,12 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
 
     @Override
     @Transactional
-    public BookParticipationRecordDto updateExitStatus(Long recordId) {
+    public BookParticipationRecordDto completeParticipation(Long recordId) {
         BookParticipationRecord record = bookParticipationRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid record ID"));
 
         record.updateExitStatus(false);
+        record.setEndTimeNow();
         bookParticipationRecordRepository.save(record);
 
         return record.entityToDto();

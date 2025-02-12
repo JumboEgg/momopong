@@ -6,5 +6,5 @@ public interface BookParticipationRecordService {
 
     BookParticipationRecordDto save(BookParticipationRecordDto bookParticipationRecordDto);
 
-    BookParticipationRecordDto updateExitStatus(Long recordId);
+    BookParticipationRecordDto completeParticipation(Long recordId);
 }

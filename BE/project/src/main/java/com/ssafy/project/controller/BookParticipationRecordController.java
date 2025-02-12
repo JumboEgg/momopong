@@ -28,13 +28,13 @@ public class BookParticipationRecordController {
         return ResponseEntity.ok(savedDto);
     }
 
-    @PatchMapping("/exit/{recordId}")
-    @Operation(summary = "중도 퇴장 여부 변경" , description = "동화가 끝날때 정상 종료를 기록합니다")
-    @ApiResponses (value = {
-            @ApiResponse(responseCode = "200", description = "참여 기록 정상 변경"),
+    @PatchMapping("/complete/{recordId}")
+    @Operation(summary = "참여 종료 처리", description = "동화가 끝날 때 정상 종료 여부와 종료 시간을 함께 기록합니다.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "참여 기록 정상 변경 및 종료 시간 기록"),
     })
-    public ResponseEntity<BookParticipationRecordDto> updateExitStatus(@PathVariable Long recordId) {
-        BookParticipationRecordDto updatedDto = bookParticipationRecordService.updateExitStatus(recordId);
+    public ResponseEntity<BookParticipationRecordDto> completeParticipation(@PathVariable Long recordId) {
+        BookParticipationRecordDto updatedDto = bookParticipationRecordService.completeParticipation(recordId);
         return ResponseEntity.ok(updatedDto);
     }
 }
