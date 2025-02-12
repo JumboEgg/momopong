@@ -8,10 +8,11 @@ import { useFriendListStore } from '@/stores/friendListStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useDrawing } from '@/stores/drawingStore';
 import { ContentType } from '@/types/invitation';
-
+import { useFriends } from '@/stores/friendStore';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { Friend } from '@/types/friend';
 
-function FriendSelection() { // props 제거
+function FriendSelection() {
   const navigate = useNavigate();
   const location = useLocation();
   const { template } = useDrawing();
@@ -25,7 +26,7 @@ function FriendSelection() { // props 제거
     fetchOnlineFriends,
   } = useFriendListStore();
 
-  // FCM 토큰 등록
+  // FCM 토큰 등록 (기존 코드와 동일)
   useEffect(() => {
     const registerFCMToken = async () => {
       try {
@@ -58,21 +59,8 @@ function FriendSelection() { // props 제거
       if (!contentId) return;
 
       try {
-        // Drawing 모드에서 온 경우와 Book 모드에서 온 경우를 구분
         const targetContentId = template?.id || contentId;
         const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
-
-        console.log('Fetching friends with:', {
-          contentId: targetContentId,
-          contentType: targetContentType,
-          template,
-          locationState: location.state,
-        });
-
-        if (!targetContentId) {
-          console.error('Content ID is missing');
-          return;
-        }
 
         await fetchOnlineFriends(targetContentId, targetContentType);
       } catch (err) {
@@ -93,11 +81,9 @@ function FriendSelection() { // props 제거
     }
 
     try {
-      console.log('template structure:', template); // 템플릿 구조 확인
-      const targetContentId = template?.id || contentId; // templateId 대신 id 사용
+      const targetContentId = template?.id || contentId;
       const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
 
-      // Drawing 모드와 Book 모드에 따라 contentTitle 설정
       const contentTitle = template
         ? `함께 그리기: ${template.name}`
         : location.state?.contentTitle;
@@ -116,8 +102,11 @@ function FriendSelection() { // props 제거
         contentTitle,
       });
 
-      // 콘텐츠 타입에 따라 다른 대기실로 이동
-      // navigate(targetContentType === 'BOOK' ? '/waiting-room' : '/sketch-waiting-room');
+      // 모든 모드에서 동일하게 소켓 연결과 friend 상태 설정
+      const { setFriend } = useFriends();
+      const { setConnect } = useSocketStore.getState();
+      setFriend(friend);
+      setConnect(true);
     } catch (err) {
       console.error('친구 초대 실패:', err);
     }
@@ -142,7 +131,13 @@ function FriendSelection() { // props 제거
           >
             ← 뒤로
           </button>
-          <h2 className="text-2xl font-bold text-center flex-1">함께 읽을 친구 선택</h2>
+          <h2 className="text-2xl font-bold text-center flex-1">
+            함께
+            {' '}
+            {template ? '그릴' : '읽을'}
+            {' '}
+            친구 선택
+          </h2>
         </div>
 
         {error && (
@@ -184,7 +179,7 @@ function FriendSelection() { // props 제거
                   <p className="text-sm text-green-500">온라인</p>
                 </div>
               </button>
-  ))}
+            ))}
           </div>
         )}
       </div>
