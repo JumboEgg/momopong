@@ -26,6 +26,7 @@ public class SketchParticipationRecordServiceImpl implements SketchParticipation
                 .child(child)
                 .startTime(recordDto.getStartTime())
                 .endTime(recordDto.getEndTime())
+                .earlyExit(recordDto.getEarlyExit() != null ? recordDto.getEarlyExit() : true)
                 .mode(recordDto.getMode())
                 .build();
 
@@ -33,4 +34,18 @@ public class SketchParticipationRecordServiceImpl implements SketchParticipation
 
         return savedRecord.entityToDto();
     }
+
+    @Override
+    @Transactional
+    public SketchParticipationRecordDto completeParticipation(Long recordId) {
+        SketchParticipationRecord record = sketchParticipationRecordRepository.findById(recordId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid record ID"));
+
+        record.updateExitStatus(false);
+        record.setEndTimeNow();
+        sketchParticipationRecordRepository.save(record);
+
+        return record.entityToDto();
+    }
+
 }
