@@ -18,7 +18,7 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
         SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)), 0)
         FROM book_participation_record
         WHERE child_id = :childId
-        AND created_at between :start and :end
+        AND start_time between :start and :end
     """, nativeQuery = true)
     Long totalBetweenTime(@Param("childId") Long childId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 

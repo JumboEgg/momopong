@@ -58,7 +58,7 @@ public class ReportServiceImpl implements ReportService {
         long sketchingMinutesSingle = 0, sketchingMinutesMulti = 0;
         for (SketchParticipationRecord sketchRecord : sketchRecordList) {
             // 중도 퇴장 횟수
-
+            if (sketchRecord.isEarlyExit()) earlyExitCount++;
 
             // 싱글 모드 / 멀티 모드 별 그린 시간
             long minutes = Duration.between(sketchRecord.getStartTime(), sketchRecord.getEndTime()).toMinutes();
