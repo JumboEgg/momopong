@@ -46,8 +46,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
                 .build();
 
         // 접속 상태 변경 (ONLINE -> READING)
-        String key = String.format(CHILD_STATUS_KEY, child.getId());
-        redisDao.setValues(key, StatusType.READING);
+
 
         bookParticipationRecordRepository.save(savedRecord);
         return savedRecord.entityToDto();
@@ -64,8 +63,6 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
         bookParticipationRecordRepository.save(record);
 
         // 접속 상태 변경 (READING -> ONLINE)
-        String key = String.format(CHILD_STATUS_KEY, record.getChild().getId());
-        redisDao.setValues(key, StatusType.ONLINE);
 
         return record.entityToDto();
     }
