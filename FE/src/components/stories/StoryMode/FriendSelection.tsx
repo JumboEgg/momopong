@@ -3,21 +3,19 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
 import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
-
 import { getToken } from 'firebase/messaging';
-// import { useStory } from '@/stores/storyStore';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { useDrawing } from '@/stores/drawingStore';
+import { ContentType } from '@/types/invitation';
+
 import { Friend } from '@/types/friend';
 
 function FriendSelection() { // props 제거
   const navigate = useNavigate();
   const location = useLocation();
-  const { contentId, contentType } = location.state || {};
-  // const { setContentTitle } = useStory(); // StoryStore에서 contentTitle을 설정
-
-  // console.log('Location state:', location.state); // location.state 전체 확인
-  // console.log('ContentId and type:', { contentId, contentType }); // contentId와 type 확
+  const { template } = useDrawing();
+  const { contentId } = location.state || {};
 
   const {
     friends,
@@ -26,6 +24,7 @@ function FriendSelection() { // props 제거
     inviteFriend,
     fetchOnlineFriends,
   } = useFriendListStore();
+
   // FCM 토큰 등록
   useEffect(() => {
     const registerFCMToken = async () => {
@@ -59,14 +58,30 @@ function FriendSelection() { // props 제거
       if (!contentId) return;
 
       try {
-        await fetchOnlineFriends(contentId, contentType);
+        // Drawing 모드에서 온 경우와 Book 모드에서 온 경우를 구분
+        const targetContentId = template?.id || contentId;
+        const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
+
+        console.log('Fetching friends with:', {
+          contentId: targetContentId,
+          contentType: targetContentType,
+          template,
+          locationState: location.state,
+        });
+
+        if (!targetContentId) {
+          console.error('Content ID is missing');
+          return;
+        }
+
+        await fetchOnlineFriends(targetContentId, targetContentType);
       } catch (err) {
         console.error('친구 목록 가져오기 실패:', err);
       }
     };
 
     fetchFriends();
-  }, [contentId, contentType, fetchOnlineFriends]);
+  }, [template, contentId, location.state?.contentType, fetchOnlineFriends]);
 
   const handleInviteFriend = async (inviteeId: number, friend: Friend) => {
     const currentChildId = tokenService.getCurrentChildId();
@@ -78,17 +93,31 @@ function FriendSelection() { // props 제거
     }
 
     try {
+      console.log('template structure:', template); // 템플릿 구조 확인
+      const targetContentId = template?.id || contentId; // templateId 대신 id 사용
+      const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
+
+      // Drawing 모드와 Book 모드에 따라 contentTitle 설정
+      const contentTitle = template
+        ? `함께 그리기: ${template.name}`
+        : location.state?.contentTitle;
+
+      if (!contentTitle) {
+        throw new Error('콘텐츠 제목이 없습니다.');
+      }
+
       await inviteFriend({
-        contentId,
+        contentId: targetContentId,
         inviterId: currentChildId,
         inviteeId,
-        contentType,
+        contentType: targetContentType,
         inviterName: currentUser.name,
         inviteeName: friend.name,
-        contentTitle: location.state.contentTitle, // location.state에서 온 실제 contentTitle 사용
+        contentTitle,
       });
 
-      navigate(contentType === 'BOOK' ? '/waiting-room' : '/sketch-waiting-room');
+      // 콘텐츠 타입에 따라 다른 대기실로 이동
+      // navigate(targetContentType === 'BOOK' ? '/waiting-room' : '/sketch-waiting-room');
     } catch (err) {
       console.error('친구 초대 실패:', err);
     }
