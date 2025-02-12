@@ -1,8 +1,10 @@
 package com.ssafy.project.service;
 
+import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.book.Book;
 import com.ssafy.project.domain.record.BookParticipationRecord;
 import com.ssafy.project.domain.Child;
+import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.record.BookParticipationRecordDto;
 import com.ssafy.project.repository.BookParticipationRecordRepository;
 import com.ssafy.project.repository.BookRepository;
@@ -20,6 +22,9 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
     private final BookParticipationRecordRepository bookParticipationRecordRepository;
     private final BookRepository bookRepository;
     private final ChildRepository childRepository;
+    private final RedisDao redisDao;
+
+    private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
 
     @Override
     @Transactional
@@ -40,6 +45,10 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
                 .mode(recordDto.getMode())
                 .build();
 
+        // 접속 상태 변경 (ONLINE -> READING)
+        String key = String.format(CHILD_STATUS_KEY, child.getId());
+        redisDao.setValues(key, StatusType.READING);
+
         bookParticipationRecordRepository.save(savedRecord);
         return savedRecord.entityToDto();
     }
@@ -53,6 +62,10 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
         record.updateExitStatus(false);
         record.setEndTimeNow();
         bookParticipationRecordRepository.save(record);
+
+        // 접속 상태 변경 (READING -> ONLINE)
+        String key = String.format(CHILD_STATUS_KEY, record.getChild().getId());
+        redisDao.setValues(key, StatusType.ONLINE);
 
         return record.entityToDto();
     }
