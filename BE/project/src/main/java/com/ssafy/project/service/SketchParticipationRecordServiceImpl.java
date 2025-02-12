@@ -38,8 +38,6 @@ public class SketchParticipationRecordServiceImpl implements SketchParticipation
         SketchParticipationRecord savedRecord = sketchParticipationRecordRepository.save(roomRecord);
 
         // 접속 상태 변경 (ONLINE -> DRAWING)
-        String key = String.format(CHILD_STATUS_KEY, child.getId());
-        redisDao.setValues(key, StatusType.DRAWING);
 
         return savedRecord.entityToDto();
     }
@@ -55,8 +53,6 @@ public class SketchParticipationRecordServiceImpl implements SketchParticipation
         sketchParticipationRecordRepository.save(record);
 
         // 접속 상태 변경 (DRAWING -> ONLINE)
-        String key = String.format(CHILD_STATUS_KEY, record.getChild().getId());
-        redisDao.setValues(key, StatusType.ONLINE);
 
         return record.entityToDto();
     }
