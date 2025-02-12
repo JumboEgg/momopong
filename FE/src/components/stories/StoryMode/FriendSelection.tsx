@@ -1,24 +1,32 @@
 import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
 import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 
+import { FriendInvitation } from '@/types/invitation';
 import { getToken } from 'firebase/messaging';
-import { useStory } from '@/stores/storyStore';
+// import { useStory } from '@/stores/storyStore';
 import { useFriendListStore } from '@/stores/friendListStore';
+import useSubAccountStore from '@/stores/subAccountStore';
+import { Friend } from '@/types/friend';
 
-function FriendSelection(): JSX.Element {
+function FriendSelection() { // props 제거
   const navigate = useNavigate();
-  const { bookId } = useStory();
+  const location = useLocation();
+  const state = location.state as FriendInvitation;
+  const { contentId, contentType } = state || {};
+
+  console.log('Location state:', location.state); // location.state 전체 확인
+  console.log('ContentId and type:', { contentId, contentType }); // contentId와 type 확
+
   const {
     friends,
     loading,
     error,
-    fetchBookFriends,
     inviteFriend,
+    fetchOnlineFriends,
   } = useFriendListStore();
-
   // FCM 토큰 등록
   useEffect(() => {
     const registerFCMToken = async () => {
@@ -28,10 +36,7 @@ function FriendSelection(): JSX.Element {
           throw new Error('로그인이 필요합니다.');
         }
 
-        // FCM 권한 요청
         await HandleAllowNotification();
-
-        // FCM 토큰 가져오기
         const fcmToken = await getToken(messaging, {
           vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
         });
@@ -40,42 +45,51 @@ function FriendSelection(): JSX.Element {
           throw new Error('FCM 토큰을 가져오지 못했습니다.');
         }
 
-        // FCM 토큰을 서버에 등록
         await saveFCMToken(currentChildId, fcmToken);
-        console.log('FCM 토큰 등록 완료');
-
-        // 온라인 친구 목록 가져오기
-        if (bookId) {
-          await fetchBookFriends(bookId);
-        }
       } catch (err) {
-        console.error('초기화 실패:', err);
+        console.error('FCM 토큰 등록 실패:', err);
       }
     };
 
     registerFCMToken();
-  }, [bookId, fetchBookFriends]);
+  }, []);
 
-  const handleInviteFriend = async (inviteeId: number) => {
-    if (!bookId) {
-      return;
-    }
+  // 친구 목록 가져오기
+  useEffect(() => {
+    const fetchFriends = async () => {
+      if (!contentId) return;
 
+      try {
+        await fetchOnlineFriends(contentId, contentType);
+      } catch (err) {
+        console.error('친구 목록 가져오기 실패:', err);
+      }
+    };
+
+    fetchFriends();
+  }, [contentId, contentType, fetchOnlineFriends]);
+
+  const handleInviteFriend = async (inviteeId: number, friend: Friend) => {
     const currentChildId = tokenService.getCurrentChildId();
-    if (!currentChildId) {
+    const currentUser = useSubAccountStore.getState().selectedAccount;
+
+    if (!currentChildId || !currentUser) {
+      console.error('사용자 정보가 없습니다.');
       return;
     }
 
     try {
-      // store의 inviteFriend 사용
       await inviteFriend({
-        bookId,
+        contentId,
         inviterId: currentChildId,
         inviteeId,
+        contentType,
+        inviterName: currentUser.name,
+        inviteeName: friend.name,
+        contentTitle: location.state.contentTitle, // location.state에서 온 실제 contentTitle 사용
       });
 
-      console.log('초대 성공');
-      navigate('/waiting-room');
+      navigate(contentType === 'BOOK' ? '/waiting-room' : '/sketch-waiting-room');
     } catch (err) {
       console.error('친구 초대 실패:', err);
     }
@@ -110,12 +124,6 @@ function FriendSelection(): JSX.Element {
         )}
 
         <div className="mb-4 text-sm text-gray-600">
-          디버그 정보:
-          <br />
-          bookId:
-          {' '}
-          {bookId}
-          <br />
           친구 수:
           {' '}
           {friends.length}
@@ -131,7 +139,7 @@ function FriendSelection(): JSX.Element {
               <button
                 key={friend.childId}
                 type="button"
-                onClick={() => handleInviteFriend(friend.childId)}
+                onClick={() => handleInviteFriend(friend.childId, friend)}
                 className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
                 disabled={loading}
               >
@@ -148,7 +156,7 @@ function FriendSelection(): JSX.Element {
                   <p className="text-sm text-green-500">온라인</p>
                 </div>
               </button>
-            ))}
+  ))}
           </div>
         )}
       </div>

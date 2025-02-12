@@ -27,6 +27,7 @@ import TogetherMode from './components/stories/StoryMode/TogetherMode';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
+import FriendSelection from './components/stories/StoryMode/FriendSelection';
 
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
@@ -122,6 +123,14 @@ function App(): JSX.Element {
           element={(
             <ProtectedRoute>
               <Friends />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/friend-selection"
+          element={(
+            <ProtectedRoute>
+              <FriendSelection />
             </ProtectedRoute>
           )}
         />

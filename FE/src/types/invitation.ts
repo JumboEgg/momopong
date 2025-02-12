@@ -1,8 +1,11 @@
 export type ContentType = 'BOOK' | 'SKETCH';
 
 export interface FriendInvitation {
-    bookId: number;
+    contentId: number;
     inviterId: number;
     inviteeId: number;
     contentType: ContentType;
+    inviterName?: string;
+    inviteeName?: string;
+    contentTitle?: string
 }

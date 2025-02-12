@@ -1,7 +1,7 @@
 // stores/friendListStore.ts
 import { create } from 'zustand';
 import type { Friend } from '@/types/friend';
-import type { FriendInvitation } from '@/types/invitation';
+import type { ContentType, FriendInvitation } from '@/types/invitation';
 import api from '@/api/axios';
 import { tokenService } from '@/services/tokenService';
 import useToastStore from './toastStore';
@@ -22,6 +22,48 @@ const assignRandomRoles = (): [StoryRole, StoryRole] => {
   ];
 };
 
+// 유틸리티 함수
+const createInvitationPayload = ({
+  inviterId,
+  inviterName,
+  inviteeName,
+  contentTitle,
+  contentType,
+  contentId,
+}: FriendInvitation) => {
+  const basePayload = {
+    inviterId,
+    inviterName,
+    inviteeName,
+    contentTitle,
+    contentId,
+  };
+
+  if (contentType === 'BOOK') {
+    return {
+      ...basePayload,
+      contentType,
+      notificationType: 'INVITE',
+    };
+  }
+
+  return {
+    ...basePayload,
+    contentType,
+  };
+};
+
+// 공통 엔드포인트 생성 함수
+const getInvitationEndpoint = (
+  contentType: ContentType,
+  contentId: number,
+  userId: number,
+  action: 'invitation' | 'accept' | 'reject' | 'expire',
+) => {
+  const basePath = contentType === 'SKETCH' ? '/sketch' : '/book';
+  return `${basePath}/${contentId}/friend/${userId}/invitation${action !== 'invitation' ? `/${action}` : ''}`;
+};
+
 interface FriendList {
   friends: Friend[];
   selectedFriend: Friend | null;
@@ -36,11 +78,11 @@ interface FriendList {
 
   // API 액션
   fetchFriends: () => Promise<void>;
-  fetchBookFriends: (bookId: number) => Promise<void>;
+  fetchOnlineFriends: (contentId: number, contentType: ContentType) => Promise<void>;
   inviteFriend: (invitation: FriendInvitation) => Promise<void>;
-  acceptInvitation: (bookId: number, inviteeId: number, inviterId: number) => Promise<void>;
-  rejectInvitation: (bookId: number, inviteeId: number, inviterId: number) => Promise<void>;
-  expireInvitation: (bookId: number, inviteeId: number, inviterId: number) => Promise<void>;
+  acceptInvitation:(invitation: FriendInvitation) => Promise<void>;
+  rejectInvitation: (invitation: FriendInvitation) => Promise<void>;
+  expireInvitation: (invitation: FriendInvitation) => Promise<void>;
   updateFriendStatus: (friendId: number, status: Friend['status']) => void;
 
   // 폴링
@@ -81,7 +123,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     }
   },
 
-  fetchBookFriends: async (bookId: number) => {
+  fetchOnlineFriends: async (contentId: number, contentType: ContentType) => {
     set({ loading: true, error: null });
     try {
       const currentChildId = tokenService.getCurrentChildId();
@@ -89,41 +131,53 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         throw new Error('선택된 자녀가 없습니다.');
       }
 
-      const response = await api.get(`/book/${bookId}/friend/${currentChildId}`);
+      const endpoint = contentType === 'SKETCH'
+        ? `/sketch/${contentId}/friend/${currentChildId}`
+        : `/book/${contentId}/friend/${currentChildId}`;
+
+      const response = await api.get(endpoint);
       const sortedFriends = sortByOnlineStatus(response.data);
       set({ friends: sortedFriends, loading: false });
     } catch (error) {
-      console.error('Failed to fetch book friends:', error);
-      const errorMessage = error instanceof Error ? error.message : '동화 친구 목록을 불러오는데 실패했습니다.';
+      console.error('Failed to fetch online friends:', error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : '온라인 친구 목록을 불러오는데 실패했습니다.';
       set({ error: errorMessage, loading: false });
     }
   },
 
-  inviteFriend: async ({
- bookId, inviterId, inviteeId, contentType,
-}: FriendInvitation) => {
+  inviteFriend: async (invitation: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
     const { setRoles } = useRoleStore.getState();
     set({ loading: true, error: null });
 
     try {
-      const [inviterRole, inviteeRole] = assignRandomRoles();
+      const endpoint = getInvitationEndpoint(
+        invitation.contentType,
+        invitation.contentId,
+        invitation.inviterId,
+        'invitation',
+      );
+      console.log('Generated endpoint:', endpoint);
 
-      setRoles(inviterRole, inviteeRole, bookId);
+      const basePayload = createInvitationPayload(invitation);
 
-      const endpoint = contentType === 'SKETCH'
-      ? `/sketch/${bookId}/friend/${inviterId}/invitation`
-      : `/book/${bookId}/friend/${inviterId}/invitation`;
+      if (invitation.contentType === 'BOOK') {
+        const [inviterRole, inviteeRole] = assignRandomRoles();
+        setRoles(inviterRole, inviteeRole, invitation.contentId);
 
-      await api.post(endpoint, {
-          inviteeId,
-          roleInfo: {
-            inviterRole,
-            inviteeRole,
-          },
-          notificationType: 'INVITATION', // 추가
-          contentType: 'BOOK',
+        // 실제 요청 데이터 자세히 확인
+        console.log('Request URL:', endpoint);
+        console.log('Request method:', 'POST');
+        console.log('Request headers:', {
+          'Content-Type': 'application/json',
+          // 기타 헤더들
         });
+        console.log('Request payload:', JSON.stringify(basePayload, null, 2));
+
+        await api.post(endpoint, basePayload);
+      }
 
       showToast({
         type: 'success',
@@ -141,54 +195,71 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     } finally {
       set({ loading: false });
     }
-  },
+   },
 
-  // friendListStore.ts
-  acceptInvitation: async (bookId, inviteeId, inviterId) => {
+   acceptInvitation: async (invitation: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
-    const roleState = useRoleStore.getState(); // 추가: roleState 가져오기
+    const roleState = useRoleStore.getState();
 
     try {
-      const response = await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/accept`, {
-        inviterId,
-        roleInfo: {
-          inviterRole: roleState.inviterRole,
-          inviteeRole: roleState.inviteeRole,
-        },
-        notificationType: 'ACCEPT',
-        contentType: 'BOOK',
-      });
+      const endpoint = getInvitationEndpoint(
+        invitation.contentType,
+        invitation.contentId,
+        invitation.inviteeId, // invitee 기준으로 엔드포인트 생성
+        'accept',
+      );
 
-      console.log('Accept invitation response:', response.data);
+      const basePayload = createInvitationPayload(invitation);
+
+      const payload = invitation.contentType === 'BOOK'
+        ? {
+            ...basePayload,
+            roleInfo: {
+              inviterRole: roleState.inviterRole,
+              inviteeRole: roleState.inviteeRole,
+            },
+          }
+        : basePayload;
+
+      await api.post(endpoint, payload);
 
       showToast({
         type: 'success',
-        message: '친구와 만나러 가고 있어요',
+        message: invitation.contentType === 'BOOK'
+          ? '친구와 만나러 가고 있어요'
+          : '함께 그림 그리러 가고 있어요',
       });
     } catch (error) {
       console.error('Failed to accept invitation:', error);
       showToast({
         type: 'error',
-        message: '지금은 함께 여행할 수 없어요',
+        message: '지금은 함께할 수 없어요',
       });
     }
-  },
+   },
 
-  rejectInvitation: async (bookId, inviteeId, inviterId) => {
+  rejectInvitation: async (invitation: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
 
     try {
-      const response = await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/reject`, {
-        inviterId,
-        notificationType: 'REJECT',
-        contentType: 'BOOK',
-      });
+      const endpoint = getInvitationEndpoint(
+        invitation.contentType,
+        invitation.contentId,
+        invitation.inviteeId, // invitee 기준으로 엔드포인트 생성
+        'reject',
+      );
 
-      console.log('Reject invitation response:', response.data);
+      const basePayload = createInvitationPayload(invitation);
+
+      await api.post(endpoint, basePayload);
+
+      // console.log('Reject invitation response:', response.data);
 
       showToast({
         type: 'reject',
-        message: '다음에 여행하기로 했어요',
+        message: invitation.contentType === 'BOOK'
+          ? '다음에 여행하기로 했어요'
+          : '다음에 함께 그리기로 했어요',
       });
     } catch (error) {
       console.error('Failed to reject invitation:', error);
@@ -199,13 +270,20 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     }
   },
 
-  expireInvitation: async (bookId, inviteeId, inviterId) => {
+  expireInvitation: async (invitation: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
 
     try {
-      await api.post(`/book/${bookId}/friend/${inviteeId}/invitation/expire`, {
-        inviterId,
-      });
+      const endpoint = getInvitationEndpoint(
+        invitation.contentType,
+        invitation.contentId,
+        invitation.inviteeId,
+        'expire',
+      );
+
+      const basePayload = createInvitationPayload(invitation);
+
+      await api.post(endpoint, basePayload);
 
       showToast({
         type: 'reject',
@@ -250,13 +328,27 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
 export const useFriendInvitation = () => {
   const {
-  inviteFriend, loading, error, clearError,
-} = useFriendListStore();
+    inviteFriend, loading, error, clearError,
+  } = useFriendListStore();
 
-  const handleInvitation = async (bookId: number, inviterId: number, inviteeId: number) => {
+  const handleInvitation = async (
+    contentId: number,
+    inviterId: number,
+    inviteeId: number,
+    contentType: ContentType,
+    inviterName: string,
+    inviteeName: string,
+    contentTitle: string,
+  ) => {
     try {
       await inviteFriend({
-        bookId, inviterId, inviteeId, contentType: 'BOOK',
+        contentId,
+        inviterId,
+        inviteeId,
+        contentType,
+        inviterName,
+        inviteeName,
+        contentTitle,
       });
     } catch (err) {
       console.error('친구 초대 처리 중 오류:', err);

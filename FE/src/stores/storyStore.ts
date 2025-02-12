@@ -1,5 +1,5 @@
-import { RecordingData, StoryMode } from '@/components/stories/types/story';
 import { create } from 'zustand';
+import { RecordingData, StoryMode } from '@/components/stories/types/story';
 
 // Drawing 상태 관리 스토어
 interface StoryStore {
