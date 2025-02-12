@@ -5,6 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -21,6 +24,9 @@ public class BookRecordPage {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_record_id")
     private BookParticipationRecord bookParticipationRecord;
+
+    @OneToMany(mappedBy = "bookRecordPage", cascade = CascadeType.ALL)
+    private List<BookRecordSketch> bookRecordSketchList = new ArrayList<>();
 
     @Column(name="book_record_page_number")
     private Long bookRecordPageNumber;
