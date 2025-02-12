@@ -6,6 +6,7 @@ function RecordingButton({
   characterType,
   storyIndex,
   onRecordingComplete,
+  onRecordingStart,
 }: RecordingButtonProps): JSX.Element {
   const [isRecording, setIsRecording] = useState(false); // 녹음중인지 여부
   const [timeLeft, setTimeLeft] = useState(20); // 남은 녹음 시간
@@ -82,6 +83,7 @@ function RecordingButton({
       recorder.start();
       setIsRecording(true);
       setTimeLeft(20); // 타이머 초기화
+      onRecordingStart();
     } catch (error) {
       console.error('Failed to start recording:', error);
     }

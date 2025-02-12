@@ -56,6 +56,7 @@ export interface RecordingButtonProps {
   characterType: CharacterType;
   storyIndex: number;
   onRecordingComplete: () => void;
+  onRecordingStart: () => void; // 추가
 }
 
 // StoryIllustration.tsx

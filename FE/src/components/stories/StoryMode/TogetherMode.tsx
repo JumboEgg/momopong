@@ -6,12 +6,12 @@ import { useLocation } from 'react-router-dom';
 import { useFriends } from '@/stores/friendStore';
 import { useStory } from '@/stores/storyStore';
 import useSubAccountStore from '@/stores/subAccountStore';
-import VideoRoom from '@/components/video/VideoRoom';
 import storyData from '../data/cinderella';
 import RecordingButton from './RecordingButton';
 import AudioPlayer from '../AudioPlayer';
 import { getAudioUrl } from '../utils/audioUtils';
 import StoryIllustration from './StoryIllustration';
+import IntegratedRoom from './IntegratedRoom';
 
 interface LocationState {
   roomName: string;
@@ -139,6 +139,22 @@ function TogetherMode() {
 
   const hasRecording = useCallback((index: number) => recordings.has(index), [recordings]);
 
+  // isRecording state 추가
+  const [isRecording, setIsRecording] = useState(false);
+  // handleRemoteStoryUpdate 함수 추가
+  const handleRemoteStoryUpdate = useCallback((newIndex: number, newContentIndex: number) => {
+    setCurrentIndex(newIndex);
+    setCurrentContentIndex(newContentIndex);
+  }, [setCurrentIndex]);
+
+  // 원격 녹음 상태 업데이트 핸들러
+  const handleRemoteRecordingChange = useCallback((remoteIsRecording: boolean) => {
+    // 상대방이 녹음 중일 때는 다음으로 넘어갈 수 없음
+    if (remoteIsRecording) {
+      // 필요한 경우 UI에 상대방 녹음 중임을 표시
+    }
+  }, []);
+
   return (
     <div className="w-full h-screen relative">
       {/* 동화 컨텐츠 영역 */}
@@ -182,7 +198,11 @@ function TogetherMode() {
                 <RecordingButton
                   characterType={currentContent.type}
                   storyIndex={currentIndex}
-                  onRecordingComplete={handleRecordingComplete}
+                  onRecordingComplete={() => {
+                    setIsRecording(false);
+                    handleRecordingComplete();
+                  }}
+                  onRecordingStart={() => setIsRecording(true)}
                 />
               )}
             </div>
@@ -201,14 +221,18 @@ function TogetherMode() {
         </div>
       </div>
 
-      {/* 화상 비디오 영역 */}
-      {isSessionEstablished && (
-        <div className="absolute bottom-8 left-0 right-0 flex justify-between items-center px-8 z-50">
-          <VideoRoom
-            roomName={roomName}
-            participantName={selectedAccount?.name}
-          />
-        </div>
+      {isSessionEstablished && userRole && (
+        <IntegratedRoom
+          roomName={roomName}
+          participantName={selectedAccount?.name || ''}
+          userRole={userRole}
+          isUserTurn={isUserTurn}
+          onStoryUpdate={handleRemoteStoryUpdate}
+          currentIndex={currentIndex}
+          currentContentIndex={currentContentIndex}
+          isRecording={isRecording}
+          onRecordingStateChange={handleRemoteRecordingChange}
+        />
       )}
 
       {/* 이야기 종료 오버레이 */}

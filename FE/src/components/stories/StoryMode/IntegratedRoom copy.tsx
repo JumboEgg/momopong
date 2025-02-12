@@ -4,10 +4,12 @@ import {
   RoomEvent,
   RemoteParticipant,
   LocalParticipant,
+  RemoteTrack,
+  RemoteTrackPublication,
+  Track,
   VideoPresets,
   DisconnectReason,
-  Track,
-  RoomOptions,
+  Participant,
 } from 'livekit-client';
 import { useStory } from '@/stores/storyStore';
 
@@ -16,19 +18,6 @@ interface IntegratedRoomProps {
   participantName: string;
   userRole: 'prince' | 'princess';
   isUserTurn: boolean;
-  onStoryUpdate: (index: number, contentIndex: number) => void;
-  currentIndex: number;
-  currentContentIndex: number;
-  isRecording: boolean;
-  onRecordingStateChange: (isRecording: boolean) => void;
-}
-
-interface StoryState {
-  type: 'STORY_UPDATE' | 'RECORDING_STATE';
-  currentIndex?: number;
-  currentContentIndex?: number;
-  isRecording?: boolean;
-  fromRole?: 'prince' | 'princess';
 }
 
 function IntegratedRoom({
@@ -36,16 +25,23 @@ function IntegratedRoom({
   participantName,
   userRole,
   isUserTurn,
-  onStoryUpdate,
-  currentIndex,
-  currentContentIndex,
-  isRecording,
-  onRecordingStateChange,
 }: IntegratedRoomProps) {
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<(RemoteParticipant | LocalParticipant)[]>([]);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const { audioEnabled } = useStory();
+
+  // 참가자 상태 업데이트
+  const updateParticipants = useCallback((currentRoom: Room) => {
+    const remoteParticipants = Array.from(currentRoom.remoteParticipants.values());
+    const allParticipants: (RemoteParticipant | LocalParticipant)[] = [...remoteParticipants];
+
+    if (currentRoom.localParticipant) {
+      allParticipants.unshift(currentRoom.localParticipant);
+    }
+
+    setParticipants(allParticipants);
+  }, []);
 
   // 토큰 가져오기
   const handleGetToken = useCallback(async (roomId: string, participantId: string) => {
@@ -71,98 +67,16 @@ function IntegratedRoom({
     }
   }, []);
 
-  // 상태 업데이트 전송
-  const sendStoryState = useCallback((state: StoryState) => {
-    if (!room) return;
-    const data = JSON.stringify({ ...state, fromRole: userRole });
-    room.localParticipant.publishData(
-      new Uint8Array(Buffer.from(data)),
-      { reliable: true },
-    );
-  }, [room, userRole]);
-
-  // 상태 변경 수신 처리
-  const handleDataReceived = useCallback((payload: Uint8Array) => {
-    try {
-      const data: StoryState = JSON.parse(new TextDecoder().decode(payload));
-      if (data.fromRole === userRole) return;
-
-      switch (data.type) {
-        case 'STORY_UPDATE':
-          if (typeof data.currentIndex === 'number' && typeof data.currentContentIndex === 'number') {
-            onStoryUpdate(data.currentIndex, data.currentContentIndex);
-          }
-          break;
-        case 'RECORDING_STATE':
-          if (typeof data.isRecording === 'boolean') {
-            onRecordingStateChange(data.isRecording);
-          }
-          break;
-        default:
-          break;
-      }
-    } catch (error) {
-      console.error('Data parsing error:', error);
-    }
-  }, [onStoryUpdate, onRecordingStateChange, userRole]);
-
-  // 비디오 트랙 가져오는 함수
-  const getVideoTrack = useCallback((participant: RemoteParticipant | LocalParticipant) => {
-    const trackPublications = Array.from(participant.trackPublications.values());
-    const videoPublication = trackPublications.find(
-      (publication) => publication.kind === Track.Kind.Video && publication.track !== null,
-    );
-
-    if (!videoPublication?.track) {
-      console.log('No video track found for participant:', participant.identity);
-      return null;
-    }
-
-    return videoPublication.track;
-  }, []);
-
-  // 참가자 상태 업데이트
-  const updateParticipants = useCallback((currentRoom: Room) => {
-    const remoteParticipants = Array.from(currentRoom.remoteParticipants.values());
-    const allParticipants: (RemoteParticipant | LocalParticipant)[] = [...remoteParticipants];
-
-    if (currentRoom.localParticipant) {
-      allParticipants.unshift(currentRoom.localParticipant);
-    }
-
-    setParticipants(allParticipants);
-  }, []);
-
-  // 상태 변경 시 동기화
-  useEffect(() => {
-    if (!room) return;
-    sendStoryState({
-      type: 'STORY_UPDATE',
-      currentIndex,
-      currentContentIndex,
-    });
-  }, [room, currentIndex, currentContentIndex, sendStoryState]);
-
-  useEffect(() => {
-    if (!room) return;
-    sendStoryState({
-      type: 'RECORDING_STATE',
-      isRecording,
-    });
-  }, [room, isRecording, sendStoryState]);
-
   // LiveKit 룸 초기화
-  useEffect(
-    () => {
+  useEffect(() => {
     let isMounted = true;
 
     const initRoom = async () => {
       try {
-        // 토큰 가져오기
         const token = await handleGetToken(roomName, participantName);
         if (!isMounted) return;
 
-        const roomOptions: RoomOptions = {
+        const roomOptions = {
           adaptiveStream: true,
           dynacast: true,
           videoCaptureDefaults: {
@@ -179,6 +93,7 @@ function IntegratedRoom({
 
         const newRoom = new Room(roomOptions);
 
+        // 이벤트 리스너 등록
         newRoom
           .on(RoomEvent.ParticipantConnected, () => {
             if (isMounted) updateParticipants(newRoom);
@@ -186,24 +101,47 @@ function IntegratedRoom({
           .on(RoomEvent.ParticipantDisconnected, () => {
             if (isMounted) updateParticipants(newRoom);
           })
-          .on(RoomEvent.DataReceived, (payload: Uint8Array) => {
-            if (isMounted) handleDataReceived(payload);
-          })
+          .on(
+        RoomEvent.TrackSubscribed,
+            (
+                track: RemoteTrack,
+                publication: RemoteTrackPublication,
+                participant: RemoteParticipant,
+            ) => {
+              if (!isMounted) return;
+              console.log('Track subscribed:', track.kind, 'from', participant.identity);
+              updateParticipants(newRoom);
+            },
+          )
+          .on(
+        RoomEvent.TrackUnsubscribed,
+            (
+                track: RemoteTrack,
+                publication: RemoteTrackPublication,
+                participant: RemoteParticipant,
+            ) => {
+              if (!isMounted) return;
+              console.log('Track unsubscribed:', track.kind, 'from', participant.identity);
+              updateParticipants(newRoom);
+            },
+          )
           .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
-            if (isMounted && reason) {
+            if (!isMounted) return;
+            if (reason) {
               setConnectionError(`Room disconnected: ${reason}`);
             }
           });
 
+        // 룸 연결
         await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
-
         if (!isMounted) {
           await newRoom.disconnect();
           return;
         }
 
         await newRoom.localParticipant.setName(participantName);
-        await newRoom.localParticipant.enableCameraAndMicrophone();
+
+        // 초기 비디오/오디오 설정
         await newRoom.localParticipant.setCameraEnabled(true);
         await newRoom.localParticipant.setMicrophoneEnabled(isUserTurn && audioEnabled);
 
@@ -225,23 +163,23 @@ function IntegratedRoom({
         room.disconnect();
       }
     };
-  },
-  [roomName,
-    participantName,
-    handleGetToken,
-    updateParticipants,
-    isUserTurn,
-    audioEnabled,
-    handleDataReceived],
-);
+  }, [roomName, participantName, handleGetToken, updateParticipants, isUserTurn, audioEnabled]);
 
   // 마이크 상태 관리
   useEffect(() => {
     if (!room) return;
+
     const { localParticipant } = room;
     localParticipant.setMicrophoneEnabled(isUserTurn && audioEnabled);
   }, [room, isUserTurn, audioEnabled]);
 
+  const getVideoTrack = useCallback((participant: Participant) => {
+    const videoPublication = Array.from(participant.getTrackPublications().values())
+      .find((publication) => publication.kind === Track.Kind.Video);
+    return videoPublication?.track;
+  }, []);
+
+  // 에러 처리
   if (connectionError) {
     return (
       <div className="p-4 bg-red-100 text-red-700 rounded-lg">
@@ -264,12 +202,7 @@ function IntegratedRoom({
               if (element) {
                 const videoTrack = getVideoTrack(participant);
                 if (videoTrack) {
-                  try {
-                    videoTrack.detach().forEach((el) => el.remove());
-                    videoTrack.attach(element);
-                  } catch (error) {
-                    console.error('Error attaching video track:', error);
-                  }
+                  videoTrack.attach(element);
                 }
               }
             }}
