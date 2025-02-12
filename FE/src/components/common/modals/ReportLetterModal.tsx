@@ -21,7 +21,11 @@ function ReportLetterModal({
   const myLetterAudio = new Audio();
 
   const onSave = () => {
-    // TODO : 저장 버튼 클릭 시 오디오 저장
+    if (!letterAudio) return;
+    const link = document.createElement('a');
+    link.href = letterAudio.src;
+    link.download = `${data.childName}(이)가 ${data.role}에게 보낸 편지-${data.createdAt}`; // 저장할 파일 이름 지정
+    link.click(); // 다운로드 실행
     onClose();
   };
 
