@@ -7,6 +7,7 @@ import useFCMStore from '@/stores/useFCMStore';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useToastStore from '@/stores/toastStore';
 import { ContentType } from '@/types/invitation';
+import type { NotificationType } from '@/types/notification';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -46,32 +47,32 @@ export const useFirebaseMessaging = () => {
     data: null,
   });
 
-//    // 공통 유틸리티 함수들
-//    const navigateToContent = (
-//     contentType: ContentType,
-//     contentId: number,
-//     participantName: string,
-// ) => {
-//     const basePath = contentType === 'BOOK' ? 'book' : 'sketch';
-//     navigate(`/${basePath}/${contentId}/together`, {
-//       state: {
-//         roomName: `${basePath}-${contentId}`,
-//         participantName,
-//       },
-//     });
-//   };
+   // 공통 유틸리티 함수들
+   const navigateToContent = (
+    contentType: ContentType,
+    contentId: number,
+    participantName: string,
+) => {
+    const basePath = contentType === 'BOOK' ? 'book' : 'sketch';
+    navigate(`/${basePath}/${contentId}/together`, {
+      state: {
+        roomName: `${basePath}-${contentId}`,
+        participantName,
+      },
+    });
+  };
 
-//   const showContentTypeMessage = (
-//     type: 'success' | 'error' | 'invitation' | 'accept' | 'reject',
-//     contentType: ContentType,
-//     messages: { book: string; sketch: string },
-//   ) => {
-//     const { showToast } = useToastStore.getState();
-//     showToast({
-//       type,
-//       message: contentType === 'BOOK' ? messages.book : messages.sketch,
-//     });
-//   };
+  const showContentTypeMessage = (
+    type: NotificationType,
+    contentType: ContentType,
+    messages: { book: string; sketch: string },
+  ) => {
+    const { showToast } = useToastStore.getState();
+    showToast({
+      type,
+      message: contentType === 'BOOK' ? messages.book : messages.sketch,
+    });
+  };
 
   const handleInvitationAccept = async () => {
     if (!invitationModal.data) return;
@@ -86,10 +87,7 @@ export const useFirebaseMessaging = () => {
       contentTitle,
     } = invitationModal.data;
 
-    const { showToast } = useToastStore.getState();
-
     try {
-      // FriendInvitation 타입에 맞게 데이터 구성
       await acceptInvitation({
         contentId,
         inviterId,
@@ -100,29 +98,12 @@ export const useFirebaseMessaging = () => {
         contentTitle,
       });
 
-      // contentType에 따라 다른 경로로 이동
-      if (contentType === 'BOOK') {
-        navigate(`/book/${contentId}/together`, {
-          state: {
-            roomName: `book-${contentId}`,
-            participantName: inviteeName,
-          },
-        });
-      } else {
-        navigate(`/sketch/${contentId}/together`, {
-          state: {
-            roomName: `sketch-${contentId}`,
-            participantName: inviteeName,
-          },
-        });
-      }
+      navigateToContent(contentType, contentId, inviteeName);
     } catch (error) {
       console.error('Failed to accept invitation:', error);
-      showToast({
-        type: 'error',
-        message: contentType === 'BOOK'
-          ? '동화 초대 수락 처리 중 오류가 발생했습니다.'
-          : '그림 초대 수락 처리 중 오류가 발생했습니다.',
+      showContentTypeMessage('error', contentType, {
+        book: '동화 초대 수락 처리 중 오류가 발생했습니다.',
+        sketch: '그림 초대 수락 처리 중 오류가 발생했습니다.',
       });
     }
 
@@ -154,12 +135,9 @@ export const useFirebaseMessaging = () => {
       });
     } catch (error) {
       console.error('Failed to reject invitation:', error);
-      const { showToast } = useToastStore.getState();
-      showToast({
-        type: 'error',
-        message: contentType === 'BOOK'
-          ? '동화 초대 거절 처리 중 오류가 발생했습니다.'
-          : '그림 초대 거절 처리 중 오류가 발생했습니다.',
+      showContentTypeMessage('error', contentType, {
+        book: '동화 초대 거절 처리 중 오류가 발생했습니다.',
+        sketch: '그림 초대 거절 처리 중 오류가 발생했습니다.',
       });
     }
 
@@ -192,87 +170,64 @@ export const useFirebaseMessaging = () => {
       }
     };
 
-    const handleMessage = onMessage(messaging, (payload) => {
-      const currentChildId = tokenService.getCurrentChildId();
-      const { showToast } = useToastStore.getState();
+      const handleMessage = onMessage(messaging, (payload) => {
+        const currentChildId = tokenService.getCurrentChildId();
+        if (!payload.data || !currentChildId) return;
 
-      if (!payload.data || !currentChildId) return;
+        const {
+          inviterId,
+          inviteeId,
+          inviterName,
+          inviteeName,
+          contentId,
+          contentTitle,
+          contentType: rawContentType,
+          notificationType,
+        } = payload.data;
 
-      const {
-        inviterId,
-        inviteeId,
-        inviterName,
-        inviteeName,
-        contentId,
-        contentTitle,
-        contentType, // contentType 추가
-        notificationType,
-      } = payload.data;
+        // 타입 가드를 사용한 검증
+        const isValidContentType = (type: string): type is ContentType => type === 'BOOK' || type === 'SKETCH';
 
-      console.log('FCM Message received:', {
-        currentChildId,
-        inviterId,
-        inviteeId,
-        notificationType,
-        contentType,
-      });
+        if (!isValidContentType(rawContentType)) {
+          console.error('Invalid content type:', rawContentType);
+          return;
+        }
 
-      // 초대장을 받은 경우
-      if (notificationType === 'INVITE' && Number(inviteeId) === currentChildId) {
-        setInvitationModal({
-          isOpen: true,
-          data: {
-            inviterId: Number(inviterId),
-            inviterName,
-            inviteeId: Number(inviteeId),
-            inviteeName,
-            contentId: Number(contentId),
-            contentTitle,
-            contentType, // contentType 추가
-          },
-        });
+        const contentType = rawContentType; // ContentType 타입으로 보장
 
-        showToast({
-          type: 'invitation',
-          message: contentType === 'BOOK'
-            ? `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`
-            : `${inviterName}님이 "${contentTitle}" 함께 그리기에 초대했어요!`,
-        });
-      } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
-        // 초대 수락을 받은 경우
-        showToast({
-          type: 'accept',
-          message: contentType === 'BOOK'
-            ? `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`
-            : `${inviteeName}님이 "${contentTitle}" 함께 그리기를 수락했어요!`,
-        });
-
-        // contentType에 따라 다른 경로로 이동
-        if (contentType === 'BOOK') {
-          navigate(`/book/${contentId}/together`, {
-            state: {
-              roomName: `book-${contentId}`,
-              participantName: inviterName,
+        // 초대장을 받은 경우
+        if (notificationType === 'INVITE' && Number(inviteeId) === currentChildId) {
+          setInvitationModal({
+            isOpen: true,
+            data: {
+              inviterId: Number(inviterId),
+              inviterName,
+              inviteeId: Number(inviteeId),
+              inviteeName,
+              contentId: Number(contentId),
+              contentTitle,
+              contentType,
             },
           });
-        } else {
-          navigate(`/sketch/${contentId}/together`, {
-            state: {
-              roomName: `sketch-${contentId}`,
-              participantName: inviterName,
-            },
+
+          showContentTypeMessage('invitation', contentType, {
+            book: `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`,
+            sketch: `${inviterName}님이 "${contentTitle}" 함께 그리기에 초대했어요!`,
+          });
+        } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
+          showContentTypeMessage('accept', contentType, {
+            book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
+            sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 수락했어요!`,
+          });
+
+          navigateToContent(contentType, Number(contentId), inviterName);
+        } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
+          showContentTypeMessage('reject', contentType, {
+            book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
+            sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 거절했어요`,
           });
         }
-      } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
-        // 초대 거절을 받은 경우
-        showToast({
-          type: 'reject',
-          message: contentType === 'BOOK'
-            ? `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`
-            : `${inviteeName}님이 "${contentTitle}" 함께 그리기를 거절했어요`,
-        });
-      }
-    });
+      });
 
     handleAllowNotification();
 

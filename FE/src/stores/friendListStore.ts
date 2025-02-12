@@ -252,7 +252,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       await api.post(endpoint, payload);
 
       showToast({
-        type: 'success',
+        type: 'accept',
         message: invitation.contentType === 'BOOK'
           ? '친구와 만나러 가고 있어요'
           : '함께 그림 그리러 가고 있어요',
