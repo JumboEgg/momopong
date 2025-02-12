@@ -35,7 +35,7 @@ logging:
     com.ssafy.project: debug
 
 jwt:
-  secret: testSecretKey20230327testSecretKey20230327testSecretKey20230327
+  secret: ${JWT_SECRET_KEY}
   access-token:
     expire-time: 259200000 # 3일
   refresh-token:
