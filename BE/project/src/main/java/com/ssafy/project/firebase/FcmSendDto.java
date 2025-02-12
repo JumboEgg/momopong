@@ -1,6 +1,6 @@
 package com.ssafy.project.firebase;
 
-import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.invitation.NotificationDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

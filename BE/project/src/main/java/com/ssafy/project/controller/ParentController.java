@@ -1,6 +1,6 @@
 package com.ssafy.project.controller;
 
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.user.*;
 import com.ssafy.project.security.JwtToken;
 import com.ssafy.project.service.ParentService;
 import io.swagger.v3.oas.annotations.Operation;

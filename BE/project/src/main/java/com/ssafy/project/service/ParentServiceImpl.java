@@ -2,10 +2,10 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
-import com.ssafy.project.dto.ChildListDto;
-import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.ParentDto;
-import com.ssafy.project.dto.ParentSignUpRequestDto;
+import com.ssafy.project.dto.user.ChildListDto;
+import com.ssafy.project.dto.user.LoginRequestDto;
+import com.ssafy.project.dto.user.ParentDto;
+import com.ssafy.project.dto.user.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
@@ -133,10 +133,11 @@ public class ParentServiceImpl implements ParentService {
                         .name(child.getName())
                         .profile(presignedUrlService.getFile(child.getProfile()))
                         .age(child.getAge())
-                        .createdAt(child.getCreatedAt())
+                        .daysSinceStart(child.getDaysSinceStart())
                         .build())
                 .collect(Collectors.toList());
     }
+
     @Override
     public void deleteParent(Long parentId) {
         // 논리적 삭제

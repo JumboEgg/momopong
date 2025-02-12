@@ -1,4 +1,4 @@
-package com.ssafy.project.dto;
+package com.ssafy.project.dto.user;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,5 +16,5 @@ public class ChildListDto {
     private String name;
     private String profile;
     private int age; // 나이
-    private LocalDate createdAt; // 가입일
+    private int daysSinceStart; // 가입 후 지난 일
 }

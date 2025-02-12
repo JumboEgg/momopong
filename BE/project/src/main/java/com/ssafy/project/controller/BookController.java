@@ -1,9 +1,9 @@
 package com.ssafy.project.controller;
 
-import com.ssafy.project.dto.ChildStatusDto;
-import com.ssafy.project.dto.InviteeIdDto;
-import com.ssafy.project.dto.InviterIdDto;
-import com.ssafy.project.dto.NotificationDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
+import com.ssafy.project.dto.invitation.InviteeIdDto;
+import com.ssafy.project.dto.invitation.InviterIdDto;
+import com.ssafy.project.dto.invitation.NotificationDto;
 import com.ssafy.project.dto.book.BookDto;
 import com.ssafy.project.dto.book.BookListDto;
 import com.ssafy.project.service.BookService;

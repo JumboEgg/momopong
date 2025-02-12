@@ -1,9 +1,9 @@
 package com.ssafy.project.service;
 
-import com.ssafy.project.dto.ChildListDto;
-import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.ParentDto;
-import com.ssafy.project.dto.ParentSignUpRequestDto;
+import com.ssafy.project.dto.user.ChildListDto;
+import com.ssafy.project.dto.user.LoginRequestDto;
+import com.ssafy.project.dto.user.ParentDto;
+import com.ssafy.project.dto.user.ParentSignUpRequestDto;
 import com.ssafy.project.security.JwtToken;
 
 import java.util.List;

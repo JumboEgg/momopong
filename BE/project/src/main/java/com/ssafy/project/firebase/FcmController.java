@@ -1,6 +1,6 @@
 package com.ssafy.project.firebase;
 
-import com.ssafy.project.dto.ChildIdDto;
+import com.ssafy.project.dto.user.ChildIdDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

@@ -1,8 +1,8 @@
 package com.ssafy.project.service;
 
-import com.ssafy.project.dto.ChildDto;
-import com.ssafy.project.dto.ChildSignUpRequestDto;
-import com.ssafy.project.dto.ChildUpdateRequestDto;
+import com.ssafy.project.dto.user.ChildDto;
+import com.ssafy.project.dto.user.ChildSignUpRequestDto;
+import com.ssafy.project.dto.user.ChildUpdateRequestDto;
 
 import java.util.Map;
 
