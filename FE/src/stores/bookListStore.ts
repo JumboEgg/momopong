@@ -1,10 +1,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { BookInfo } from '@/types/book';
+import { BookItemInfo } from '@/types/book';
 
 interface BookListStore {
-  bookList: BookInfo[];
+  bookList: BookItemInfo[];
   setBookList: () => void;
 }
 

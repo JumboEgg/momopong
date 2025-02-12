@@ -9,11 +9,12 @@ import {
  faArrowLeft, faCaretLeft, faCaretRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { getCoverPath } from '@/utils/format/imgPath';
+import { useBookContent } from '@/stores/selectedBookStore';
 
 function StorySelection(): JSX.Element {
-  const {
-    bookList,
-  } = useBookList();
+  const { bookList } = useBookList();
+  const { setBookContent } = useBookContent();
+
   const navigate = useNavigate();
   const { setBookId } = useStory();
   const [startIndex, setStartIndex] = useState(0);
@@ -35,6 +36,7 @@ function StorySelection(): JSX.Element {
       // 스토리 ID 설정
       setBookId(bookId); // setStoryId -> setBookId
       console.log('선택된 bookId:', bookId); // 디버깅용 로그 추가
+      setBookContent(bookId);
       navigate('/story/ModeSelection'); // 추천: 선택 후 스토리 모드로 이동
     } catch (err) {
       setError('스토리를 불러오는 중 오류가 발생했습니다.');
