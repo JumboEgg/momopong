@@ -14,7 +14,7 @@ function HomePage() {
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test' | '/book/letter'): void => {
     navigate(path);
   };
-  const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
+  const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
   // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
@@ -144,8 +144,17 @@ function HomePage() {
       <button
         type="button"
         onClick={() => setIsLettersModalOpen(true)}
+        onMouseEnter={() => setHoveredItem('post')}
+        onMouseLeave={() => setHoveredItem(null)}
+        className="fixed flex flex-col items-center bg-transparent border-0 p-0 m-0 transition-all duration-300
+        translate-x-[15vw] translate-y-[15vh]"
+        style={{ transform: `scale(${hoveredItem === 'post' ? 1.1 : 1})` }}
       >
-        편지함
+        <img
+          src="/images/icons/notification.png"
+          alt="우편함"
+          className="w-[10vw]"
+        />
       </button>
 
       {isLettersModalOpen && (

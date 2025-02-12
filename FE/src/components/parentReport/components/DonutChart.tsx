@@ -1,3 +1,4 @@
+import TempTimeFormatter from '@/utils/format/timeFormatter';
 import React from 'react';
 
 export interface DonutChartProps {
@@ -62,7 +63,7 @@ function DonutChart({ singleTime = 60, multiTime = 40 }: DonutChartProps) {
             dominantBaseline="middle"
             className="text-xl font-bold"
           >
-            {total}
+            {TempTimeFormatter(total)}
           </text>
         </svg>
       </div>

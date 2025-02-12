@@ -1,9 +1,14 @@
 // src/components/stories/StoryMode/StorySelection.tsx
 import { useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import { useBookList } from '@/stores/bookListStore';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import {
+ faArrowLeft, faCaretLeft, faCaretRight,
+} from '@fortawesome/free-solid-svg-icons';
+import { getCoverPath } from '@/utils/format/imgPath';
 
 function StorySelection(): JSX.Element {
   const {
@@ -39,112 +44,92 @@ function StorySelection(): JSX.Element {
     }
   };
 
-  // 홈으로 이동하는 경우만 navigate 사용
-  const handleBackClick = () => {
-    navigate('/home');
-  };
-
   return (
-    <div className="w-[1600px] h-[1000px] flex flex-col px-[200px] bg-[url('/images/bookstand.jpg')] bg-cover bg-center">
-      {/* 헤더 영역 */}
-      <div className="h-14 px-8 pt-6">
-        <button
-          type="button"
-          onClick={handleBackClick}
-          className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
-        >
-          <ChevronLeft size={20} />
-          <span>뒤로가기</span>
-        </button>
+    <div className="w-full h-full bg-green-900 flex items-center justify-center">
+      <div className="absolute top-5 left-5 z-10">
+        <IconCircleButton
+          size="sm"
+          variant="action"
+          onClick={() => navigate('/home')}
+          icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
+          className=""
+        />
       </div>
 
-      <h1 className="text-2xl font-bold text-center mt-4">읽을 동화를 골라보아요</h1>
+      <div className="absolute top-5 md:top-10 flex justify-center w-full font-[BMJUA] text-3xl z-0 text-yellow-100">
+        읽을 동화를 골라보세요
+      </div>
 
-      {error && (
-        <div className="mx-auto mt-4 px-4 py-2 bg-red-100 text-red-700 rounded-lg">
-          {error}
-        </div>
-      )}
+      <IconCircleButton
+        size="sm"
+        variant="action"
+        className="fixed top-1/2 left-5 z-10"
+        onClick={showPrevious}
+        icon={<FontAwesomeIcon icon={faCaretLeft} size="sm" />}
+      />
 
-      {/* 캐러셀 컨테이너 */}
-      <div className="flex items-center gap-4 px-20 flex-1 mb-16 pb-8">
-        {/* 이전 버튼 */}
-        <button
-          type="button"
-          onClick={showPrevious}
-          disabled={startIndex === 0 || isLoading}
-          className="disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <div className="w-8 h-8 bg-purple-600 text-white flex items-center justify-center rounded-full">
-            <ChevronLeft size={20} />
-          </div>
-        </button>
+      <IconCircleButton
+        size="sm"
+        variant="action"
+        className="fixed top-1/2 right-5 z-10"
+        onClick={showNext}
+        icon={<FontAwesomeIcon icon={faCaretRight} size="sm" />}
+      />
 
-        {/* 책 표지 그리드 */}
-        <div className="flex-1 h-[750px] grid grid-rows-2 grid-cols-3 gap-x-4 gap-y-16 place-items-center">
-          {bookList.slice(startIndex, startIndex + 6).map((book) => (
-            <button
-              key={book.bookId}
-              type="button"
-              onClick={() => handleStorySelect(book.bookId)}
-              disabled={isLoading}
-              className="group relative perspective w-[280px] h-[350px] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {/* 기존 책 UI 컴포넌트 */}
-              <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg opacity-50" />
-              <div className="w-[280px] h-[350px] preserve-3d transition-all duration-300 ease-out
-                group-hover:rotate-y-12 group-hover:scale-105 group-hover:-translate-y-2
-                group-hover:rotate-x-2"
-              >
-                {/* 책 앞면 */}
-                <div className="absolute w-full h-full bg-white rounded-lg shadow-xl transform-style preserve-3d
-                  rotate-y-3 bg-gradient-to-br from-white to-gray-50"
+      {/* 책장 */}
+      <div className="relative w-[90%] mt-20 min-w-xl max-w-5xl h-[80vh] bg-yellow-700 rounded-2xl p-8 flex items-center justify-center overflow-hidden">
+        {/* 선반 컨테이너 */}
+        <div className="absolute inset-0 flex flex-col justify-evenly items-center p-8">
+          {/* 상단 선반 */}
+          <div className="w-full h-[45%] bg-yellow-800 rounded-2xl flex items-end px-6">
+            <div className="w-full grid grid-cols-3 gap-x-6">
+              {bookList.slice(startIndex, startIndex + 3).map((book) => (
+                <button
+                  key={book.bookId}
+                  type="button"
+                  onClick={() => handleStorySelect(book.bookId)}
+                  disabled={isLoading}
+                  className="group relative w-full aspect-4/3 transform-gpu transition-transform duration-300 hover:scale-105 origin-bottom"
                 >
                   <img
-                    src={book.bookPath}
+                    src={getCoverPath(book.bookPath)}
                     alt={book.title}
-                    className="w-full h-full object-cover rounded-lg opacity-95"
+                    className="w-full h-full object-cover rounded"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-black/20 rounded-lg" />
-                  <div className="absolute inset-0 rounded-lg ring-1 ring-black/5" />
-                </div>
+                  <div className="absolute -bottom-4 left-1/2 w-4/5 h-4 bg-black/20 blur-lg -translate-x-1/2" />
+                </button>
+              ))}
+            </div>
+          </div>
 
-                {/* 책등 */}
-                <div className="absolute right-0 top-0 w-8 h-full bg-gradient-to-r from-gray-200 to-gray-300
-                  transform translate-x-full rotate-y-90 origin-left rounded-r-sm"
+          {/* 하단 선반 */}
+          <div className="w-full h-[45%] bg-yellow-800 rounded-2xl flex items-end px-4">
+            <div className="w-full grid grid-cols-3 gap-x-6">
+              {bookList.slice(startIndex + 3, startIndex + 6).map((book) => (
+                <button
+                  key={book.bookId}
+                  type="button"
+                  onClick={() => handleStorySelect(book.bookId)}
+                  disabled={isLoading}
+                  className="group relative w-full aspect-4/3 transform-gpu transition-transform duration-300 hover:scale-105 origin-bottom"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/10" />
-                  <div className="absolute inset-x-0 top-4 h-[1px] bg-gray-400/30" />
-                  <div className="absolute inset-x-0 bottom-4 h-[1px] bg-gray-400/30" />
-                </div>
-
-                {/* 책 아래쪽 면 */}
-                <div className="absolute bottom-0 left-0 w-full h-8 bg-gradient-to-b from-gray-200 to-gray-300
-                  transform translate-y-full rotate-x-90 origin-top"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-white/40 to-black/20" />
-                </div>
-              </div>
-
-              {/* 그림자 효과 */}
-              <div className="absolute -bottom-4 left-1/2 w-4/5 h-4 bg-black/20 blur-lg transform -translate-x-1/2
-                transition-all duration-300 group-hover:w-3/4 group-hover:h-6 group-hover:-bottom-6"
-              />
-            </button>
-          ))}
+                  <img
+                    src={getCoverPath(book.bookPath)}
+                    alt={book.title}
+                    className="w-full h-full object-cover rounded"
+                  />
+                  <div className="absolute -bottom-4 left-1/2 w-4/5 h-4 bg-black/20 blur-lg -translate-x-1/2" />
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* 다음 버튼 */}
-        <button
-          type="button"
-          onClick={showNext}
-          disabled={startIndex >= bookList.length - 6 || isLoading}
-          className="disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <div className="w-8 h-8 bg-purple-600 text-white flex items-center justify-center rounded-full">
-            <ChevronRight size={20} />
+        {error && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-2 bg-red-100 text-red-700 rounded-lg">
+            {error}
           </div>
-        </button>
+        )}
       </div>
     </div>
   );

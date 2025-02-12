@@ -25,13 +25,13 @@ function DrawingSelection(): JSX.Element {
       onClick={() => {
         setTemplate(template);
       }}
-      className="text-center min-w-10 w-[40%] sm:w-[30%] md:w-[20%] m-2"
+      className="text-center min-w-10 w-[40%] sm:w-[30%] md:w-[20%] m-2 text-yellow-100"
     >
       <div>
         <img
           src={getOutlinePath(template.sketchPath) ?? ''}
           alt={template.sketchTitle}
-          className="w-full bg-white rounded-2xl"
+          className="w-full bg-amber-50 rounded-2xl"
         />
       </div>
       <div
@@ -43,7 +43,7 @@ function DrawingSelection(): JSX.Element {
   ));
 
   return (
-    <div className="w-full h-full p-5 bg-[#FCEDBA] relative overflow-clip">
+    <div className="w-full h-full p-5 bg-yellow-900 relative overflow-clip">
       <div className="relative z-10">
         <IconCircleButton
           size="sm"
@@ -53,7 +53,7 @@ function DrawingSelection(): JSX.Element {
           icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
         />
       </div>
-      <div className="absolute top-10 flex justify-center w-full font-[BMJUA] text-3xl z-0">
+      <div className="absolute top-10 flex justify-center w-full font-[BMJUA] text-3xl z-0 text-yellow-100">
         색칠하고 싶은 그림을 골라보세요
       </div>
       <div

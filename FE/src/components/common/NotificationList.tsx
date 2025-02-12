@@ -21,7 +21,7 @@ function NotificationList() {
   if (hasError) return <div>알림을 불러오는데 실패했습니다.</div>;
 
   return (
-    <div className="max-w-md mx-auto border rounded-lg overflow-hidden">
+    <div className="max-w-md mx-auto rounded-lg overflow-hidden">
       {!notifications || notifications.length === 0 ? (
         <div className="p-4 text-center text-gray-500">
           알림이 없습니다
@@ -30,7 +30,6 @@ function NotificationList() {
         notifications.map((notification) => (
           <NotificationItem
             key={notification.id}
-            type={notification.type}
             data={notification}
             onClick={() => markAsRead(notification.id)}
           />

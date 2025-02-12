@@ -5,3 +5,7 @@ export function getOutlinePath(fileName: string) {
 export function getBackgroundPath(fileName: string) {
     return `/public/images/coloringTemplates/background/${fileName}`;
 }
+
+export function getCoverPath(fileName: string) {
+    return `/public/images/bookcover/${fileName}`;
+}

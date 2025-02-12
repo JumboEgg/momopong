@@ -41,7 +41,7 @@ function RecentLetterList() {
                 <strong>{letter.role}</strong>
                 (이)가 편지를 보냈어요
               </div>
-              <div className="text-end">{letter.createdAt.substring(0, 10)}</div>
+              <div className="text-end text-sm">{letter.createdAt.substring(0, 10)}</div>
             </div>
           </button>
         ))

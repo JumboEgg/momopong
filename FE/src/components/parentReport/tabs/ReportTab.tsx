@@ -1,22 +1,17 @@
 import { Book, Palette } from 'lucide-react';
+import { useReportStore } from '@/stores/reportStore';
+import TempTimeFormatter from '@/utils/format/timeFormatter';
 import DonutChart from '../components/DonutChart';
-
-const MOCK_REPORT_DATA = {
-  monthTime: 12345,
-  storyReadTime: 123,
-  storyTogetherTime: 456,
-  drawingSingleTime: 345,
-  drawingTogetherTime: 567,
-  thisWeek: 345,
-  lastWeek: 456,
-  resignCnt: 3,
-};
 
 export interface ReportTabProps {
   childName: string;
 }
 
 function ReportTab({ childName }: ReportTabProps) {
+  const {
+    analysis,
+  } = useReportStore();
+
   return (
     <div className="flex flex-col w-full h-full gap-y-2">
       <div className="text-xl">
@@ -26,7 +21,7 @@ function ReportTab({ childName }: ReportTabProps) {
         {' '}
         어린이는 모모퐁에서
         {' '}
-        <span className="text-[steelblue]">{MOCK_REPORT_DATA.monthTime}</span>
+        <span className="text-[steelblue]">{TempTimeFormatter(analysis?.thisMonthMinutes ?? 0)}</span>
         {' '}
         여행했어요.
       </div>
@@ -40,8 +35,8 @@ function ReportTab({ childName }: ReportTabProps) {
               독서 시간
             </div>
             <DonutChart
-              singleTime={MOCK_REPORT_DATA.storyReadTime}
-              multiTime={MOCK_REPORT_DATA.storyTogetherTime}
+              singleTime={analysis?.readingMinutesSingle ?? 0}
+              multiTime={analysis?.readingMinutesMulti ?? 0}
             />
           </div>
           <div>
@@ -50,8 +45,8 @@ function ReportTab({ childName }: ReportTabProps) {
               그린 시간
             </div>
             <DonutChart
-              singleTime={MOCK_REPORT_DATA.drawingSingleTime}
-              multiTime={MOCK_REPORT_DATA.drawingTogetherTime}
+              singleTime={analysis?.sketchingMinutesSingle ?? 0}
+              multiTime={analysis?.sketchingMinutesMulti ?? 0}
             />
           </div>
           <div>
@@ -62,7 +57,7 @@ function ReportTab({ childName }: ReportTabProps) {
                 <div
                   className="text-2xl ps-5 text-pink-400"
                 >
-                  {MOCK_REPORT_DATA.thisWeek}
+                  {TempTimeFormatter(analysis?.thisWeekMinutes ?? 0)}
                 </div>
               </div>
               <div>
@@ -70,7 +65,7 @@ function ReportTab({ childName }: ReportTabProps) {
                 <div
                   className="text-2xl ps-5 text-blue-400"
                 >
-                  {MOCK_REPORT_DATA.lastWeek}
+                  {TempTimeFormatter(analysis?.lastWeekMinutes ?? 0)}
                 </div>
               </div>
             </div>
@@ -79,7 +74,7 @@ function ReportTab({ childName }: ReportTabProps) {
         <div>
           멀티플레이 중 중도퇴장 횟수:
           {' '}
-          {MOCK_REPORT_DATA.resignCnt}
+          {analysis?.earlyExitCount ?? 0}
         </div>
       </div>
     </div>

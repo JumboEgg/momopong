@@ -1,10 +1,7 @@
 import '@/components/common/scrollbar.css';
 import { useState, useEffect } from 'react';
-import { FrameInfo } from '@/types/frame';
-import loadImagesFromS3 from '@/utils/drawingS3/drawingLoad';
-import { LetterInfo } from '@/types/letter';
-import loadLettersFromS3 from '@/utils/audioS3/letterLoad';
 import ReportLetterModal from '@/components/common/modals/ReportLetterModal';
+import { useReportStore } from '@/stores/reportStore';
 import DrawingModal from '../../common/modals/DrawingModal';
 
 const books = [
@@ -41,13 +38,13 @@ const books = [
 ];
 
 interface CraftsTabProps {
-  childId: string;
   childName: string;
 }
 
-function CraftsTab({ childId, childName }: CraftsTabProps) {
-  const [drawingList, setDrawingList] = useState<FrameInfo[]>([]);
-  const [letterList, setLetterList] = useState<LetterInfo[]>([]);
+function CraftsTab({ childName }: CraftsTabProps) {
+  const {
+    letters, sketches,
+  } = useReportStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -56,32 +53,13 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
 
   const [modal, setModal] = useState<JSX.Element | null>(null);
 
-  // TODO : 리포트 API 생성 후 부모 조회 기능으로 교체
-  const fetchData = async (id: string) => {
-    if (!id) return;
-    try {
-      const drawingData: FrameInfo[] = await loadImagesFromS3(id);
-      setDrawingList(drawingData);
-
-      const letterData: LetterInfo[] = await loadLettersFromS3(id);
-      setLetterList(letterData);
-    } catch (error) {
-      console.error('Error loading images: ', error);
-    }
-  };
-
-  useEffect(() => {
-    if (!childId) return;
-    fetchData(childId);
-  }, [childId]);
-
   const openModal = (idx: number) => {
     if (selectedCraftsTab === 'reading') {
       setModal(null);
     } else if (selectedCraftsTab === 'drawing') {
       setModal(
         <DrawingModal
-          data={drawingList[idx]}
+          data={sketches[idx]}
           onClose={() => setIsModalOpen(false)}
         />,
       );
@@ -89,7 +67,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
       setModal(
         <ReportLetterModal
           childName={childName}
-          data={letterList[idx]}
+          data={letters[idx]}
           onClose={() => setIsModalOpen(false)}
         />,
       );
@@ -110,7 +88,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
     </button>
   ));
 
-  const drawingHistory = drawingList.map((data, idx) => (
+  const drawingHistory = sketches.map((data, idx) => (
     <button
       type="button"
       key={data.frameUrl}
@@ -125,7 +103,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
     </button>
   ));
 
-  const letterHistory = letterList.map((letter, idx) => (
+  const letterHistory = letters.map((letter, idx) => (
     <button
       type="button"
       key={letter.letterFileName}

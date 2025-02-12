@@ -11,13 +11,11 @@ export interface BaseNotification {
 }
 
 export interface InviteNotification extends BaseNotification {
-  type: 'invite';
   senderName: string;
   title: string;
 }
 
 export interface SystemNotification extends BaseNotification {
-  type: 'system';
   characterName: string;
 }
 
@@ -40,7 +38,6 @@ interface NotificationStore {
 const mockData: NotificationData[] = [
   {
     id: 1,
-    type: 'invite',
     senderName: '인어공주',
     title: '인어공주',
     image: 'https://www.palnews.co.kr/news/photo/201801/92969_25283_5321.jpg',
@@ -48,8 +45,8 @@ const mockData: NotificationData[] = [
   },
   {
     id: 2,
-    type: 'system',
-    characterName: '그레텔',
+    senderName: '그레텔',
+    title: '헨젤과 그레텔',
     image: 'https://www.palnews.co.kr/news/photo/201801/92969_25283_5321.jpg',
     timestamp: '2024-01-30T09:00:00Z',
   },

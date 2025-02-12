@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useNavigate } from 'react-router-dom';
 import '@/components/common/scrollbar.css';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { useEffect } from 'react';
 
 function Parent() {
   const navigate = useNavigate();
@@ -16,8 +17,18 @@ function Parent() {
   } = useSubAccountStore();
 
   const {
-    childIdx, setChildIdx, reportTab, setReportTab,
+    childIdx, setChildIdx,
+    reportTab, setReportTab,
+    setAnalysis, setHistory, setSketches, setLetters,
   } = useReportStore();
+
+  useEffect(() => {
+    if (!subAccounts) return;
+    setAnalysis(subAccounts[childIdx].childId);
+    setHistory(subAccounts[childIdx].childId);
+    setSketches(subAccounts[childIdx].childId);
+    setLetters(subAccounts[childIdx].childId);
+  }, [childIdx]);
 
   const content = (): JSX.Element => {
     if (reportTab === 'report') {
@@ -33,7 +44,7 @@ function Parent() {
     }
 
     return (
-      <CraftsTab childId={subAccounts[childIdx].childId} childName={subAccounts[childIdx].name} />
+      <CraftsTab childName={subAccounts[childIdx].name} />
     );
   };
 
@@ -60,7 +71,7 @@ function Parent() {
             아이 활동 리포트
           </div>
           {/* 리포트 전체 영역 */}
-          <div className="bg-white rounded-2xl min-h-xl max-h-[90%] flex-1 flex flex-col px-4 md:px-10 py-3 md:py-5">
+          <div className="bg-white rounded-2xl h-[calc(90%-50px)] sm:max-h-[500px] flex-1 flex flex-col px-4 md:px-10 py-3 md:py-5">
             {/* 아이 선택 탭 */}
             <div className="flex flex-row mb-5">
               {subAccounts.map((child, idx) => (

@@ -70,7 +70,7 @@ function Story() {
   };
 
   return (
-    <div>
+    <div className="w-screen h-screen">
       {content()}
     </div>
   );
