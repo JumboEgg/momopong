@@ -5,6 +5,7 @@ import com.ssafy.project.domain.type.ParticipationMode;
 import com.ssafy.project.dto.record.SketchParticipationRecordDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -26,11 +27,15 @@ public class SketchParticipationRecord {
     @JoinColumn(name = "child_id", nullable = false)
     private Child child;
 
-    @Column(name = "start_time", nullable = false)
+    @CreatedDate
+    @Column(name = "start_time", nullable = false, updatable = false)
     private LocalDateTime startTime;  // 시작 시간
 
     @Column(name = "end_time")
     private LocalDateTime endTime;    // 종료 시간
+
+    @Column(name = "early_exit", nullable = false)
+    private boolean earlyExit = true;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -39,7 +44,7 @@ public class SketchParticipationRecord {
     // Entity to Dto
     public SketchParticipationRecordDto entityToDto() {
         return SketchParticipationRecordDto.builder()
-                .drawingParticipationId(this.id)
+                .sketch_participation_id(this.id)
                 .childId(this.child.getId())
                 .startTime(this.startTime)
                 .endTime(this.endTime)
@@ -47,4 +52,11 @@ public class SketchParticipationRecord {
                 .build();
     }
 
+    public void updateExitStatus(boolean status) {
+        this.earlyExit = status;
+    }
+
+    public void setEndTimeNow() {
+        this.endTime = LocalDateTime.now();
+    }
 }

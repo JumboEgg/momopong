@@ -12,9 +12,9 @@ public class BookParticipationRecordDto {
     private Long bookRecordId;
     private Long childId;
     private Long bookId;
-    private LocalDateTime createdAt;
     private String role;
-    private boolean earlyExit;
+    @Builder.Default
+    private Boolean earlyExit = true;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private ParticipationMode mode;

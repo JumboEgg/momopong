@@ -6,6 +6,7 @@ import com.ssafy.project.domain.type.ParticipationMode;
 import com.ssafy.project.dto.record.BookParticipationRecordDto;
 import jakarta.persistence.*;
 import lombok.*;
+import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
@@ -16,7 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
-public class BookParticipationRecord{
+public class BookParticipationRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,16 +32,14 @@ public class BookParticipationRecord{
     @JoinColumn(name = "book_id", nullable = false)
     private Book book;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
     @Column(name = "role", nullable = false)
     private String role;
 
     @Column(name = "early_exit", nullable = false)
     private boolean earlyExit = true;
 
-    @Column(name = "start_time", nullable = false)
+    @CreatedDate
+    @Column(name = "start_time", nullable = false, updatable = false)
     private LocalDateTime startTime;
 
     @Column(name = "end_time")
@@ -56,12 +55,19 @@ public class BookParticipationRecord{
                 .bookRecordId(this.id)
                 .childId(this.child.getId())
                 .bookId(this.book.getId())
-                .createdAt(this.createdAt)
                 .role(this.role)
                 .earlyExit(this.earlyExit)
                 .startTime(this.startTime)
                 .endTime(this.endTime)
                 .mode(this.mode)
                 .build();
+    }
+
+    public void updateExitStatus(boolean status) {
+        this.earlyExit = status;
+    }
+
+    public void setEndTimeNow() {
+        this.endTime = LocalDateTime.now();
     }
 }

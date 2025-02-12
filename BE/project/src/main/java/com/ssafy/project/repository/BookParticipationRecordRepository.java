@@ -9,8 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
-public interface BookParticipationRecordRepository extends JpaRepository<BookParticipationRecord, Integer> {
+public interface BookParticipationRecordRepository extends JpaRepository<BookParticipationRecord, Long> {
     // 아이별 동화 참여 기록 조회
     List<BookParticipationRecord> findAllByChild(Child child);
 
@@ -24,16 +23,16 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
     Long totalBetweenTime(@Param("childId") Long childId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     // 많이 읽은 책 (3개만 조회)
-        @Query(value = """
+    @Query(value = """
             select a.title as bookTitle, a.book_path as bookPath, b.readCount
             from book a\s
             join (
-            	select book_id, count(book_id) as readCount
-            	from book_participation_record
-            	where child_id = :childId
-            	group by book_id
-            	order by count(book_id) desc
-            	limit 3
+                select book_id, count(book_id) as readCount
+                from book_participation_record
+                where child_id = :childId
+                group by book_id
+                order by count(book_id) desc
+                limit 3
             ) b
             on a.book_id = b.book_id;
         """, nativeQuery = true)
