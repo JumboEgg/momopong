@@ -4,7 +4,6 @@ import { tokenService } from '@/services/tokenService';
 import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 
-import { FriendInvitation } from '@/types/invitation';
 import { getToken } from 'firebase/messaging';
 // import { useStory } from '@/stores/storyStore';
 import { useFriendListStore } from '@/stores/friendListStore';
@@ -14,11 +13,11 @@ import { Friend } from '@/types/friend';
 function FriendSelection() { // props 제거
   const navigate = useNavigate();
   const location = useLocation();
-  const state = location.state as FriendInvitation;
-  const { contentId, contentType } = state || {};
+  const { contentId, contentType } = location.state || {};
+  // const { setContentTitle } = useStory(); // StoryStore에서 contentTitle을 설정
 
-  console.log('Location state:', location.state); // location.state 전체 확인
-  console.log('ContentId and type:', { contentId, contentType }); // contentId와 type 확
+  // console.log('Location state:', location.state); // location.state 전체 확인
+  // console.log('ContentId and type:', { contentId, contentType }); // contentId와 type 확
 
   const {
     friends,

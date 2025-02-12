@@ -6,6 +6,7 @@ import { tokenService } from '@/services/tokenService';
 import useFCMStore from '@/stores/useFCMStore';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useToastStore from '@/stores/toastStore';
+import { ContentType } from '@/types/invitation';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -24,6 +25,7 @@ export interface InvitationData {
   inviteeName: string;
   contentId: number;
   contentTitle: string;
+  contentType: ContentType;
 }
 
 export interface InvitationModal {
@@ -44,27 +46,83 @@ export const useFirebaseMessaging = () => {
     data: null,
   });
 
+//    // 공통 유틸리티 함수들
+//    const navigateToContent = (
+//     contentType: ContentType,
+//     contentId: number,
+//     participantName: string,
+// ) => {
+//     const basePath = contentType === 'BOOK' ? 'book' : 'sketch';
+//     navigate(`/${basePath}/${contentId}/together`, {
+//       state: {
+//         roomName: `${basePath}-${contentId}`,
+//         participantName,
+//       },
+//     });
+//   };
+
+//   const showContentTypeMessage = (
+//     type: 'success' | 'error' | 'invitation' | 'accept' | 'reject',
+//     contentType: ContentType,
+//     messages: { book: string; sketch: string },
+//   ) => {
+//     const { showToast } = useToastStore.getState();
+//     showToast({
+//       type,
+//       message: contentType === 'BOOK' ? messages.book : messages.sketch,
+//     });
+//   };
+
   const handleInvitationAccept = async () => {
     if (!invitationModal.data) return;
 
-    const { inviterId, inviteeId, contentId: bookId } = invitationModal.data;
+    const {
+      inviterId,
+      inviteeId,
+      contentId,
+      contentType,
+      inviteeName,
+      inviterName,
+      contentTitle,
+    } = invitationModal.data;
+
     const { showToast } = useToastStore.getState();
 
     try {
-      await acceptInvitation(bookId, inviteeId, inviterId);
-
-      // TogetherMode로 이동하면서 state로 정보 전달
-      navigate(`/book/${bookId}/together`, {
-        state: {
-          roomName: `book-${bookId}`,
-          participantName: invitationModal.data.inviteeName,
-        },
+      // FriendInvitation 타입에 맞게 데이터 구성
+      await acceptInvitation({
+        contentId,
+        inviterId,
+        inviteeId,
+        contentType,
+        inviterName,
+        inviteeName,
+        contentTitle,
       });
+
+      // contentType에 따라 다른 경로로 이동
+      if (contentType === 'BOOK') {
+        navigate(`/book/${contentId}/together`, {
+          state: {
+            roomName: `book-${contentId}`,
+            participantName: inviteeName,
+          },
+        });
+      } else {
+        navigate(`/sketch/${contentId}/together`, {
+          state: {
+            roomName: `sketch-${contentId}`,
+            participantName: inviteeName,
+          },
+        });
+      }
     } catch (error) {
       console.error('Failed to accept invitation:', error);
       showToast({
         type: 'error',
-        message: '초대 수락 처리 중 오류가 발생했습니다.',
+        message: contentType === 'BOOK'
+          ? '동화 초대 수락 처리 중 오류가 발생했습니다.'
+          : '그림 초대 수락 처리 중 오류가 발생했습니다.',
       });
     }
 
@@ -74,9 +132,37 @@ export const useFirebaseMessaging = () => {
   const handleInvitationReject = async () => {
     if (!invitationModal.data) return;
 
-    const { inviterId, inviteeId, contentId: bookId } = invitationModal.data;
+    const {
+      inviterId,
+      inviteeId,
+      contentId,
+      contentType,
+      inviterName,
+      inviteeName,
+      contentTitle,
+    } = invitationModal.data;
 
-    await rejectInvitation(bookId, inviteeId, inviterId);
+    try {
+      await rejectInvitation({
+        contentId,
+        inviterId,
+        inviteeId,
+        contentType,
+        inviterName,
+        inviteeName,
+        contentTitle,
+      });
+    } catch (error) {
+      console.error('Failed to reject invitation:', error);
+      const { showToast } = useToastStore.getState();
+      showToast({
+        type: 'error',
+        message: contentType === 'BOOK'
+          ? '동화 초대 거절 처리 중 오류가 발생했습니다.'
+          : '그림 초대 거절 처리 중 오류가 발생했습니다.',
+      });
+    }
+
     setInvitationModal({ isOpen: false, data: null });
   };
 
@@ -119,6 +205,7 @@ export const useFirebaseMessaging = () => {
         inviteeName,
         contentId,
         contentTitle,
+        contentType, // contentType 추가
         notificationType,
       } = payload.data;
 
@@ -127,6 +214,7 @@ export const useFirebaseMessaging = () => {
         inviterId,
         inviteeId,
         notificationType,
+        contentType,
       });
 
       // 초대장을 받은 경우
@@ -140,35 +228,52 @@ export const useFirebaseMessaging = () => {
             inviteeName,
             contentId: Number(contentId),
             contentTitle,
+            contentType, // contentType 추가
           },
         });
 
         showToast({
           type: 'invitation',
-          message: `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`,
+          message: contentType === 'BOOK'
+            ? `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`
+            : `${inviterName}님이 "${contentTitle}" 함께 그리기에 초대했어요!`,
         });
       } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
         // 초대 수락을 받은 경우
         showToast({
           type: 'accept',
-          message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
+          message: contentType === 'BOOK'
+            ? `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`
+            : `${inviteeName}님이 "${contentTitle}" 함께 그리기를 수락했어요!`,
         });
 
-        // 초대자도 TogetherMode로 이동
-        navigate(`/book/${contentId}/together`, {
-          state: {
-          roomName: `book-${contentId}`,
-          participantName: inviterName,
-          },
-        });
+        // contentType에 따라 다른 경로로 이동
+        if (contentType === 'BOOK') {
+          navigate(`/book/${contentId}/together`, {
+            state: {
+              roomName: `book-${contentId}`,
+              participantName: inviterName,
+            },
+          });
+        } else {
+          navigate(`/sketch/${contentId}/together`, {
+            state: {
+              roomName: `sketch-${contentId}`,
+              participantName: inviterName,
+            },
+          });
+        }
       } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
         // 초대 거절을 받은 경우
         showToast({
           type: 'reject',
-          message: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
+          message: contentType === 'BOOK'
+            ? `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`
+            : `${inviteeName}님이 "${contentTitle}" 함께 그리기를 거절했어요`,
         });
       }
     });
+
     handleAllowNotification();
 
     return () => {

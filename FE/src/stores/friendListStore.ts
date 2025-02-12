@@ -25,6 +25,7 @@ const assignRandomRoles = (): [StoryRole, StoryRole] => {
 // 유틸리티 함수
 const createInvitationPayload = ({
   inviterId,
+  inviteeId,
   inviterName,
   inviteeName,
   contentTitle,
@@ -33,6 +34,7 @@ const createInvitationPayload = ({
 }: FriendInvitation) => {
   const basePayload = {
     inviterId,
+    inviteeId,
     inviterName,
     inviteeName,
     contentTitle,
@@ -159,29 +161,45 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         invitation.inviterId,
         'invitation',
       );
-      console.log('Generated endpoint:', endpoint);
 
-      const basePayload = createInvitationPayload(invitation);
+      // 공통 payload 구성
+      const basePayload = {
+        inviterId: invitation.inviterId,
+        inviteeId: invitation.inviteeId,
+        inviterName: invitation.inviterName,
+        inviteeName: invitation.inviteeName,
+        contentTitle: invitation.contentTitle,
+        contentType: invitation.contentType,
+      };
 
+      let payload;
       if (invitation.contentType === 'BOOK') {
         const [inviterRole, inviteeRole] = assignRandomRoles();
         setRoles(inviterRole, inviteeRole, invitation.contentId);
 
-        // 실제 요청 데이터 자세히 확인
-        console.log('Request URL:', endpoint);
-        console.log('Request method:', 'POST');
-        console.log('Request headers:', {
-          'Content-Type': 'application/json',
-          // 기타 헤더들
-        });
-        console.log('Request payload:', JSON.stringify(basePayload, null, 2));
-
-        await api.post(endpoint, basePayload);
+        payload = {
+          ...basePayload,
+          roleInfo: {
+            inviterRole,
+            inviteeRole,
+          },
+          notificationType: 'INVITATION',
+        };
+      } else {
+        // SKETCH 타입일 경우
+        payload = {
+          ...basePayload,
+          notificationType: 'INVITATION',
+        };
       }
+
+      await api.post(endpoint, payload);
 
       showToast({
         type: 'success',
-        message: '친구에게 초대장을 보냈어요!',
+        message: invitation.contentType === 'BOOK'
+          ? '친구에게 여행 초대장을 보냈어요!'
+          : '친구에게 함께 그릴지 물어볼게요!',
       });
     } catch (error) {
       console.error('Failed to invite friend:', error);
@@ -195,9 +213,9 @@ export const useFriendListStore = create<FriendList>()((set) => ({
     } finally {
       set({ loading: false });
     }
-   },
+  },
 
-   acceptInvitation: async (invitation: FriendInvitation) => {
+  acceptInvitation: async (invitation: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
     const roleState = useRoleStore.getState();
 
@@ -205,21 +223,31 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       const endpoint = getInvitationEndpoint(
         invitation.contentType,
         invitation.contentId,
-        invitation.inviteeId, // invitee 기준으로 엔드포인트 생성
+        invitation.inviteeId,
         'accept',
       );
 
-      const basePayload = createInvitationPayload(invitation);
+      const basePayload = {
+        inviterId: invitation.inviterId,
+        inviterName: invitation.inviterName,
+        inviteeName: invitation.inviteeName,
+        contentTitle: invitation.contentTitle,
+        contentType: invitation.contentType,
+        notificationType: 'ACCEPT',
+      };
 
-      const payload = invitation.contentType === 'BOOK'
-        ? {
-            ...basePayload,
-            roleInfo: {
-              inviterRole: roleState.inviterRole,
-              inviteeRole: roleState.inviteeRole,
-            },
-          }
-        : basePayload;
+      let payload;
+      if (invitation.contentType === 'BOOK') {
+        payload = {
+          ...basePayload,
+          roleInfo: {
+            inviterRole: roleState.inviterRole,
+            inviteeRole: roleState.inviteeRole,
+          },
+        };
+      } else {
+        payload = basePayload;
+      }
 
       await api.post(endpoint, payload);
 
@@ -236,7 +264,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         message: '지금은 함께할 수 없어요',
       });
     }
-   },
+  },
 
   rejectInvitation: async (invitation: FriendInvitation) => {
     const { showToast } = useToastStore.getState();
@@ -245,13 +273,27 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       const endpoint = getInvitationEndpoint(
         invitation.contentType,
         invitation.contentId,
-        invitation.inviteeId, // invitee 기준으로 엔드포인트 생성
+        invitation.inviteeId,
         'reject',
       );
 
-      const basePayload = createInvitationPayload(invitation);
+      const basePayload = {
+        inviterId: invitation.inviterId,
+        inviterName: invitation.inviterName,
+        inviteeName: invitation.inviteeName,
+        contentTitle: invitation.contentTitle,
+        contentType: invitation.contentType,
+        notificationType: 'ACCEPT',
+      };
 
-      await api.post(endpoint, basePayload);
+      let payload;
+      if (invitation.contentType === 'BOOK') {
+        payload = basePayload;
+      } else {
+        payload = basePayload;
+      }
+
+      await api.post(endpoint, payload);
 
       // console.log('Reject invitation response:', response.data);
 

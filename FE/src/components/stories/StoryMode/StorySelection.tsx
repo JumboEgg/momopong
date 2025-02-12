@@ -45,7 +45,7 @@ const stories = [
 
 function StorySelection(): JSX.Element {
   const navigate = useNavigate();
-  const { setBookId } = useStory();
+  const { setBookId, setTitle } = useStory();
   const [startIndex, setStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -63,17 +63,18 @@ function StorySelection(): JSX.Element {
       setIsLoading(true);
       setError(null);
       // 스토리 ID 설정
-      setBookId(bookId); // setStoryId -> setBookId
-      console.log('선택된 bookId:', bookId); // 디버깅용 로그 추가
-      navigate('/story/ModeSelection'); // 추천: 선택 후 스토리 모드로 이동
-    } catch (err) {
-      setError('스토리를 불러오는 중 오류가 발생했습니다.');
-      console.error('스토리 선택 오류:', err);
-    } finally {
-      setIsLoading(false);
+      const selectedStory = stories.find((story) => story.id === bookId);
+    if (selectedStory) {
+      setBookId(bookId);
+      setTitle(selectedStory.title); // title 저장 추가
+      navigate('/story/ModeSelection');
     }
-  };
-
+  } catch (err) {
+    setError('스토리를 불러오는 중 오류가 발생했습니다.');
+  } finally {
+    setIsLoading(false);
+  }
+};
   // 홈으로 이동하는 경우만 navigate 사용
   const handleBackClick = () => {
     navigate('/home');

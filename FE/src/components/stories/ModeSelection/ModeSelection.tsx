@@ -3,7 +3,7 @@ import { useStory } from '@/stores/storyStore';
 
 function ModeSelection(): JSX.Element {
   const navigate = useNavigate();
-  const { setMode, bookId } = useStory();
+  const { setMode, bookId, title } = useStory();
   console.log('ModeSelection에서의 bookId:', bookId);
 
   const handleModeSelection = (mode: 'reading' | 'together') => {
@@ -13,7 +13,7 @@ function ModeSelection(): JSX.Element {
         state: {
           contentId: bookId,
           contentType: 'BOOK',
-          contentTitle: '함께 읽기', // 또는 적절한 타이틀
+          contentTitle: title, // 추가된 title 전달
         },
       });
     }
