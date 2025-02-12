@@ -8,7 +8,6 @@ import com.ssafy.project.dto.report.ActivityAnalysisDto;
 import com.ssafy.project.dto.report.ActivityHistoryDto;
 import com.ssafy.project.exception.NotFoundException;
 import com.ssafy.project.repository.BookParticipationRecordRepository;
-import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.SketchParticipationRecordRepository;
 import jakarta.transaction.Transactional;
@@ -30,7 +29,6 @@ public class ReportServiceImpl implements ReportService {
     private final BookParticipationRecordRepository bookParticipationRecordRepository;
     private final SketchParticipationRecordRepository sketchParticipationRecordRepository;
     private final ChildRepository childRepository;
-    private final BookRepository bookRepository;
 
     //  독서 시간, 그린 시간, 평균 이용 시간(이번달, 이번주, 지난주), 중도 퇴장 횟수
     // + 싱글 모드 / 멀티 모드
@@ -42,30 +40,36 @@ public class ReportServiceImpl implements ReportService {
         List<BookParticipationRecord> bookRecordList = bookParticipationRecordRepository.findAllByChild(child);
         List<SketchParticipationRecord> sketchRecordList = sketchParticipationRecordRepository.findAllByChild(child);
 
-        long readingMinutes = 0, sketchingMinutes = 0;
-        long thisMonthMinutes = 0, thisWeekMinutes = 0, lastWeekMinutes = 0;
-        int earlyExitCount = 0, singleModeCount = 0, multiModeCount = 0;
+        long readingMinutesSingle = 0, readingMinutesMulti = 0; // 독서 시간
+        int earlyExitCount = 0; // 증도 퇴장 횟수
         for (BookParticipationRecord bookRecord : bookRecordList) {
             // 중도 퇴장 횟수
             if (bookRecord.isEarlyExit()) earlyExitCount++;
 
-            // 싱글 모드 / 멀티 모드 횟수
-            if (bookRecord.getMode() == ParticipationMode.SINGLE) singleModeCount++;
-            else multiModeCount++;
-
-            // 독서 시간
-            readingMinutes += Duration.between(bookRecord.getStartTime(), bookRecord.getEndTime()).toMinutes();
+            // 싱글 모드 / 멀티 모드 별 독서 시간
+            long minutes = Duration.between(bookRecord.getStartTime(), bookRecord.getEndTime()).toMinutes();
+            if (bookRecord.getMode() == ParticipationMode.SINGLE) {
+                readingMinutesSingle += minutes;
+            } else {
+                readingMinutesMulti += minutes;
+            }
         }
 
+        long sketchingMinutesSingle = 0, sketchingMinutesMulti = 0;
         for (SketchParticipationRecord sketchRecord : sketchRecordList) {
-            // 싱글 모드 / 멀티 모드 횟수
-            if (sketchRecord.getMode() == ParticipationMode.SINGLE) singleModeCount++;
-            else multiModeCount++;
+            // 중도 퇴장 횟수
 
-            // 그린 시간
-            sketchingMinutes += Duration.between(sketchRecord.getStartTime(), sketchRecord.getEndTime()).toMinutes();
+
+            // 싱글 모드 / 멀티 모드 별 그린 시간
+            long minutes = Duration.between(sketchRecord.getStartTime(), sketchRecord.getEndTime()).toMinutes();
+            if (sketchRecord.getMode() == ParticipationMode.SINGLE) {
+                sketchingMinutesSingle += minutes;
+            } else {
+                sketchingMinutesMulti += minutes;
+            }
         }
 
+        long thisMonthMinutes = 0, thisWeekMinutes = 0, lastWeekMinutes = 0;
         LocalDateTime now = LocalDateTime.now();
         log.info("now={}", now);
 
@@ -86,20 +90,25 @@ public class ReportServiceImpl implements ReportService {
         // 저번주 이용 시간
         LocalDateTime startOfLastWeek = startOfWeek.minusWeeks(1);
         LocalDateTime endOfLastWeek = endOfWeek.minusWeeks(1);
+        lastWeekMinutes += getTotalBetweenTime(childId, startOfLastWeek, endOfLastWeek);
         log.info("startOfLastWeek={}", startOfLastWeek);
         log.info("endOfLastWeek={}", endOfLastWeek);
 
-        lastWeekMinutes += getTotalBetweenTime(childId, startOfLastWeek, endOfLastWeek);
-
         return ActivityAnalysisDto.builder()
-                .readingMinutes(readingMinutes)
-                .sketchingMinutes(sketchingMinutes)
+                // 독서 시간
+                .readingMinutes(readingMinutesSingle + readingMinutesMulti)
+                .readingMinutesSingle(readingMinutesSingle)
+                .readingMinutesMulti(readingMinutesMulti)
+                // 그린 시간
+                .sketchingMinutes(sketchingMinutesSingle + sketchingMinutesMulti)
+                .sketchingMinutesSingle(sketchingMinutesSingle)
+                .sketchingMinutesMulti(sketchingMinutesMulti)
+                // 이용 시간
                 .thisMonthMinutes(thisMonthMinutes)
                 .thisWeekMinutes(thisWeekMinutes)
                 .lastWeekMinutes(lastWeekMinutes)
+                // 중도 퇴장
                 .earlyExitCount(earlyExitCount)
-                .singleModeCount(singleModeCount)
-                .multiModeCount(multiModeCount)
                 .build();
     }
 
