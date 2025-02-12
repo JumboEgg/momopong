@@ -55,7 +55,7 @@ function AudioRecorderSTT() {
 
         audioContext.current = new AudioContext({ sampleRate });
         await audioContext.current.audioWorklet.addModule(
-          './linear16-processor.js',
+          '/linear16-processor.js',
         );
         const source = audioContext.current.createMediaStreamSource(stream);
         processor.current = new AudioWorkletNode(

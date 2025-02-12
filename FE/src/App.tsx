@@ -158,7 +158,7 @@ function App(): JSX.Element {
           )}
         />
         <Route
-          path="/audioSTT"
+          path="/book/letter"
           element={(
             <ProtectedRoute>
               <LetterPage />

@@ -1,15 +1,17 @@
 import FriendsModal from '@/components/common/modals/FriendsModal';
 import ProfileImage from '@/components/common/ProfileImage';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
+import useRecentLetterStore from '@/stores/recentLetterStore';
 
 function HomePage() {
   const navigate = useNavigate();
   const { selectedAccount } = useSubAccountStore();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test'): void => {
+  const { setRecentLetterList } = useRecentLetterStore();
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test' | '/book/letter'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | null>(null);
@@ -17,6 +19,10 @@ function HomePage() {
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
   // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
   // console.log('Profile URL:', selectedAccount?.profile); // profile URL 확인
+
+  useEffect(() => {
+    setRecentLetterList();
+  }, []);
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -68,6 +74,14 @@ function HomePage() {
         className="cursor-pointer flex flex-col items-center"
       >
         <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
+      </button>
+
+      <button
+        type="button"
+        onClick={() => handleNavigation('/book/letter')}
+        className="cursor-pointer flex flex-col items-center"
+      >
+        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">편지</p>
       </button>
 
       {isModalOpen && (

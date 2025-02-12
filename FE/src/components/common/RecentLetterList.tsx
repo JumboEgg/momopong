@@ -1,11 +1,11 @@
-import useLetterStore from '@/stores/letterStore';
 import { useState } from 'react';
+import useRecentLetterStore from '@/stores/recentLetterStore';
 import RecentLetterModal from './modals/RecentLetterModal';
 
 function RecentLetterList() {
   const {
-    isLoading, letterList, selectedLetter, setSelectedLetter,
-  } = useLetterStore();
+    isLoading, recentLetterList, selectedLetter, setSelectedLetter,
+  } = useRecentLetterStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
@@ -13,12 +13,12 @@ function RecentLetterList() {
 
   return (
     <div className="max-w-md mx-auto rounded-lg overflow-hidden">
-      {!letterList || letterList.length === 0 ? (
+      {!recentLetterList || recentLetterList.length === 0 ? (
         <div className="p-4 text-center text-gray-500">
           알림이 없습니다
         </div>
       ) : (
-        letterList.map((letter) => (
+        recentLetterList.map((letter) => (
           <button
             key={letter.letterFileName}
             type="button"

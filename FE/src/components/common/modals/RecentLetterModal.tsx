@@ -4,14 +4,14 @@ import { TextCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TextButton from '@/components/common/buttons/TextButton';
 import { LetterInfo } from '@/types/letter';
-import useLetterStore from '@/stores/letterStore';
 import useSubAccountStore from '@/stores/subAccountStore';
+import useRecentLetterStore from '@/stores/recentLetterStore';
 import fetchSavedAudio from '../../../utils/audioS3/audioLoad';
 
 function RecentLetterModal({ data }: { data: LetterInfo }): JSX.Element {
     const {
         setSelectedLetter,
-    } = useLetterStore();
+    } = useRecentLetterStore();
 
   const [letterAudio, setLetterAudio] = useState<HTMLAudioElement>();
   const myLetterAudio = new Audio();

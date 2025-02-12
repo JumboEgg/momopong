@@ -5,7 +5,7 @@ function LetterPage() {
       <div className="w-screen h-screen bg-pink-200">
         <div className="w-full h-full flex flex-col items-center justify-center">
           <img
-            src="./public/images/bookcover/cover_theredridinghood.webp"
+            src="/images/bookcover/cover_theredridinghood.webp"
             alt="내가 맡은 등장인물"
             className="w-[80%]"
           />

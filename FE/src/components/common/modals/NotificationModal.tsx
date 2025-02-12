@@ -17,9 +17,13 @@ function NotificationModal({ onClose }: NotificationModalProps): JSX.Element {
 
   return (
     <div
+      role="presentation"
       className="fixed top-0 left-0 w-full h-full z-30
       bg-[#00000060]
       flex items-center justify-center"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
     >
       <div className="w-1/2 min-h-[85vh] bg-[#FFF08E] border-10 border-tainoi-400
         flex flex-col absolute items-center justify-bottom p-8 rounded-[2vw] overflow-hidden space-y-3"
