@@ -1,4 +1,4 @@
-import storyData from '../data/cinderella';
+import { useBookContent } from '@/stores/bookContentStore';
 import { StoryIllustrationProps, CharacterType } from '../types/story';
 
 function StoryIllustration({
@@ -10,28 +10,31 @@ function StoryIllustration({
   isLast,
   userRole,
 }: StoryIllustrationProps) {
-  const page = storyData.find((p) => p.pageNumber === pageNumber);
+  const { bookContent } = useBookContent();
+  if (!bookContent) return <div>loading...</div>;
+
+  const page = bookContent.pages.find((p) => p.pageNumber === pageNumber);
 
   if (!page) return null;
 
-  const { contents, illustration } = page;
+  const { audios, pagePath } = page;
 
-  if (!contents) return null;
+  if (!audios) return null;
 
-  const currentContent = contents[currentContentIndex];
+  const currentContent = audios[currentContentIndex];
   const relatedContents = [currentContent];
 
   const getSpeakerName = (type: CharacterType) => {
     if (type === 'narration') return '나레이션';
-    if (type === 'prince') return `왕자님${userRole === 'prince' ? ' (나)' : ''}`;
-    if (type === 'princess') return `신데렐라${userRole === 'princess' ? ' (나)' : ''}`;
+    if (type === 'role1') return `${bookContent.role1}${userRole === 'role1' ? ' (나)' : ''}`;
+    if (type === 'role2') return `${bookContent.role2}${userRole === 'role2' ? ' (나)' : ''}`;
     return '등장인물';
   };
 
   return (
     <div style={{ height: '900px' }} className="relative w-full mx-auto mb-4">
       <img
-        src={illustration}
+        src={pagePath}
         alt={`Page ${pageNumber} illustration`}
         className="absolute inset-0 w-full h-full object-cover rounded-lg"
       />
@@ -58,16 +61,17 @@ function StoryIllustration({
       <div className="absolute bottom-8 left-8">
         <div className="bg-black bg-opacity-30 text-white p-6 rounded-lg max-w-xl">
           {relatedContents.map((content) => {
-           const isUserTurn = userRole === content.type;
+           let isUserTurn = userRole && userRole === content.role;
+           if (userRole && userRole === content.role) isUserTurn = true;
 
            return (
              <div
-               key={`${pageNumber}-${content.type}-${content.text.substring(0, 20)}`}
+               key={`${pageNumber}-${content.role}-${content.text.substring(0, 20)}`}
                className={`mb-4 last:mb-0 ${isUserTurn ? 'border-{yellow}-{100}' : ''}`}
              >
-               {content.type !== 'narration' && (
+               {content.role !== 'narration' && (
                  <div className="text-sm font-medium text-gray-300 mb-1">
-                   {getSpeakerName(content.type)}
+                   {getSpeakerName(content.role)}
                  </div>
                )}
                <p className={`text-xl font-bold tracking-wide leading-relaxed ${isUserTurn ? 'text-yellow-200' : 'text-white'}`}>

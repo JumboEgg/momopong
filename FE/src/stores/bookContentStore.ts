@@ -25,13 +25,10 @@ const useBookContentStore = create<BookContentStore>()(
               },
             );
 
-            console.log(response);
-            const data = await response.json();
-            console.log(data);
-
             if (!response.ok) {
               throw new Error(`Loading failed: ${response.status}`);
             }
+            const data = await response.json();
 
             set({ bookContent: data });
         } catch (error) {

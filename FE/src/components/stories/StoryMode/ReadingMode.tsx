@@ -6,9 +6,8 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
-import storyData from '../data/cinderella';
+import { useBookContent } from '@/stores/bookContentStore';
 import AudioPlayer from '../AudioPlayer';
-import { getAudioUrl } from '../utils/audioUtils';
 import StoryIllustration from './StoryIllustration';
 
 function ReadingMode(): ReactElement {
@@ -19,6 +18,8 @@ function ReadingMode(): ReactElement {
     audioEnabled,
     toggleAudio,
   } = useStory();
+
+  const { bookContent } = useBookContent();
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
@@ -32,12 +33,12 @@ function ReadingMode(): ReactElement {
   }, []);
 
   const handleNext = useCallback(() => {
-    const currentPage = storyData[currentIndex];
+    const currentPage = bookContent?.pages[currentIndex];
 
     // 현재 페이지에 다음 콘텐츠가 있는 경우
-    if (currentContentIndex < currentPage.contents.length - 1) {
+    if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
       setCurrentContentIndex(currentContentIndex + 1);
-    } else if (currentIndex < storyData.length - 1) {
+    } else if (currentIndex < (bookContent?.pages.length ?? 0) - 1) {
       stopCurrentAudio();
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
@@ -57,17 +58,17 @@ function ReadingMode(): ReactElement {
     if (currentIndex > 0) {
       stopCurrentAudio();
       setCurrentIndex(currentIndex - 1);
-      const prevPage = storyData[currentIndex - 1];
-      setCurrentContentIndex(prevPage.contents.length - 1);
+      const prevPage = bookContent?.pages[currentIndex - 1];
+      setCurrentContentIndex((prevPage?.audios.length ?? 0) - 1);
     }
   }, [currentIndex, currentContentIndex, stopCurrentAudio, setCurrentIndex]);
 
   const handleContentEnd = useCallback(() => {
-    const currentPage = storyData[currentIndex];
+    const currentPage = bookContent?.pages[currentIndex];
 
     // 현재 페이지의 다음 콘텐츠로 이동 또는 다음 페이지로 전환
-    const hasNextContent = currentContentIndex < currentPage.contents.length - 1;
-    const hasNextPage = currentIndex < storyData.length - 1;
+    const hasNextContent = currentContentIndex < (currentPage?.audios.length ?? 0) - 1;
+    const hasNextPage = currentIndex < (bookContent?.pages.length ?? 0) - 1;
 
     if (hasNextContent) {
       setCurrentContentIndex(currentContentIndex + 1);
@@ -92,12 +93,11 @@ function ReadingMode(): ReactElement {
     navigate('/home');
   }, [navigate, stopCurrentAudio]);
 
-  const currentPage = storyData[currentIndex];
-  const currentContent = currentPage.contents[currentContentIndex];
-  const isLastPage = currentIndex === storyData.length - 1;
+  const currentPage = bookContent?.pages[currentIndex];
+  const currentContent = currentPage?.audios[currentContentIndex];
+  const isLastPage = currentIndex === (bookContent?.pages.length ?? 0) - 1;
 
-  // audioId를 이용해 오디오 URL 생성
-  const audioUrl = getAudioUrl(currentContent.audioId);
+  const audioUrl = currentContent?.path ?? '';
 
   return (
     <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
@@ -106,8 +106,9 @@ function ReadingMode(): ReactElement {
           신데렐라
           {' '}
           <span className="text-base text-gray-600">
-            {currentPage.pageNumber}
-            /28
+            {currentPage?.pageNumber}
+            /
+            {bookContent?.totalPage ?? 0}
           </span>
           {' '}
           <span className="text-sm text-gray-500">
@@ -115,7 +116,7 @@ function ReadingMode(): ReactElement {
             {' '}
             {currentContentIndex + 1}
             /
-            {currentPage.contents.length}
+            {currentPage?.audios.length ?? 0}
             )
           </span>
         </h2>
@@ -131,20 +132,20 @@ function ReadingMode(): ReactElement {
       </div>
 
       <StoryIllustration
-        pageNumber={currentPage.pageNumber}
+        pageNumber={currentPage?.pageNumber ?? 0}
         currentContentIndex={currentContentIndex}
         onPrevious={handlePrevious}
         onNext={handleNext}
         isFirst={currentIndex === 0 && currentContentIndex === 0}
-        isLast={isLastPage && currentContentIndex === currentPage.contents.length - 1}
+        isLast={isLastPage && currentContentIndex === (currentPage?.audios.length ?? 0) - 1}
         currentContent={currentContent}
-        illustration={currentPage.illustration}
+        illustration={currentPage?.pagePath ?? ''}
       />
 
-      {audioEnabled && currentContent.audioId && (
+      {audioEnabled && currentContent?.path && (
         <AudioPlayer
           ref={audioRef}
-          audioFiles={[audioUrl]}
+          audioFiles={[audioUrl ?? '']}
           autoPlay
           onEnded={handleContentEnd}
         />

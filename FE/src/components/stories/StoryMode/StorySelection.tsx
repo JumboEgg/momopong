@@ -9,7 +9,7 @@ import {
  faArrowLeft, faCaretLeft, faCaretRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { getCoverPath } from '@/utils/format/imgPath';
-import { useBookContent } from '@/stores/selectedBookStore';
+import { useBookContent } from '@/stores/bookContentStore';
 
 function StorySelection(): JSX.Element {
   const { bookList } = useBookList();

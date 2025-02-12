@@ -1,6 +1,8 @@
+import { BookAudioInfo } from '@/types/book';
+
 export type StoryMode = 'reading' | 'together';
 
-export type CharacterType = 'narration' | 'prince' | 'princess';
+export type CharacterType = 'narration' | 'role1' | 'role2';
 
 export interface Friend {
   id: number;
@@ -66,8 +68,8 @@ export interface StoryIllustrationProps {
   onNext: () => void;
   isFirst: boolean;
   isLast: boolean;
-  userRole?: 'prince' | 'princess';
-  currentContent: StoryPageContent;
+  userRole?: 'role1' | 'role2';
+  currentContent: BookAudioInfo | undefined;
   illustration: string;
 }
 

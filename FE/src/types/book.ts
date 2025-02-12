@@ -4,14 +4,16 @@ export interface BookItemInfo {
     bookPath: string; // 책 표지 경로로
 }
 
-interface BookAudioInfo {
+type CharacterType = 'narration' | 'role1' | 'role2';
+
+export interface BookAudioInfo {
     order: number; // 페이지 내 오디오 순서
-    role: string; // 역할. 역할 구분 interface가 있다면 적용
+    role: CharacterType; // 역할. 역할 구분 interface가 있다면 적용
     text: string; // 대사
     path: string; // 오디오 S3 경로
 }
 
-interface PageInfo {
+export interface PageInfo {
     pageId: number;
     pageNumber: number;
     pagePath: string; // 페이지 이미지 경로

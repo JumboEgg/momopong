@@ -24,7 +24,7 @@ function ReportLetterModal({
     if (!letterAudio) return;
     const link = document.createElement('a');
     link.href = letterAudio.src;
-    link.download = `${data.childName}(이)가 ${data.role}에게 보낸 편지-${data.createdAt}`; // 저장할 파일 이름 지정
+    link.download = `${childName}(이)가 ${data.role}에게 보낸 편지-${data.createdAt}.webm`; // 저장할 파일 이름 지정
     link.click(); // 다운로드 실행
     onClose();
   };
