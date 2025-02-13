@@ -47,34 +47,6 @@ export const useFirebaseMessaging = () => {
     data: null,
   });
 
-   // 공통 유틸리티 함수들
-   const navigateToContent = (
-    contentType: ContentType,
-    contentId: number,
-    participantName: string,
-    templateName?: string, // templateName 추가
-  ) => {
-    if (contentType === 'BOOK') {
-      // BOOK 로직 유지
-      navigate(`/book/${contentId}/together`, {
-        state: {
-          roomName: `book-${contentId}`,
-          participantName,
-        },
-      });
-    } else {
-      // SKETCH에 templateName 추가
-      navigate('/drawing', {
-        state: {
-          waitingForResponse: true,
-          templateId: contentId,
-          templateName, // 템플릿 이름 추가
-          participantName,
-        },
-      });
-    }
-  };
-
   const showContentTypeMessage = (
     type: NotificationType,
     contentType: ContentType,
@@ -131,11 +103,16 @@ const handleInvitationAccept = async () => {
             templateId: contentId,
             templateName: contentTitle,
             participantName: inviterName,
-            isAccepted: true, // 수락자임을 표시
+            isAccepted: true,
           },
         });
-      } else {
-        navigateToContent(contentType, contentId, inviterName);
+      } else if (contentType === 'BOOK') {
+        navigate(`/book/${contentId}/together`, {
+          state: {
+            roomName: `book-${contentId}`,
+            participantName: inviterName,
+          },
+        });
       }
     } catch (error) {
       console.error('Failed to accept invitation:', error);
@@ -305,18 +282,22 @@ const handleInvitationAccept = async () => {
           });
 
           if (contentType === 'SKETCH') {
-            // 초대자의 대기 상태 해제
             navigate('/drawing', {
               state: {
                 templateId: Number(contentId),
                 templateName: contentTitle,
-                waitingForResponse: false, // 대기 상태 해제
+                waitingForResponse: false,
                 participantName: inviteeName,
               },
               replace: true,
             });
-          } else {
-            navigateToContent(contentType, Number(contentId), inviteeName);
+          } else if (contentType === 'BOOK') {
+            navigate(`/book/${contentId}/together`, {
+              state: {
+                roomName: `book-${contentId}`,
+                participantName: inviteeName,
+              },
+            });
           }
         } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
           showContentTypeMessage('reject', contentType, {

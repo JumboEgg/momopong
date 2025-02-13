@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
+import { useFriends } from '@/stores/friendStore';
 
 export interface DrawingData {
   status: string;
@@ -68,6 +69,9 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     newSocket.on('connect', () => {
       console.info('WebSocket 연결 성공!');
+      const { setIsConnected } = useFriends();
+      setIsConnected(true); // 소켓 연결 성공시 설정
+
       const roomId = invitationId ? `drawing_${invitationId}` : null;
       if (roomId) {
         set({ roomId });

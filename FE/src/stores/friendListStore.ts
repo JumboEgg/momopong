@@ -195,6 +195,12 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         roleStore.setRoles(inviterRole, inviteeRole, invitation.contentId);
       }
 
+      console.log('Accept invitation request:', {
+        endpoint,
+        payload,
+        invitation,
+      });
+
       await api.post(endpoint, payload);
 
       toastStore.showToast({
@@ -204,7 +210,10 @@ export const useFriendListStore = create<FriendList>()((set) => ({
           : '함께 그림 그리러 가고 있어요',
       });
     } catch (error) {
-      console.error('Failed to accept invitation:', error);
+      console.error('Accept invitation error details:', {
+        error,
+        requestData: invitation,
+      });
       toastStore.showToast({
         type: 'error',
         message: '지금은 함께할 수 없어요',

@@ -14,6 +14,26 @@ import { useSketchList } from '@/stores/drawing/sketchListStore';
 import InvitationWaitPage from '../components/common/multiplayPages/invitationWaitPage';
 import NetworkErrorPage from '../components/common/multiplayPages/networkerrorPage';
 
+const getTemplateFilename = (id: number): string => {
+  const fileMap: Record<number, string> = {
+    1: 'boilthewitch.webp',
+    2: 'cardsoldiers.webp',
+    3: 'cinderella.webp',
+    4: 'cookiehouse.webp',
+    5: 'frooog.webp',
+    6: 'grillthemermaid.webp',
+    7: 'peavine.webp',
+    8: 'prince.webp',
+    9: 'pumpkinmagic.webp',
+    10: 'runningbunny.webp',
+    11: 'shoemakerelves.webp',
+    12: 'thepremiumshoe.webp',
+    13: 'theshoe.webp',
+  };
+
+  return fileMap[id] || '';
+};
+
 function Drawing() {
   const {
     mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
@@ -21,7 +41,7 @@ function Drawing() {
 
   const { setSketchList } = useSketchList();
   const {
-    friend, setFriend, isConnected, setIsConnected,
+    friend, setFriend, isConnected,
   } = useFriends();
   const { socket, setConnect } = useSocketStore();
   const location = useLocation();
@@ -31,58 +51,48 @@ function Drawing() {
   } = location.state || {};
 
    // 기본 초기화용 useEffect
-   useEffect(() => {
-    // console.log('Effect triggered');
-    // console.log('Current location.state:', location.state);
-
+    useEffect(() => {
     if (location.state?.templateId) {
-      // console.log('Setting template with:', location.state.templateId);
-      setTemplate({
-        sketchId: location.state.templateId,
-        sketchPath: '',
-        sketchTitle: location.state.templateName || '함께 그리기',
-      });
-      setMode('together');
-      // console.log('Template should be set now');
+      // 한 번만 설정되도록
+      if (!template || template.sketchId !== location.state.templateId) {
+        setTemplate({
+          sketchId: location.state.templateId,
+          sketchPath: getTemplateFilename(location.state.templateId),
+          sketchTitle: location.state.templateName || '함께 그리기',
+        });
+        setMode('together');
+      }
     } else if (!location.state) {
-      // console.log('Initializing states to null');
       setMode(null);
       setTemplate(null);
       setSketchList();
+      setPenColor('black');
+      setIsErasing(false);
+      setImageData('');
     }
-
-    setPenColor('black');
-    setIsErasing(false);
-    setImageData('');
   }, [location.state]);
 
   // 소켓 연결 관리
   useEffect(() => {
     if (mode === 'together') {
-      console.log('location.state:', location.state);
-      if (waitingForResponse) {
-        setConnect(false);
-        setIsConnected(false);
-      } else if (isAccepted || location.state?.participantName) {
+      const isParticipating = isAccepted || location.state?.participantName;
+
+      if (isParticipating) {
         setConnect(true);
-        setIsConnected(false);
-        const participantName = location.state?.participantName;
-        if (participantName && !friend) {
+        // isConnected; // 여기 추가
+
+        if (location.state?.participantName && !friend) {
           setFriend({
             id: location.state?.participantId,
             childId: location.state?.participantId,
-            name: participantName,
+            name: location.state?.participantName,
             profile: location.state?.participantProfile || '',
-            status: 'DRAWING', // StatusType의 literal type 중 하나
+            status: 'DRAWING',
           });
         }
-      } else {
-        setFriend(null);
-        setConnect(false);
-        setIsConnected(false);
       }
     }
-  }, [mode, waitingForResponse, isAccepted]);
+  }, [mode, isAccepted, location.state?.participantName]);
 
   const content = () => {
     if (!template) {
