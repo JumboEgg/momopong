@@ -85,7 +85,6 @@ export const useFirebaseMessaging = () => {
 
     const fcmStore = useFCMStore.getState();
     fcmStore.setProcessingInvitation(true);
-    console.log('Starting invitation accept process');
 
     const {
       inviterId,
@@ -97,6 +96,8 @@ export const useFirebaseMessaging = () => {
     } = invitationModal.data;
 
     try {
+      setInvitationModal({ isOpen: false, data: null });
+
       await acceptInvitation({
         contentId,
         inviterId,
@@ -107,9 +108,12 @@ export const useFirebaseMessaging = () => {
         contentTitle,
       });
 
-      console.log('Invitation accepted, navigating...');
-      navigateToContent(contentType, contentId, inviterName); // inviteeName -> inviterName으로 수정
-      setInvitationModal({ isOpen: false, data: null });
+      // Promise 생성 방식 수정
+      await new Promise((resolve) => {
+        setTimeout(resolve, 500);
+      });
+
+      navigateToContent(contentType, contentId, inviterName);
     } catch (error) {
       console.error('Failed to accept invitation:', error);
       showContentTypeMessage('error', contentType, {
@@ -119,8 +123,7 @@ export const useFirebaseMessaging = () => {
     } finally {
       setTimeout(() => {
         fcmStore.setProcessingInvitation(false);
-        console.log('Invitation processing completed');
-      }, 1000);
+      }, 2000);
     }
   };
 
@@ -130,6 +133,13 @@ export const useFirebaseMessaging = () => {
     const currentChildId = tokenService.getCurrentChildId();
     if (!currentChildId) {
       console.error('No current child ID found');
+      return;
+    }
+
+    // 프로세싱 중인지 확인
+    const fcmStore = useFCMStore.getState();
+    if (fcmStore.processingInvitation) {
+      console.log('Another invitation is being processed');
       return;
     }
 
@@ -143,15 +153,8 @@ export const useFirebaseMessaging = () => {
     } = invitationModal.data;
 
     try {
-      console.log('Rejecting invitation:', {
-        contentId,
-        inviterId,
-        inviteeId: currentChildId,
-        contentType,
-        inviterName,
-        inviteeName,
-        contentTitle,
-      });
+      // 모달 상태를 먼저 업데이트
+      setInvitationModal({ isOpen: false, data: null });
 
       await rejectInvitation({
         contentId,
@@ -168,8 +171,6 @@ export const useFirebaseMessaging = () => {
         book: '동화 초대 거절 처리 중 오류가 발생했습니다.',
         sketch: '그림 초대 거절 처리 중 오류가 발생했습니다.',
       });
-    } finally {
-      setInvitationModal({ isOpen: false, data: null });
     }
   };
 
