@@ -129,7 +129,9 @@ const handleInvitationAccept = async () => {
         navigate('/drawing', {
           state: {
             templateId: contentId,
+            templateName: contentTitle,
             participantName: inviterName,
+            isAccepted: true, // 수락자임을 표시
           },
         });
       } else {
@@ -302,7 +304,20 @@ const handleInvitationAccept = async () => {
             sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 수락했어요!`,
           });
 
-          navigateToContent(contentType, Number(contentId), inviterName);
+          if (contentType === 'SKETCH') {
+            // 초대자의 대기 상태 해제
+            navigate('/drawing', {
+              state: {
+                templateId: Number(contentId),
+                templateName: contentTitle,
+                waitingForResponse: false, // 대기 상태 해제
+                participantName: inviteeName,
+              },
+              replace: true,
+            });
+          } else {
+            navigateToContent(contentType, Number(contentId), inviteeName);
+          }
         } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
           showContentTypeMessage('reject', contentType, {
             book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,

@@ -1,6 +1,7 @@
 import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
 import { useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
@@ -17,33 +18,52 @@ function Drawing() {
     mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
   } = useDrawing();
 
+  const { setSketchList } = useSketchList();
   const {
-    setSketchList,
-  } = useSketchList();
+ friend, setFriend, isConnected, setIsConnected,
+} = useFriends();
+  const { socket, setConnect } = useSocketStore();
+  const location = useLocation();
+  const {
+    waitingForResponse,
+    templateId,
+    templateName,
+    isAccepted,
+  } = location.state || {};
 
+  // 초기화 useEffect
   useEffect(() => {
-    setMode(null);
-    setTemplate(null);
+    if (templateId) {
+      // SketchInfo 타입에 맞게 설정
+      setTemplate({
+        sketchId: templateId,
+        sketchPath: '', // 빈 문자열로 설정
+        sketchTitle: templateName || '함께 그리기',
+      });
+      setMode('together');
+    } else {
+      setMode(null);
+      setTemplate(null);
+      setSketchList();
+    }
+
     setPenColor('black');
     setIsErasing(false);
     setImageData('');
-    setSketchList();
   }, []);
 
-  const {
-    friend, setFriend, isConnected, setIsConnected,
-  } = useFriends();
-
-  const {
-    socket, setConnect,
-  } = useSocketStore();
-
+  // 소켓 연결 관리
   useEffect(() => {
-    // setConnect(false);
-    setConnect(true);
-    setIsConnected(false);
-    setFriend(null);
-  }, [mode]);
+    if (mode === 'together') {
+      if (waitingForResponse) {
+        setConnect(false);
+      } else if (isAccepted || !waitingForResponse) {
+        setConnect(true);
+      }
+      setIsConnected(false);
+      setFriend(null);
+    }
+  }, [mode, waitingForResponse, isAccepted]);
 
   const content = () => {
     if (!template) {
@@ -54,31 +74,32 @@ function Drawing() {
       return <DrawingModeSelection />;
     }
 
-    if (mode === 'single' && !imageData) {
-      return (
-        <DrawingPage />
-      );
+    // 함께하기 모드일 때
+    if (mode === 'together') {
+      // 초대 대기중일 경우
+      if (waitingForResponse) {
+        return <InvitationWaitPage />;
+      }
+
+      if (!friend) {
+        return <FriendSelection />;
+      }
+
+      if (friend && !socket) {
+        return <NetworkErrorPage />;
+      }
+
+      if (friend && socket && !isConnected) {
+        return <InvitationWaitPage />;
+      }
+
+      if (!imageData) {
+        return <DrawingPage />;
+      }
     }
 
-    if (mode === 'together') {
-      if (!friend) {
-        return (
-          <FriendSelection />
-        );
-      } if (friend && !socket) {
-        return (
-          <NetworkErrorPage />
-        );
-      } if (friend && socket && !isConnected) {
-        return (
-          <InvitationWaitPage />
-        );
-      }
-      if (!imageData) {
-        return (
-          <DrawingPage />
-        );
-      }
+    if (mode === 'single' && !imageData) {
+      return <DrawingPage />;
     }
 
     if (mode === 'story' && !imageData) {
@@ -94,4 +115,5 @@ function Drawing() {
     </div>
   );
 }
+
 export default Drawing;
