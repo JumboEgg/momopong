@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { useDrawingHistory } from '@/stores/sketch/drawingHistoyStore';
+import { useDrawingHistory } from '@/stores/drawing/drawingHistoyStore';
 import useLetterStore from '@/stores/letter/letterStore';
 
 function MyHouse() {

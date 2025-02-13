@@ -1,6 +1,6 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useCallback, useEffect, useState } from 'react';
-import { useDrawing } from '@/stores/sketch/drawingStore';
+import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
 import { useBookSketch } from '@/stores/book/bookSketchStore';
 

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useDrawingHistory } from '@/stores/sketch/drawingHistoyStore';
+import { useDrawingHistory } from '@/stores/drawing/drawingHistoyStore';
 
 function MyDrawing() {
   const [currentIndex, setCurrentIndex] = useState(0);

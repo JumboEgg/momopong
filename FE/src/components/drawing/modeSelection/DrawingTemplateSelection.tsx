@@ -2,8 +2,8 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
-import { useDrawing } from '@/stores/sketch/drawingStore';
-import { useSketchList } from '@/stores/sketch/sketchListStore';
+import { useDrawing } from '@/stores/drawing/drawingStore';
+import { useSketchList } from '@/stores/drawing/sketchListStore';
 import '@/components/common/scrollbar.css';
 import { getOutlinePath } from '@/utils/format/imgPath';
 

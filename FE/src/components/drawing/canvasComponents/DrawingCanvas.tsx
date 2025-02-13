@@ -1,7 +1,7 @@
 import {
   useState, useRef, useEffect, useCallback,
 } from 'react';
-import { useDrawing } from '@/stores/sketch/drawingStore';
+import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getOutlinePath } from '@/utils/format/imgPath';
 import useSocketStore from '../hooks/useSocketStore';
 

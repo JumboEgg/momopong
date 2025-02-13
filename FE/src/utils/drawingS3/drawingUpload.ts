@@ -1,4 +1,4 @@
-import base64ToBlob from '@/stores/sketch/base64ToBlob';
+import base64ToBlob from '@/stores/drawing/base64ToBlob';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { FrameInfo } from '@/types/frame';
 

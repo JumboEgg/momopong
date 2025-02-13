@@ -1,4 +1,4 @@
-import { useDrawing } from '@/stores/sketch/drawingStore';
+import { useDrawing } from '@/stores/drawing/drawingStore';
 import colors, { simpleColors } from '../data/colorList';
 
 function Color({ color }: { color: string }): JSX.Element {

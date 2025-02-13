@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import useSubAccountStore from '../subAccountStore';
-import base64ToBlob from '../sketch/base64ToBlob';
+import base64ToBlob from '../drawing/base64ToBlob';
 
 // Drawing 상태 관리 스토어
 interface BookSketchStore {

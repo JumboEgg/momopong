@@ -10,7 +10,7 @@ import { ContentType } from '@/types/invitation';
 import { useFriends } from '@/stores/friendStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { Friend } from '@/types/friend';
-import { useDrawing } from '@/stores/sketch/drawingStore';
+import { useDrawing } from '@/stores/drawing/drawingStore';
 
 function FriendSelection() {
   const navigate = useNavigate();
