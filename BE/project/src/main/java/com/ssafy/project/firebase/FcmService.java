@@ -46,6 +46,9 @@ public class FcmService {
         // 알림 받을 사용자의 VAPID 토큰 얻기
         String key = String.format(CHILD_VAPID_TOKEN, sendDto.getReceiveId());
         String token = (String) redisDao.getValues(key);
+        log.info("sendMessage.key={}", key);
+        log.info("sendMessage.token={}", token);
+
         if (token == null) {
             throw new NotFoundException("해당 사용자의 토큰이 존재하지 않습니다");
         }
@@ -62,13 +65,14 @@ public class FcmService {
                 "contentType",notificationDto.getContentType().toString(),
                 "notificationType", notificationDto.getNotificationType().toString()
         );
-
+        log.info("sendMessage.data={}", data);
 
         // 알림 메시지 구성하기 (Firebase의 Message)
         Message message = Message.builder()
                 .setToken(token)
                 .putAllData(data)
                 .build();
+        log.info("sendMessage.message={}", message);
 
         // 알림 메시지 전송
         try {
