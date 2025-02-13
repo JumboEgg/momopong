@@ -1,27 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
+// 수정한거임
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   Room,
   RoomEvent,
   RemoteParticipant,
   LocalParticipant,
   VideoPresets,
-  DisconnectReason,
+  Track,
 } from 'livekit-client';
-import { useStory } from '@/stores/storyStore';
 
 interface IntegratedRoomProps {
   roomName: string;
   participantName: string;
   userRole: 'prince' | 'princess';
   isUserTurn: boolean;
-  onRecordingComplete: () => void;
+  onRecordingComplete: (participantId: string) => void;
+  onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
 }
 
-// 녹음 데이터 인터페이스 추가
-interface RecordingData {
-  characterType: 'prince' | 'princess';
-  audioUrl: string;
-  timestamp: number;
+interface ParticipantTrack {
+  participant: LocalParticipant | RemoteParticipant;
+  trackPublication?: Track;
 }
 
 function IntegratedRoom({
@@ -30,278 +34,179 @@ function IntegratedRoom({
   userRole,
   isUserTurn,
   onRecordingComplete,
+  onRecordingStatusChange,
 }: IntegratedRoomProps) {
   const [room, setRoom] = useState<Room | null>(null);
-  const [participants, setParticipants] = useState<(RemoteParticipant | LocalParticipant)[]>([]);
-  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
-  const { audioEnabled, addRecording, currentIndex } = useStory();
-  const [globalRecordingStatus, setGlobalRecordingStatus] = useState<'idle' | 'recording' | 'completed'>('idle');
+  const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
 
-  // 녹음 상태 동기화를 위한 시그널 전송
-  const broadcastRecordingStatus = useCallback((status: 'idle' | 'recording' | 'completed') => {
-    if (!room) return;
+  // 토큰 가져오기
+  const getToken = useCallback(async () => {
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ roomName, participantName }),
+      });
 
-    const data = {
-      type: 'recording_status',
-      status,
-      sender: participantName,
-    };
+      if (!response.ok) throw new Error('Failed to get token');
+      const data = await response.json();
+      return data.token;
+    } catch (error) {
+      console.error('Token error:', error);
+      throw error;
+    }
+  }, [roomName, participantName]);
 
-    room.localParticipant.publishData(
-      new TextEncoder().encode(JSON.stringify(data)),
-      { reliable: true },
-    );
-  }, [room, participantName]);
-
-  // 참가자 상태 업데이트
+  // 참가자 목록 업데이트
   const updateParticipants = useCallback((currentRoom: Room) => {
-    const remoteParticipants = Array.from(currentRoom.remoteParticipants.values());
-    const allParticipants = [currentRoom.localParticipant, ...remoteParticipants];
-    setParticipants(allParticipants);
+    const participantTracks: ParticipantTrack[] = [];
+
+    // 로컬 참가자 추가
+    const localVideoPublication = currentRoom.localParticipant
+      .getTrackPublications()
+      .find((publication) => publication.kind === Track.Kind.Video);
+
+    participantTracks.push({
+      participant: currentRoom.localParticipant,
+      trackPublication: localVideoPublication?.track,
+    });
+
+    // 원격 참가자 추가
+    currentRoom.remoteParticipants.forEach((participant) => {
+      const videoPublication = participant
+        .getTrackPublications()
+        .find((publication) => publication.kind === Track.Kind.Video);
+
+      participantTracks.push({
+        participant,
+        trackPublication: videoPublication?.track,
+      });
+    });
+
+    setParticipants(participantTracks);
   }, []);
+
+  // 녹음 상태 브로드캐스트
+  const broadcastRecordingStatus = useCallback(
+    (status: 'idle' | 'recording' | 'completed') => {
+      if (!room) return;
+
+      const message = {
+        type: 'recording_status',
+        content: {
+          recordingStatus: status,
+          sender: room.localParticipant.identity,
+        },
+      };
+
+      room.localParticipant.publishData(
+        new TextEncoder().encode(JSON.stringify(message)),
+        { reliable: true },
+      );
+
+      onRecordingStatusChange(room.localParticipant.identity, status);
+    },
+    [room, onRecordingStatusChange],
+  );
 
   // 녹음 중지
   const stopRecording = useCallback(() => {
-    if (!isRecording) return;
-    setIsRecording(false);
-    setTimeLeft(20);
-  }, [isRecording]);
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+    }
+  }, [mediaRecorder]);
 
   // 녹음 시작
   const startRecording = useCallback(async () => {
-    if (!isUserTurn || isRecording) return;
+    if (!isUserTurn || isRecording || !room) return;
 
     try {
-      // 녹음 시작 상태 브로드캐스트
-      broadcastRecordingStatus('recording');
-      setGlobalRecordingStatus('recording');
-
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      audioStreamRef.current = stream;
+
+      const recorder = new MediaRecorder(stream);
       const audioChunks: BlobPart[] = [];
 
-      mediaRecorder.ondataavailable = (event) => {
+      recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
           audioChunks.push(event.data);
         }
       };
 
-      mediaRecorder.onstop = () => {
+      recorder.onstop = () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        const recordingData: RecordingData = {
-          characterType: userRole,
-          audioUrl,
-          timestamp: Date.now(),
-        };
-
-        addRecording(currentIndex, recordingData);
-
+        // Clean up
         stream.getTracks().forEach((track) => track.stop());
+        audioStreamRef.current = null;
+        setMediaRecorder(null);
         setIsRecording(false);
 
-        // 녹음 완료 상태 브로드캐스트
+        // Notify status changes
         broadcastRecordingStatus('completed');
-        setGlobalRecordingStatus('completed');
+        onRecordingComplete(room.localParticipant.identity);
 
-        // 다음 페이지로 이동
-        setTimeout(() => {
-          onRecordingComplete();
-        }, 1000);
+        // Play recorded audio
+        try {
+          const audio = new Audio();
+          audio.src = audioUrl;
+          audio.onended = () => {
+            URL.revokeObjectURL(audioUrl);
+          };
+
+          audio.onerror = (e) => {
+            console.error('Audio playback error:', e);
+            URL.revokeObjectURL(audioUrl);
+          };
+
+          audio.play().catch((error) => {
+            console.error('Failed to play audio:', error);
+            URL.revokeObjectURL(audioUrl);
+          });
+        } catch (error) {
+          console.error('Audio setup error:', error);
+          URL.revokeObjectURL(audioUrl);
+        }
       };
 
+      setMediaRecorder(recorder);
       setIsRecording(true);
       setTimeLeft(20);
-      mediaRecorder.start();
+      recorder.start(1000);
 
-      setTimeout(() => {
-        if (mediaRecorder.state === 'recording') {
-          mediaRecorder.stop();
-        }
-      }, 20000);
+      // Broadcast recording status
+      broadcastRecordingStatus('recording');
+      onRecordingStatusChange(room.localParticipant.identity, 'recording');
     } catch (error) {
-      console.error('녹음 시작 실패:', error);
+      console.error('Recording failed:', error);
       alert('마이크 접근에 실패했습니다. 마이크 권한을 확인해주세요.');
       setIsRecording(false);
       broadcastRecordingStatus('idle');
-      setGlobalRecordingStatus('idle');
     }
   }, [
     isUserTurn,
     isRecording,
-    currentIndex,
-    userRole, addRecording, broadcastRecordingStatus, onRecordingComplete]);
+    room,
+    onRecordingComplete,
+    onRecordingStatusChange,
+    broadcastRecordingStatus]);
 
-  // 데이터 수신 이벤트 리스너 추가
-  useEffect(() => {
-    if (!room) return;
-
-    const handleData = (payload: Uint8Array) => {
-      try {
-        const data = JSON.parse(new TextDecoder().decode(payload));
-        if (data.type === 'recording_status' && data.sender !== participantName) {
-          setGlobalRecordingStatus(data.status);
-        }
-      } catch (error) {
-        console.error('데이터 처리 오류:', error);
-      }
-    };
-
-    room.on(RoomEvent.DataReceived, handleData);
-
-    // eslint-disable-next-line no-void
-    void 0;
-  }, [room, participantName]);
-
-  // 타이머 처리
-  useEffect(() => {
-    let timerId: NodeJS.Timeout;
-
-    if (isRecording) {
-      timerId = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            clearInterval(timerId);
-            stopRecording();
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
-    }
-
-    return () => {
-      if (timerId) clearInterval(timerId);
-    };
-  }, [isRecording, stopRecording]);
-
-  // 토큰 가져오기
-  const handleGetToken = useCallback(async () => {
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          roomName,
-          participantName,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Token request failed: ${response.status}`);
-      }
-
-  const data = await response.json();
-  return data.token;
-} catch (error) {
-  console.error('Token error:', error);
-  throw error;
-}
-  }, []);
-
-  // 상태 업데이트 전송
-  const sendStoryState = useCallback((state: StoryState) => {
-    if (!room) return;
-    const data = JSON.stringify({ ...state, fromRole: userRole });
-    const encoder = new TextEncoder();
-    const encodedData = encoder.encode(data);
-    room.localParticipant.publishData(encodedData, { reliable: true });
-  }, [room, userRole]);
-
-  // 상태 변경 수신 처리
-  const handleDataReceived = useCallback((payload: Uint8Array) => {
-    try {
-      const decoder = new TextDecoder();
-      const data: StoryState = JSON.parse(decoder.decode(payload));
-
-  if (data.fromRole === userRole) return;
-
-  switch (data.type) {
-    case 'STORY_UPDATE':
-      if (typeof data.currentIndex === 'number' && typeof data.currentContentIndex === 'number') {
-        onStoryUpdate(data.currentIndex, data.currentContentIndex);
-      }
-      break;
-    case 'RECORDING_STATE':
-      if (typeof data.isRecording === 'boolean') {
-        onRecordingStateChange(data.isRecording);
-      }
-      break;
-    default:
-      break;
-  }
-} catch (error) {
-  console.error('Data parsing error:', error);
-}
-  }, [onStoryUpdate, onRecordingStateChange, userRole]);
-
-  // 비디오 트랙 가져오는 함수
-  const getVideoTrack = useCallback((participant: RemoteParticipant | LocalParticipant) => {
-    try {
-      if (participant instanceof LocalParticipant) {
-        const localTracks = Array.from(participant.videoTrackPublications.values());
-        const cameraTrack = localTracks.find((publication) => publication.trackName === 'camera');
-        console.log('Local video track:', cameraTrack);
-        return cameraTrack?.track;
-      }
-
-  const remoteTracks = Array.from(participant.trackPublications.values());
-  const videoPublication = remoteTracks.find(
-    (publication) => publication.kind === Track.Kind.Video,
-);
-  console.log('Remote video track:', videoPublication);
-  return videoPublication?.track;
-} catch (error) {
-  console.error('Error getting video track:', error);
-  return null;
-}
-  }, []);
-
-  // 참가자 상태 업데이트
-  const updateParticipants = useCallback((currentRoom: Room) => {
-    const remoteParticipants = Array.from(currentRoom.remoteParticipants.values());
-    const allParticipants: (RemoteParticipant | LocalParticipant)[] = [...remoteParticipants];
-
-if (currentRoom.localParticipant) {
-  allParticipants.unshift(currentRoom.localParticipant);
-}
-
-setParticipants(allParticipants);
-  }, []);
-
-  // 상태 변경 시 동기화
-  useEffect(() => {
-    if (!room) return;
-    sendStoryState({
-      type: 'STORY_UPDATE',
-      currentIndex,
-      currentContentIndex,
-    });
-  }, [room, currentIndex, currentContentIndex, sendStoryState]);
-
-  useEffect(() => {
-    if (!room) return;
-    sendStoryState({
-      type: 'RECORDING_STATE',
-      isRecording,
-    });
-  }, [room, isRecording, sendStoryState]);
->>>>>>> Stashed changes
-
-  // LiveKit 룸 초기화
+  // Room 연결 설정
   useEffect(() => {
     let isMounted = true;
 
-    const initRoom = async () => {
+    const connectToRoom = async () => {
       try {
-        // 토큰 가져오기
-        const token = await handleGetToken(roomName, participantName);
+        const token = await getToken();
         if (!isMounted) return;
 
-        const roomOptions: RoomOptions = {
+        const newRoom = new Room({
           adaptiveStream: true,
           dynacast: true,
           videoCaptureDefaults: {
@@ -314,10 +219,21 @@ setParticipants(allParticipants);
               maxFramerate: 30,
             },
           },
-        };
+        });
 
-    const newRoom = new Room(roomOptions);
+        // 데이터 수신 처리
+        newRoom.on(RoomEvent.DataReceived, (payload: Uint8Array) => {
+          try {
+            const message = JSON.parse(new TextDecoder().decode(payload));
+            if (message.type === 'recording_status' && message.content.sender !== newRoom.localParticipant.identity) {
+              onRecordingStatusChange(message.content.sender, message.content.recordingStatus);
+            }
+          } catch (error) {
+            console.error('데이터 처리 오류:', error);
+          }
+        });
 
+        // 참가자 관련 이벤트 처리
         newRoom
           .on(RoomEvent.ParticipantConnected, () => {
             if (isMounted) updateParticipants(newRoom);
@@ -325,207 +241,156 @@ setParticipants(allParticipants);
           .on(RoomEvent.ParticipantDisconnected, () => {
             if (isMounted) updateParticipants(newRoom);
           })
-          .on(RoomEvent.DataReceived, (payload: Uint8Array) => {
-            if (isMounted) handleDataReceived(payload);
+          .on(RoomEvent.TrackSubscribed, () => {
+            if (isMounted) updateParticipants(newRoom);
           })
-          .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
-            if (isMounted && reason) {
-              setConnectionError(`Room disconnected: ${reason}`);
-            }
+          .on(RoomEvent.TrackUnsubscribed, () => {
+            if (isMounted) updateParticipants(newRoom);
           });
 
-    await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
+        await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
+        if (!isMounted) {
+          await newRoom.disconnect();
+          return;
+        }
 
-    if (!isMounted) {
-      await newRoom.disconnect();
-      return;
-    }
+        await newRoom.localParticipant.setName(participantName);
+        await newRoom.localParticipant.setCameraEnabled(true);
+        await newRoom.localParticipant.setMicrophoneEnabled(false);
 
-    await newRoom.localParticipant.setName(participantName);
-    // 카메라와 마이크 초기화
-    await newRoom.localParticipant.enableCameraAndMicrophone();
-    await newRoom.localParticipant.setCameraEnabled(true);
-    await newRoom.localParticipant.setMicrophoneEnabled(isUserTurn && audioEnabled);
+        setRoom(newRoom);
+        updateParticipants(newRoom);
+      } catch (error) {
+        console.error('Room connection failed:', error);
+        if (isMounted) {
+          setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+        }
+      }
+    };
 
-    // 발행된 트랙이 있는지 확인
-    const videoTracks = Array.from(newRoom.localParticipant.videoTrackPublications.values());
-    if (videoTracks.length === 0) {
-        console.warn('No camera track published after enabling camera');
-    } else {
-        console.log('Camera track published successfully');
-    }
+    connectToRoom();
 
-    setRoom(newRoom);
-    updateParticipants(newRoom);
-    } catch (error) {
-    console.error('Failed to initialize media devices:', error);
-    setConnectionError('카메라 또는 마이크 초기화에 실패했습니다.');
-    }
-};
+    return () => {
+      isMounted = false;
+      if (room) {
+        room.disconnect();
+      }
+    };
+  }, [roomName, participantName, getToken, updateParticipants]);
 
-initRoom();
+  // 리소스 정리
+  useEffect(
+    () => () => {
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        mediaRecorder.stop();
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach((track) => track.stop());
+      }
+    },
+    [mediaRecorder],
+  );
 
-return () => {
-  isMounted = false;
-  if (room) {
-    room.disconnect();
-  }
-};
-  },
-  [roomName,
->>>>>>> Stashed changes
-    participantName,
-    handleGetToken,
-    updateParticipants,
-    isUserTurn, audioEnabled, isRecording]);
-
-  // 마이크 상태 관리
-  useEffect(() => {
-    if (!room) return;
-    room.localParticipant.setMicrophoneEnabled(isUserTurn && (audioEnabled || isRecording));
-  }, [room, isUserTurn, audioEnabled, isRecording]);
-
-  // 에러 처리
   if (connectionError) {
     return (
       <div className="p-4 bg-red-100 text-red-700 rounded-lg">
-        Error:
-        {' '}
-        {connectionError}
+        <span>연결 오류: </span>
+        <span>{connectionError}</span>
       </div>
     );
   }
 
-  return (
-    <div className="fixed bottom-8 right-8 flex gap-4">
-<<<<<<< Updated upstream
-      {participants.map((participant) => {
-        // LiveKit의 published tracks에서 비디오 트랙 찾기
-        const videoPublication = Array.from(participant.getTrackPublications()).find(
-          (pub) => pub.kind === 'video',
-        );
-        const videoTrack = videoPublication?.track;
+  const renderRecordingButton = () => {
+    if (!isUserTurn) {
+      return null;
+    }
 
-        return (
-          <div
-            key={participant.identity}
-            className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden"
-          >
-            <video
-              ref={(element) => {
-                if (element && videoTrack) {
-                  videoTrack.attach(element);
-                }
-              }}
-              autoPlay
-              playsInline
-              muted={participant === room?.localParticipant}
-              className="w-full h-full object-cover"
-            >
-              <track kind="captions" srcLang="ko" label="Korean" />
-            </video>
-            <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
-              <span className="text-white text-sm truncate">
-                {participant.name || participant.identity}
-                {participant === room?.localParticipant
-                  ? ` (${userRole === 'prince' ? '왕자님' : '신데렐라'})`
-                  : ''}
-              </span>
-              {participant === room?.localParticipant && (
-                <div className="flex gap-1">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      isUserTurn ? 'bg-green-500' : 'bg-red-500'
-                    }`}
-                    title={isUserTurn ? '내 차례' : '상대방 차례'}
-                  />
-                </div>
-              )}
-            </div>
-=======
-      {participants.map((participant) => (
-        <div
-          key={participant.identity}
-          className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden"
-        >
-          <video
-            ref={(element) => {
-                if (element) {
-                const videoTrack = getVideoTrack(participant);
-                if (videoTrack) {
-                    try {
-                    // 기존 연결 해제
-                    videoTrack.detach().forEach((el) => el.remove());
-                    // 새로운 연결
-                    videoTrack.attach(element);
-                    console.log('Video track attached:', participant.identity);
-                    } catch (error) {
-                    console.error('Error attaching video track:', error);
-                    }
-                } else {
-                    console.log('No video track found for:', participant.identity);
-                }
-                }
-            }}
-            autoPlay
-            playsInline
-            muted={participant === room?.localParticipant}
-            className="w-full h-full object-cover"
-          >
-            <track kind="captions" src="" />
-          </video>
-          <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
-            <span className="text-white text-sm truncate">
-              {participant.name || participant.identity}
-              {participant === room?.localParticipant ? (
-                `(${userRole === 'prince' ? '왕자님' : '신데렐라'})`
-              ) : ''}
-            </span>
-            {participant === room?.localParticipant && (
-              <div className="flex gap-1">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    isUserTurn ? 'bg-green-500' : 'bg-red-500'
-                  }`}
-                  title={isUserTurn ? '내 차례' : '상대방 차례'}
-                />
-              </div>
-            )}
->>>>>>> Stashed changes
+    return (
+      <div className="flex flex-col items-center gap-2">
+        {isRecording && (
+          <div className="w-32 h-2 bg-gray-200 rounded mb-2">
+            <div
+              className="h-full bg-red-500 rounded transition-all duration-1000"
+              style={{ width: `${(timeLeft / 20) * 100}%` }}
+            />
           </div>
-        );
-      })}
+        )}
 
-      {/* 녹음 중 대기 상태 표시 */}
-      {globalRecordingStatus === 'recording' && !isRecording && (
-      <div className="absolute top-0 left-0 right-0 bg-yellow-100 text-yellow-800 p-2 text-center">
-        상대방이 녹음 중입니다. 잠시만 기다려주세요...
-      </div>
-      )}
-      {/* 녹음 버튼 - 상대방 녹음 중일 때는 비활성화 */}
-      {isUserTurn && (
-      <button
-        type="button"
-        onClick={isRecording ? stopRecording : startRecording}
-        disabled={globalRecordingStatus === 'recording' && !isRecording}
-        className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full 
-          ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} 
-          text-white font-medium transition-colors
-          ${globalRecordingStatus === 'recording' && !isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        {isRecording ? `녹음 중... (${timeLeft}초)` : '녹음 시작'}
-      </button>
-      )}
+        <div className="flex gap-2">
+          <button
+            type="button"
+            onClick={startRecording}
+            disabled={!isUserTurn || isRecording}
+            className={`
+              px-4 py-2 rounded-full text-white font-medium transition-colors whitespace-nowrap
+              ${isRecording ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}
+            `}
+          >
+            {isRecording ? `${timeLeft}초` : '녹음 시작'}
+          </button>
 
-      {/* 녹음 진행바 */}
-      {isRecording && (
-        <div className="absolute bottom-16 left-1/2 transform -translate-x-1/2 w-48 h-2 bg-gray-200 rounded">
-          <div
-            className="h-full bg-red-500 rounded transition-all duration-1000"
-            style={{ width: `${(timeLeft / 20) * 100}%` }}
-          />
+          {isRecording && (
+            <button
+              type="button"
+              onClick={stopRecording}
+              className="
+                px-4 py-2 rounded-full text-white font-medium
+                bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap
+              "
+            >
+              완료
+            </button>
+          )}
         </div>
-      )}
+      </div>
+    );
+  };
+
+  const renderParticipantVideo = (index: number) => {
+    if (!participants[index]) {
+      return null;
+    }
+
+    const { participant, trackPublication } = participants[index];
+    const isLocal = participant === room?.localParticipant;
+
+    return (
+      <div className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden">
+        <video
+          ref={(element) => {
+            if (element && trackPublication) {
+              trackPublication.attach(element);
+            }
+          }}
+          autoPlay
+          playsInline
+          muted={isLocal}
+          className="w-full h-full object-cover"
+        >
+          <track kind="captions" />
+        </video>
+
+        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
+          <span className="text-white text-sm truncate">
+            <span>{participant.name || participant.identity}</span>
+            {isLocal && <span>{` (${userRole === 'prince' ? '왕자님' : '신데렐라'})`}</span>}
+          </span>
+          {isLocal && (
+            <div
+              className={`w-2 h-2 rounded-full ${isUserTurn ? 'bg-green-500' : 'bg-red-500'}`}
+              title={isUserTurn ? '내 차례' : '상대방 차례'}
+            />
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="fixed bottom-8 right-8 flex items-center gap-4">
+      {renderParticipantVideo(0)}
+      {renderRecordingButton()}
+      {renderParticipantVideo(1)}
     </div>
   );
 }
