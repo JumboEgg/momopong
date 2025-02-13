@@ -190,14 +190,106 @@ function IntegratedRoom({
         }),
       });
 
-      if (!response.ok) throw new Error(`Token request failed: ${response.status}`);
-      const data = await response.json();
-      return data.token;
-    } catch (error) {
-      console.error('Token error:', error);
-      throw error;
-    }
-  }, [roomName, participantName]);
+      if (!response.ok) {
+        throw new Error(`Token request failed: ${response.status}`);
+      }
+
+  const data = await response.json();
+  return data.token;
+} catch (error) {
+  console.error('Token error:', error);
+  throw error;
+}
+  }, []);
+
+  // 상태 업데이트 전송
+  const sendStoryState = useCallback((state: StoryState) => {
+    if (!room) return;
+    const data = JSON.stringify({ ...state, fromRole: userRole });
+    const encoder = new TextEncoder();
+    const encodedData = encoder.encode(data);
+    room.localParticipant.publishData(encodedData, { reliable: true });
+  }, [room, userRole]);
+
+  // 상태 변경 수신 처리
+  const handleDataReceived = useCallback((payload: Uint8Array) => {
+    try {
+      const decoder = new TextDecoder();
+      const data: StoryState = JSON.parse(decoder.decode(payload));
+
+  if (data.fromRole === userRole) return;
+
+  switch (data.type) {
+    case 'STORY_UPDATE':
+      if (typeof data.currentIndex === 'number' && typeof data.currentContentIndex === 'number') {
+        onStoryUpdate(data.currentIndex, data.currentContentIndex);
+      }
+      break;
+    case 'RECORDING_STATE':
+      if (typeof data.isRecording === 'boolean') {
+        onRecordingStateChange(data.isRecording);
+      }
+      break;
+    default:
+      break;
+  }
+} catch (error) {
+  console.error('Data parsing error:', error);
+}
+  }, [onStoryUpdate, onRecordingStateChange, userRole]);
+
+  // 비디오 트랙 가져오는 함수
+  const getVideoTrack = useCallback((participant: RemoteParticipant | LocalParticipant) => {
+    try {
+      if (participant instanceof LocalParticipant) {
+        const localTracks = Array.from(participant.videoTrackPublications.values());
+        const cameraTrack = localTracks.find((publication) => publication.trackName === 'camera');
+        console.log('Local video track:', cameraTrack);
+        return cameraTrack?.track;
+      }
+
+  const remoteTracks = Array.from(participant.trackPublications.values());
+  const videoPublication = remoteTracks.find(
+    (publication) => publication.kind === Track.Kind.Video,
+);
+  console.log('Remote video track:', videoPublication);
+  return videoPublication?.track;
+} catch (error) {
+  console.error('Error getting video track:', error);
+  return null;
+}
+  }, []);
+
+  // 참가자 상태 업데이트
+  const updateParticipants = useCallback((currentRoom: Room) => {
+    const remoteParticipants = Array.from(currentRoom.remoteParticipants.values());
+    const allParticipants: (RemoteParticipant | LocalParticipant)[] = [...remoteParticipants];
+
+if (currentRoom.localParticipant) {
+  allParticipants.unshift(currentRoom.localParticipant);
+}
+
+setParticipants(allParticipants);
+  }, []);
+
+  // 상태 변경 시 동기화
+  useEffect(() => {
+    if (!room) return;
+    sendStoryState({
+      type: 'STORY_UPDATE',
+      currentIndex,
+      currentContentIndex,
+    });
+  }, [room, currentIndex, currentContentIndex, sendStoryState]);
+
+  useEffect(() => {
+    if (!room) return;
+    sendStoryState({
+      type: 'RECORDING_STATE',
+      isRecording,
+    });
+  }, [room, isRecording, sendStoryState]);
+>>>>>>> Stashed changes
 
   // LiveKit 룸 초기화
   useEffect(() => {
@@ -205,10 +297,11 @@ function IntegratedRoom({
 
     const initRoom = async () => {
       try {
-        const token = await handleGetToken();
+        // 토큰 가져오기
+        const token = await handleGetToken(roomName, participantName);
         if (!isMounted) return;
 
-        const roomOptions = {
+        const roomOptions: RoomOptions = {
           adaptiveStream: true,
           dynacast: true,
           videoCaptureDefaults: {
@@ -223,9 +316,8 @@ function IntegratedRoom({
           },
         };
 
-        const newRoom = new Room(roomOptions);
+    const newRoom = new Room(roomOptions);
 
-        // 이벤트 리스너 등록
         newRoom
           .on(RoomEvent.ParticipantConnected, () => {
             if (isMounted) updateParticipants(newRoom);
@@ -233,54 +325,55 @@ function IntegratedRoom({
           .on(RoomEvent.ParticipantDisconnected, () => {
             if (isMounted) updateParticipants(newRoom);
           })
-          .on(RoomEvent.TrackSubscribed, () => {
-            if (isMounted) updateParticipants(newRoom);
-          })
-          .on(RoomEvent.TrackUnsubscribed, () => {
-            if (isMounted) updateParticipants(newRoom);
+          .on(RoomEvent.DataReceived, (payload: Uint8Array) => {
+            if (isMounted) handleDataReceived(payload);
           })
           .on(RoomEvent.Disconnected, (reason?: DisconnectReason) => {
-            if (!isMounted) return;
-            if (reason) {
+            if (isMounted && reason) {
               setConnectionError(`Room disconnected: ${reason}`);
             }
           });
 
-        // 룸 연결
-        await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
-        if (!isMounted) {
-          await newRoom.disconnect();
-          return;
-        }
+    await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
 
-        await newRoom.localParticipant.setName(participantName);
+    if (!isMounted) {
+      await newRoom.disconnect();
+      return;
+    }
 
-        // 초기 비디오/오디오 설정
-        await newRoom.localParticipant.setCameraEnabled(true);
-        await newRoom.localParticipant.setMicrophoneEnabled(
-          isUserTurn && (audioEnabled || isRecording),
-        );
+    await newRoom.localParticipant.setName(participantName);
+    // 카메라와 마이크 초기화
+    await newRoom.localParticipant.enableCameraAndMicrophone();
+    await newRoom.localParticipant.setCameraEnabled(true);
+    await newRoom.localParticipant.setMicrophoneEnabled(isUserTurn && audioEnabled);
 
-        setRoom(newRoom);
-        updateParticipants(newRoom);
-      } catch (err) {
-        console.error('Failed to connect to LiveKit room:', err);
-        if (isMounted) {
-          setConnectionError(err instanceof Error ? err.message : 'Failed to connect to room');
-        }
-      }
-    };
+    // 발행된 트랙이 있는지 확인
+    const videoTracks = Array.from(newRoom.localParticipant.videoTrackPublications.values());
+    if (videoTracks.length === 0) {
+        console.warn('No camera track published after enabling camera');
+    } else {
+        console.log('Camera track published successfully');
+    }
 
-    initRoom();
+    setRoom(newRoom);
+    updateParticipants(newRoom);
+    } catch (error) {
+    console.error('Failed to initialize media devices:', error);
+    setConnectionError('카메라 또는 마이크 초기화에 실패했습니다.');
+    }
+};
 
-    return () => {
-      isMounted = false;
-      if (room) {
-        room.disconnect();
-      }
-    };
-  }, [
-    roomName,
+initRoom();
+
+return () => {
+  isMounted = false;
+  if (room) {
+    room.disconnect();
+  }
+};
+  },
+  [roomName,
+>>>>>>> Stashed changes
     participantName,
     handleGetToken,
     updateParticipants,
@@ -305,6 +398,7 @@ function IntegratedRoom({
 
   return (
     <div className="fixed bottom-8 right-8 flex gap-4">
+<<<<<<< Updated upstream
       {participants.map((participant) => {
         // LiveKit의 published tracks에서 비디오 트랙 찾기
         const videoPublication = Array.from(participant.getTrackPublications()).find(
@@ -348,6 +442,56 @@ function IntegratedRoom({
                 </div>
               )}
             </div>
+=======
+      {participants.map((participant) => (
+        <div
+          key={participant.identity}
+          className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden"
+        >
+          <video
+            ref={(element) => {
+                if (element) {
+                const videoTrack = getVideoTrack(participant);
+                if (videoTrack) {
+                    try {
+                    // 기존 연결 해제
+                    videoTrack.detach().forEach((el) => el.remove());
+                    // 새로운 연결
+                    videoTrack.attach(element);
+                    console.log('Video track attached:', participant.identity);
+                    } catch (error) {
+                    console.error('Error attaching video track:', error);
+                    }
+                } else {
+                    console.log('No video track found for:', participant.identity);
+                }
+                }
+            }}
+            autoPlay
+            playsInline
+            muted={participant === room?.localParticipant}
+            className="w-full h-full object-cover"
+          >
+            <track kind="captions" src="" />
+          </video>
+          <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
+            <span className="text-white text-sm truncate">
+              {participant.name || participant.identity}
+              {participant === room?.localParticipant ? (
+                `(${userRole === 'prince' ? '왕자님' : '신데렐라'})`
+              ) : ''}
+            </span>
+            {participant === room?.localParticipant && (
+              <div className="flex gap-1">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    isUserTurn ? 'bg-green-500' : 'bg-red-500'
+                  }`}
+                  title={isUserTurn ? '내 차례' : '상대방 차례'}
+                />
+              </div>
+            )}
+>>>>>>> Stashed changes
           </div>
         );
       })}

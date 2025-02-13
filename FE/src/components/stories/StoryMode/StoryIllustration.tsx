@@ -1,24 +1,19 @@
-import storyData from '../data/cinderella';
 import { StoryIllustrationProps, CharacterType } from '../types/story';
 
 function StoryIllustration({
   pageNumber,
-  currentContentIndex,
+  // currentContentIndex,
   onPrevious,
   onNext,
   isFirst,
   isLast,
   userRole,
+  currentContent, // props로 받기
+  illustration, // props로 받기
 }: StoryIllustrationProps) {
-  const page = storyData.find((p) => p.pageNumber === pageNumber);
+  // currentContent가 없으면 일찍 반환
+  if (!currentContent) return null;
 
-  if (!page) return null;
-
-  const { contents, illustration } = page;
-
-  if (!contents) return null;
-
-  const currentContent = contents[currentContentIndex];
   const relatedContents = [currentContent];
 
   const getSpeakerName = (type: CharacterType) => {
