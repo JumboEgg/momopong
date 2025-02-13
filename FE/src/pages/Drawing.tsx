@@ -1,7 +1,6 @@
 import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
@@ -9,78 +8,84 @@ import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage'
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
+import { useSketchList } from '@/stores/drawing/sketchListStore';
 import InvitationWaitPage from '../components/common/multiplayPages/invitationWaitPage';
 import NetworkErrorPage from '../components/common/multiplayPages/networkerrorPage';
 
 function Drawing() {
-  const location = useLocation();
-  const { waitingForResponse, templateId } = location.state || {};
-
   const {
     mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
   } = useDrawing();
 
-  const { friend, setFriend } = useFriends();
-  const { socket, setConnect } = useSocketStore();
+  const {
+    setSketchList,
+  } = useSketchList();
 
-  // 초기 마운트시 상태 초기화
   useEffect(() => {
-    if (templateId) {
-      // SketchInfo 타입에 맞게 속성 이름 수정
-      setTemplate({
-        sketchId: templateId,
-        sketchPath: '', // 실제 스케치 경로가 필요함
-        sketchTitle: location.state?.templateName || '함께 그리기',
-      });
-      setMode('together');
-    } else {
-      setMode(null);
-      setTemplate(null);
-    }
-
+    setMode(null);
+    setTemplate(null);
     setPenColor('black');
     setIsErasing(false);
     setImageData('');
-    setFriend(null);
+    setSketchList();
+  }, []);
 
-    // 소켓 연결 관리
-    if (waitingForResponse) {
-      setConnect(false);
-    }
-  }, [templateId, waitingForResponse]);
+  const {
+    friend, setFriend, isConnected, setIsConnected,
+  } = useFriends();
+
+  const {
+    socket, setConnect,
+  } = useSocketStore();
+
+  useEffect(() => {
+    // setConnect(false);
+    setConnect(true);
+    setIsConnected(false);
+    setFriend(null);
+  }, [mode]);
 
   const content = () => {
-    if (!template) return <DrawingSelection />;
-    if (!mode) return <DrawingModeSelection />;
-
-    // single 모드
-    if (mode === 'single') {
-      return !imageData ? <DrawingPage /> : <ResultPage />;
+    if (!template) {
+      return <DrawingSelection />;
     }
 
-    // together 모드
+    if (!mode) {
+      return <DrawingModeSelection />;
+    }
+
+    if (mode === 'single' && !imageData) {
+      return (
+        <DrawingPage />
+      );
+    }
+
     if (mode === 'together') {
-      if (waitingForResponse) {
-        return <InvitationWaitPage />;
-      }
-
       if (!friend) {
-        return <FriendSelection />;
+        return (
+          <FriendSelection />
+        );
+      } if (friend && !socket) {
+        return (
+          <NetworkErrorPage />
+        );
+      } if (friend && socket && !isConnected) {
+        return (
+          <InvitationWaitPage />
+        );
       }
-
-      if (!socket) {
-        return <NetworkErrorPage />;
+      if (!imageData) {
+        return (
+          <DrawingPage />
+        );
       }
-
-      return !imageData ? <DrawingPage /> : <ResultPage />;
     }
 
-    // story 모드
-    if (mode === 'story') {
-      return !imageData ? <StoryDrawingPage /> : <ResultPage />;
+    if (mode === 'story' && !imageData) {
+      return <StoryDrawingPage />;
     }
 
-    return <DrawingSelection />;
+    return <ResultPage />;
   };
 
   return (
@@ -89,5 +94,4 @@ function Drawing() {
     </div>
   );
 }
-
 export default Drawing;
