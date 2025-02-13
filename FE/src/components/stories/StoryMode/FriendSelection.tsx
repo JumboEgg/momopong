@@ -6,11 +6,11 @@ import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 import { getToken } from 'firebase/messaging';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { useDrawing } from '@/stores/drawingStore';
 import { ContentType } from '@/types/invitation';
 import { useFriends } from '@/stores/friendStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { Friend } from '@/types/friend';
+import { useDrawing } from '@/stores/sketch/drawingStore';
 
 function FriendSelection() {
   const navigate = useNavigate();
@@ -61,7 +61,7 @@ function FriendSelection() {
       if (!contentId) return;
 
       try {
-        const targetContentId = template?.id || contentId;
+        const targetContentId = template?.sketchId || contentId;
         const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
 
         await fetchOnlineFriends(targetContentId, targetContentType);
@@ -83,11 +83,11 @@ function FriendSelection() {
     }
 
     try {
-      const targetContentId = template?.id || contentId;
+      const targetContentId = template?.sketchId || contentId;
       const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
 
       const contentTitle = template
-        ? `함께 그리기: ${template.name}`
+        ? `함께 그리기: ${template.sketchTitle}`
         : location.state?.contentTitle;
 
       if (!contentTitle) {
