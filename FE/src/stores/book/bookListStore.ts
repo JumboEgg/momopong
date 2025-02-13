@@ -39,12 +39,10 @@ const useBookListStore = create<BookListStore>()(
       },
     }),
     {
-      name: 'sketchlist-storage',
-      partialize: (state) => Object.fromEntries(
-        Object.entries(state)
-          .filter(([key]) => ['sketchList']
-            .includes(key)),
-      ),
+      name: 'booklist-storage',
+      partialize: (state) => ({
+        sketch: state.bookList,
+      }),
     },
   ),
 );
