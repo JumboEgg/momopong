@@ -94,7 +94,7 @@ public class BookServiceImpl implements BookService {
                 .role2(book.getRole2())
                 .totalPage(pageList.size())
                 .pages(pageDtoList)
-                .sketch(book.getSketch().getSketchPath())
+                .sketch(book.getSketch() != null ? book.getSketch().getSketchPath() : null)
                 .build();
     }
 

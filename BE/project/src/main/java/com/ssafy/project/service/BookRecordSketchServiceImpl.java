@@ -30,7 +30,8 @@ public class BookRecordSketchServiceImpl implements BookRecordSketchService {
                 .bookRecordSketchPath(bookRecordSketchDto.getBookRecordSketchPath())
                 .build();
 
-        bookRecordSketchRepository.save(bookRecordSketch);
         bookRecordSketch.updateBookRecordSketch(bookRecordPage);
+
+        bookRecordSketchRepository.save(bookRecordSketch);
     }
 }
