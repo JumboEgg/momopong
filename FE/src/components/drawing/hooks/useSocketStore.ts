@@ -12,11 +12,11 @@ export interface DrawingData {
 
 interface SocketStore {
   connect: boolean;
-  setConnect: (connected: boolean) => void;
+  setConnect: (connected: boolean, invitation?: string) => void;
   roomId: string | null;
   setRoomId: (roomId: string | null) => void;
   socket: Socket | null;
-  connectSocket: () => void;
+  connectSocket: (invitationId?: string) => void;
   disconnectSocket: () => void;
 }
 
@@ -27,13 +27,13 @@ const useSocketStore = create<SocketStore>((set, get) => ({
   roomId: null,
   socket: null,
 
-  setConnect: (connection: boolean) => {
+  setConnect: (connection: boolean, invitationId?: string) => {
     set({ connect: connection });
 
     if (connection) {
-      get().connectSocket();
-      // 방에 입장
-      // get().setRoomId(DEFAULT_ROOM);
+      get().connectSocket(invitationId);
+      // // 방에 입장
+      // get().setRoomId(invitationId);
     } else {
       get().disconnectSocket();
     }
@@ -55,7 +55,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
   },
 
   // 소켓 연결 및 방 자동 입장
-  connectSocket: () => {
+  connectSocket: (invitationId?: string) => {
     const { socket } = get();
     if (socket) return;
 
@@ -67,11 +67,13 @@ const useSocketStore = create<SocketStore>((set, get) => ({
     newSocket.connect();
 
     newSocket.on('connect', () => {
-      console.info(' WebSocket 연결 성공!');
-      // const activeRoom = roomId || DEFAULT_ROOM; // 기본 방이 없으면 "ADSADWQ"로 설정
-      // set({ roomId: activeRoom });
-      // newSocket.emit('join-room', activeRoom);
-      // console.info(` join-room: ${activeRoom}`);
+      console.info('WebSocket 연결 성공!');
+      const roomId = invitationId ? `drawing_${invitationId}` : null;
+      if (roomId) {
+        set({ roomId });
+        newSocket.emit('join-room', roomId);
+        console.info(`join-room: ${roomId}`);
+      }
     });
 
     newSocket.on('disconnect', () => {

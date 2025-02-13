@@ -22,40 +22,6 @@ const assignRandomRoles = (): [StoryRole, StoryRole] => {
   ];
 };
 
-// 유틸리티 함수
-// const createInvitationPayload = ({
-//   inviterId,
-//   inviteeId,
-//   inviterName,
-//   inviteeName,
-//   contentTitle,
-//   contentType,
-//   contentId,
-// }: FriendInvitation) => {
-//   const basePayload = {
-//     inviterId,
-//     inviteeId,
-//     inviterName,
-//     inviteeName,
-//     contentTitle,
-//     contentId,
-//   };
-
-//   if (contentType === 'BOOK') {
-//     return {
-//       ...basePayload,
-//       contentType,
-//       notificationType: 'INVITE',
-//     };
-//   }
-
-//   return {
-//     ...basePayload,
-//     contentType,
-//   };
-// };
-
-// 공통 엔드포인트 생성 함수
 const getInvitationEndpoint = (
   contentType: ContentType,
   contentId: number,
