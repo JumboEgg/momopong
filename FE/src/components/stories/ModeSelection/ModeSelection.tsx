@@ -1,17 +1,25 @@
+import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
-import useSocketStore from '@/components/drawing/hooks/useSocketStore';
-import MakeRandomCode from '../../../utils/format/randomString';
+// import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+// import MakeRandomCode from '../../../utils/format/randomString';
 
 function ModeSelection(): JSX.Element {
-  const {
-    setMode,
-  } = useStory();
-  const { bookId } = useStory();
+  const navigate = useNavigate();
+  const { setMode, bookId, title } = useStory();
   console.log('ModeSelection에서의 bookId:', bookId);
 
-  const {
-    setRoomId,
-  } = useSocketStore();
+  const handleModeSelection = (mode: 'reading' | 'together') => {
+    setMode(mode);
+    if (mode === 'together') {
+      navigate('/friend-selection', {
+        state: {
+          contentId: bookId,
+          contentType: 'BOOK',
+          contentTitle: title, // 추가된 title 전달
+        },
+      });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -20,17 +28,14 @@ function ModeSelection(): JSX.Element {
         <div className="flex justify-center gap-4">
           <button
             type="button"
-            onClick={() => setMode('reading')}
+            onClick={() => handleModeSelection('reading')}
             className="py-4 px-6 text-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
           >
             읽기 모드
           </button>
           <button
             type="button"
-            onClick={() => {
-              setMode('together');
-              setRoomId(MakeRandomCode());
-            }}
+            onClick={() => handleModeSelection('together')}
             className="py-4 px-6 text-lg font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
           >
             함께 읽기 모드
