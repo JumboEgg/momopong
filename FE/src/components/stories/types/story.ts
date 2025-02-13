@@ -77,11 +77,6 @@ export interface StoryIllustrationProps {
   illustration: string;
 }
 
-// TogetherMode.tsx
-export interface TogetherModeProps {
-  friend: Friend;
-}
-
 export interface Story {
   id: number;
   title: string;
