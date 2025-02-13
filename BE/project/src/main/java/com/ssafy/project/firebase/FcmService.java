@@ -62,7 +62,7 @@ public class FcmService {
                 "inviteeName", notificationDto.getInviteeName(),
                 "contentId", notificationDto.getContentId().toString(),
                 "contentTitle", notificationDto.getContentTitle(),
-                "contentType",notificationDto.getContentType().toString(),
+                "contentType", notificationDto.getContentType().toString(),
                 "notificationType", notificationDto.getNotificationType().toString()
         );
         log.info("sendMessage.data={}", data);
@@ -78,8 +78,17 @@ public class FcmService {
         try {
             FirebaseMessaging.getInstance().send(message);
         } catch (FirebaseMessagingException e) {
-            log.info("FcmService.sendMessage={}", e.getMessage());
+            log.error("FcmService.sendMessage - FirebaseMessagingException: {}", e.getMessage());
+
+            // FCM 토큰이 만료되었을 경우 자동 삭제
+            if ("UNREGISTERED".equals(e.getErrorCode())) {
+                log.warn("🚨 유효하지 않은 FCM 토큰 감지됨. 자동 삭제: {}", token);
+                redisDao.deleteValues(key);
+            }
+
             throw new RuntimeException(e);
         }
     }
+
+
 }
