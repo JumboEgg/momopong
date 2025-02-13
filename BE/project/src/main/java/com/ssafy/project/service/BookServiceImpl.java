@@ -23,12 +23,14 @@ import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.FriendRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -49,6 +51,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public List<BookDto> bookList() {
         List<Book> bookList = bookRepository.findAll();
+        log.info("bookList={}", bookList);
 
         return bookList.stream()
                 .map(Book::entityToDto)
@@ -60,6 +63,7 @@ public class BookServiceImpl implements BookService {
     public BookListDto readBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
                 .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
+        log.info("book={}", book);
 
         // 동화 페이지 조회
         List<Page> pageList = book.getPageList();
@@ -104,7 +108,7 @@ public class BookServiceImpl implements BookService {
         List<Friend> friendList = friendRepository.findAllByFrom(child);
 
         // 2. 상태가 온라인인 사람
-        return friendList.stream()
+        List<ChildStatusDto> statusDtoList = friendList.stream()
                 .map(friend -> {
                     String key = String.format(CHILD_STATUS_KEY, friend.getTo().getId());
                     Object json = redisDao.getValues(key);
@@ -114,12 +118,21 @@ public class BookServiceImpl implements BookService {
                 })
                 .filter(childStatusDto -> childStatusDto.getStatus().equals(StatusType.ONLINE))
                 .toList();
+
+        log.info("statusDtoList={}", statusDtoList);
+
+        return statusDtoList;
     }
 
     // 친구 초대 보내기
     @Override
     public NotificationDto sendInvitation(Long bookId, Long inviterId, Long inviteeId) { // inviter: 초대한 사람, invitee: 초대받은 사람
+        log.info("sendInvitation.bookId={}", bookId);
+        log.info("sendInvitation.inviterId={}", inviterId);
+        log.info("sendInvitation.inviteeIdd={}", inviteeId);
+
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
+        log.info("sendInvitation.key={}", key);
         if (redisDao.getValues(key) != null) {
             throw new DuplicateException("이미 진행중인 초대가 존재합니다");
         }
@@ -143,6 +156,8 @@ public class BookServiceImpl implements BookService {
                 .contentType(ContentType.BOOK)
                 .build();
 
+        log.info("sendInvitation.notificationDto={}", notificationDto);
+
         // 초대장 Redis에 저장 (10초간 초대장 유효)
         redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
@@ -151,6 +166,7 @@ public class BookServiceImpl implements BookService {
                 .receiveId(inviteeId)
                 .notificationDto(notificationDto)
                 .build();
+        log.info("notificationDto.sendDto={}", sendDto);
         fcmService.sendMessage(sendDto);
 
         return notificationDto;
@@ -159,7 +175,12 @@ public class BookServiceImpl implements BookService {
     // 친구 초대 수락하기
     @Override
     public void acceptInvitation(Long bookId, Long inviterId, Long inviteeId) { // 초대받은 아이 입장에서 수락
+        log.info("acceptInvitation.bookId={}", bookId);
+        log.info("acceptInvitation.inviterId={}", inviterId);
+        log.info("acceptInvitation.inviteeIdd={}", inviteeId);
+
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
+        log.info("acceptInvitation.key={}", key);
         if (redisDao.getValues(key) == null) {
             throw new InvitationExpiredException("이미 만료된 초대장입니다");
         }
@@ -185,21 +206,31 @@ public class BookServiceImpl implements BookService {
                 .contentTitle(book.getTitle())
                 .contentType(ContentType.BOOK)
                 .build();
+        log.info("acceptInvitation.notificationDto={}", notificationDto);
 
         FcmSendDto sendDto = FcmSendDto.builder()
                 .receiveId(inviterId)
                 .notificationDto(notificationDto)
                 .build();
+        log.info("acceptInvitation.sendDto={}", sendDto);
         fcmService.sendMessage(sendDto);
     }
 
     // 친구 초대 거절하기
     @Override
     public void rejectInvitation(Long bookId, Long inviterId, Long inviteeId) { // 초대받은 아이 입장에서 거절
+        log.info("rejectInvitation.bookId={}", bookId);
+        log.info("rejectInvitation.inviterId={}", inviterId);
+        log.info("rejectInvitation.inviteeIdd={}", inviteeId);
+
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
+        log.info("rejectInvitation.key={}", key);
+        Object values = redisDao.getValues(key);
+        log.info("rejectInvitation.redisDao.getValues(key)={}", values);
         if (redisDao.getValues(key) == null) {
             throw new InvitationExpiredException("이미 만료된 초대장입니다");
         }
+        log.info("rejectInvitation.redisDao.getValues(key)={}", values);
         // 수락한 초대장 삭제
         redisDao.deleteValues(key);
 
@@ -222,11 +253,13 @@ public class BookServiceImpl implements BookService {
                 .contentTitle(book.getTitle())
                 .contentType(ContentType.BOOK)
                 .build();
+        log.info("rejectInvitation.notificationDto={}", notificationDto);
 
         FcmSendDto sendDto = FcmSendDto.builder()
                 .receiveId(inviterId)
                 .notificationDto(notificationDto)
                 .build();
+        log.info("rejectInvitation.sendDto={}", sendDto);
         fcmService.sendMessage(sendDto);
     }
 
