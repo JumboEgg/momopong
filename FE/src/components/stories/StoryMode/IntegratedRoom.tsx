@@ -118,6 +118,8 @@ function IntegratedRoom({
   const stopRecording = useCallback(() => {
     if (mediaRecorder && mediaRecorder.state === 'recording') {
       mediaRecorder.stop();
+      setIsRecording(false);
+      setTimeLeft(20);
     }
   }, [mediaRecorder]);
 
@@ -126,10 +128,19 @@ function IntegratedRoom({
     if (!isUserTurn || isRecording || !room) return;
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+        },
+      });
       audioStreamRef.current = stream;
 
-      const recorder = new MediaRecorder(stream);
+      const recorder = new MediaRecorder(stream, {
+        mimeType: 'audio/webm;codecs=opus',
+        audioBitsPerSecond: 128000,
+      });
+
       const audioChunks: BlobPart[] = [];
 
       recorder.ondataavailable = (event) => {
@@ -138,47 +149,49 @@ function IntegratedRoom({
         }
       };
 
-      recorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+      recorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks, {
+          type: 'audio/webm',
+        });
+
+        // 오디오 Blob URL 생성
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        // Clean up
-        stream.getTracks().forEach((track) => track.stop());
-        audioStreamRef.current = null;
-        setMediaRecorder(null);
-        setIsRecording(false);
-
-        // Notify status changes
-        broadcastRecordingStatus('completed');
-        onRecordingComplete(room.localParticipant.identity);
-
-        // Play recorded audio
         try {
-          const audio = new Audio();
-          audio.src = audioUrl;
-          audio.onended = () => {
-            URL.revokeObjectURL(audioUrl);
-          };
-
-          audio.onerror = (e) => {
-            console.error('Audio playback error:', e);
-            URL.revokeObjectURL(audioUrl);
-          };
-
-          audio.play().catch((error) => {
-            console.error('Failed to play audio:', error);
-            URL.revokeObjectURL(audioUrl);
+          // 오디오 재생을 Promise로 감싸서 명확한 상태 관리
+          await new Promise<void>((resolve, reject) => {
+            const audio = new Audio(audioUrl);
+            audio.oncanplaythrough = () => audio.play();
+            audio.onended = () => {
+              URL.revokeObjectURL(audioUrl);
+              resolve();
+            };
+            audio.onerror = () => {
+              URL.revokeObjectURL(audioUrl);
+              reject(new Error('Audio playback failed'));
+            };
           });
+
+          // 녹음 완료 상태 브로드캐스트
+          broadcastRecordingStatus('completed');
+          onRecordingComplete(room.localParticipant.identity);
         } catch (error) {
-          console.error('Audio setup error:', error);
-          URL.revokeObjectURL(audioUrl);
+          console.error('Audio playback error:', error);
+          broadcastRecordingStatus('completed');
+          onRecordingComplete(room.localParticipant.identity);
+        } finally {
+          // 스트림 정리
+          stream.getTracks().forEach((track) => track.stop());
+          audioStreamRef.current = null;
+          setMediaRecorder(null);
+          setIsRecording(false);
         }
       };
 
       setMediaRecorder(recorder);
       setIsRecording(true);
       setTimeLeft(20);
-      recorder.start(1000);
+      recorder.start(1000); // 1초마다 데이터 수집
 
       // Broadcast recording status
       broadcastRecordingStatus('recording');
@@ -195,7 +208,27 @@ function IntegratedRoom({
     room,
     onRecordingComplete,
     onRecordingStatusChange,
-    broadcastRecordingStatus]);
+    broadcastRecordingStatus,
+  ]);
+
+  // 20초 타이머를 위한 별도의 effect
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
+    if (isRecording && mediaRecorder) {
+      timeoutId = setTimeout(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }, 20000);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isRecording, mediaRecorder]);
 
   // Room 연결 설정
   useEffect(() => {
@@ -290,6 +323,31 @@ function IntegratedRoom({
     },
     [mediaRecorder],
   );
+
+  // 타이머 effect 추가
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    if (isRecording && timeLeft > 0) {
+      timerId = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            if (mediaRecorder && mediaRecorder.state === 'recording') {
+              mediaRecorder.stop();
+            }
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerId) {
+        clearInterval(timerId);
+      }
+    };
+  }, [isRecording, timeLeft, mediaRecorder]);
 
   if (connectionError) {
     return (
