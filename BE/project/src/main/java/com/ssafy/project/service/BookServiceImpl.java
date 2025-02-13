@@ -129,7 +129,7 @@ public class BookServiceImpl implements BookService {
     public NotificationDto sendInvitation(Long bookId, Long inviterId, Long inviteeId) { // inviter: 초대한 사람, invitee: 초대받은 사람
         log.info("sendInvitation.bookId={}", bookId);
         log.info("sendInvitation.inviterId={}", inviterId);
-        log.info("sendInvitation.inviteeIdd={}", inviteeId);
+        log.info("sendInvitation.inviteeId={}", inviteeId);
 
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         log.info("sendInvitation.key={}", key);
@@ -177,7 +177,7 @@ public class BookServiceImpl implements BookService {
     public void acceptInvitation(Long bookId, Long inviterId, Long inviteeId) { // 초대받은 아이 입장에서 수락
         log.info("acceptInvitation.bookId={}", bookId);
         log.info("acceptInvitation.inviterId={}", inviterId);
-        log.info("acceptInvitation.inviteeIdd={}", inviteeId);
+        log.info("acceptInvitation.inviteeId={}", inviteeId);
 
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         log.info("acceptInvitation.key={}", key);
@@ -221,7 +221,7 @@ public class BookServiceImpl implements BookService {
     public void rejectInvitation(Long bookId, Long inviterId, Long inviteeId) { // 초대받은 아이 입장에서 거절
         log.info("rejectInvitation.bookId={}", bookId);
         log.info("rejectInvitation.inviterId={}", inviterId);
-        log.info("rejectInvitation.inviteeIdd={}", inviteeId);
+        log.info("rejectInvitation.inviteeId={}", inviteeId);
 
         String key = String.format(INVITATION_KEY, inviterId, inviteeId);
         log.info("rejectInvitation.key={}", key);
