@@ -59,25 +59,11 @@ const assignRandomRoles = (): [StoryRole, StoryRole] => {
 const getInvitationEndpoint = (
   contentType: ContentType,
   contentId: number,
-  invitation: FriendInvitation,
+  userId: number,
   action: 'invitation' | 'accept' | 'reject' | 'expire',
 ) => {
   const basePath = contentType === 'SKETCH' ? '/sketch' : '/book';
-  // inviter / invitee 아이디 정하는 부분
-  const userId = action === 'invitation' ? invitation.inviterId : invitation.inviteeId;
-
-  const endpoint = `${basePath}/${contentId}/friend/${userId}/invitation${action !== 'invitation' ? `/${action}` : ''}`;
-
-  console.log('Generated Endpoint:', {
-    action,
-    contentType,
-    contentId,
-    userId,
-    endpoint,
-    invitation,
-  });
-
-  return endpoint;
+  return `${basePath}/${contentId}/friend/${userId}/invitation${action !== 'invitation' ? `/${action}` : ''}`;
 };
 
 interface FriendList {
@@ -164,18 +150,19 @@ export const useFriendListStore = create<FriendList>()((set) => ({
   },
 
   inviteFriend: async (invitation: FriendInvitation) => {
-    const toastStore = useToastStore.getState();
-    const roleStore = useRoleStore.getState();
+    const { showToast } = useToastStore.getState();
+    const { setRoles } = useRoleStore.getState();
     set({ loading: true, error: null });
 
     try {
       const endpoint = getInvitationEndpoint(
         invitation.contentType,
         invitation.contentId,
-        invitation,
+        invitation.inviterId,
         'invitation',
       );
 
+      // 공통 payload - API 명세에 따라 inviteeId만 전송
       const payload = {
         inviteeId: invitation.inviteeId,
       };
@@ -183,12 +170,12 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       // BOOK일 경우 프론트엔드에서 role 상태 관리
       if (invitation.contentType === 'BOOK') {
         const [inviterRole, inviteeRole] = assignRandomRoles();
-        roleStore.setRoles(inviterRole, inviteeRole, invitation.contentId);
+        setRoles(inviterRole, inviteeRole, invitation.contentId);
       }
 
       await api.post(endpoint, payload);
 
-      toastStore.showToast({
+      showToast({
         type: 'success',
         message: invitation.contentType === 'BOOK'
           ? '친구에게 여행 초대장을 보냈어요!'
@@ -198,7 +185,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       console.error('Failed to invite friend:', error);
       const errorMessage = error instanceof Error ? error.message : '친구 초대에 실패했습니다.';
       set({ error: errorMessage });
-      toastStore.showToast({
+      showToast({
         type: 'error',
         message: '초대장을 보내지 못했어요',
       });
@@ -209,29 +196,30 @@ export const useFriendListStore = create<FriendList>()((set) => ({
   },
 
   acceptInvitation: async (invitation: FriendInvitation) => {
-    const toastStore = useToastStore.getState();
-    const roleStore = useRoleStore.getState();
+    const { showToast } = useToastStore.getState();
+    const { setRoles } = useRoleStore.getState();
 
     try {
       const endpoint = getInvitationEndpoint(
         invitation.contentType,
         invitation.contentId,
-        invitation,
+        invitation.inviteeId,
         'accept',
       );
 
       const payload = {
-        inviterId: invitation.inviterId, // inviteeId -> inviterId로 수정
+        inviterId: invitation.inviterId,
       };
 
+      // BOOK일 경우 프론트엔드에서 role 상태 관리
       if (invitation.contentType === 'BOOK') {
         const [inviterRole, inviteeRole] = assignRandomRoles();
-        roleStore.setRoles(inviterRole, inviteeRole, invitation.contentId);
+        setRoles(inviterRole, inviteeRole, invitation.contentId);
       }
 
       await api.post(endpoint, payload);
 
-      toastStore.showToast({
+      showToast({
         type: 'accept',
         message: invitation.contentType === 'BOOK'
           ? '친구와 만나러 가고 있어요'
@@ -239,7 +227,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       });
     } catch (error) {
       console.error('Failed to accept invitation:', error);
-      toastStore.showToast({
+      showToast({
         type: 'error',
         message: '지금은 함께할 수 없어요',
       });
@@ -247,23 +235,23 @@ export const useFriendListStore = create<FriendList>()((set) => ({
   },
 
   rejectInvitation: async (invitation: FriendInvitation) => {
-    const toastStore = useToastStore.getState();
+    const { showToast } = useToastStore.getState();
 
     try {
       const endpoint = getInvitationEndpoint(
         invitation.contentType,
         invitation.contentId,
-        invitation,
+        invitation.inviteeId,
         'reject',
       );
 
       const payload = {
-        inviterId: invitation.inviterId, // inviteeId -> inviterId로 수정
+        inviterId: invitation.inviterId,
       };
 
       await api.post(endpoint, payload);
 
-      toastStore.showToast({
+      showToast({
         type: 'reject',
         message: invitation.contentType === 'BOOK'
           ? '다음에 여행하기로 했어요'
@@ -271,7 +259,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       });
     } catch (error) {
       console.error('Failed to reject invitation:', error);
-      toastStore.showToast({
+      showToast({
         type: 'error',
         message: '답장을 보내지 못했어요',
       });
@@ -285,7 +273,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       const endpoint = getInvitationEndpoint(
         invitation.contentType,
         invitation.contentId,
-        invitation,
+        invitation.inviteeId,
         'expire',
       );
 

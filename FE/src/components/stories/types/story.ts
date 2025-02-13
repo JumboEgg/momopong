@@ -48,11 +48,6 @@ export interface StoryPage {
   contents: StoryPageContent[];
 }
 
-// FriendSelection.tsx
-export interface FriendSelectionProps {
-  onFriendSelect: (friendId: number) => void;
-}
-
 // RecordingButton.tsx
 export interface RecordingButtonProps {
   characterType: CharacterType;
@@ -71,11 +66,6 @@ export interface StoryIllustrationProps {
   userRole?: 'role1' | 'role2';
   currentContent: BookAudioInfo | undefined;
   illustration: string;
-}
-
-// TogetherMode.tsx
-export interface TogetherModeProps {
-  friend: Friend;
 }
 
 export interface Story {
