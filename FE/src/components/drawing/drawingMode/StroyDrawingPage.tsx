@@ -13,8 +13,6 @@ function StoryDrawingPage(): JSX.Element {
     <div className="bg-yellow-600 w-full h-full m-0 p-0 relative">
       <span className="absolute top-4 right-4 p-0 z-1">
         <SaveButton
-          canvasWidth={canvasWidth}
-          canvasHeight={canvasHeight}
           canvasRef={canvasRef}
         />
       </span>

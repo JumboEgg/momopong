@@ -40,7 +40,7 @@ const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
     }
 
     const presignedResponse = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/draw/presigned-url`,
+      `${import.meta.env.VITE_API_BASE_URL}/frame/presigned-url`,
       {
         method: 'GET',
         headers: {
@@ -76,7 +76,7 @@ const uploadImageToS3 = async (imageData: FrameInfo): Promise<string> => {
 
     // 2. Upload to S3 using presigned URL
     const uploadResponse = await fetch(
-      `${import.meta.env.VITE_API_BASE_URL}/draw/${childId}`,
+      `${import.meta.env.VITE_API_BASE_URL}/frame/${childId}`,
       {
         method: 'POST',
         body: JSON.stringify({

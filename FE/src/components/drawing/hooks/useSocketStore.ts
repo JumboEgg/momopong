@@ -20,7 +20,7 @@ interface SocketStore {
   disconnectSocket: () => void;
 }
 
-const DEFAULT_ROOM = 'ADSADWQ';
+// const DEFAULT_ROOM = 'ADSADWQ';
 
 const useSocketStore = create<SocketStore>((set, get) => ({
   connect: false,
@@ -33,7 +33,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
     if (connection) {
       get().connectSocket();
       // 방에 입장
-      get().setRoomId(DEFAULT_ROOM);
+      // get().setRoomId(DEFAULT_ROOM);
     } else {
       get().disconnectSocket();
     }
@@ -56,7 +56,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
   // 소켓 연결 및 방 자동 입장
   connectSocket: () => {
-    const { socket, roomId } = get();
+    const { socket } = get();
     if (socket) return;
 
     const newSocket = io('wss://i12d103.p.ssafy.io', {
@@ -68,10 +68,10 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     newSocket.on('connect', () => {
       console.info(' WebSocket 연결 성공!');
-      const activeRoom = roomId || DEFAULT_ROOM; // 기본 방이 없으면 "ADSADWQ"로 설정
-      set({ roomId: activeRoom });
-      newSocket.emit('join-room', activeRoom);
-      console.info(` join-room: ${activeRoom}`);
+      // const activeRoom = roomId || DEFAULT_ROOM; // 기본 방이 없으면 "ADSADWQ"로 설정
+      // set({ roomId: activeRoom });
+      // newSocket.emit('join-room', activeRoom);
+      // console.info(` join-room: ${activeRoom}`);
     });
 
     newSocket.on('disconnect', () => {

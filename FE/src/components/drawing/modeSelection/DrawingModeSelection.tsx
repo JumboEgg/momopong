@@ -3,11 +3,17 @@ import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDrawing } from '@/stores/drawingStore';
 import { useEffect } from 'react';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+import MakeRandomCode from '../../../utils/format/randomString';
 
 function DrawingModeSelection(): JSX.Element {
   const {
     setTemplate, setMode, mode,
   } = useDrawing();
+
+  const {
+    setRoomId,
+  } = useSocketStore();
 
   useEffect(() => {
     if (mode) {
@@ -53,6 +59,7 @@ function DrawingModeSelection(): JSX.Element {
               type="button"
               onClick={() => {
                 setMode('together');
+                setRoomId(MakeRandomCode());
               }}
               className="py-4 px-6 text-lg hover:text-2xl duration-200 font-semibold flex flex-col"
             >

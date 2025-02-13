@@ -1,21 +1,18 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { ArrowLeft, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useDrawing } from '@/stores/drawingStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import useSubAccountStore from '@/stores/subAccountStore';
-import { FrameInfo } from '@/types/frame';
-import loadImagesFromS3 from '@/utils/drawingS3/drawingLoad';
+import { useDrawingHistory } from '@/stores/drawingHistoyStore';
 
 function MyDrawing() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const navigate = useNavigate();
 
   const {
-    drawingList, setDrawingData,
-  } = useDrawing();
+    drawingList,
+  } = useDrawingHistory();
 
   const handlePrevious = () => {
     setCurrentIndex((prev) => (prev > 0 ? prev - 1 : drawingList.length - 1));
@@ -28,23 +25,6 @@ function MyDrawing() {
   const handleBack = () => {
     navigate('/house');
   };
-
-  const childId = useSubAccountStore.getState().selectedAccount?.childId;
-
-  const fetchData = async (id: number) => {
-    if (!id) return;
-    try {
-      const data: FrameInfo[] = await loadImagesFromS3(id.toString());
-      setDrawingData(data);
-    } catch (error) {
-      console.error('Error loading images: ', error);
-    }
-  };
-
-  useEffect(() => {
-    if (!childId) return;
-    fetchData(childId);
-  }, [childId]);
 
   return (
     <div className="flex flex-col min-h-screen bg-yellow-100 p-8">

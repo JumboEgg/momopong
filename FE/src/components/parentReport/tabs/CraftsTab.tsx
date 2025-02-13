@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { FrameInfo } from '@/types/frame';
 import loadImagesFromS3 from '@/utils/drawingS3/drawingLoad';
 import { LetterInfo } from '@/types/letter';
-import loadLettersFromS3 from '@/utils/voiceS3/letterLoad';
+import loadLettersFromS3 from '@/utils/audioS3/letterLoad';
 import LetterModal from '@/components/common/modals/LetterModal';
 import DrawingModal from '../../common/modals/DrawingModal';
 
@@ -56,6 +56,7 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
 
   const [modal, setModal] = useState<JSX.Element | null>(null);
 
+  // TODO : 리포트 API 생성 후 부모 조회 기능으로 교체
   const fetchData = async (id: string) => {
     if (!id) return;
     try {
@@ -75,8 +76,6 @@ function CraftsTab({ childId, childName }: CraftsTabProps) {
   }, [childId]);
 
   const openModal = (idx: number) => {
-    console.log(idx);
-
     if (selectedCraftsTab === 'reading') {
       setModal(null);
     } else if (selectedCraftsTab === 'drawing') {

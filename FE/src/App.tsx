@@ -19,10 +19,10 @@ import Profile from './pages/Profile';
 import Friends from './pages/Friends';
 import Parent from './pages/Parent';
 import Test from './pages/Test';
-import MyBookStory from './components/myhouse/mybookstory/mybookstory';
-import MyLetters from './components/myhouse/letters/letters';
-import AudioRecorderSTT from './test/AudioRecorderSTT';
-import MyDrawing from './components/myhouse/mydrawing/mydrawing';
+import MyBookStory from './components/myhouse/mybookstory';
+import MyDrawing from './components/myhouse/mydrawing';
+import MyLetters from './components/myhouse/letters';
+import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 
 // 모달 컴포넌트
@@ -161,7 +161,7 @@ function App(): JSX.Element {
           path="/audioSTT"
           element={(
             <ProtectedRoute>
-              <AudioRecorderSTT />
+              <LetterPage />
             </ProtectedRoute>
           )}
         />

@@ -1,6 +1,10 @@
-// DrawingModal.tsx
+import { useState, useEffect } from 'react';
+import { faVolumeHigh } from '@fortawesome/free-solid-svg-icons';
+import { TextCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TextButton from '@/components/common/buttons/TextButton';
 import { LetterInfo } from '@/types/letter';
+import fetchSavedAudio from '../../../utils/audioS3/audioLoad';
 
 interface LetterModalProps {
     childName: string;
@@ -9,13 +13,36 @@ interface LetterModalProps {
 }
 
 function LetterModal({
-    childName,
+  childName,
   data,
   onClose,
 }: LetterModalProps): JSX.Element {
+  const [letterAudio, setLetterAudio] = useState<Audio>();
+  const myLetterAudio = new Audio();
+
   const onSave = () => {
     // TODO : 저장 버튼 클릭 시 오디오 저장
     onClose();
+  };
+
+  useEffect(() => {
+    if (!data) return;
+
+    const loadAudio = async () => {
+      const audioUrl = await fetchSavedAudio(data.letterUrl);
+      myLetterAudio.src = audioUrl;
+      setLetterAudio(myLetterAudio);
+    };
+
+    loadAudio();
+  }, []);
+
+  const playMyLetter = () => {
+    if (letterAudio.paused) {
+      letterAudio.play();
+    } else {
+      letterAudio.pause();
+    }
   };
 
   return (
@@ -31,11 +58,19 @@ function LetterModal({
       >
         <div className="flex-grow flex flex-col items-center justify-center font-[BMJUA] w-full">
           <div className="flex flex-col gap-4 w-full">
-            <p>
+            <div>
+              <TextCircleButton
+                icon={<FontAwesomeIcon icon={faVolumeHigh} />}
+                text="내가 보낸 편지"
+                size="sm"
+                variant="action"
+                className="text-2xl"
+                onClick={playMyLetter}
+              />
               {childName}
               (이)가 보낸 내용
-            </p>
-            <p className="text-center text-3xl break-words">{data.content}</p>
+            </div>
+            <p className="break-words">{data.content}</p>
             <p>
               {data.bookTitle}
               의
