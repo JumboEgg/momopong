@@ -1,17 +1,21 @@
-// src/pages/TogetherMode.tsx
 import {
-  useState, useEffect, useRef, useCallback, useMemo,
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+  useRef,
 } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useFriends } from '@/stores/friendStore';
 import { useStory } from '@/stores/storyStore';
+import { useFriends } from '@/stores/friendStore';
 import useSubAccountStore from '@/stores/subAccountStore';
-import VideoRoom from '@/components/video/VideoRoom';
-import storyData from '../data/cinderella';
-import RecordingButton from './RecordingButton';
+
+import IntegratedRoom from './IntegratedRoom';
 import AudioPlayer from '../AudioPlayer';
-import { getAudioUrl } from '../utils/audioUtils';
 import StoryIllustration from './StoryIllustration';
+
+import storyData from '../data/cinderella';
+import { getAudioUrl } from '../utils/audioUtils';
 
 interface LocationState {
   roomName: string;
@@ -21,92 +25,47 @@ interface LocationState {
 function TogetherMode() {
   const location = useLocation();
   const { roomName } = location.state as LocationState;
-  const [isSessionEstablished, setIsSessionEstablished] = useState(false);
 
-  const {
-    currentIndex, setCurrentIndex, recordings, audioEnabled,
-  } = useStory();
-
-  const {
-    friend,
-  } = useFriends();
-  const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
-
+  // 상태 관리
   const [userRole, setUserRole] = useState<'prince' | 'princess' | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [isLastAudioCompleted, setIsLastAudioCompleted] = useState(false);
-  const audioRef = useRef(null);
 
+  // 스토어에서 상태 가져오기
+  const {
+    currentIndex,
+    setCurrentIndex,
+    audioEnabled,
+  } = useStory();
+
+  const { friend } = useFriends();
+  const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
+
+  const audioRef = useRef<HTMLAudioElement>(null);
+
+  // 현재 페이지 및 컨텐츠 계산
   const currentPage = storyData[currentIndex];
+  const currentContent = currentPage?.contents[currentContentIndex];
 
-  // LiveKit 세션 초기화
-  useEffect(() => {
-    const initializeSession = async () => {
-      try {
-        setIsSessionEstablished(true);
-      } catch (error) {
-        console.error('LiveKit 세션 초기화 실패:', error);
-      }
-    };
-
-    initializeSession();
-  }, [roomName]);
-
-  if (!currentPage) {
-    return (
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
-            페이지를 찾을 수 없습니다
-          </h3>
-        </div>
-      </div>
-    );
-  }
-
-  const currentContent = currentPage.contents[currentContentIndex];
-
-  const isStoryEnd = useMemo(() => {
-    if (!currentPage || currentIndex !== storyData.length - 1) return false;
-    if (currentContentIndex !== currentPage.contents.length - 1) return false;
-
-    // 마지막 페이지의 마지막 컨텐츠가 나레이션이고 오디오가 있는 경우
-    const isLastContentNarration = currentContent?.type === 'narration'
-      && currentContent?.audioId;
-
-    // 나레이션이 아니거나 오디오가 없는 경우는 바로 종료
-    if (!isLastContentNarration) return true;
-
-    // 나레이션이고 오디오가 있는 경우는 오디오 완료 후 종료
-    return isLastAudioCompleted;
-  }, [currentIndex, currentContentIndex, currentPage, currentContent, isLastAudioCompleted]);
-
-  const currentAudioUrl = useMemo(() => {
-    if (!currentContent || !currentContent.audioId) {
-      console.log('오디오 ID를 찾을 수 없습니다');
-      return '';
-    }
-
-    return getAudioUrl(currentContent.audioId);
-  }, [currentContent]);
-
+  // 페이지 초기 설정
   useEffect(() => {
     const randomRole = Math.random() < 0.5 ? 'prince' : 'princess';
     setUserRole(randomRole);
     console.log('선택된 역할:', randomRole);
   }, []);
 
+  // 페이지 변경 시 상태 초기화
   useEffect(() => {
     setIsLastAudioCompleted(false);
-    console.log('현재 페이지:', currentPage);
-    console.log('현재 컨텐츠:', currentContent);
   }, [currentIndex, currentContentIndex]);
 
+  // 현재 사용자 차례 확인
   const isUserTurn = useMemo(() => {
     if (!userRole || !currentContent) return false;
     return currentContent.type === userRole;
   }, [userRole, currentContent]);
 
+  // 다음 페이지/컨텐츠로 이동
   const handleNext = useCallback(() => {
     if (!currentPage) return;
 
@@ -118,26 +77,49 @@ function TogetherMode() {
     }
   }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
 
-  const handleRecordingComplete = useCallback(() => {
-    setTimeout(handleNext, 1000);
-  }, [handleNext]);
+  // 오디오 URL 계산
+  const currentAudioUrl = useMemo(() => {
+    if (!currentContent?.audioId) return '';
+    return getAudioUrl(currentContent.audioId);
+  }, [currentContent]);
 
+  // 홈 이동 처리
   const handleHomeClick = useCallback(() => {
     window.location.href = '/home';
   }, []);
 
+  // 오디오 재생 완료 처리
   const handleAudioComplete = useCallback(() => {
-    if (
-      currentIndex === storyData.length - 1
-      && currentContentIndex === currentPage.contents.length - 1
-    ) {
+    if (currentIndex === storyData.length - 1
+        && currentContentIndex === currentPage.contents.length - 1) {
       setIsLastAudioCompleted(true);
     } else {
       handleNext();
     }
-  }, [currentIndex, currentContentIndex, currentPage.contents.length, handleNext]);
+  }, [currentIndex, currentContentIndex, currentPage?.contents.length, handleNext]);
 
-  const hasRecording = useCallback((index: number) => recordings.has(index), [recordings]);
+  // 스토리 종료 여부 확인
+  const isStoryEnd = useMemo(() => {
+    if (!currentPage || currentIndex !== storyData.length - 1) return false;
+    if (currentContentIndex !== currentPage.contents.length - 1) return false;
+
+    const isLastContentNarration = currentContent?.type === 'narration' && currentContent?.audioId;
+
+    return isLastContentNarration ? isLastAudioCompleted : true;
+  }, [currentIndex, currentContentIndex, currentPage, currentContent, isLastAudioCompleted]);
+
+  // const [isRecording, setIsRecording] = useState(false);
+
+  // // 녹음 상태 변경 핸들러
+  // const handleRecordingStateChange = useCallback((recording: boolean) => {
+  //   setIsRecording(recording);
+  // }, []);
+
+  // 오디오 재생 여부 결정
+  const shouldPlayAudio = useMemo(
+    () => !isUserTurn && audioEnabled && currentAudioUrl,
+    [isUserTurn, audioEnabled, currentAudioUrl],
+  );
 
   return (
     <div className="w-full h-screen relative">
@@ -148,11 +130,13 @@ function TogetherMode() {
             <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
             <p className="text-gray-600">
               내 역할:
+              {' '}
               {userRole === 'prince' ? '왕자님' : '신데렐라'}
             </p>
             <p className="text-gray-600">
               함께 읽는 친구:
-              {friend ? friend.name : ''}
+              {' '}
+              {friend?.name || ''}
             </p>
           </div>
         </div>
@@ -174,41 +158,33 @@ function TogetherMode() {
           illustration={currentPage.illustration}
         />
 
-        {/* 녹음 버튼과 오디오 플레이어 */}
-        <div className="mt-4 flex justify-center">
-          {isUserTurn ? (
-            <div className="mt-4">
-              {!hasRecording(currentIndex) && (
-                <RecordingButton
-                  characterType={currentContent.type}
-                  storyIndex={currentIndex}
-                  onRecordingComplete={handleRecordingComplete}
-                />
-              )}
-            </div>
-          ) : (
-            audioEnabled && currentAudioUrl && (
-              <div className="hidden">
-                <AudioPlayer
-                  ref={audioRef}
-                  audioFiles={[currentAudioUrl]}
-                  autoPlay
-                  onEnded={handleAudioComplete}
-                />
-              </div>
-            )
-          )}
-        </div>
+        {/* 오디오 플레이어 */}
+        {shouldPlayAudio && (
+          <div className="hidden">
+            <AudioPlayer
+              ref={audioRef}
+              audioFiles={[currentAudioUrl]}
+              autoPlay
+              onEnded={handleAudioComplete}
+            />
+          </div>
+        )}
       </div>
 
       {/* 화상 비디오 영역 */}
-      {isSessionEstablished && (
-        <div className="absolute bottom-8 left-0 right-0 flex justify-between items-center px-8 z-50">
-          <VideoRoom
-            roomName={roomName}
-            participantName={selectedAccount?.name}
-          />
-        </div>
+      {userRole && (
+        <IntegratedRoom
+          roomName={roomName}
+          participantName={selectedAccount?.name || 'Anonymous'}
+          userRole={userRole}
+          isUserTurn={isUserTurn}
+          onRecordingComplete={() => {
+            // 녹음 완료 후 수행할 로직 추가
+            // 예: 다음 페이지로 이동, 상태 업데이트 등
+            console.log('녹음 완료');
+            // 예시: goToNextPage();
+          }}
+        />
       )}
 
       {/* 이야기 종료 오버레이 */}
@@ -225,7 +201,8 @@ function TogetherMode() {
             <button
               type="button"
               onClick={handleHomeClick}
-              className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors text-lg font-medium"
+              className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600
+                       transition-colors text-lg font-medium"
             >
               홈으로 가기
             </button>

@@ -14,14 +14,6 @@ interface IntegratedRoomProps {
   participantName: string;
   userRole: 'prince' | 'princess';
   isUserTurn: boolean;
-  onRecordingComplete: () => void;
-}
-
-// 녹음 데이터 인터페이스 추가
-interface RecordingData {
-  characterType: 'prince' | 'princess';
-  audioUrl: string;
-  timestamp: number;
 }
 
 function IntegratedRoom({
@@ -29,7 +21,6 @@ function IntegratedRoom({
   participantName,
   userRole,
   isUserTurn,
-  onRecordingComplete,
 }: IntegratedRoomProps) {
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<(RemoteParticipant | LocalParticipant)[]>([]);
@@ -37,23 +28,11 @@ function IntegratedRoom({
   const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const { audioEnabled, addRecording, currentIndex } = useStory();
-  const [globalRecordingStatus, setGlobalRecordingStatus] = useState<'idle' | 'recording' | 'completed'>('idle');
 
-  // 녹음 상태 동기화를 위한 시그널 전송
-  const broadcastRecordingStatus = useCallback((status: 'idle' | 'recording' | 'completed') => {
-    if (!room) return;
-
-    const data = {
-      type: 'recording_status',
-      status,
-      sender: participantName,
-    };
-
-    room.localParticipant.publishData(
-      new TextEncoder().encode(JSON.stringify(data)),
-      { reliable: true },
-    );
-  }, [room, participantName]);
+  // 녹음 상태 변경 시 부모 컴포넌트에 알림
+  // useEffect(() => {
+  //   onRecordingStateChange(isRecording);
+  // }, [isRecording, onRecordingStateChange]);
 
   // 참가자 상태 업데이트
   const updateParticipants = useCallback((currentRoom: Room) => {
@@ -74,10 +53,6 @@ function IntegratedRoom({
     if (!isUserTurn || isRecording) return;
 
     try {
-      // 녹음 시작 상태 브로드캐스트
-      broadcastRecordingStatus('recording');
-      setGlobalRecordingStatus('recording');
-
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       const audioChunks: BlobPart[] = [];
@@ -92,31 +67,21 @@ function IntegratedRoom({
         const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
         const audioUrl = URL.createObjectURL(audioBlob);
 
-        const recordingData: RecordingData = {
+        addRecording(currentIndex, {
           characterType: userRole,
           audioUrl,
           timestamp: Date.now(),
-        };
-
-        addRecording(currentIndex, recordingData);
+        });
 
         stream.getTracks().forEach((track) => track.stop());
         setIsRecording(false);
-
-        // 녹음 완료 상태 브로드캐스트
-        broadcastRecordingStatus('completed');
-        setGlobalRecordingStatus('completed');
-
-        // 다음 페이지로 이동
-        setTimeout(() => {
-          onRecordingComplete();
-        }, 1000);
       };
 
       setIsRecording(true);
       setTimeLeft(20);
       mediaRecorder.start();
 
+      // 20초 후 자동 중지
       setTimeout(() => {
         if (mediaRecorder.state === 'recording') {
           mediaRecorder.stop();
@@ -126,35 +91,8 @@ function IntegratedRoom({
       console.error('녹음 시작 실패:', error);
       alert('마이크 접근에 실패했습니다. 마이크 권한을 확인해주세요.');
       setIsRecording(false);
-      broadcastRecordingStatus('idle');
-      setGlobalRecordingStatus('idle');
     }
-  }, [
-    isUserTurn,
-    isRecording,
-    currentIndex,
-    userRole, addRecording, broadcastRecordingStatus, onRecordingComplete]);
-
-  // 데이터 수신 이벤트 리스너 추가
-  useEffect(() => {
-    if (!room) return;
-
-    const handleData = (payload: Uint8Array) => {
-      try {
-        const data = JSON.parse(new TextDecoder().decode(payload));
-        if (data.type === 'recording_status' && data.sender !== participantName) {
-          setGlobalRecordingStatus(data.status);
-        }
-      } catch (error) {
-        console.error('데이터 처리 오류:', error);
-      }
-    };
-
-    room.on(RoomEvent.DataReceived, handleData);
-
-    // eslint-disable-next-line no-void
-    void 0;
-  }, [room, participantName]);
+  }, [isUserTurn, isRecording, currentIndex, userRole, addRecording]);
 
   // 타이머 처리
   useEffect(() => {
@@ -352,25 +290,17 @@ function IntegratedRoom({
         );
       })}
 
-      {/* 녹음 중 대기 상태 표시 */}
-      {globalRecordingStatus === 'recording' && !isRecording && (
-      <div className="absolute top-0 left-0 right-0 bg-yellow-100 text-yellow-800 p-2 text-center">
-        상대방이 녹음 중입니다. 잠시만 기다려주세요...
-      </div>
-      )}
-      {/* 녹음 버튼 - 상대방 녹음 중일 때는 비활성화 */}
+      {/* 녹음 버튼 */}
       {isUserTurn && (
-      <button
-        type="button"
-        onClick={isRecording ? stopRecording : startRecording}
-        disabled={globalRecordingStatus === 'recording' && !isRecording}
-        className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full 
-          ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} 
-          text-white font-medium transition-colors
-          ${globalRecordingStatus === 'recording' && !isRecording ? 'opacity-50 cursor-not-allowed' : ''}`}
-      >
-        {isRecording ? `녹음 중... (${timeLeft}초)` : '녹음 시작'}
-      </button>
+        <button
+          type="button"
+          onClick={isRecording ? stopRecording : startRecording}
+          className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full 
+            ${isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'} 
+            text-white font-medium transition-colors`}
+        >
+          {isRecording ? `녹음 중... (${timeLeft}초)` : '녹음 시작'}
+        </button>
       )}
 
       {/* 녹음 진행바 */}
