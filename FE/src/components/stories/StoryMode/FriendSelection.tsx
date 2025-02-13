@@ -17,6 +17,8 @@ function FriendSelection() {
   const location = useLocation();
   const { template } = useDrawing();
   const { contentId } = location.state || {};
+  const { setFriend } = useFriends(); // Hook을 컴포넌트 최상위 레벨로 이동
+  const socketStore = useSocketStore(); // Hook을 컴포넌트 최상위 레벨로 이동
 
   const {
     friends,
@@ -92,6 +94,17 @@ function FriendSelection() {
         throw new Error('콘텐츠 제목이 없습니다.');
       }
 
+      // 초대 데이터 로깅 추가
+      console.log('Sending invitation:', {
+        contentId: targetContentId,
+        inviterId: currentChildId,
+        inviteeId,
+        contentType: targetContentType,
+        inviterName: currentUser.name,
+        inviteeName: friend.name,
+        contentTitle,
+      });
+
       await inviteFriend({
         contentId: targetContentId,
         inviterId: currentChildId,
@@ -102,11 +115,10 @@ function FriendSelection() {
         contentTitle,
       });
 
-      // 모든 모드에서 동일하게 소켓 연결과 friend 상태 설정
-      const { setFriend } = useFriends();
-      const { setConnect } = useSocketStore.getState();
+      // SKETCH일 때만 소켓 연결
+      console.log(`${targetContentType} invitation sent successfully, setting up socket connection`);
       setFriend(friend);
-      setConnect(true);
+      socketStore.setConnect(true);
     } catch (err) {
       console.error('친구 초대 실패:', err);
     }

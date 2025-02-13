@@ -63,7 +63,6 @@ const getInvitationEndpoint = (
   action: 'invitation' | 'accept' | 'reject' | 'expire',
 ) => {
   const basePath = contentType === 'SKETCH' ? '/sketch' : '/book';
-  // inviter / invitee 아이디 정하는 부분
   const userId = action === 'invitation' ? invitation.inviterId : invitation.inviteeId;
 
   const endpoint = `${basePath}/${contentId}/friend/${userId}/invitation${action !== 'invitation' ? `/${action}` : ''}`;
@@ -221,7 +220,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       );
 
       const payload = {
-        inviterId: invitation.inviterId, // inviteeId -> inviterId로 수정
+        inviteeId: invitation.inviteeId,
       };
 
       if (invitation.contentType === 'BOOK') {
@@ -258,7 +257,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       );
 
       const payload = {
-        inviterId: invitation.inviterId, // inviteeId -> inviterId로 수정
+        inviteeId: invitation.inviteeId,
       };
 
       await api.post(endpoint, payload);
