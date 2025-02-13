@@ -1,11 +1,13 @@
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
 // import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 // import MakeRandomCode from '../../../utils/format/randomString';
 
 function ModeSelection(): JSX.Element {
   const navigate = useNavigate();
-  const { setMode, bookId, title } = useStory();
+  const { setMode, bookId } = useStory();
+  const { bookContent } = useBookContent();
   console.log('ModeSelection에서의 bookId:', bookId);
 
   const handleModeSelection = (mode: 'reading' | 'together') => {
@@ -15,7 +17,7 @@ function ModeSelection(): JSX.Element {
         state: {
           contentId: bookId,
           contentType: 'BOOK',
-          contentTitle: title, // 추가된 title 전달
+          contentTitle: bookContent?.bookTitle, // 추가된 title 전달
         },
       });
     }

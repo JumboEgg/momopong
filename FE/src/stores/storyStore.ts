@@ -8,8 +8,6 @@ interface StoryStore {
   bookId: number | null; // storyId -> bookId, null 허용
   setBookId: (id: number | null) => void // 타입 수정
   currentIndex: number;
-  title: string | null; // 추가
-  setTitle: (title: string | null) => void;
   setCurrentIndex: (idx: number) => void;
   recordings: Map<number, RecordingData>;
   addRecording: (idx: number, record: RecordingData) => void;
@@ -24,9 +22,6 @@ const useStoryStore = create<StoryStore>((set, get) => ({
 
   bookId: null, // storyId -> bookId
   setBookId: (id) => set({ bookId: id }), // 구현 수정
-
-  title: null, // 추가
-  setTitle: (title) => set({ title }), // 추가
 
   currentIndex: 0,
   setCurrentIndex: (idx) => set({ currentIndex: idx }),

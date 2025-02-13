@@ -43,10 +43,6 @@ function StorySelection(): JSX.Element {
     setIsLoading(false);
   }
 };
-  // 홈으로 이동하는 경우만 navigate 사용
-  const handleBackClick = () => {
-    navigate('/home');
-  };
 
   return (
     <div className="w-full h-full bg-green-900 flex items-center justify-center">
@@ -54,7 +50,7 @@ function StorySelection(): JSX.Element {
         <IconCircleButton
           size="sm"
           variant="action"
-          onClick={handleBackClick}
+          onClick={() => navigate('/home')}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
           className=""
         />
