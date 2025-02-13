@@ -10,6 +10,7 @@ import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useSketchList } from '@/stores/drawing/sketchListStore';
+// import { Friend, StatusType } from '@/types/friend';
 import InvitationWaitPage from '../components/common/multiplayPages/invitationWaitPage';
 import NetworkErrorPage from '../components/common/multiplayPages/networkerrorPage';
 
@@ -20,28 +21,31 @@ function Drawing() {
 
   const { setSketchList } = useSketchList();
   const {
- friend, setFriend, isConnected, setIsConnected,
-} = useFriends();
+    friend, setFriend, isConnected, setIsConnected,
+  } = useFriends();
   const { socket, setConnect } = useSocketStore();
   const location = useLocation();
   const {
     waitingForResponse,
-    templateId,
-    templateName,
     isAccepted,
   } = location.state || {};
 
-  // 초기화 useEffect
-  useEffect(() => {
-    if (templateId) {
-      // SketchInfo 타입에 맞게 설정
+   // 기본 초기화용 useEffect
+   useEffect(() => {
+    // console.log('Effect triggered');
+    // console.log('Current location.state:', location.state);
+
+    if (location.state?.templateId) {
+      // console.log('Setting template with:', location.state.templateId);
       setTemplate({
-        sketchId: templateId,
-        sketchPath: '', // 빈 문자열로 설정
-        sketchTitle: templateName || '함께 그리기',
+        sketchId: location.state.templateId,
+        sketchPath: '',
+        sketchTitle: location.state.templateName || '함께 그리기',
       });
       setMode('together');
-    } else {
+      // console.log('Template should be set now');
+    } else if (!location.state) {
+      // console.log('Initializing states to null');
       setMode(null);
       setTemplate(null);
       setSketchList();
@@ -50,18 +54,33 @@ function Drawing() {
     setPenColor('black');
     setIsErasing(false);
     setImageData('');
-  }, []);
+  }, [location.state]);
 
   // 소켓 연결 관리
   useEffect(() => {
     if (mode === 'together') {
+      console.log('location.state:', location.state);
       if (waitingForResponse) {
         setConnect(false);
-      } else if (isAccepted || !waitingForResponse) {
+        setIsConnected(false);
+      } else if (isAccepted || location.state?.participantName) {
         setConnect(true);
+        setIsConnected(false);
+        const participantName = location.state?.participantName;
+        if (participantName && !friend) {
+          setFriend({
+            id: location.state?.participantId,
+            childId: location.state?.participantId,
+            name: participantName,
+            profile: location.state?.participantProfile || '',
+            status: 'DRAWING', // StatusType의 literal type 중 하나
+          });
+        }
+      } else {
+        setFriend(null);
+        setConnect(false);
+        setIsConnected(false);
       }
-      setIsConnected(false);
-      setFriend(null);
     }
   }, [mode, waitingForResponse, isAccepted]);
 
@@ -76,12 +95,16 @@ function Drawing() {
 
     // 함께하기 모드일 때
     if (mode === 'together') {
-      // 초대 대기중일 경우
       if (waitingForResponse) {
         return <InvitationWaitPage />;
       }
 
+      // 초대가 수락되었거나 초대받은 상태에서는 friend가 설정되어 있어야 함
       if (!friend) {
+        if (isAccepted || location.state?.participantName) {
+          // friend 정보 설정이 필요한 상태
+          return <InvitationWaitPage />; // 또는 다른 로딩 상태
+        }
         return <FriendSelection />;
       }
 
@@ -94,10 +117,12 @@ function Drawing() {
       }
 
       if (!imageData) {
+        console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
         return <DrawingPage />;
       }
     }
 
+    // 싱글모드
     if (mode === 'single' && !imageData) {
       return <DrawingPage />;
     }
