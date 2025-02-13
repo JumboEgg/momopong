@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { RecordInfo } from '@/types/book';
+import { PageRecordData } from '@/types/book';
 import uploadStoryAudioToS3 from '@/utils/bookS3/lineAudioUpload';
 
 interface RecordListStore {
-  recordList: RecordInfo[];
-  addRecord: (audio: Blob) => void;
+  recordList: PageRecordData[];
+  addRecord: (pageData: PageRecordData, audio: Blob) => void;
   clearRecordList: () => void;
   uploadRecord: () => void;
 }
@@ -13,14 +13,32 @@ interface RecordListStore {
 const useRecordListStore = create<RecordListStore>()(
     (set, get) => ({
       recordList: [],
-      addRecord: async (audioBlob) => {
-        try {
-          const { presignedUrl, fileName } = await uploadStoryAudioToS3(audioBlob);
 
-          // TODO : API 요구사항에 맞는 데이터 추가
-          const data: RecordInfo = {
-            path: presignedUrl,
-            fileName,
+      /* narration과 자신의 대사를 table에 저장 */
+      addRecord: async (pageData, audioBlob) => {
+        try {
+          // narration은 기존 S3를 저장
+          if (pageData.role === 'narration') {
+            set({ recordList: [...get().recordList, pageData] });
+            return;
+          }
+
+          // 본인 대사일 경우에만 audio 정보 저장 시도
+          const { fileName } = await uploadStoryAudioToS3(audioBlob);
+
+          // TODO : roleStore에서 정보 가져오기
+          const inviterRecordId = 5;
+          const inviteeRecordId = 6;
+
+          const data: PageRecordData = {
+            bookRecordId: inviterRecordId,
+            partnerBookRecordId: inviteeRecordId,
+            bookRecordPageNumber: pageData.bookRecordPageNumber,
+            pagePath: pageData.pagePath,
+            audioPath: fileName,
+            role: pageData.role,
+            text: pageData.text,
+            audioNumber: pageData.audioNumber,
           };
 
             set({ recordList: [...get().recordList, data] });

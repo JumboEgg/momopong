@@ -34,3 +34,14 @@ export interface RecordInfo {
     path: string;
     fileName: string;
 }
+
+export interface PageRecordData {
+    bookRecordId: number;
+    partnerBookRecordId: number;
+    bookRecordPageNumber: number;
+    pagePath: string;
+    audioPath: string;
+    role: string;
+    text: string;
+    audioNumber: number;
+}

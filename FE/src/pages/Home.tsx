@@ -81,7 +81,9 @@ function HomePage() {
         onClick={() => handleNavigation('/book/letter')}
         className="cursor-pointer flex flex-col items-center"
       >
-        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">편지</p>
+        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">
+          도서 정보 저장 테스트
+        </p>
       </button>
 
       {isModalOpen && (

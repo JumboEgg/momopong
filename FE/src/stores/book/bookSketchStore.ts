@@ -45,7 +45,7 @@ const useBookSketchStore = create<BookSketchStore>()(
               throw new Error(`Upload failed: ${presignedResponse.status}`);
             }
 
-            const { presignedUrl } = await presignedResponse.json();
+            const { presignedUrl, fileName } = await presignedResponse.json();
 
             const uploadToS3Response = await fetch(presignedUrl, {
                 method: 'PUT',
@@ -59,11 +59,9 @@ const useBookSketchStore = create<BookSketchStore>()(
                 throw new Error(`Failed to upload to S3: ${uploadToS3Response.status}`);
             }
 
-            console.log('save url: ', get().sketch);
-
             const data = {
-                bookRecordPageId: 1, // TODO : 현재 페이지 번호로 교체
-                bookRecordSketchPath: presignedUrl,
+                bookRecordPageId: 10, // TODO : 현재 페이지 번호로 교체
+                bookRecordSketchPath: fileName,
             };
 
             const response = await fetch(

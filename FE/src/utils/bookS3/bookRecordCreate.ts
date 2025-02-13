@@ -1,11 +1,9 @@
 import { useRoleStore } from '@/stores/roleStore';
-import { useStory } from '@/stores/storyStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 
-const makeBookRecord = async () => {
+const makeBookRecord = async (selectedBookId: number, readingMode: string) => {
     try {
         const { accessToken } = useSubAccountStore.getState().childToken;
-        const { bookId, mode } = useStory();
 
         // TODO : roleStore에 저장된 데이터로 교체
         const inviterId = useSubAccountStore.getState().selectedAccount?.childId;
@@ -13,15 +11,15 @@ const makeBookRecord = async () => {
 
         const inviterData = {
             childId: inviterId,
-            bookId,
+            bookId: selectedBookId,
             role: useRoleStore.getState().inviterRole,
-            mode,
+            mode: readingMode,
         };
         const inviteeData = {
             childId: inviteeId,
-            bookId,
+            bookId: selectedBookId,
             role: useRoleStore.getState().inviteeRole,
-            mode,
+            mode: readingMode,
         };
 
         const inviterResponse = await fetch(
@@ -31,7 +29,7 @@ const makeBookRecord = async () => {
                 body: JSON.stringify(inviterData),
                 headers: {
                     Authorization: `Bearer ${accessToken}`,
-                    'Content-Type': 'applicaton/json',
+                    'Content-Type': 'application/json',
                 },
             },
         );
@@ -66,8 +64,8 @@ const makeBookRecord = async () => {
 
         // TODO : 테이블 생성 결과 roleStore에 저장
         const bookRecordIdInfo = {
-            inviterRecordId: inviterReply,
-            inviteeRecordId: inviteeReply,
+            inviterRecord: inviterReply,
+            inviteeRecord: inviteeReply,
         };
 
         return bookRecordIdInfo;

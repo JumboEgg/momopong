@@ -22,12 +22,13 @@ import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory';
 import MyDrawing from './components/myhouse/mydrawing';
 import MyLetters from './components/myhouse/myletters';
-import LetterPage from './components/stories/StoryMode/LetterPage';
+// import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
 import FriendSelection from './components/stories/StoryMode/FriendSelection';
+import BookRecordPage from './test/BookRecordPage';
 
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
@@ -170,7 +171,7 @@ function App(): JSX.Element {
           path="/book/letter"
           element={(
             <ProtectedRoute>
-              <LetterPage />
+              <BookRecordPage />
             </ProtectedRoute>
           )}
         />
