@@ -73,7 +73,7 @@ public class CloudFrontService {
 
             SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCannedPolicy(cannedRequest);
             String url = signedUrl.url();
-            log.info("Generated signed URL: {}", url);
+//            log.info("Generated signed URL: {}", url);
 
             return url;
 
