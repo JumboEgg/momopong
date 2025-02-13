@@ -1,4 +1,4 @@
-import { useBookContent } from '@/stores/bookContentStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
 import { StoryIllustrationProps, CharacterType } from '../types/story';
 
 function StoryIllustration({
@@ -61,6 +61,7 @@ function StoryIllustration({
       <div className="absolute bottom-8 left-8">
         <div className="bg-black bg-opacity-30 text-white p-6 rounded-lg max-w-xl">
           {relatedContents.map((content) => {
+            if (!content) return null;
            let isUserTurn = userRole && userRole === content.role;
            if (userRole && userRole === content.role) isUserTurn = true;
 

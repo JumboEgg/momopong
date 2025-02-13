@@ -2,14 +2,14 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
-import { useBookList } from '@/stores/bookListStore';
+import { useBookList } from '@/stores/book/bookListStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
  faArrowLeft, faCaretLeft, faCaretRight,
 } from '@fortawesome/free-solid-svg-icons';
 import { getCoverPath } from '@/utils/format/imgPath';
-import { useBookContent } from '@/stores/bookContentStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
 
 function StorySelection(): JSX.Element {
   const { bookList } = useBookList();
@@ -105,7 +105,7 @@ function StorySelection(): JSX.Element {
           </div>
 
           {/* 하단 선반 */}
-          <div className="w-full h-[45%] bg-yellow-800 rounded-2xl flex items-end px-4">
+          <div className="w-full h-[45%] bg-yellow-800 rounded-2xl flex items-end px-6">
             <div className="w-full grid grid-cols-3 gap-x-6">
               {bookList.slice(startIndex + 3, startIndex + 6).map((book) => (
                 <button

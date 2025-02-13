@@ -29,3 +29,8 @@ export interface BookContentInfo {
     sketch: string; // 책 내에서 사용할 도안 경로
     pages: PageInfo[];
 }
+
+export interface RecordInfo {
+    path: string;
+    fileName: string;
+}

@@ -30,6 +30,8 @@ const useBookContentStore = create<BookContentStore>()(
             }
             const data = await response.json();
 
+            console.log(data);
+
             set({ bookContent: data });
         } catch (error) {
           console.error('Error loading book content:', error);

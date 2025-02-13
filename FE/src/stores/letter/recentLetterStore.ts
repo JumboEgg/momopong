@@ -1,7 +1,7 @@
 import { LetterInfo } from '@/types/letter';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import useSubAccountStore from './subAccountStore';
+import useSubAccountStore from '../subAccountStore';
 
 interface RecentLetterState {
   recentLetterList: LetterInfo[];

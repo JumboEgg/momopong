@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import '@/components/common/scrollbar.css';
 import { LetterInfo } from '@/types/letter';
 import useSubAccountStore from '@/stores/subAccountStore';
-import useLetterStore from '@/stores/letterStore';
+import useLetterStore from '@/stores/letter/letterStore';
 import fetchSavedAudio from '@/utils/audioS3/audioLoad';
 
 function MyLetters(): React.JSX.Element {

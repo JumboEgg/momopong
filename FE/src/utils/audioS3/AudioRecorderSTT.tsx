@@ -5,8 +5,11 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import { useBookContent } from '@/stores/book/bookContentStore';
 
 function AudioRecorderSTT() {
+  const { bookContent } = useBookContent();
+
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
   const [error, setError] = useState('');
@@ -153,9 +156,9 @@ function AudioRecorderSTT() {
     if (!recordingBlob) return;
 
     const letter: LetterInfo = {
-      bookTitle: '라이언 일병 구하기',
-      role: '라이언 일병',
-      childName: '김이병',
+      bookTitle: bookContent?.bookTitle ?? '',
+      role: bookContent?.role1 ?? '',
+      childName: '',
       content: voiceText,
       letterFileName: '',
       letterUrl: '',

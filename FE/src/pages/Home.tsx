@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
-import useRecentLetterStore from '@/stores/recentLetterStore';
+import useRecentLetterStore from '@/stores/letter/recentLetterStore';
 
 function HomePage() {
   const navigate = useNavigate();

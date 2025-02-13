@@ -2,11 +2,11 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import { tokenService } from '@/services/tokenService';
 
-export type StoryRole = 'princess' | 'prince';
+export type StoryRole = 'role1' | 'role2';
 
 export const STORY_ROLES = {
-  PRINCESS: 'princess',
-  PRINCE: 'prince',
+  PRINCESS: 'role1',
+  PRINCE: 'role2',
 } as const;
 
 interface RoleState {

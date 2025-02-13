@@ -1,7 +1,8 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useCallback, useEffect, useState } from 'react';
-import { useDrawing } from '@/stores/drawingStore';
+import { useDrawing } from '@/stores/sketch/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
+import { useBookSketch } from '@/stores/book/bookSketchStore';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -11,6 +12,11 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
   const {
     mode, template, setImageData,
   } = useDrawing();
+
+  // TODO : story mode 저장 테스트 코드 삭제
+  const {
+    setSketch, uploadSketch,
+  } = useBookSketch();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
 
@@ -51,6 +57,10 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
           const dataURL = tempCanvas.toDataURL('image/webp');
 
           setImageData(dataURL);
+
+          // TODO : story mode sketch 저장 테스트 코드 삭제
+          setSketch(dataURL);
+          uploadSketch();
         };
       };
     } else {

@@ -9,7 +9,7 @@ import { useStory } from '@/stores/storyStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import InvitationWaitPage from '@/components/common/multiplayPages/invitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/networkerrorPage';
-import { useBookList } from '@/stores/bookListStore';
+import { useBookList } from '@/stores/book/bookListStore';
 
 function Story() {
   const {

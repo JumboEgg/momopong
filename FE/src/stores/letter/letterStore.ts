@@ -1,7 +1,7 @@
 import { LetterInfo } from '@/types/letter';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import useSubAccountStore from './subAccountStore';
+import useSubAccountStore from '@/stores/subAccountStore';
 
 interface LetterState {
   letterList: LetterInfo[];

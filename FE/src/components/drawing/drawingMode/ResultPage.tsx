@@ -1,7 +1,7 @@
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useEffect, useState } from 'react';
 import DialogModal from '@/components/common/modals/DialogModal';
-import { useDrawing } from '@/stores/drawingStore';
+import { useDrawing } from '@/stores/sketch/drawingStore';
 import { useFriends } from '@/stores/friendStore';
 import { FrameInfo } from '@/types/frame';
 import uploadImageToS3 from '../../../utils/drawingS3/drawingUpload';

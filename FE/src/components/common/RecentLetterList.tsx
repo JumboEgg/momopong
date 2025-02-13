@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import useRecentLetterStore from '@/stores/recentLetterStore';
+import useRecentLetterStore from '@/stores/letter/recentLetterStore';
 import RecentLetterModal from './modals/RecentLetterModal';
 
 function RecentLetterList() {

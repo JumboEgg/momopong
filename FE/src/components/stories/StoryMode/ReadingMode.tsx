@@ -6,7 +6,7 @@ import {
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
-import { useBookContent } from '@/stores/bookContentStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
 import AudioPlayer from '../AudioPlayer';
 import StoryIllustration from './StoryIllustration';
 

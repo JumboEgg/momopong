@@ -1,7 +1,7 @@
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useDrawing } from '@/stores/drawingStore';
+import { useDrawing } from '@/stores/sketch/drawingStore';
 import { useEffect } from 'react';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import MakeRandomCode from '../../../utils/format/randomString';

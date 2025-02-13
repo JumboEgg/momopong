@@ -1,0 +1,100 @@
+import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
+import useSubAccountStore from '../subAccountStore';
+import base64ToBlob from '../sketch/base64ToBlob';
+
+// Drawing 상태 관리 스토어
+interface BookSketchStore {
+  sketch: string | null;
+  setSketch: (frameUrl: string) => void;
+  uploadSketch: () => void;
+}
+
+// Zustand 상태 훅 생성
+const useBookSketchStore = create<BookSketchStore>()(
+  persist(
+    (set, get) => ({
+        sketch: null,
+        setSketch: (frameUrl) => set({ sketch: frameUrl }),
+        uploadSketch: async () => {
+        try {
+            if (!get().sketch) {
+                console.error('Cannot find sketch url');
+                return;
+            }
+
+            const imageBlob = await base64ToBlob(get().sketch ?? '');
+            // child token 얻기
+            const { accessToken } = useSubAccountStore.getState().childToken;
+
+            if (!accessToken) {
+              throw new Error('Failed to get accessToken');
+            }
+
+            const presignedResponse = await fetch(
+              `${import.meta.env.VITE_API_BASE_URL}/book/record-sketch/presigned-url`,
+              {
+                method: 'GET',
+                headers: {
+                  Authorization: `Bearer ${accessToken}`,
+                },
+              },
+            );
+
+            if (!presignedResponse.ok) {
+              throw new Error(`Upload failed: ${presignedResponse.status}`);
+            }
+
+            const { presignedUrl } = await presignedResponse.json();
+
+            const uploadToS3Response = await fetch(presignedUrl, {
+                method: 'PUT',
+                body: imageBlob,
+                headers: {
+                    'Content-Type': 'image/webp',
+                },
+            });
+
+            if (!uploadToS3Response.ok) {
+                throw new Error(`Failed to upload to S3: ${uploadToS3Response.status}`);
+            }
+
+            console.log('save url: ', get().sketch);
+
+            const data = {
+                bookRecordPageId: 1, // TODO : 현재 페이지 번호로 교체
+                bookRecordSketchPath: presignedUrl,
+            };
+
+            const response = await fetch(
+                `${import.meta.env.VITE_API_BASE_URL}/book/record-sketch/save`,
+                {
+                    method: 'POST',
+                    body: JSON.stringify(data),
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json',
+                    },
+                },
+            );
+
+            if (!response.ok) {
+                throw new Error(`Upload failed: ${response.status}`);
+            }
+          } catch (error) {
+            console.error('Error uploading image:', error);
+            throw error;
+          }
+      },
+    }),
+    {
+      name: 'booksketch-storage',
+      partialize: (state) => ({
+        sketch: state.sketch,
+      }),
+    },
+  ),
+);
+
+// Zustand에서 상태를 가져오는 커스텀 훅
+export const useBookSketch = (): BookSketchStore => useBookSketchStore();
