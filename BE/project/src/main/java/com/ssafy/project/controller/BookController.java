@@ -10,12 +10,15 @@ import com.ssafy.project.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('CHILD')") // 권한이 자식이면 허용 , 부모면 미허용
@@ -57,6 +60,11 @@ public class BookController {
     public ResponseEntity<NotificationDto> sendInvitation(@PathVariable("bookId") Long bookId,
                                                           @PathVariable("inviterId") Long inviterId,
                                                           @RequestBody InviteeIdDto inviteeIdDto) {
+        log.info("sendInvitation.inviterId={}", inviterId);
+
+        log.info("sendInvitation.inviteeIdDto={}", inviteeIdDto);
+        log.info("sendInvitation.inviteeId={}", inviteeIdDto.getInviteeId());
+
         Long inviteeId = inviteeIdDto.getInviteeId();
         NotificationDto notificationDto = bookService.sendInvitation(bookId, inviterId, inviteeId);
 
@@ -68,8 +76,18 @@ public class BookController {
     @PostMapping("/{bookId}/friend/{inviteeId}/invitation/accept")
     public ResponseEntity<Void> acceptInvitation(@PathVariable("bookId") Long bookId,
                                                  @PathVariable("inviteeId") Long inviteeId,
-                                                 @RequestBody InviterIdDto inviterIdDto) {
-        Long inviterId = inviterIdDto.getInviterId();
+                                                 @RequestBody Map<String, String> map) {
+//                                                 @RequestBody InviterIdDto inviterIdDto) {
+
+        log.info("acceptInvitation.inviteeId={}", inviteeId);
+
+//        log.info("acceptInvitation.inviterIdDto={}", inviterIdDto);
+//        log.info("acceptInvitation.inviterId={}", inviterIdDto.getInviterId());
+
+//        Long inviterId = inviterIdDto.getInviterId();
+        Long inviterId = Long.parseLong(map.get("inviterId"));
+        log.info("rejectInvitation.map={}", map);
+        log.info("rejectInvitation.inviterId={}", inviterId);
         bookService.acceptInvitation(bookId, inviterId, inviteeId);
 
         return ResponseEntity.ok().build();
@@ -80,8 +98,18 @@ public class BookController {
     @PostMapping("/{bookId}/friend/{inviteeId}/invitation/reject")
     public ResponseEntity<Void> rejectInvitation(@PathVariable("bookId") Long bookId,
                                                  @PathVariable("inviteeId") Long inviteeId,
-                                                 @RequestBody InviterIdDto inviterIdDto) {
-        Long inviterId = inviterIdDto.getInviterId();
+                                                 @RequestBody Map<String, String> map) {
+//                                                 @RequestBody InviterIdDto inviterIdDto) {
+        log.info("rejectInvitation.inviteeId={}", inviteeId);
+
+//        log.info("rejectInvitation.inviterIdDto={}", inviterIdDto);
+//        log.info("rejectInvitation.inviterId={}", inviterIdDto.getInviterId());
+//
+//        Long inviterId = inviterIdDto.getInviterId();
+        Long inviterId = Long.parseLong(map.get("inviterId"));
+        log.info("rejectInvitation.map={}", map);
+        log.info("rejectInvitation.inviterId={}", inviterId);
+
         bookService.rejectInvitation(bookId, inviterId, inviteeId);
 
         return ResponseEntity.ok().build();

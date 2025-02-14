@@ -57,12 +57,12 @@ public class CloudFrontService {
         }
     }
 
-    public String getSignedUrl(String audioUrl) {
+    public String getSignedUrl(String fileUrl) {
         try {
             CloudFrontUtilities cloudFrontUtilities = CloudFrontUtilities.create();
             Instant expirationDate = Instant.now().plus(7, ChronoUnit.DAYS);    //유효기간 7일
 
-            String resourceUrl = domain + "/" + audioUrl;
+            String resourceUrl = domain + "/" + fileUrl;
 
             CannedSignerRequest cannedRequest = CannedSignerRequest.builder()
                     .resourceUrl(resourceUrl)
@@ -73,7 +73,7 @@ public class CloudFrontService {
 
             SignedUrl signedUrl = cloudFrontUtilities.getSignedUrlWithCannedPolicy(cannedRequest);
             String url = signedUrl.url();
-            log.info("Generated signed URL: {}", url);
+//            log.info("Generated signed URL: {}", url);
 
             return url;
 

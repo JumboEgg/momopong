@@ -2,13 +2,11 @@ package com.ssafy.project.dto.invitation;
 
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationDto {
