@@ -23,7 +23,7 @@ const getTemplateFilename = (id: number): string => {
     5: 'frooog.webp',
     6: 'grillthemermaid.webp',
     7: 'peavine.webp',
-    8: 'prince.webp',
+    8: 'role2.webp',
     9: 'pumpkinmagic.webp',
     10: 'runningbunny.webp',
     11: 'shoemakerelves.webp',
@@ -36,19 +36,26 @@ const getTemplateFilename = (id: number): string => {
 
 function Drawing() {
   const {
-    mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
+    mode,
+    setMode,
+    template,
+    setTemplate,
+    setPenColor,
+    setIsErasing,
+    imageData,
+    setImageData,
   } = useDrawing();
 
   const { setSketchList } = useSketchList();
   const {
-    friend, setFriend, isConnected, setIsConnected,
+    friend,
+    setFriend,
+    isConnected,
+    setIsConnected,
   } = useFriends();
   const { socket, setConnect, isConnected: socketConnected } = useSocketStore();
   const location = useLocation();
-  const {
-    waitingForResponse,
-    isAccepted,
-  } = location.state || {};
+  const { waitingForResponse, isAccepted } = location.state || {};
 
   // socketStore의 연결 상태 변화를 friendStore에 동기화
   useEffect(() => {
@@ -132,37 +139,37 @@ function Drawing() {
         return <InvitationWaitPage />;
       }
 
-    // 연결 준비 상태 (초대 수락 직후)
-    if (isAccepted || location.state?.participantName) {
-      if (!isConnected) {
-        return (
-          <InvitationWaitPage
-            message="함께 그리기 준비 중이에요..."
-            showTimer={false}
-            duration={2}
-            onComplete={() => setIsConnected(true)}
-          />
-        );
+      // 연결 준비 상태 (초대 수락 직후)
+      if (isAccepted || location.state?.participantName) {
+        if (!isConnected) {
+          return (
+            <InvitationWaitPage
+              message="함께 그리기 준비 중이에요..."
+              showTimer={false}
+              duration={2}
+              onComplete={() => setIsConnected(true)}
+            />
+          );
+        }
+      }
+
+      // 친구 선택
+      if (!friend) {
+        return <FriendSelection />;
+      }
+      if (friend && !socket) {
+        return <NetworkErrorPage />;
+      }
+
+      if (friend && socket && !isConnected) {
+        return <InvitationWaitPage />;
+      }
+
+      if (!imageData) {
+        // console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
+        return <DrawingPage />;
       }
     }
-
-    // 친구 선택
-    if (!friend) {
-      return <FriendSelection />;
-    }
-    if (friend && !socket) {
-      return <NetworkErrorPage />;
-    }
-
-    if (friend && socket && !isConnected) {
-      return <InvitationWaitPage />;
-    }
-
-    if (!imageData) {
-      // console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
-      return <DrawingPage />;
-    }
-  }
 
     // 싱글모드
     if (mode === 'single' && !imageData) {
@@ -176,11 +183,7 @@ function Drawing() {
     return <ResultPage />;
   };
 
-  return (
-    <div className="w-screen h-screen">
-      {content()}
-    </div>
-  );
+  return <div className="w-screen h-screen">{content()}</div>;
 }
 
 export default Drawing;

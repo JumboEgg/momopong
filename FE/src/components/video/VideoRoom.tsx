@@ -1,27 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
-import {
-  Room,
-  RoomEvent,
-  LocalParticipant,
-  RemoteParticipant,
-  VideoPresets,
-} from 'livekit-client';
+import { Room, RoomEvent, LocalParticipant, RemoteParticipant, VideoPresets } from 'livekit-client';
 
 interface VideoRoomProps {
   roomName: string;
   participantName: string;
-  userRole: 'prince' | 'princess';
+  userRole: 'role2' | 'role1';
   isUserTurn: boolean;
   audioEnabled: boolean;
 }
 
-function VideoRoom({
-  roomName,
-  participantName,
-  userRole,
-  isUserTurn,
-  audioEnabled,
-}: VideoRoomProps) {
+function VideoRoom({ roomName, participantName, userRole, isUserTurn, audioEnabled }: VideoRoomProps) {
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<(RemoteParticipant | LocalParticipant)[]>([]);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -135,30 +123,19 @@ function VideoRoom({
 
   // 에러 처리
   if (connectionError) {
-    return (
-      <div className="p-4 bg-red-100 text-red-700 rounded-lg">
-        Error:
-        {' '}
-        {connectionError}
-      </div>
-    );
+    return <div className="p-4 bg-red-100 text-red-700 rounded-lg">Error: {connectionError}</div>;
   }
 
   // 비디오 트랙 가져오기
   const getVideoTrack = useCallback((participant: LocalParticipant | RemoteParticipant) => {
-    const videoPublication = Array.from(participant.getTrackPublications()).find(
-      (pub) => pub.kind === 'video',
-    );
+    const videoPublication = Array.from(participant.getTrackPublications()).find((pub) => pub.kind === 'video');
     return videoPublication?.track;
   }, []);
 
   return (
     <div className="fixed bottom-8 right-8 flex gap-4">
       {participants.map((participant) => (
-        <div
-          key={participant.identity}
-          className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden"
-        >
+        <div key={participant.identity} className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden">
           <video
             ref={(element) => {
               if (element) {
@@ -183,9 +160,7 @@ function VideoRoom({
             {participant === room?.localParticipant && (
               <div className="flex gap-1">
                 <div
-                  className={`w-2 h-2 rounded-full ${
-                    isUserTurn ? 'bg-green-500' : 'bg-red-500'
-                  }`}
+                  className={`w-2 h-2 rounded-full ${isUserTurn ? 'bg-green-500' : 'bg-red-500'}`}
                   title={isUserTurn ? '내 차례' : '상대방 차례'}
                 />
               </div>

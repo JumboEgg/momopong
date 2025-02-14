@@ -18,8 +18,8 @@ function StoryIllustration({
 
   const getSpeakerName = (type: CharacterType) => {
     if (type === 'narration') return '나레이션';
-    if (type === 'prince') return `왕자님${userRole === 'prince' ? ' (나)' : ''}`;
-    if (type === 'princess') return `신데렐라${userRole === 'princess' ? ' (나)' : ''}`;
+    if (type === 'role2') return `왕자님${userRole === 'role2' ? ' (나)' : ''}`;
+    if (type === 'role1') return `신데렐라${userRole === 'role1' ? ' (나)' : ''}`;
     return '등장인물';
   };
 
@@ -53,24 +53,24 @@ function StoryIllustration({
       <div className="absolute bottom-8 left-8">
         <div className="bg-black bg-opacity-30 text-white p-6 rounded-lg max-w-xl">
           {relatedContents.map((content) => {
-           const isUserTurn = userRole === content.type;
+            const isUserTurn = userRole === content.role;
 
-           return (
-             <div
-               key={`${pageNumber}-${content.type}-${content.text.substring(0, 20)}`}
-               className={`mb-4 last:mb-0 ${isUserTurn ? 'border-{yellow}-{100}' : ''}`}
-             >
-               {content.type !== 'narration' && (
-                 <div className="text-sm font-medium text-gray-300 mb-1">
-                   {getSpeakerName(content.type)}
-                 </div>
-               )}
-               <p className={`text-xl font-bold tracking-wide leading-relaxed ${isUserTurn ? 'text-yellow-200' : 'text-white'}`}>
-                 {content.text}
-               </p>
-             </div>
-           );
-         })}
+            return (
+              <div
+                key={`${pageNumber}-${content.role}-${content.text.substring(0, 20)}`}
+                className={`mb-4 last:mb-0 ${isUserTurn ? 'border-{yellow}-{100}' : ''}`}
+              >
+                {content.role !== 'narration' && (
+                  <div className="text-sm font-medium text-gray-300 mb-1">{getSpeakerName(content.role)}</div>
+                )}
+                <p
+                  className={`text-xl font-bold tracking-wide leading-relaxed ${isUserTurn ? 'text-yellow-200' : 'text-white'}`}
+                >
+                  {content.text}
+                </p>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

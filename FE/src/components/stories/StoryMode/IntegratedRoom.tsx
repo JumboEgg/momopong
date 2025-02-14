@@ -17,7 +17,7 @@ import {
 interface IntegratedRoomProps {
   roomName: string;
   participantName: string;
-  userRole: 'prince' | 'princess';
+  userRole: 'role2' | 'role1';
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
@@ -105,10 +105,8 @@ function IntegratedRoom({
         },
       };
 
-      room.localParticipant.publishData(
-        new TextEncoder().encode(JSON.stringify(message)),
-        { reliable: true },
-      );
+      room.localParticipant
+      .publishData(new TextEncoder().encode(JSON.stringify(message)), { reliable: true });
 
       onRecordingStatusChange(room.localParticipant.identity, status);
     },
@@ -166,9 +164,9 @@ function IntegratedRoom({
       // 타이머 설정
       setTimeout(() => {
         if (recorder.state === 'recording') {
-            recorder.stop();
+          recorder.stop();
         }
-    }, 20000);
+      }, 20000);
     } catch (error) {
       console.error('Recording failed', error);
       alert('마이크 접근에 실패했습니다.');
@@ -417,7 +415,7 @@ function IntegratedRoom({
         <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
           <span className="text-white text-sm truncate">
             <span>{participant.name || participant.identity}</span>
-            {isLocal && <span>{` (${userRole === 'prince' ? '왕자님' : '신데렐라'})`}</span>}
+            {isLocal && <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>}
           </span>
           {isLocal && (
             <div
