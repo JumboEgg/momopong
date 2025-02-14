@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 public class SketchParticipationRecordDto {
-    private Long sketch_participation_id;  // 참가기록
+    private Long sketchParticipationId;  // 참가기록
     private Long childId;  // 유저 id
     @Builder.Default
     private Boolean earlyExit = true; // 비정상 종료 여부

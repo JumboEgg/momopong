@@ -44,7 +44,7 @@ public class SketchParticipationRecord {
     // Entity to Dto
     public SketchParticipationRecordDto entityToDto() {
         return SketchParticipationRecordDto.builder()
-                .sketch_participation_id(this.id)
+                .sketchParticipationId(this.id)
                 .childId(this.child.getId())
                 .startTime(this.startTime)
                 .endTime(this.endTime)

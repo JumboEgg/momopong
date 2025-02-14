@@ -2,14 +2,12 @@ package com.ssafy.project.firebase;
 
 import com.ssafy.project.dto.invitation.NotificationDto;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 // 요청받은 알림 메시지 정보
 @Getter
 @Builder
+@ToString
 @AllArgsConstructor
 @NoArgsConstructor
 public class FcmSendDto {

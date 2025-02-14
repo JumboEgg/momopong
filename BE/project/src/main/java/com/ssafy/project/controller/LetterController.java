@@ -23,7 +23,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
-@PreAuthorize("hasRole('CHILD')")
 @CrossOrigin(origins = "*")  // CORS 설정 추가
 public class LetterController {
     private final LetterService letterService;

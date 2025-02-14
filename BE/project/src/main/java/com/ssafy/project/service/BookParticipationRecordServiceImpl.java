@@ -1,19 +1,19 @@
 package com.ssafy.project.service;
 
+import com.ssafy.project.common.JsonConverter;
 import com.ssafy.project.dao.RedisDao;
+import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.book.Book;
 import com.ssafy.project.domain.record.BookParticipationRecord;
-import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.record.BookParticipationRecordDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.repository.BookParticipationRecordRepository;
 import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +23,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
     private final BookRepository bookRepository;
     private final ChildRepository childRepository;
     private final RedisDao redisDao;
+    private final JsonConverter jsonConverter;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
 
@@ -46,7 +47,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
                 .build();
 
         // 접속 상태 변경 (ONLINE -> READING)
-
+        updateStatus(StatusType.READING, child);
 
         bookParticipationRecordRepository.save(savedRecord);
         return savedRecord.entityToDto();
@@ -63,7 +64,19 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
         bookParticipationRecordRepository.save(record);
 
         // 접속 상태 변경 (READING -> ONLINE)
+        updateStatus(StatusType.ONLINE, record.getChild());
 
         return record.entityToDto();
+    }
+
+    private void updateStatus(StatusType status, Child child) {
+        String key = String.format(CHILD_STATUS_KEY, child.getId());
+        ChildStatusDto childStatusDto = ChildStatusDto.builder()
+                .childId(child.getId())
+                .name(child.getName())
+                .status(status)
+                .build();
+
+        redisDao.setValues(key, jsonConverter.toJson(childStatusDto));
     }
 }
