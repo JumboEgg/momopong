@@ -7,7 +7,9 @@ import { useFriends } from '@/stores/friendStore';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
 import { useStory } from '@/stores/storyStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+// eslint-disable-next-line import/no-unresolved
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
+// eslint-disable-next-line import/no-unresolved
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
 import { useBookList } from '@/stores/book/bookListStore';
 
