@@ -47,7 +47,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
                 .build();
 
         // 접속 상태 변경 (ONLINE -> READING)
-        updateStatus(StatusType.READING, child.getId());
+        updateStatus(StatusType.READING, child);
 
         bookParticipationRecordRepository.save(savedRecord);
         return savedRecord.entityToDto();
@@ -64,15 +64,18 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
         bookParticipationRecordRepository.save(record);
 
         // 접속 상태 변경 (READING -> ONLINE)
-        updateStatus(StatusType.ONLINE, record.getChild().getId());
+        updateStatus(StatusType.ONLINE, record.getChild());
 
         return record.entityToDto();
     }
 
-    private void updateStatus(StatusType status, Long childId) {
-        String key = String.format(CHILD_STATUS_KEY, childId);
-        ChildStatusDto childStatusDto = jsonConverter.fromJson((String) redisDao.getValues(key), ChildStatusDto.class);
-        childStatusDto.updateStatus(status);
+    private void updateStatus(StatusType status, Child child) {
+        String key = String.format(CHILD_STATUS_KEY, child.getId());
+        ChildStatusDto childStatusDto = ChildStatusDto.builder()
+                .childId(child.getId())
+                .name(child.getName())
+                .status(status)
+                .build();
 
         redisDao.setValues(key, jsonConverter.toJson(childStatusDto));
     }

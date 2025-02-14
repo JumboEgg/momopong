@@ -48,13 +48,5 @@ public class BookRecordPageServiceImpl implements BookRecordPageService{
 
         bookRecordPageRepository.save(bookRecordPage);
         bookRecordPageRepository.save(partnerbookRecordPage);
-
-
-
-
-
-
-
     };
-
 }
