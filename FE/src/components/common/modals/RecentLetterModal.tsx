@@ -6,7 +6,7 @@ import TextButton from '@/components/common/buttons/TextButton';
 import { LetterInfo } from '@/types/letter';
 import useSubAccountStore from '@/stores/subAccountStore';
 import useRecentLetterStore from '@/stores/letter/recentLetterStore';
-import fetchSavedAudio from '../../../utils/audioS3/audioLoad';
+import fetchSavedAudio from '../../../utils/letterS3/audioLoad';
 
 function RecentLetterModal({ data }: { data: LetterInfo }): JSX.Element {
     const {

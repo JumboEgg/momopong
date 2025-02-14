@@ -1,12 +1,12 @@
 import useSubAccountStore from '@/stores/subAccountStore';
-import { BookParticiPationRecordData, BookParticipationRecordInfo } from '@/types/book';
+import { DrawingParticipationRecordData, DrawingParticipationRecordInfo } from '@/types/sketch';
 
-const makeBookRecord = async (recordData: BookParticiPationRecordData) => {
+const makeDrawingRecord = async (recordData: DrawingParticipationRecordData) => {
     try {
         const { accessToken } = useSubAccountStore.getState().childToken;
 
         const response = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/book/record/save`,
+            `${import.meta.env.VITE_API_BASE_URL}/sketch/record/save`,
             {
                 method: 'POST',
                 body: JSON.stringify(recordData),
@@ -18,17 +18,18 @@ const makeBookRecord = async (recordData: BookParticiPationRecordData) => {
         );
 
         if (!response.ok) {
-            throw new Error(`Book record table creation failed: ${response.status}`);
+            throw new Error(`Sketch record table creation failed: ${response.status}`);
         }
 
-        // TODO : 테이블 생성 결과 roleStore에 저장
-        const data: BookParticipationRecordInfo = await response.json();
+        const data: DrawingParticipationRecordInfo = await response.json();
 
-        return data.bookRecordId;
+        console.log('Sketch session: ', data);
+
+        return data.sketchParticipationId;
     } catch (error) {
         console.error(error);
         throw error;
     }
 };
 
-export default makeBookRecord;
+export default makeDrawingRecord;

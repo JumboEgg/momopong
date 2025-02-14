@@ -35,6 +35,23 @@ export interface RecordInfo {
     fileName: string;
 }
 
+export interface BookParticiPationRecordData {
+    childId: number;
+    bookId: number;
+    role: string;
+    mode: string,
+}
+
+export interface BookParticipationRecordInfo {
+    bookRecordId: number;
+    childId: number;
+    bookId: number;
+    role: string;
+    startTime: string;
+    endTime: string;
+    mode: string;
+}
+
 export interface PageRecordData {
     bookRecordId: number;
     partnerBookRecordId: number;

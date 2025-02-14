@@ -8,7 +8,7 @@ const uploadStoryAudioToS3 = async (audioBlob: Blob) => {
         }
 
         const presignedResponse = await fetch(
-            `${import.meta.env.VITE_API_BASE_URL}/book/record-audio/presigned-url`,
+            `${import.meta.env.VITE_API_BASE_URL}/book/record-page/presigned-url`,
             {
                 method: 'GET',
                 headers: {

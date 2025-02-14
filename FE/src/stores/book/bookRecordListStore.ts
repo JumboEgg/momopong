@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { PageRecordData } from '@/types/book';
-import uploadStoryAudioToS3 from '@/utils/bookS3/lineAudioUpload';
+import uploadStoryAudioToS3 from '@/utils/bookS3/pageAudioS3Upload';
 
 interface RecordListStore {
   recordList: PageRecordData[];
@@ -51,13 +51,16 @@ const useRecordListStore = create<RecordListStore>()(
       uploadRecord: async () => {
         try {
           const { accessToken } = useSubAccountStore.getState().childToken;
+
+          get().recordList.forEach(async (record) => {
             const response = await fetch(
-              `${import.meta.env.VITE_API_BASE_URL}/book/record-audio/save`,
+              `${import.meta.env.VITE_API_BASE_URL}/book/record-page/save`,
               {
                 method: 'POST',
-                body: JSON.stringify(get().recordList),
+                body: JSON.stringify(record),
                 headers: {
                   Authorization: `Bearer ${accessToken}`,
+                  'Content-Type': 'application/json',
                 },
               },
             );
@@ -65,6 +68,7 @@ const useRecordListStore = create<RecordListStore>()(
             if (!response.ok) {
               throw new Error(`Upload failed: ${response.status}`);
             }
+          });
 
             set({ recordList: [] });
         } catch (error) {

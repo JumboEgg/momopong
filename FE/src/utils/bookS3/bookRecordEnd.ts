@@ -13,7 +13,7 @@ const endBookRecordSession = async () => {
         const response = await fetch(
             `${import.meta.env.VITE_API_BASE_URL}/book/record/complete/${bookRecordId}`,
             {
-                method: 'POST',
+                method: 'PATCH',
                 body: JSON.stringify(data),
                 headers: {
                     Authorization: `Bearer ${accessToken}`,

@@ -15,6 +15,8 @@ interface DrawingStore {
   setIsErasing: (isErasing: boolean) => void;
   imageData: string;
   setImageData: (data: string) => void;
+  sessionId: number | null;
+  setSessionId: (id: number | null) => void;
 }
 
 // Zustand 상태 훅 생성
@@ -35,6 +37,9 @@ const useDrawingStore = create<DrawingStore>()(
 
       imageData: '',
       setImageData: (data) => set({ imageData: data }),
+
+      sessionId: null,
+      setSessionId: (id) => set({ sessionId: id }),
     }),
     {
       name: 'drawing-storage',
@@ -42,7 +47,7 @@ const useDrawingStore = create<DrawingStore>()(
         // TODO : 새로고침 시 페이지 생성 시 초기화 설정 때문에 의미가 없다
         // 개선 방안 고려
         Object.entries(state)
-          .filter(([key]) => ['mode', 'templateId', 'imageData']
+          .filter(([key]) => ['mode', 'templateId', 'imageData', 'sessionId']
             .includes(key)),
       ),
     },

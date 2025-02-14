@@ -4,7 +4,7 @@ import { TextCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import TextButton from '@/components/common/buttons/TextButton';
 import { LetterInfo } from '@/types/letter';
-import fetchSavedAudio from '../../../utils/audioS3/audioLoad';
+import fetchSavedAudio from '../../../utils/letterS3/audioLoad';
 
 interface LetterModalProps {
     childName: string;

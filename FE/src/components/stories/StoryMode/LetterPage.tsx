@@ -1,4 +1,4 @@
-import AudioRecorderSTT from '@/utils/audioS3/AudioRecorderSTT';
+import AudioRecorderSTT from '@/utils/letterS3/AudioRecorderSTT';
 
 function LetterPage() {
   return (

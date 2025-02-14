@@ -1,5 +1,5 @@
 import { LetterInfo } from '@/types/letter';
-import uploadLetterToS3 from '@/utils/audioS3/letterUpload';
+import uploadLetterToS3 from '@/utils/letterS3/letterUpload';
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
