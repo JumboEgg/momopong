@@ -72,7 +72,14 @@ function RecordingButton({
       console.error('녹음 시작 실패:', error);
       alert('마이크 접근에 실패했습니다. 마이크 권한을 확인해주세요.');
     }
-  }, [isUserTurn, globalRecordingStatus, characterType, storyIndex, addRecording, onRecordingComplete]);
+  }, [
+    isUserTurn,
+    globalRecordingStatus,
+    characterType,
+    storyIndex,
+    addRecording,
+    onRecordingComplete,
+  ]);
 
   // 타이머 처리
   useEffect(() => {
