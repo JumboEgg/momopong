@@ -64,7 +64,7 @@ function FriendSelection() {
       if (!targetContentId) return;
 
       try {
-        const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK'; // template 유무로만 구분
+        const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK'; // template 유무로 구분
 
         await fetchOnlineFriends(targetContentId, targetContentType);
       } catch (err) {
