@@ -24,6 +24,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
     private final ChildRepository childRepository;
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
+    private final CloudFrontService cloudFrontService;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
 
@@ -74,6 +75,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
         ChildStatusDto childStatusDto = ChildStatusDto.builder()
                 .childId(child.getId())
                 .name(child.getName())
+                .profile(cloudFrontService.getSignedUrl(child.getProfile()))
                 .status(status)
                 .build();
 

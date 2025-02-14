@@ -5,6 +5,7 @@ import com.ssafy.project.domain.type.RoleType;
 import com.ssafy.project.exception.JwtAuthenticationException;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -167,6 +168,8 @@ public class JwtTokenProvider {
             System.out.println("auth = " + auth);
             // 권한 정보가 있는지 확인
             return auth != null && (auth.contains(RoleType.PARENT.toString()) || auth.contains(RoleType.CHILD.toString()));
+        } catch (SignatureException e) {
+          log.error("Invalid JWT Signature");
         } catch (SecurityException | MalformedJwtException e) {
             log.warn("Invalid JWT Token", e);
         } catch (ExpiredJwtException e) {

@@ -33,7 +33,7 @@ public class ChildServiceImpl implements ChildService {
     private final JsonConverter jsonConverter;
     private final TokenBlacklistService tokenBlacklistService;
     private final RedisDao redisDao;
-    private final PresignedUrlService presignedUrlService;
+    private final CloudFrontService cloudFrontService;
 
     private static final String CHILD_STATUS_KEY = "child:status:%d";
     // 서브 회원가입
@@ -89,7 +89,7 @@ public class ChildServiceImpl implements ChildService {
         ChildDto childDto = ChildDto.builder()
                 .childId(childId)
                 .name(child.getName())
-                .profile(presignedUrlService.getFile(child.getProfile()))
+                .profile(cloudFrontService.getSignedUrl(child.getProfile()))
                 .age(child.getAge())
                 .daysSinceStart(child.getDaysSinceStart())
                 .code(child.getCode())
@@ -105,6 +105,7 @@ public class ChildServiceImpl implements ChildService {
         ChildStatusDto statusDto = ChildStatusDto.builder()
                 .childId(childId)
                 .name(child.getName())
+                .profile(cloudFrontService.getSignedUrl(child.getProfile()))
                 .status(StatusType.ONLINE)
                 .build();
 
@@ -134,7 +135,7 @@ public class ChildServiceImpl implements ChildService {
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
         ChildDto childDto = child.entityToDto();
-        childDto.updateProfile(presignedUrlService.getFile(childDto.getProfile()));
+        childDto.updateProfile(cloudFrontService.getSignedUrl(childDto.getProfile()));
         return childDto;
     }
 
@@ -147,7 +148,7 @@ public class ChildServiceImpl implements ChildService {
         child.updateChild(updateRequestDto.getName(), updateRequestDto.getProfile());
 
         ChildDto childDto = child.entityToDto();
-        childDto.updateProfile(presignedUrlService.getFile(childDto.getProfile()));
+        childDto.updateProfile(cloudFrontService.getSignedUrl(childDto.getProfile()));
         return childDto;
     }
 
