@@ -24,10 +24,11 @@ import MyDrawing from './components/myhouse/mydrawing';
 import MyLetters from './components/myhouse/myletters';
 // import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
+import FriendSelection from './pages/FriendSelection';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
-import FriendSelection from './components/stories/StoryMode/FriendSelection';
+
 import BookRecordPage from './test/BookRecordPage';
 
 function App(): JSX.Element {

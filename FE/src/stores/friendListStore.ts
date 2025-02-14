@@ -149,7 +149,13 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       // BOOK일 경우 프론트엔드에서 role 상태 관리
       if (invitation.contentType === 'BOOK') {
         const [inviterRole, inviteeRole] = assignRandomRoles();
-        roleStore.setRoles(inviterRole, inviteeRole, invitation.contentId);
+        roleStore.setRoles(
+          inviterRole,
+          inviteeRole,
+          invitation.contentId,
+          invitation.inviterId,
+          invitation.inviteeId,
+        );
       }
 
       await api.post(endpoint, payload);
@@ -192,9 +198,14 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
       if (invitation.contentType === 'BOOK') {
         const [inviterRole, inviteeRole] = assignRandomRoles();
-        roleStore.setRoles(inviterRole, inviteeRole, invitation.contentId);
+        roleStore.setRoles(
+          inviterRole,
+          inviteeRole,
+          invitation.contentId,
+          invitation.inviterId,
+          invitation.inviteeId,
+        );
       }
-
       // console.log('Accept invitation request:', {
       //   endpoint,
       //   payload,
