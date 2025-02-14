@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Room, RoomEvent, LocalParticipant, RemoteParticipant, VideoPresets } from 'livekit-client';
+import {
+ Room, RoomEvent, LocalParticipant, RemoteParticipant, VideoPresets,
+} from 'livekit-client';
 
 interface VideoRoomProps {
   roomName: string;
@@ -9,7 +11,13 @@ interface VideoRoomProps {
   audioEnabled: boolean;
 }
 
-function VideoRoom({ roomName, participantName, userRole, isUserTurn, audioEnabled }: VideoRoomProps) {
+function VideoRoom({
+  roomName,
+  participantName,
+  userRole,
+  isUserTurn,
+  audioEnabled,
+}: VideoRoomProps) {
   const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<(RemoteParticipant | LocalParticipant)[]>([]);
   const [connectionError, setConnectionError] = useState<string | null>(null);
@@ -123,7 +131,12 @@ function VideoRoom({ roomName, participantName, userRole, isUserTurn, audioEnabl
 
   // 에러 처리
   if (connectionError) {
-    return <div className="p-4 bg-red-100 text-red-700 rounded-lg">Error: {connectionError}</div>;
+    return (
+      <div className="p-4 bg-red-100 text-red-700 rounded-lg">
+        Error:
+        {connectionError}
+      </div>
+    );
   }
 
   // 비디오 트랙 가져오기
