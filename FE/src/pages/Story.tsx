@@ -5,7 +5,7 @@ import StorySelection from '@/components/stories/StoryMode/StorySelection';
 import ModeSelection from '@/components/stories/ModeSelection/ModeSelection';
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
-import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
+import FriendSelection from '@/pages/FriendSelection';
 import { useFriends } from '@/stores/friendStore';
 import { useStory } from '@/stores/storyStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';

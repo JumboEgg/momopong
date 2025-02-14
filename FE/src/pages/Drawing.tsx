@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
-import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
+import FriendSelection from '@/pages/FriendSelection';
 import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
