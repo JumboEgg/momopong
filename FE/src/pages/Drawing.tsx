@@ -9,78 +9,171 @@ import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage'
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
-import InvitationWaitPage from '../components/common/multiplayPages/invitationWaitPage';
-import NetworkErrorPage from '../components/common/multiplayPages/networkerrorPage';
+import { useSketchList } from '@/stores/drawing/sketchListStore';
+// import { Friend, StatusType } from '@/types/friend';
+import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
+import NetworkErrorPage from '../components/common/multiplayPages/NetworkerrorPage';
+
+const getTemplateFilename = (id: number): string => {
+  const fileMap: Record<number, string> = {
+    1: 'boilthewitch.webp',
+    2: 'cardsoldiers.webp',
+    3: 'cinderella.webp',
+    4: 'cookiehouse.webp',
+    5: 'frooog.webp',
+    6: 'grillthemermaid.webp',
+    7: 'peavine.webp',
+    8: 'prince.webp',
+    9: 'pumpkinmagic.webp',
+    10: 'runningbunny.webp',
+    11: 'shoemakerelves.webp',
+    12: 'thepremiumshoe.webp',
+    13: 'theshoe.webp',
+  };
+
+  return fileMap[id] || '';
+};
 
 function Drawing() {
-  const location = useLocation();
-  const { waitingForResponse, templateId } = location.state || {};
-
   const {
     mode, setMode, template, setTemplate, setPenColor, setIsErasing, imageData, setImageData,
   } = useDrawing();
 
-  const { friend, setFriend } = useFriends();
-  const { socket, setConnect } = useSocketStore();
+  const { setSketchList } = useSketchList();
+  const {
+    friend, setFriend, isConnected, setIsConnected,
+  } = useFriends();
+  const { socket, setConnect, isConnected: socketConnected } = useSocketStore();
+  const location = useLocation();
+  const {
+    waitingForResponse,
+    isAccepted,
+  } = location.state || {};
 
-  // 초기 마운트시 상태 초기화
+  // socketStore의 연결 상태 변화를 friendStore에 동기화
   useEffect(() => {
-    if (templateId) {
-      // SketchInfo 타입에 맞게 속성 이름 수정
-      setTemplate({
-        sketchId: templateId,
-        sketchPath: '', // 실제 스케치 경로가 필요함
-        sketchTitle: location.state?.templateName || '함께 그리기',
-      });
-      setMode('together');
-    } else {
+    if (mode === 'together') {
+      setIsConnected(socketConnected);
+    }
+  }, [socketConnected, mode]);
+
+  // 기본 초기화용 useEffect
+  useEffect(() => {
+    if (location.state?.templateId) {
+      // 한 번만 설정되도록
+      if (!template || template.sketchId !== location.state.templateId) {
+        setTemplate({
+          sketchId: location.state.templateId,
+          sketchPath: getTemplateFilename(location.state.templateId),
+          sketchTitle: location.state.templateName || '함께 그리기',
+        });
+        setMode('together');
+      }
+    } else if (!location.state) {
       setMode(null);
       setTemplate(null);
+      setSketchList();
+      setPenColor('black');
+      setIsErasing(false);
+      setImageData('');
+    }
+  }, [location.state]);
+
+  // 소켓 연결 관리
+  // 기본 초기화용 useEffect는 그대로 유지
+
+  // 소켓 연결 관리
+  useEffect(() => {
+    if (mode === 'together') {
+      const isParticipating = isAccepted || location.state?.participantName;
+
+      if (isParticipating) {
+        setConnect(true);
+
+        if (socket && template) {
+          const roomId = `drawing_${template.sketchId}`;
+          socket.emit('join-room', roomId);
+          console.log(`Joining room: ${roomId}`);
+
+          // friend 정보 설정
+          if (location.state?.participantName && !friend) {
+            setFriend({
+              id: location.state?.participantId,
+              childId: location.state?.participantId,
+              name: location.state?.participantName,
+              profile: location.state?.participantProfile || '',
+              status: 'DRAWING',
+            });
+          }
+
+          return () => {
+            socket.emit('leave-room', roomId);
+          };
+        }
+      }
     }
 
-    setPenColor('black');
-    setIsErasing(false);
-    setImageData('');
-    setFriend(null);
-
-    // 소켓 연결 관리
-    if (waitingForResponse) {
-      setConnect(false);
-    }
-  }, [templateId, waitingForResponse]);
+    return undefined;
+  }, [mode, isAccepted, location.state?.participantName, socket, template, friend]);
 
   const content = () => {
-    if (!template) return <DrawingSelection />;
-    if (!mode) return <DrawingModeSelection />;
-
-    // single 모드
-    if (mode === 'single') {
-      return !imageData ? <DrawingPage /> : <ResultPage />;
+    if (!template) {
+      return <DrawingSelection />;
     }
 
-    // together 모드
+    if (!mode) {
+      return <DrawingModeSelection />;
+    }
+
+    // 함께하기 모드일 때
     if (mode === 'together') {
+      // 초대자 대기 상태
       if (waitingForResponse) {
         return <InvitationWaitPage />;
       }
 
-      if (!friend) {
-        return <FriendSelection />;
+    // 연결 준비 상태 (초대 수락 직후)
+    if (isAccepted || location.state?.participantName) {
+      if (!isConnected) {
+        return (
+          <InvitationWaitPage
+            message="함께 그리기 준비 중이에요..."
+            showTimer={false}
+            duration={2}
+            onComplete={() => setIsConnected(true)}
+          />
+        );
       }
-
-      if (!socket) {
-        return <NetworkErrorPage />;
-      }
-
-      return !imageData ? <DrawingPage /> : <ResultPage />;
     }
 
-    // story 모드
-    if (mode === 'story') {
-      return !imageData ? <StoryDrawingPage /> : <ResultPage />;
+    // 친구 선택
+    if (!friend) {
+      return <FriendSelection />;
+    }
+    if (friend && !socket) {
+      return <NetworkErrorPage />;
     }
 
-    return <DrawingSelection />;
+    if (friend && socket && !isConnected) {
+      return <InvitationWaitPage />;
+    }
+
+    if (!imageData) {
+      // console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
+      return <DrawingPage />;
+    }
+  }
+
+    // 싱글모드
+    if (mode === 'single' && !imageData) {
+      return <DrawingPage />;
+    }
+
+    if (mode === 'story' && !imageData) {
+      return <StoryDrawingPage />;
+    }
+
+    return <ResultPage />;
   };
 
   return (
