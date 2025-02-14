@@ -42,7 +42,6 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
   };
 
   const saveCanvas = useCallback(() => {
-    endSketchSession();
     if (!canvasRef) return;
     const currentCanvas = canvasRef;
     if (!currentCanvas) return;
@@ -75,6 +74,7 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
         };
       };
     } else {
+      endSketchSession();
       tempCtx.fillStyle = 'white';
       tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);

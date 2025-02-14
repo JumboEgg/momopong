@@ -47,7 +47,7 @@ const useDrawingStore = create<DrawingStore>()(
         // TODO : 새로고침 시 페이지 생성 시 초기화 설정 때문에 의미가 없다
         // 개선 방안 고려
         Object.entries(state)
-          .filter(([key]) => ['mode', 'templateId', 'imageData', 'sessionId']
+          .filter(([key]) => ['mode', 'template', 'imageData', 'sessionId']
             .includes(key)),
       ),
     },

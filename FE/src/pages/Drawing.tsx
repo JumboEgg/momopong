@@ -12,27 +12,6 @@ import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useSketchList } from '@/stores/drawing/sketchListStore';
-// import { Friend, StatusType } from '@/types/friend';
-
-const getTemplateFilename = (id: number): string => {
-  const fileMap: Record<number, string> = {
-    1: 'boilthewitch.webp',
-    2: 'cardsoldiers.webp',
-    3: 'cinderella.webp',
-    4: 'cookiehouse.webp',
-    5: 'frooog.webp',
-    6: 'grillthemermaid.webp',
-    7: 'peavine.webp',
-    8: 'role2.webp',
-    9: 'pumpkinmagic.webp',
-    10: 'runningbunny.webp',
-    11: 'shoemakerelves.webp',
-    12: 'thepremiumshoe.webp',
-    13: 'theshoe.webp',
-  };
-
-  return fileMap[id] || '';
-};
 
 function Drawing() {
   const {
@@ -46,7 +25,7 @@ function Drawing() {
     setImageData,
   } = useDrawing();
 
-  const { setSketchList } = useSketchList();
+  const { sketchList, setSketchList } = useSketchList();
   const {
     friend,
     setFriend,
@@ -67,11 +46,12 @@ function Drawing() {
   // 기본 초기화용 useEffect
   useEffect(() => {
     if (location.state?.templateId) {
+      console.log(location.state?.templateId);
       // 한 번만 설정되도록
       if (!template || template.sketchId !== location.state.templateId) {
         setTemplate({
           sketchId: location.state.templateId,
-          sketchPath: getTemplateFilename(location.state.templateId),
+          sketchPath: sketchList[location.state.templateId - 1].sketchPath,
           sketchTitle: location.state.templateName || '함께 그리기',
         });
         setMode('together');
