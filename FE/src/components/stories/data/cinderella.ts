@@ -1,4 +1,4 @@
-export type CharacterType = 'narration' | 'princess' | 'prince';
+export type CharacterType = 'narration' | 'role1' | 'role2';
 
 export interface StoryPageContent {
   type: CharacterType;
@@ -71,7 +71,7 @@ const storyData: StoryPage[] = [
         audioId: 'scene4_narration2',
       },
       {
-        type: 'princess',
+        type: 'role1',
         text: '"저도 무도회에 가고 싶었어요."',
         audioId: 'scene4_narration3',
       },
@@ -135,7 +135,7 @@ const storyData: StoryPage[] = [
     illustration: '/images/storyimg/7.png',
     contents: [
       {
-        type: 'princess',
+        type: 'role1',
         text: '"하지만 저에게는 이 재투성이 옷뿐이에요."',
         audioId: 'scene8_narration1',
       },
@@ -188,7 +188,7 @@ const storyData: StoryPage[] = [
         audioId: 'scene11_narration3',
       },
       {
-        type: 'princess',
+        type: 'role1',
         text: '"명심할게요. 12시 전엔 집으로 돌아오겠어요."',
         audioId: 'scene11_narration4',
       },
@@ -235,7 +235,7 @@ const storyData: StoryPage[] = [
         audioId: 'scene13_narration4',
       },
       {
-        type: 'prince',
+        type: 'role2',
         text: '"아름다운 공주님, 저와 한 곡 추시겠습니까?"',
         audioId: 'scene13_narration5',
       },
@@ -272,7 +272,7 @@ const storyData: StoryPage[] = [
     illustration: '/images/storyimg/12.png',
     contents: [
       {
-        type: 'prince',
+        type: 'role2',
         text: '"테라스로 나가 이야기를 나누지 않으시겠습니까? 여긴 너무 시끄럽네요."',
         audioId: 'scene15_narration1',
       },
@@ -288,12 +288,12 @@ const storyData: StoryPage[] = [
         audioId: 'scene16_narration1',
       },
       {
-        type: 'prince',
+        type: 'role2',
         text: '"이상하게도 당신과 함께 있으면 마음이 편안해집니다."',
         audioId: 'scene16_narration2',
       },
       {
-        type: 'prince',
+        type: 'role2',
         text: '"그러고 보니 아직 이름조차 모르는군요. 알려 주시겠습니까?"',
         audioId: 'scene16_narration3',
       },
@@ -347,7 +347,7 @@ const storyData: StoryPage[] = [
         audioId: 'scene20_narration1',
       },
       {
-        type: 'prince',
+        type: 'role2',
         text: '"들어라. 이 구두가 발에 꼭 맞는 여인과 결혼할 것이니 날이 밝으면 내가 직접 거리로 나서겠다."',
         audioId: 'scene20_narration2',
       },
@@ -379,7 +379,7 @@ const storyData: StoryPage[] = [
         audioId: 'scene22_narration2',
       },
       {
-        type: 'prince',
+        type: 'role2',
         text: '"다른 여인은 더 없소?"',
         audioId: 'scene22_narration3',
       },
@@ -400,7 +400,7 @@ const storyData: StoryPage[] = [
         audioId: 'scene23_narration1',
       },
       {
-        type: 'princess',
+        type: 'role1',
         text: '"아직 제가 신어 보지 않았어요."',
         audioId: 'scene23_narration2',
       },
@@ -422,7 +422,7 @@ const storyData: StoryPage[] = [
     illustration: '/images/storyimg/19.png',
     contents: [
       {
-        type: 'prince',
+        type: 'role2',
         text: '"모든 여인이 신어 보는 것이 조건이었습니다. 이리 와서 구두를 신어 보시죠."',
         audioId: 'scene25_narration1',
       },
@@ -448,12 +448,12 @@ const storyData: StoryPage[] = [
         audioId: 'scene26_narration1',
       },
       {
-        type: 'prince',
+        type: 'role2',
         text: '"다시 만나고 싶었습니다. 이제 당신의 이름을 들을 수 있겠습니까?"',
         audioId: 'scene26_narration2',
       },
       {
-        type: 'princess',
+        type: 'role1',
         text: '"저는 신데렐라예요."',
         audioId: 'scene26_narration3',
       },

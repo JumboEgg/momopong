@@ -1,17 +1,29 @@
+// 수정한거임
 import { useStory } from '@/stores/storyStore';
 import {
-  useEffect, useRef, useCallback, useState,
-  ForwardedRef, forwardRef, SyntheticEvent,
+  useEffect,
+  useRef,
+  useCallback,
+  useState,
+  ForwardedRef,
+  forwardRef,
+  SyntheticEvent,
 } from 'react';
 
 interface AudioPlayerProps {
   audioFiles: string[];
   autoPlay: boolean;
   onEnded: () => void;
+  onError?: () => void;
 }
 
 function AudioPlayerComponent(
-  { audioFiles, autoPlay = true, onEnded }: AudioPlayerProps,
+  {
+    audioFiles,
+    autoPlay = true,
+    onEnded,
+    onError,
+  }: AudioPlayerProps,
   ref: ForwardedRef<HTMLAudioElement>,
 ) {
   const { audioEnabled } = useStory();
@@ -98,14 +110,22 @@ function AudioPlayerComponent(
     if (!audioRef.current) return;
 
     audioRef.current.load();
-    setTimeout(() => {
-      if (audioRef.current) {
-        audioRef.current.play().catch((error) => {
-          console.error('Retry playback failed:', error);
+
+    // 디버깅용 로그 추가
+    console.log('Attempting to play:', audioFiles[currentFileIndex]);
+
+    audioRef.current.play()
+      .then(() => {
+        console.log('Playback successful');
+      })
+      .catch((error) => {
+        console.error('Detailed Playback Error:', {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
         });
-      }
-    }, 1000);
-  }, []);
+      });
+  }, [audioFiles, currentFileIndex]);
 
   const handleError = useCallback((event: SyntheticEvent<HTMLAudioElement, Event>) => {
     console.error('Audio error:', event);
@@ -115,12 +135,16 @@ function AudioPlayerComponent(
       console.log(`Retrying playback attempt ${retryCountRef.current} of ${maxRetries}`);
       retryPlayback();
     } else {
-      // Only move to next file after all retries are exhausted
+      // 명시적으로 onAudioError prop 호출
+      if (onError) {
+        onError();
+      }
+
       console.log('Max retries reached, moving to next file');
       retryCountRef.current = 0;
       handleAudioEnd();
     }
-  }, [handleAudioEnd, retryPlayback]);
+  }, [handleAudioEnd, retryPlayback, onError]);
 
   useEffect(() => {
     handlePlay();

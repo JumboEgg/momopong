@@ -1,105 +1,126 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useStory } from '@/stores/storyStore';
-import { RecordingButtonProps } from '../types/story';
+
+interface RecordingButtonProps {
+  characterType: 'role2' | 'role1';
+  storyIndex: number;
+  onRecordingComplete: (audioUrl: string) => void;
+  globalRecordingStatus: 'idle' | 'recording' | 'completed';
+  isUserTurn: boolean;
+}
 
 function RecordingButton({
   characterType,
   storyIndex,
   onRecordingComplete,
-}: RecordingButtonProps): JSX.Element {
-  const [isRecording, setIsRecording] = useState(false); // 녹음중인지 여부
-  const [timeLeft, setTimeLeft] = useState(20); // 남은 녹음 시간
-  const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  globalRecordingStatus,
+  isUserTurn,
+}: RecordingButtonProps) {
+  const [isRecording, setIsRecording] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(20);
   const { addRecording } = useStory();
 
-  // 녹음 중지 함수
+  // 녹음 중지
   const stopRecording = useCallback(() => {
-    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-      mediaRecorder.stop();
-      mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-      setIsRecording(false);
-    }
-  }, [mediaRecorder]);
-
-  useEffect(() => {
-    if (isRecording && timeLeft > 0) {
-      const timer = setTimeout(() => setTimeLeft((prev) => prev - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-    if (isRecording && timeLeft === 0) {
-      stopRecording(); // 시간이 다되면 녹음 중지
-    }
-    return () => {};
-  }, [isRecording, timeLeft]);
-
-  // 컴포넌트 마운트 시 로그
-  useEffect(() => {
-    console.log('RecordingButton Detailed Initialization:', {
-      characterType,
-      storyIndex,
-      isRecording,
-      mediaRecorder: !!mediaRecorder,
-      browserSupport: {
-        getUserMedia: !!navigator.mediaDevices.getUserMedia,
-        mediaRecorder: !!window.MediaRecorder,
-      },
-    });
-  }, [characterType, storyIndex]);
+    if (!isRecording) return;
+    setIsRecording(false);
+    setTimeLeft(20);
+  }, [isRecording]);
 
   // 녹음 시작
   const startRecording = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      console.log('Media Stream Acquired:', {
-        streamActive: stream.active,
-        streamTracks: stream.getTracks().length,
-      });
-
-      // 스트림 확인
-    if (!stream.active) {
-      alert('마이크에 접근할 수 없습니다.');
+    if (!isUserTurn || globalRecordingStatus === 'recording') {
       return;
     }
 
-      const recorder = new MediaRecorder(stream);
-      const chunks: BlobPart[] = []; // 녹음 데이터를 저장할 배열
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream);
+      const audioChunks: BlobPart[] = [];
 
-      recorder.ondataavailable = (e) => chunks.push(e.data);
-      recorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/mp3' });
-        const audioUrl = URL.createObjectURL(blob);
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunks.push(event.data);
+        }
+      };
 
-        // 녹음 데이터를 스토리에 추가
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/mp3' });
+        const audioUrl = URL.createObjectURL(audioBlob);
+
         addRecording(storyIndex, {
           characterType,
           audioUrl,
           timestamp: Date.now(),
         });
-        onRecordingComplete();
+
+        onRecordingComplete(audioUrl);
+        stream.getTracks().forEach((track) => track.stop());
       };
 
-      setMediaRecorder(recorder);
-      recorder.start();
+      mediaRecorder.start();
       setIsRecording(true);
-      setTimeLeft(20); // 타이머 초기화
+      setTimeLeft(20);
+
+      // 20초 후 자동 중지
+      setTimeout(() => {
+        if (mediaRecorder.state === 'recording') {
+          mediaRecorder.stop();
+        }
+      }, 20000);
     } catch (error) {
-      console.error('Failed to start recording:', error);
+      console.error('녹음 시작 실패:', error);
+      alert('마이크 접근에 실패했습니다. 마이크 권한을 확인해주세요.');
     }
-  }, [addRecording, characterType, storyIndex, onRecordingComplete]);
+  }, [isUserTurn, globalRecordingStatus, characterType, storyIndex, addRecording, onRecordingComplete]);
+
+  // 타이머 처리
+  useEffect(() => {
+    let timerId: NodeJS.Timeout;
+
+    if (isRecording) {
+      timerId = setInterval(() => {
+        setTimeLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(timerId);
+            stopRecording();
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerId) clearInterval(timerId);
+    };
+  }, [isRecording, stopRecording]);
+
+  // 버튼 비활성화 조건
+  const isButtonDisabled = !isUserTurn || globalRecordingStatus === 'recording' || !isUserTurn;
+
+  // 버튼 스타일 계산
+  const getButtonStyle = () => {
+    if (isRecording) {
+      return 'bg-red-500 hover:bg-red-600';
+    }
+    if (isButtonDisabled) {
+      return 'bg-gray-400 cursor-not-allowed';
+    }
+    return 'bg-blue-500 hover:bg-blue-600';
+  };
 
   return (
     <div className="flex flex-col items-center gap-2">
-      {/* 녹음버튼 */}
       <button
         type="button"
         onClick={isRecording ? stopRecording : startRecording}
-        className={`px-4 py-2 rounded-full ${
-          isRecording ? 'bg-red-500 hover:bg-red-600' : 'bg-blue-500 hover:bg-blue-600'
-        } text-white font-bold transition-colors`}
+        disabled={isButtonDisabled}
+        className={`px-4 py-2 rounded-full transition-colors ${getButtonStyle()} text-white font-bold`}
       >
         {isRecording ? `녹음 중... (${timeLeft}초)` : '녹음 시작'}
       </button>
-      {/* 진행바(녹음 중일 때만 표시) */}
+
       {isRecording && (
         <div className="w-full h-2 bg-gray-200 rounded">
           <div

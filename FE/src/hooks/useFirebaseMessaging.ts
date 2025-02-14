@@ -9,7 +9,6 @@ import useToastStore from '@/stores/toastStore';
 import { ContentType } from '@/types/invitation';
 import type { NotificationType } from '@/types/notification';
 
-// Firebase 설정 값
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
@@ -20,7 +19,6 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// 초대 데이터 형식
 export interface InvitationData {
   inviterId: number;
   inviterName: string;
@@ -31,13 +29,11 @@ export interface InvitationData {
   contentType: ContentType;
 }
 
-// 초대 모달 상태 형식
 export interface InvitationModal {
-  isOpen: boolean;
-  data: InvitationData | null;
-}
+    isOpen: boolean;
+    data: InvitationData | null;
+  }
 
-// Firebase 앱 초기화 및 메시징 객체 설정
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
@@ -46,41 +42,11 @@ export const useFirebaseMessaging = () => {
   const { setFCMToken } = useFCMStore();
   const { rejectInvitation, acceptInvitation } = useFriendListStore();
 
-  // 초대 모달 상태 관리
   const [invitationModal, setInvitationModal] = useState<InvitationModal>({
     isOpen: false,
     data: null,
   });
 
-  // 콘텐츠로 이동하는 공통 함수
-  const navigateToContent = (
-    contentType: ContentType,
-    contentId: number,
-    participantName: string,
-    templateName?: string, // templateName 추가
-  ) => {
-    if (contentType === 'BOOK') {
-      // BOOK 로직 유지
-      navigate(`/book/${contentId}/together`, {
-        state: {
-          roomName: `book-${contentId}`,
-          participantName,
-        },
-      });
-    } else {
-      // SKETCH에 templateName 추가
-      navigate('/drawing', {
-        state: {
-          waitingForResponse: true,
-          templateId: contentId,
-          templateName, // 템플릿 이름 추가
-          participantName,
-        },
-      });
-    }
-  };
-
-  // 콘텐츠 타입에 따른 메시지 표시 함수
   const showContentTypeMessage = (
     type: NotificationType,
     contentType: ContentType,
@@ -93,8 +59,7 @@ export const useFirebaseMessaging = () => {
     });
   };
 
-  // 초대 수락 처리 함수
-  const handleInvitationAccept = async () => {
+const handleInvitationAccept = async () => {
     if (!invitationModal.data) return;
 
     const currentChildId = tokenService.getCurrentChildId();
@@ -118,7 +83,6 @@ export const useFirebaseMessaging = () => {
     try {
       setInvitationModal({ isOpen: false, data: null });
 
-      // 초대 수락 처리
       await acceptInvitation({
         contentId,
         inviterId,
@@ -130,19 +94,25 @@ export const useFirebaseMessaging = () => {
       });
 
       await new Promise((resolve) => {
-        setTimeout(resolve, 500); // 처리 후 500ms 대기
+        setTimeout(resolve, 500);
       });
 
-      // 콘텐츠 타입에 따라 다른 경로로 이동
       if (contentType === 'SKETCH') {
         navigate('/drawing', {
           state: {
             templateId: contentId,
+            templateName: contentTitle,
+            participantName: inviterName,
+            isAccepted: true,
+          },
+        });
+      } else if (contentType === 'BOOK') {
+        navigate(`/book/${contentId}/together`, {
+          state: {
+            roomName: `book-${contentId}`,
             participantName: inviterName,
           },
         });
-      } else {
-        navigateToContent(contentType, contentId, inviterName);
       }
     } catch (error) {
       console.error('Failed to accept invitation:', error);
@@ -153,11 +123,10 @@ export const useFirebaseMessaging = () => {
     } finally {
       setTimeout(() => {
         fcmStore.setProcessingInvitation(false);
-      }, 2000); // 2초 후 프로세싱 상태 해제
+      }, 2000);
     }
   };
 
-  // 초대 거절 처리 함수
   const handleInvitationReject = async () => {
     if (!invitationModal.data) return;
 
@@ -167,6 +136,7 @@ export const useFirebaseMessaging = () => {
       return;
     }
 
+    // 프로세싱 중인지 확인
     const fcmStore = useFCMStore.getState();
     if (fcmStore.processingInvitation) {
       console.log('Another invitation is being processed');
@@ -183,9 +153,9 @@ export const useFirebaseMessaging = () => {
     } = invitationModal.data;
 
     try {
+      // 모달 상태를 먼저 업데이트
       setInvitationModal({ isOpen: false, data: null });
 
-      // 초대 거절 처리
       await rejectInvitation({
         contentId,
         inviterId,
@@ -204,7 +174,6 @@ export const useFirebaseMessaging = () => {
     }
   };
 
-  // Firebase 메시지 및 권한 처리
   useEffect(() => {
     const handleAllowNotification = async () => {
       try {
@@ -218,7 +187,7 @@ export const useFirebaseMessaging = () => {
             console.log('FCM Token:', token);
             const currentChildId = tokenService.getCurrentChildId();
             if (currentChildId) {
-              await setFCMToken(currentChildId, token); // FCM 토큰 저장
+              await setFCMToken(currentChildId, token);
             }
           } else {
             console.error('토큰 등록이 불가능합니다.');
@@ -235,16 +204,18 @@ export const useFirebaseMessaging = () => {
       const currentChildId = tokenService.getCurrentChildId();
       if (!payload.data || !currentChildId) return;
 
+      // 현재 처리 상태 로깅
       const { processingInvitation } = useFCMStore.getState();
-      console.log('FCM Message Handler State:', {
-        processingInvitation,
-        notificationType: payload.data.notificationType,
-        currentChildId,
-        messageData: payload.data,
-      });
+      // console.log('FCM Message Handler State:', {
+      //   processingInvitation,
+      //   notificationType: payload.data.notificationType,
+      //   currentChildId,
+      //   messageData: payload.data,
+      // });
 
+      // 초대 처리 중인 경우 확실히 리턴
       if (processingInvitation) {
-        console.log('Skipping FCM message - invitation is being processed');
+        // console.log('Skipping FCM message - invitation is being processed');
         return;
       }
 
@@ -259,61 +230,95 @@ export const useFirebaseMessaging = () => {
         notificationType,
       } = payload.data;
 
-      // 타입 가드로 contentType 검증
-      const isValidContentType = (type: string): type is ContentType => type === 'BOOK' || type === 'SKETCH';
+        // 타입 가드를 사용한 검증
+        const isValidContentType = (type: string): type is ContentType => type === 'BOOK' || type === 'SKETCH';
 
-      if (!isValidContentType(rawContentType)) {
-        console.error('Invalid content type:', rawContentType);
-        return;
-      }
-
-      const contentType = rawContentType;
-
-      // 초대 처리
-      if (notificationType === 'INVITE') {
-        if (Number(inviterId) === Number(inviteeId)) {
-          console.log('Skipping self-invitation', { inviterId, inviteeId });
+        if (!isValidContentType(rawContentType)) {
+          console.error('Invalid content type:', rawContentType);
           return;
         }
 
-        if (Number(inviteeId) === currentChildId) {
-          setInvitationModal({
-            isOpen: true,
-            data: {
-              inviterId: Number(inviterId),
-              inviterName,
-              inviteeId: currentChildId,
-              inviteeName,
-              contentId: Number(contentId),
-              contentTitle,
-              contentType,
-            },
+        const contentType = rawContentType; // ContentType 타입으로 보장
+
+        // 초대장을 받은 경우
+        if (notificationType === 'INVITE') {
+          // 자기 자신에게 온 초대는 무시
+          if (Number(inviterId) === Number(inviteeId)) {
+            console.log('Skipping self-invitation', { inviterId, inviteeId });
+            return;
+          }
+
+          // 실제 초대 대상인 경우만 처리
+          if (Number(inviteeId) === currentChildId) {
+            console.log('Processing invitation for current user', {
+              currentChildId,
+              inviterId,
+              inviteeId,
+            });
+
+            setInvitationModal({
+              isOpen: true,
+              data: {
+                inviterId: Number(inviterId),
+                inviterName,
+                inviteeId: currentChildId, // 현재 사용자 ID 사용
+                inviteeName,
+                contentId: Number(contentId),
+                contentTitle,
+                contentType,
+              },
+            });
+
+            showContentTypeMessage('invitation', contentType, {
+              book: `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`,
+              sketch: `${inviterName}님이 "${contentTitle}" 함께 그리기에 초대했어요!`,
+            });
+          }
+        } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
+          showContentTypeMessage('accept', contentType, {
+            book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
+            sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 수락했어요!`,
           });
 
-          showContentTypeMessage('invitation', contentType, {
-            book: `${inviterName}님이 "${contentTitle}" 여행에 초대했어요!`,
-            sketch: `${inviterName}님이 "${contentTitle}" 함께 그리기에 초대했어요!`,
+          if (contentType === 'SKETCH') {
+            navigate('/drawing', {
+              state: {
+                templateId: Number(contentId),
+                templateName: contentTitle,
+                waitingForResponse: false,
+                participantName: inviteeName,
+              },
+              replace: true,
+            });
+          } else if (contentType === 'BOOK') {
+            navigate(`/book/${contentId}/together`, {
+              state: {
+                roomName: `book-${contentId}`,
+                participantName: inviteeName,
+              },
+            });
+          }
+        } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
+          showContentTypeMessage('reject', contentType, {
+            book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
+            sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 거절했어요`,
           });
+
+          // 스케치일 경우 초대자를 친구 선택 페이지로 돌려보냄
+          if (contentType === 'SKETCH') {
+            navigate('/drawing', {
+              state: {
+                waitingForResponse: false, // 대기 상태 해제
+                templateId: Number(contentId),
+              },
+              replace: true,
+            });
+          }
         }
-      } else if (notificationType === 'ACCEPT' && Number(inviterId) === currentChildId) {
-        showContentTypeMessage('accept', contentType, {
-          book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 수락했어요!`,
-          sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 수락했어요!`,
-        });
+      });
 
-        navigateToContent(contentType, Number(contentId), inviterName);
-      } else if (notificationType === 'REJECT' && Number(inviterId) === currentChildId) {
-        showContentTypeMessage('reject', contentType, {
-          book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
-          sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 거절했어요`,
-        });
-      }
-    });
-
-    // 푸시 알림 요청
     handleAllowNotification();
 
-    // 컴포넌트 언마운트 시 처리 함수 정리
     return () => {
       handleMessage();
     };
@@ -323,5 +328,6 @@ export const useFirebaseMessaging = () => {
     invitationModal,
     handleInvitationAccept,
     handleInvitationReject,
+
   };
 };

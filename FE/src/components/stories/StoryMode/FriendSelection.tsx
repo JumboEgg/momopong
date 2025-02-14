@@ -7,8 +7,8 @@ import { getToken } from 'firebase/messaging';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { ContentType } from '@/types/invitation';
-import { useFriends } from '@/stores/friendStore';
-import useSocketStore from '@/components/drawing/hooks/useSocketStore';
+// import { useFriends } from '@/stores/friendStore';
+// import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { Friend } from '@/types/friend';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 
@@ -17,8 +17,8 @@ function FriendSelection() {
   const location = useLocation();
   const { template } = useDrawing();
   const { contentId } = location.state || {};
-  const { setFriend } = useFriends(); // Hook을 컴포넌트 최상위 레벨로 이동
-  const socketStore = useSocketStore(); // Hook을 컴포넌트 최상위 레벨로 이동
+  // const { setFriend } = useFriends(); // Hook을 컴포넌트 최상위 레벨로 이동
+  // const socketStore = useSocketStore(); // Hook을 컴포넌트 최상위 레벨로 이동
 
   const {
     friends,
@@ -115,10 +115,15 @@ function FriendSelection() {
         contentTitle,
       });
 
-      // SKETCH일 때만 소켓 연결
-      console.log(`${targetContentType} invitation sent successfully, setting up socket connection`);
-      setFriend(friend);
-      socketStore.setConnect(true);
+      // 초대 성공 후 대기 페이지로 이동
+      navigate('/drawing', {
+        state: {
+          waitingForResponse: true,
+          templateId: targetContentId,
+          templateName: contentTitle,
+        },
+        replace: true,
+      });
     } catch (err) {
       console.error('친구 초대 실패:', err);
     }

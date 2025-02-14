@@ -1,279 +1,208 @@
-// import {
-//   useState, useEffect, useRef, useCallback, useMemo,
-// } from 'react';
-// import { useFriends } from '@/stores/friendStore';
-// import { useStory } from '@/stores/storyStore';
-// import storyData from '../data/cinderella';
-// import RecordingButton from './RecordingButton';
-// import AudioPlayer from '../AudioPlayer';
-// import { getAudioUrl } from '../utils/audioUtils';
-// import StoryIllustration from './StoryIllustration';
-
-// function TogetherMode(): JSX.Element {
-//   const {
-//     currentIndex, setCurrentIndex, recordings, audioEnabled,
-//   } = useStory();
-
-//   const {
-//     friend,
-//   } = useFriends();
-
-//   const [userRole, setUserRole] = useState<'prince' | 'princess' | null>(null);
-//   const [currentContentIndex, setCurrentContentIndex] = useState(0);
-//   const [isLastAudioCompleted, setIsLastAudioCompleted] = useState(false);
-//   const audioRef = useRef<HTMLAudioElement>(null);
-
-//   const currentPage = storyData[currentIndex];
-
-//   if (!currentPage) {
-//     return (
-//       <div className="max-w-2xl mx-auto p-6">
-//         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-//           <h3 className="text-2xl font-bold text-gray-800 mb-4">
-//             페이지를 찾을 수 없습니다
-//           </h3>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   const currentContent = currentPage.contents[currentContentIndex];
-
-//   const isStoryEnd = useMemo(() => {
-//     if (!currentPage || currentIndex !== storyData.length - 1) return false;
-//     if (currentContentIndex !== currentPage.contents.length - 1) return false;
-
-//     // 마지막 페이지의 마지막 컨텐츠가 나레이션이고 오디오가 있는 경우
-//     const isLastContentNarration = currentContent?.type === 'narration'
-//       && currentContent?.audioId;
-
-//     // 나레이션이 아니거나 오디오가 없는 경우는 바로 종료
-//     if (!isLastContentNarration) return true;
-
-//     // 나레이션이고 오디오가 있는 경우는 오디오 완료 후 종료
-//     return isLastAudioCompleted;
-//   }, [currentIndex, currentContentIndex, currentPage, currentContent, isLastAudioCompleted]);
-
-//   const currentAudioUrl = useMemo(() => {
-//     if (!currentContent || !currentContent.audioId) {
-//       console.log('No content or audio id found');
-//       return '';
-//     }
-
-//     return getAudioUrl(currentContent.audioId);
-//   }, [currentContent]);
-
-//   useEffect(() => {
-//     const randomRole = Math.random() < 0.5 ? 'prince' : 'princess';
-//     setUserRole(randomRole);
-
-//     // 디버깅 로그 추가
-//     console.log('Randomly Selected Role:', randomRole);
-//   }, []);
-
-//   useEffect(() => {
-//     setIsLastAudioCompleted(false);
-//     console.log('Current Page:', currentPage);
-//     console.log('Current Content:', currentContent);
-//   }, [currentIndex, currentContentIndex]);
-
-//   const isUserTurn = useMemo(() => {
-//     if (!userRole || !currentContent) return false;
-//     return currentContent.type === userRole;
-//   }, [userRole, currentContent]);
-
-//   const handleNext = useCallback(() => {
-//     if (!currentPage) return;
-
-//     if (currentContentIndex < currentPage.contents.length - 1) {
-//       setCurrentContentIndex((prev) => prev + 1);
-//     } else if (currentIndex < storyData.length - 1) {
-//       setCurrentIndex(currentIndex + 1);
-//       setCurrentContentIndex(0);
-//     }
-//   }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
-
-//   const handleRecordingComplete = useCallback(() => {
-//     setTimeout(handleNext, 1000);
-//   }, [handleNext]);
-
-//   const handleHomeClick = useCallback(() => {
-//     window.location.href = '/home';
-//   }, []);
-
-//   const handleAudioComplete = useCallback(() => {
-//     if (
-//       currentIndex === storyData.length - 1
-//       && currentContentIndex === currentPage.contents.length - 1
-//     ) {
-//       setIsLastAudioCompleted(true);
-//     } else {
-//       handleNext();
-//     }
-//   }, [currentIndex, currentContentIndex, currentPage.contents.length, handleNext]);
-
-//   const hasRecording = useCallback((index: number) => recordings.has(index), [recordings]);
-
-//   if (isStoryEnd) {
-//     return (
-//       <div className="max-w-2xl mx-auto p-6">
-//         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-//           <h3 className="text-2xl font-bold text-gray-800 mb-4">
-//             함께했던 스토리는 나의집에서 다시볼수있어!
-//           </h3>
-//           <p className="text-lg text-gray-600 mb-8">
-//             다음에 또만나자~
-//           </p>
-//           <button
-//             type="button"
-//             onClick={handleHomeClick}
-//             className="px-6 py-3 bg-blue-500 text-white
-// rounded-lg hover:bg-blue-600 transition-colors duration-200 text-lg font-medium"
-//           >
-//             홈으로 가기
-//           </button>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   if (!currentContent) {
-//     return (
-//       <div className="max-w-2xl mx-auto p-6">
-//         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
-//           <h3 className="text-2xl font-bold text-gray-800 mb-4">
-//             콘텐츠를 찾을 수 없습니다
-//           </h3>
-//         </div>
-//       </div>
-//     );
-//   }
-
-//   return (
-//     <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
-//       <div className="mb-6 flex justify-between items-center">
-//         <div>
-//           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
-//           <p className="text-gray-600">
-//             내 역할:
-//             {userRole === 'prince' ? '왕자님' : '신데렐라'}
-//           </p>
-//           <p className="text-gray-600">
-//             함께 읽는 친구:
-//             {friend ? friend.name : ''}
-//           </p>
-//         </div>
-//       </div>
-
-//       <StoryIllustration
-//         pageNumber={currentPage.pageNumber}
-//         currentContentIndex={currentContentIndex}
-//         onPrevious={() => {
-//           if (currentIndex > 0) {
-//             setCurrentIndex(currentIndex - 1);
-//             setCurrentContentIndex(0);
-//           }
-//         }}
-//         onNext={handleNext}
-//         isFirst={currentIndex === 0}
-//         isLast={isStoryEnd}
-//         userRole={userRole || undefined}
-//         currentContent={currentContent}
-//         illustration={currentPage.illustration}
-//       />
-
-//       {/* 녹음 버튼과 오디오 플레이어 */}
-//       <div className="mt-4 flex justify-center">
-//         {isUserTurn ? (
-//           <div className="mt-4">
-//             {!hasRecording(currentIndex) && (
-//               <RecordingButton
-//                 characterType={currentContent.type}
-//                 storyIndex={currentIndex}
-//                 onRecordingComplete={handleRecordingComplete}
-//               />
-//             )}
-//           </div>
-//         ) : (
-//           audioEnabled && currentAudioUrl && (
-//             <div className="hidden">
-//               <AudioPlayer
-//                 ref={audioRef}
-//                 audioFiles={[currentAudioUrl]}
-//                 autoPlay
-//                 onEnded={handleAudioComplete}
-//               />
-//             </div>
-//           )
-//         )}
-//       </div>
-
-//       {/* 이야기 종료시 나타날 오버레이 */}
-//       {isStoryEnd && (
-//         <div className="fixed inset-0 flex items-center justify-center z-50">
-//           <div className="fixed inset-0 bg-black opacity-50" />
-//           <div className="bg-white rounded-lg p-8 shadow-xl max-w-sm w-full mx-4 z-50 relative">
-//             <h3 className="text-2xl font-bold text-gray-800 mb-4 text-center">
-//               함께했던 스토리는 나의집에서 다시볼수있어!
-//             </h3>
-//             <p className="text-gray-600 mb-8 text-center">
-//               다음에 또만나자~
-//             </p>
-//             <button
-//               type="button"
-//               onClick={handleHomeClick}
-//               className="w-full py-3 bg-blue-500 text-white
-// rounded-lg hover:bg-blue-600 transition-colors text-lg font-medium"
-//             >
-//               홈으로 가기
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
-
-// export default TogetherMode;
-
-// src/pages/TogetherMode.tsx
-import { useEffect, useState } from 'react';
+// 수정한거임
+import {
+  useState,
+  useEffect,
+  useCallback,
+  useMemo,
+} from 'react';
 import { useLocation } from 'react-router-dom';
-import VideoRoom from '@/components/video/VideoRoom';
+import { useStory } from '@/stores/storyStore';
+import { useFriends } from '@/stores/friendStore';
+import useSubAccountStore from '@/stores/subAccountStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
+import IntegratedRoom from './IntegratedRoom';
+import AudioPlayer from '../AudioPlayer';
+import StoryIllustration from './StoryIllustration';
+import storyData from '../data/cinderella';
+// import { getAudioUrl } from '../utils/audioUtils';
 
 interface LocationState {
   roomName: string;
   participantName: string;
 }
 
+interface RecordingState {
+  [participantId: string]: {
+    isRecording: boolean;
+    isCompleted: boolean;
+  };
+}
+
 function TogetherMode() {
   const location = useLocation();
   const { roomName } = location.state as LocationState;
-  const [isSessionEstablished, setIsSessionEstablished] = useState(false);
+  const { friend } = useFriends();
+  const { bookContent } = useBookContent();
+  const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
+  const { currentIndex, setCurrentIndex, audioEnabled } = useStory();
 
+  // 상태 관리
+  const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
+  const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  const [recordingStates, setRecordingStates] = useState<RecordingState>({});
+  const [isWaitingForOther, setIsWaitingForOther] = useState(false);
+
+  // 현재 페이지 및 컨텐츠 계산
+  const currentPage = bookContent?.pages[currentIndex];
+  const currentContent = currentPage?.audios[currentContentIndex];
+
+  // 역할 초기 설정
   useEffect(() => {
-    // OpenVidu 세션 설정
-    const initializeSession = async () => {
-      try {
-        // OpenVidu 세션 초기화 로직
-        setIsSessionEstablished(true);
-      } catch (error) {
-        console.error('Failed to initialize OpenVidu session:', error);
-      }
-    };
+    const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
+    setUserRole(randomRole);
+  }, []);
 
-    initializeSession();
-  }, [roomName]);
+  // 현재 사용자 차례 확인
+  const isUserTurn = useMemo(() => {
+    if (!userRole || !currentContent) return false;
+    return currentContent.role === userRole;
+  }, [userRole, currentContent]);
+
+  // 다음 페이지/컨텐츠로 이동
+  const handleNext = useCallback(() => {
+    if (!currentPage) return;
+
+    // 녹음 상태 초기화
+    setRecordingStates({});
+    setIsWaitingForOther(false);
+
+    if (currentContentIndex < currentPage.audios.length - 1) {
+      setCurrentContentIndex((prev) => prev + 1);
+    } else if (currentIndex < storyData.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+      setCurrentContentIndex(0);
+    }
+  }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
+
+  // 녹음 상태 변경 처리
+  const handleRecordingStateChange = useCallback(
+    (participantId: string, status: 'idle' | 'recording' | 'completed') => {
+      setRecordingStates((prev) => ({
+        ...prev,
+        [participantId]: {
+          isRecording: status === 'recording',
+          isCompleted: status === 'completed',
+        },
+      }));
+    },
+    [],
+  );
+
+  // 모든 참가자의 녹음 완료 여부 확인
+  useEffect(() => {
+    const allParticipantsCompleted = Object
+    .values(recordingStates).every((state) => state.isCompleted);
+
+    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
+    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
+      // 현재 페이지의 모든 컨텐츠를 확인
+      if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
+        // 아직 페이지 내 다음 컨텐츠가 있다면 다음 컨텐츠로 이동
+        setCurrentContentIndex((prev) => prev + 1);
+      } else if (currentIndex < storyData.length - 1) {
+        // 페이지 내 컨텐츠를 모두 완료했다면 다음 페이지로 이동
+        setCurrentIndex(currentIndex + 1);
+        setCurrentContentIndex(0);
+      }
+
+      // 녹음 상태 초기화
+      setRecordingStates({});
+      setIsWaitingForOther(false);
+    }
+  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+
+  // 내레이션 오디오 완료 처리
+  const handleNarrationComplete = useCallback(() => {
+    handleNext();
+  }, [handleNext]);
+
+  const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
+    // 녹음된 오디오 blob 처리
+    console.log('녹음 완료:', participantId, audioBlob);
+
+    // 녹음 상태 업데이트
+    setRecordingStates((prev) => ({
+      ...prev,
+      [participantId]: {
+        isRecording: false,
+        isCompleted: true,
+        audioBlob, // 오디오 blob 저장
+      },
+    }));
+
+    // 대기 상태 설정
+    setIsWaitingForOther(true);
+  }, []);
 
   return (
-    <div className="together-mode">
-      {/* OpenVidu 컴포넌트들 */}
-      {isSessionEstablished && (
-        <div className="video-container">
-          <VideoRoom />
+    <div className="w-full h-screen relative">
+      {/* 동화 컨텐츠 영역 */}
+      <div className="w-full h-full px-6 pb-48 pt-6">
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
+          <p className="text-gray-600">
+            내 역할:
+            {userRole === 'role2' ? '왕자님' : '신데렐라'}
+          </p>
+          <p className="text-gray-600">
+            함께 읽는 친구:
+            {friend?.name || ''}
+          </p>
         </div>
+
+        <StoryIllustration
+          pageNumber={currentPage?.pageNumber ?? 0}
+          currentContentIndex={currentContentIndex}
+          onPrevious={() => {
+            if (currentIndex > 0) {
+              setCurrentIndex(currentIndex - 1);
+              setCurrentContentIndex(0);
+            }
+          }}
+          onNext={handleNext}
+          isFirst={currentIndex === 0}
+          isLast={currentIndex === storyData.length - 1}
+          userRole={userRole || undefined}
+          currentContent={currentContent}
+          illustration={currentPage?.pagePath ?? ''}
+        />
+
+        {/* 녹음 대기 상태 표시 */}
+        {isWaitingForOther && (
+          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 px-6 py-3 rounded-full shadow-lg">
+            상대방의 녹음이 끝날 때까지 기다려주세요...
+          </div>
+        )}
+
+        {/* 오디오 플레이어 (내레이션) */}
+        {currentContent?.role === 'narration' && audioEnabled && currentContent.order && (
+          <div className="hidden">
+            <AudioPlayer
+              audioFiles={[currentContent.path ?? '']}
+              autoPlay
+              onEnded={handleNarrationComplete}
+              onError={() => {
+                console.error('Audio playback failed');
+                handleNext();
+              }}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* 화상 비디오 영역 */}
+      {userRole && (
+        <IntegratedRoom
+          roomName={roomName}
+          participantName={selectedAccount?.name || 'Anonymous'}
+          userRole={userRole}
+          isUserTurn={isUserTurn}
+          onRecordingComplete={handleRecordingComplete}
+          onRecordingStatusChange={(participantId: string, status) => {
+            handleRecordingStateChange(participantId, status);
+          }}
+        />
       )}
-      {/* 동화, 나레이션, 녹음 등의 컴포넌트들 */}
     </div>
   );
 }

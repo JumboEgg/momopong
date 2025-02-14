@@ -121,7 +121,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
       const sortedFriends = sortByOnlineStatus(response.data);
       set({ friends: sortedFriends, loading: false });
     } catch (error) {
-      console.error('Failed to fetch online friends:', error);
+      // console.error('Failed to fetch online friends:', error);
       const errorMessage = error instanceof Error
         ? error.message
         : '온라인 친구 목록을 불러오는데 실패했습니다.';
@@ -161,7 +161,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
           : '친구에게 함께 그릴지 물어볼게요!',
       });
     } catch (error) {
-      console.error('Failed to invite friend:', error);
+      // console.error('Failed to invite friend:', error);
       const errorMessage = error instanceof Error ? error.message : '친구 초대에 실패했습니다.';
       set({ error: errorMessage });
       toastStore.showToast({
@@ -195,6 +195,12 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         roleStore.setRoles(inviterRole, inviteeRole, invitation.contentId);
       }
 
+      // console.log('Accept invitation request:', {
+      //   endpoint,
+      //   payload,
+      //   invitation,
+      // });
+
       await api.post(endpoint, payload);
 
       toastStore.showToast({
@@ -204,7 +210,10 @@ export const useFriendListStore = create<FriendList>()((set) => ({
           : '함께 그림 그리러 가고 있어요',
       });
     } catch (error) {
-      console.error('Failed to accept invitation:', error);
+      // console.error('Accept invitation error details:', {
+      //   error,
+      //   requestData: invitation,
+      // });
       toastStore.showToast({
         type: 'error',
         message: '지금은 함께할 수 없어요',
@@ -236,7 +245,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
           : '다음에 함께 그리기로 했어요',
       });
     } catch (error) {
-      console.error('Failed to reject invitation:', error);
+      // console.error('Failed to reject invitation:', error);
       toastStore.showToast({
         type: 'error',
         message: '답장을 보내지 못했어요',
@@ -266,7 +275,7 @@ export const useFriendListStore = create<FriendList>()((set) => ({
         message: '초대가 만료되었습니다.',
       });
     } catch (error) {
-      console.error('Failed to expire invitation:', error);
+      // console.error('Failed to expire invitation:', error);
       showToast({
         type: 'error',
         message: '초대 만료 처리 중 오류가 발생했습니다.',

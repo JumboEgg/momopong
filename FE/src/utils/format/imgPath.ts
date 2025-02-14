@@ -8,5 +8,4 @@ export function getBackgroundPath(fileName: string) {
 
 export function getCoverPath(fileName: string) {
     return `/images/bookcover/${fileName}`;
-    // return `/public/images/bookcover/${fileName}`;
 }
