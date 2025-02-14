@@ -7,8 +7,8 @@ import { useFriends } from '@/stores/friendStore';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
 import { useStory } from '@/stores/storyStore';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
-import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
-import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
+import InvitationWaitPage from '@/components/common/multiplayPages/invitationWaitPage';
+import NetworkErrorPage from '@/components/common/multiplayPages/networkerrorPage';
 import { useBookList } from '@/stores/book/bookListStore';
 
 function Story() {

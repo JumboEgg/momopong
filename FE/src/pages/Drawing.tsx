@@ -11,8 +11,8 @@ import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useSketchList } from '@/stores/drawing/sketchListStore';
 // import { Friend, StatusType } from '@/types/friend';
-import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
-import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
+import InvitationWaitPage from '@/components/common/multiplayPages/invitationWaitPage';
+import NetworkErrorPage from '@/components/common/multiplayPages/networkerrorPage';
 
 const getTemplateFilename = (id: number): string => {
   const fileMap: Record<number, string> = {
