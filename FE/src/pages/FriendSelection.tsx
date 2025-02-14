@@ -11,14 +11,15 @@ import { ContentType } from '@/types/invitation';
 // import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { Friend } from '@/types/friend';
 import { useDrawing } from '@/stores/drawing/drawingStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
+import { useStory } from '@/stores/storyStore';
 
 function FriendSelection() {
   const navigate = useNavigate();
   const location = useLocation();
   const { template } = useDrawing();
-  const { contentId } = location.state || {};
-  // const { setFriend } = useFriends(); // Hook을 컴포넌트 최상위 레벨로 이동
-  // const socketStore = useSocketStore(); // Hook을 컴포넌트 최상위 레벨로 이동
+  const { bookContent } = useBookContent();
+  const { bookId } = useStory();
 
   const {
     friends,
@@ -58,11 +59,11 @@ function FriendSelection() {
   // 친구 목록 가져오기
   useEffect(() => {
     const fetchFriends = async () => {
-      if (!contentId) return;
+      const targetContentId = template?.sketchId || bookId;
+      if (!targetContentId) return;
 
       try {
-        const targetContentId = template?.sketchId || contentId;
-        const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
+        const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK'; // template 유무로만 구분
 
         await fetchOnlineFriends(targetContentId, targetContentType);
       } catch (err) {
@@ -71,7 +72,7 @@ function FriendSelection() {
     };
 
     fetchFriends();
-  }, [template, contentId, location.state?.contentType, fetchOnlineFriends]);
+  }, [template, bookId, fetchOnlineFriends]);
 
   const handleInviteFriend = async (inviteeId: number, friend: Friend) => {
     const currentChildId = tokenService.getCurrentChildId();
@@ -83,30 +84,28 @@ function FriendSelection() {
     }
 
     try {
-      const targetContentId = template?.sketchId || contentId;
-      const targetContentType: ContentType = template ? 'SKETCH' : (location.state?.contentType || 'BOOK');
+      const targetContentId = template?.sketchId || bookId;
 
-      const contentTitle = template
-        ? `함께 그리기: ${template.sketchTitle}`
-        : location.state?.contentTitle;
+      // null 체크 추가
+      if (!targetContentId) {
+        throw new Error('콘텐츠 ID가 없습니다.');
+      }
+
+      const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK';
+
+      let contentTitle;
+      if (template) {
+        contentTitle = `함께 그리기: ${template.sketchTitle}`;
+      } else {
+        contentTitle = bookContent?.bookTitle;
+      }
 
       if (!contentTitle) {
         throw new Error('콘텐츠 제목이 없습니다.');
       }
 
-      // 초대 데이터 로깅 추가
-      console.log('Sending invitation:', {
-        contentId: targetContentId,
-        inviterId: currentChildId,
-        inviteeId,
-        contentType: targetContentType,
-        inviterName: currentUser.name,
-        inviteeName: friend.name,
-        contentTitle,
-      });
-
       await inviteFriend({
-        contentId: targetContentId,
+        contentId: targetContentId, // 이제 targetContentId는 확실히 number 타입
         inviterId: currentChildId,
         inviteeId,
         contentType: targetContentType,
@@ -115,19 +114,38 @@ function FriendSelection() {
         contentTitle,
       });
 
-      // 초대 성공 후 대기 페이지로 이동
-      navigate('/drawing', {
-        state: {
+      // Story 모드인지 확인
+      const isStoryMode = location.pathname.startsWith('/story');
+
+      if (isStoryMode) {
+        // Story 모드일 때는 현재 경로를 그대로 유지
+        const currentState = {
+          ...location.state,
           waitingForResponse: true,
-          templateId: targetContentId,
-          templateName: contentTitle,
-        },
-        replace: true,
-      });
+          contentId: targetContentId,
+          contentType: targetContentType,
+          contentTitle,
+        };
+
+        navigate(location.pathname, {
+          state: currentState,
+          replace: true,
+        });
+      } else {
+        // Drawing 모드일 때만 /drawing으로 이동
+        navigate('/drawing', {
+          state: {
+            waitingForResponse: true,
+            templateId: targetContentId,
+            templateName: contentTitle,
+          },
+          replace: true,
+        });
+      }
     } catch (err) {
       console.error('친구 초대 실패:', err);
     }
-  };
+};
 
   if (loading) {
     return (
