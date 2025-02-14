@@ -1,12 +1,15 @@
 import { useReportStore } from '@/stores/reportStore';
 import { ActivityHistoryInfo } from '@/types/report';
+import { getCoverPath } from '@/utils/format/imgPath';
 
 function BookReport({ bookData }: { bookData: ActivityHistoryInfo }) {
+  console.log(bookData);
+
   return (
     <div className="flex flex-col justify-center items-center w-full py-3">
       <div className="w-[80%] mb-2">
         <img
-          src={bookData.bookPath}
+          src={getCoverPath(bookData.bookPath)}
           alt={bookData.bookTitle}
           className="max-w-full aspect-[4/3]"
         />
@@ -38,7 +41,7 @@ function ActivityTab() {
         </span>
       </div>
       <div className="w-full h-full flex justify-center items-center bg-blue-100 border-4 border-blue-300 rounded-2xl font-sans font-bold">
-        <div className="w-full flex justify-evenly items-baseline">
+        <div className="w-full grid grid-cols-3 justify-evenly items-baseline">
           {readData}
         </div>
       </div>

@@ -7,8 +7,10 @@ import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
 import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
 import makeDrawingRecord from '@/utils/drawingS3/drawingRecordCreate';
 import endDrawingSession from '@/utils/drawingS3/drawingRecordEnd';
+import { useNavigate } from 'react-router-dom';
 
 function BookRecordPage() {
+  const navigate = useNavigate();
     const {
         addRecord, uploadRecord,
     } = useRecordList();
@@ -77,6 +79,7 @@ function BookRecordPage() {
         <button type="button" onClick={endSketchSession}>
           sketchRecord 끝내기
         </button>
+        <button type="button" onClick={() => navigate('/home')}>홈으로 가기</button>
       </div>
     );
 }
