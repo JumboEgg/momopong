@@ -13,6 +13,7 @@ import { Friend } from '@/types/friend';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
 import { useStory } from '@/stores/storyStore';
+import FriendListItem from '@/components/friends/FriendListItem';
 
 function FriendSelection() {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ function FriendSelection() {
       if (!targetContentId) return;
 
       try {
-        const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK'; // template 유무로만 구분
+        const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK'; // template 유무로 구분
 
         await fetchOnlineFriends(targetContentId, targetContentType);
       } catch (err) {
@@ -182,7 +183,7 @@ function FriendSelection() {
         )}
 
         <div className="mb-4 text-sm text-gray-600">
-          친구 수:
+          대기중인 친구 수:
           {' '}
           {friends.length}
         </div>
@@ -192,27 +193,16 @@ function FriendSelection() {
             현재 온라인인 친구가 없습니다
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="divide-y divide-gray-200">
             {friends.map((friend) => (
               <button
                 key={friend.childId}
                 type="button"
                 onClick={() => handleInviteFriend(friend.childId, friend)}
-                className="w-full flex items-center justify-between p-4 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+                className="w-full hover:bg-gray-50 transition-colors"
                 disabled={loading}
               >
-                <div className="flex items-center space-x-4">
-                  <img
-                    src={friend.profile}
-                    alt={friend.name}
-                    className="w-10 h-10 rounded-full"
-                  />
-                  <p className="font-medium text-gray-900">{friend.name}</p>
-                </div>
-                <div className="flex items-center space-x-1">
-                  <span className="w-2 h-2 rounded-full bg-green-500" />
-                  <p className="text-sm text-green-500">온라인</p>
-                </div>
+                <FriendListItem friend={friend} />
               </button>
             ))}
           </div>

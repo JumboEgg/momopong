@@ -52,6 +52,8 @@ interface FriendList {
   loading: boolean;
   error: string | null;
   isConnected: boolean;
+  currentPollingInterval: NodeJS.Timeout | null;
+  friendStatusPolling: NodeJS.Timeout | null;
 
   // 기본 액션
   setSelectedFriend: (friend: Friend | null) => void;
@@ -68,17 +70,21 @@ interface FriendList {
   updateFriendStatus: (friendId: number, status: Friend['status']) => void;
 
   // 폴링
+  startContentPolling: (contentId: number, contentType: ContentType) => void;
+  stopContentPolling: () => void;
   startStatusPolling: () => void;
   stopStatusPolling: () => void;
 }
 
-export const useFriendListStore = create<FriendList>()((set) => ({
+export const useFriendListStore = create<FriendList>()((set, get) => ({
   // 초기 상태
   friends: [],
   selectedFriend: null,
   loading: false,
   error: null,
   isConnected: false,
+  currentPollingInterval: null,
+  friendStatusPolling: null,
 
   // 기본 액션
   setSelectedFriend: (friend) => set({ selectedFriend: friend }),
@@ -106,22 +112,23 @@ export const useFriendListStore = create<FriendList>()((set) => ({
   },
 
   fetchOnlineFriends: async (contentId: number, contentType: ContentType) => {
-    set({ loading: true, error: null });
-    try {
-      const currentChildId = tokenService.getCurrentChildId();
-      if (!currentChildId) {
-        throw new Error('선택된 자녀가 없습니다.');
-      }
+    const currentChildId = tokenService.getCurrentChildId();
+    if (!currentChildId) return;
 
+    try {
       const endpoint = contentType === 'SKETCH'
         ? `/sketch/${contentId}/friend/${currentChildId}`
         : `/book/${contentId}/friend/${currentChildId}`;
 
       const response = await api.get(endpoint);
       const sortedFriends = sortByOnlineStatus(response.data);
-      set({ friends: sortedFriends, loading: false });
+
+      set({
+        friends: sortedFriends,
+        loading: false,
+        error: null,
+      });
     } catch (error) {
-      // console.error('Failed to fetch online friends:', error);
       const errorMessage = error instanceof Error
         ? error.message
         : '온라인 친구 목록을 불러오는데 실패했습니다.';
@@ -305,19 +312,49 @@ export const useFriendListStore = create<FriendList>()((set) => ({
 
   // 폴링
   startStatusPolling: () => {
-    const pollInterval = setInterval(() => {
+    const { stopStatusPolling, fetchFriends } = get();
+
+    // 기존 폴링 중지
+    stopStatusPolling();
+
+    // 새로운 폴링 시작
+    const interval = setInterval(() => {
       const currentChildId = tokenService.getCurrentChildId();
       if (currentChildId) {
-        // 기존의 fetchFriends 재사용
-        useFriendListStore.getState().fetchFriends();
+        fetchFriends();
       }
-    }, 30000); // 30초마다 갱신
+    }, 30000);
 
-    (window as any).friendStatusPolling = pollInterval;
+    set({ friendStatusPolling: interval });
   },
+
   stopStatusPolling: () => {
-    if ((window as any).friendStatusPolling) {
-      clearInterval((window as any).friendStatusPolling);
+    const { friendStatusPolling } = get();
+    if (friendStatusPolling) {
+      clearInterval(friendStatusPolling);
+      set({ friendStatusPolling: null });
+    }
+  },
+
+  // 콘텐츠별 실시간 폴링 (5초)
+  startContentPolling: (contentId: number, contentType: ContentType) => {
+    const { stopContentPolling, fetchOnlineFriends } = get();
+
+    stopContentPolling();
+    fetchOnlineFriends(contentId, contentType);
+
+    const interval = setInterval(() => {
+      fetchOnlineFriends(contentId, contentType);
+    }, 5000);
+
+    set({ currentPollingInterval: interval });
+  },
+
+  stopContentPolling: () => {
+    const { currentPollingInterval } = get();
+    if (currentPollingInterval) {
+      clearInterval(currentPollingInterval);
+      set({ currentPollingInterval: null });
     }
   },
 }));
