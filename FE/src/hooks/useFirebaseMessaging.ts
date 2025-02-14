@@ -206,16 +206,16 @@ const handleInvitationAccept = async () => {
 
       // 현재 처리 상태 로깅
       const { processingInvitation } = useFCMStore.getState();
-      console.log('FCM Message Handler State:', {
-        processingInvitation,
-        notificationType: payload.data.notificationType,
-        currentChildId,
-        messageData: payload.data,
-      });
+      // console.log('FCM Message Handler State:', {
+      //   processingInvitation,
+      //   notificationType: payload.data.notificationType,
+      //   currentChildId,
+      //   messageData: payload.data,
+      // });
 
       // 초대 처리 중인 경우 확실히 리턴
       if (processingInvitation) {
-        console.log('Skipping FCM message - invitation is being processed');
+        // console.log('Skipping FCM message - invitation is being processed');
         return;
       }
 
@@ -241,7 +241,6 @@ const handleInvitationAccept = async () => {
         const contentType = rawContentType; // ContentType 타입으로 보장
 
         // 초대장을 받은 경우
-
         if (notificationType === 'INVITE') {
           // 자기 자신에게 온 초대는 무시
           if (Number(inviterId) === Number(inviteeId)) {
