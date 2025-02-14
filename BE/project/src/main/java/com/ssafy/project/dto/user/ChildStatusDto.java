@@ -11,5 +11,6 @@ import lombok.*;
 public class ChildStatusDto {
     private Long childId;
     private String name;
+    private String profile;
     private StatusType status;
 }

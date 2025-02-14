@@ -35,7 +35,7 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
     private final ChildService childService;
-    private final PresignedUrlService presignedUrlService;
+    private final CloudFrontService cloudFrontService;
 
     // 부모 회원가입
     @Override
@@ -131,7 +131,7 @@ public class ParentServiceImpl implements ParentService {
                 .map(child -> ChildListDto.builder()
                         .childId(child.getId())
                         .name(child.getName())
-                        .profile(presignedUrlService.getFile(child.getProfile()))
+                        .profile(cloudFrontService.getSignedUrl(child.getProfile()))
                         .age(child.getAge())
                         .daysSinceStart(child.getDaysSinceStart())
                         .build())
