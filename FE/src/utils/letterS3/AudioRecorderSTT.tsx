@@ -5,10 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
-import { useBookContent } from '@/stores/book/bookContentStore';
+// import { useBookContent } from '@/stores/book/bookContentStore';
 
 function AudioRecorderSTT() {
-  const { bookContent } = useBookContent();
+  // const { bookContent } = useBookContent();
 
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
@@ -155,9 +155,20 @@ function AudioRecorderSTT() {
   useEffect(() => {
     if (!recordingBlob) return;
 
+    // const letter: LetterInfo = {
+    //   bookTitle: bookContent?.bookTitle ?? '',
+    //   role: bookContent?.role1 ?? '',
+    //   childName: '',
+    //   content: voiceText,
+    //   letterFileName: '',
+    //   letterUrl: '',
+    //   reply: '',
+    //   createdAt: '',
+    // };
+
     const letter: LetterInfo = {
-      bookTitle: bookContent?.bookTitle ?? '',
-      role: bookContent?.role1 ?? '',
+      bookTitle: '신데렐라',
+      role: '신데렐라',
       childName: '',
       content: voiceText,
       letterFileName: '',

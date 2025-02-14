@@ -79,6 +79,7 @@ function BookRecordPage() {
         <button type="button" onClick={endSketchSession}>
           sketchRecord 끝내기
         </button>
+        <button type="button" onClick={() => navigate('/book/letter')}>편지 남기기</button>
         <button type="button" onClick={() => navigate('/home')}>홈으로 가기</button>
       </div>
     );

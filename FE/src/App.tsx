@@ -22,7 +22,7 @@ import Test from './pages/Test';
 import MyBookStory from './components/myhouse/mybookstory';
 import MyDrawing from './components/myhouse/mydrawing';
 import MyLetters from './components/myhouse/myletters';
-// import LetterPage from './components/stories/StoryMode/LetterPage';
+import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 
 // 모달 컴포넌트
@@ -168,10 +168,19 @@ function App(): JSX.Element {
           )}
         />
         <Route
-          path="/book/letter"
+          path="/book/record"
           element={(
             <ProtectedRoute>
               <BookRecordPage />
+            </ProtectedRoute>
+          )}
+        />
+
+        <Route
+          path="/book/letter"
+          element={(
+            <ProtectedRoute>
+              <LetterPage />
             </ProtectedRoute>
           )}
         />

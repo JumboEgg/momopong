@@ -4,7 +4,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useEffect } from 'react';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
-import MakeRandomCode from '../../../utils/format/randomString';
+import makeRandomCode from '@/utils/format/randomString';
 
 function DrawingModeSelection(): JSX.Element {
   const {
@@ -59,7 +59,7 @@ function DrawingModeSelection(): JSX.Element {
               type="button"
               onClick={() => {
                 setMode('together');
-                setRoomId(MakeRandomCode());
+                setRoomId(makeRandomCode());
               }}
               className="py-4 px-6 text-lg hover:text-2xl duration-200 font-semibold flex flex-col"
             >

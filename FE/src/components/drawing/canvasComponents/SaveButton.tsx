@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
 import { useBookSketch } from '@/stores/book/bookSketchStore';
+import endDrawingSession from '@/utils/drawingS3/drawingRecordEnd';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -10,7 +11,7 @@ export interface SaveButtonProps {
 
 function SaveButton({ canvasRef }: SaveButtonProps) {
   const {
-    mode, template, setImageData,
+    mode, template, setImageData, sessionId,
   } = useDrawing();
 
   // TODO : story mode 저장 테스트 코드 삭제
@@ -31,7 +32,17 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
     outlineImgSrc = getOutlinePath(template.sketchPath);
   }
 
+  // 그리기 세션 종료 서버에 전송
+  const endSketchSession = () => {
+    if (!sessionId) {
+      console.log('session id is null');
+      return;
+    }
+    endDrawingSession(sessionId);
+  };
+
   const saveCanvas = useCallback(() => {
+    endSketchSession();
     if (!canvasRef) return;
     const currentCanvas = canvasRef;
     if (!currentCanvas) return;

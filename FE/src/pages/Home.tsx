@@ -11,7 +11,8 @@ function HomePage() {
   const navigate = useNavigate();
   const { selectedAccount } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house' | '/test' | '/book/letter'): void => {
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
+     | '/test' | '/book/letter' | '/book/record'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
@@ -78,7 +79,7 @@ function HomePage() {
 
       <button
         type="button"
-        onClick={() => handleNavigation('/book/letter')}
+        onClick={() => handleNavigation('/book/record')}
         className="cursor-pointer flex flex-col items-center"
       >
         <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">
