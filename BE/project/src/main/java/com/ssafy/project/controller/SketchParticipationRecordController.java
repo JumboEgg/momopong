@@ -19,7 +19,7 @@ public class SketchParticipationRecordController {
 
     private final SketchParticipationRecordService sketchParticipationRecordService;
 
-    @PostMapping
+    @PostMapping("/save")
     @Operation(summary = "그림 참여 기록 저장", description = "사용자의 그림 참여 기록을 저장합니다.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "참여 기록 저장 성공"),
