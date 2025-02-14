@@ -95,15 +95,47 @@ function TogetherMode() {
 
     // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
     if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      // 약간의 딜레이 후 다음으로 넘어가기
-      setTimeout(handleNext, 1000);
+      // 현재 페이지의 모든 컨텐츠를 확인
+      if (currentContentIndex < currentPage.contents.length - 1) {
+        // 아직 페이지 내 다음 컨텐츠가 있다면 다음 컨텐츠로 이동
+        setCurrentContentIndex((prev) => prev + 1);
+      } else if (currentIndex < storyData.length - 1) {
+        // 페이지 내 컨텐츠를 모두 완료했다면 다음 페이지로 이동
+        setCurrentIndex(currentIndex + 1);
+        setCurrentContentIndex(0);
+      }
+
+      // 녹음 상태 초기화
+      setRecordingStates({});
+      setIsWaitingForOther(false);
     }
-  }, [recordingStates, handleNext]);
+  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
 
   // 내레이션 오디오 완료 처리
   const handleNarrationComplete = useCallback(() => {
     handleNext();
   }, [handleNext]);
+
+  const handleRecordingComplete = useCallback(
+    (participantId: string, audioBlob?: Blob) => {
+      // 녹음된 오디오 blob 처리
+      console.log('녹음 완료:', participantId, audioBlob);
+
+      // 녹음 상태 업데이트
+      setRecordingStates((prev) => ({
+        ...prev,
+        [participantId]: {
+          isRecording: false,
+          isCompleted: true,
+          audioBlob, // 오디오 blob 저장
+        },
+      }));
+
+      // 대기 상태 설정
+      setIsWaitingForOther(true);
+    },
+    [],
+  );
 
   return (
     <div className="w-full h-screen relative">
@@ -172,10 +204,7 @@ function TogetherMode() {
           participantName={selectedAccount?.name || 'Anonymous'}
           userRole={userRole}
           isUserTurn={isUserTurn}
-          onRecordingComplete={(participantId: string) => {
-            handleRecordingStateChange(participantId, 'completed');
-            setIsWaitingForOther(true);
-          }}
+          onRecordingComplete={handleRecordingComplete}
           onRecordingStatusChange={(participantId: string, status) => {
             handleRecordingStateChange(participantId, status);
           }}

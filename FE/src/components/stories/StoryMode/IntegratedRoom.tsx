@@ -19,7 +19,7 @@ interface IntegratedRoomProps {
   participantName: string;
   userRole: 'prince' | 'princess';
   isUserTurn: boolean;
-  onRecordingComplete: (participantId: string) => void;
+  onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
 }
 
@@ -41,6 +41,7 @@ function IntegratedRoom({
   const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
 
@@ -114,15 +115,6 @@ function IntegratedRoom({
     [room, onRecordingStatusChange],
   );
 
-  // 녹음 중지
-  const stopRecording = useCallback(() => {
-    if (mediaRecorder && mediaRecorder.state === 'recording') {
-      mediaRecorder.stop();
-      setIsRecording(false);
-      setTimeLeft(20);
-    }
-  }, [mediaRecorder]);
-
   // 녹음 시작
   const startRecording = useCallback(async () => {
     if (!isUserTurn || isRecording || !room) return;
@@ -132,16 +124,17 @@ function IntegratedRoom({
         audio: {
           echoCancellation: true,
           noiseSuppression: true,
+          autoGainControl: true,
         },
       });
-      audioStreamRef.current = stream;
 
+      // 새로운 MediaRecorder 생성 및 상태 업데이트
       const recorder = new MediaRecorder(stream, {
-        mimeType: 'audio/webm;codecs=opus',
+        mimeType: 'audio/webm',
         audioBitsPerSecond: 128000,
       });
 
-      const audioChunks: BlobPart[] = [];
+      const audioChunks: Blob[] = [];
 
       recorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -149,67 +142,53 @@ function IntegratedRoom({
         }
       };
 
-      recorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, {
-          type: 'audio/webm',
-        });
+      recorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
-        // 오디오 Blob URL 생성
-        const audioUrl = URL.createObjectURL(audioBlob);
-
-        try {
-          // 오디오 재생을 Promise로 감싸서 명확한 상태 관리
-          await new Promise<void>((resolve, reject) => {
-            const audio = new Audio(audioUrl);
-            audio.oncanplaythrough = () => audio.play();
-            audio.onended = () => {
-              URL.revokeObjectURL(audioUrl);
-              resolve();
-            };
-            audio.onerror = () => {
-              URL.revokeObjectURL(audioUrl);
-              reject(new Error('Audio playback failed'));
-            };
-          });
-
-          // 녹음 완료 상태 브로드캐스트
+        if (audioBlob.size > 0 && room) {
+          // 녹음 완료 브로드캐스트
           broadcastRecordingStatus('completed');
-          onRecordingComplete(room.localParticipant.identity);
-        } catch (error) {
-          console.error('Audio playback error:', error);
-          broadcastRecordingStatus('completed');
-          onRecordingComplete(room.localParticipant.identity);
-        } finally {
-          // 스트림 정리
-          stream.getTracks().forEach((track) => track.stop());
-          audioStreamRef.current = null;
-          setMediaRecorder(null);
-          setIsRecording(false);
+
+          // 상위 컴포넌트에 녹음 완료 알림
+          onRecordingComplete(room.localParticipant.identity, audioBlob);
         }
+
+        // 스트림 정리
+        stream.getTracks().forEach((track) => track.stop());
       };
 
+      // mediaRecorder 상태 설정
       setMediaRecorder(recorder);
-      setIsRecording(true);
-      setTimeLeft(20);
-      recorder.start(1000); // 1초마다 데이터 수집
 
-      // Broadcast recording status
-      broadcastRecordingStatus('recording');
-      onRecordingStatusChange(room.localParticipant.identity, 'recording');
+      recorder.start();
+      setIsRecording(true);
+
+      // 타이머 설정
+      setTimeout(() => {
+        if (recorder.state === 'recording') {
+            recorder.stop();
+        }
+    }, 20000);
     } catch (error) {
-      console.error('Recording failed:', error);
-      alert('마이크 접근에 실패했습니다. 마이크 권한을 확인해주세요.');
-      setIsRecording(false);
-      broadcastRecordingStatus('idle');
+      console.error('Recording failed', error);
+      alert('마이크 접근에 실패했습니다.');
     }
-  }, [
-    isUserTurn,
-    isRecording,
-    room,
-    onRecordingComplete,
-    onRecordingStatusChange,
-    broadcastRecordingStatus,
-  ]);
+  }, [isUserTurn, room, broadcastRecordingStatus, onRecordingComplete]);
+
+  // 녹음 중지
+  const stopRecording = useCallback(() => {
+    console.log('Stop Recording called', {
+      isUserTurn,
+      isRecording,
+      mediaRecorderState: mediaRecorder?.state,
+    });
+
+    if (mediaRecorder && mediaRecorder.state === 'recording') {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      setTimeLeft(20);
+    }
+  }, [mediaRecorder, isUserTurn, isRecording]);
 
   // 20초 타이머를 위한 별도의 effect
   useEffect(() => {
@@ -390,7 +369,14 @@ function IntegratedRoom({
           {isRecording && (
             <button
               type="button"
-              onClick={stopRecording}
+              onClick={() => {
+                console.log('완료 버튼 클릭', {
+                  isUserTurn,
+                  isRecording,
+                  mediaRecorderState: mediaRecorder?.state,
+                });
+                stopRecording();
+              }}
               className="
                 px-4 py-2 rounded-full text-white font-medium
                 bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap
