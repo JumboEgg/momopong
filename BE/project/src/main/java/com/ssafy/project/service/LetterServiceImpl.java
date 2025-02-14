@@ -49,14 +49,13 @@ public class LetterServiceImpl implements LetterService {
     public String getGPTResponse(String fairyTale, String role, String childName, String content) {
         // GPT 프롬프트 생성
         String prompt = String.format(
-                "너는 동화 속 주인공이야. 아래의 지시를 따라서 8세 아이가 주인공에게 쓴 편지에 답장을 해줘. " +
+                "너는 동화 속 주인공이야. 아래의 지시사항을 따르고 정보에 맞게 8세 아이가 주인공에게 쓴 편지에 답장을 해줘. 편지가 음성녹음을 stt로 변환한거라서 잘못된 내용이 들어갈수도있는것을 감안해줘.  " +
                         "###지시사항### " +
                         "1. 아이의 편지와 맥락이 맞는 답장을 작성해줘 " +
                         "2. 8세 아이가 받을 거니까 말투를 상냥하고 이야기를 잘 풀어서 이야기 해줘 " +
                         "3. 4줄로 적어줘 " +
-                        "4. 끝인사를 넣어줘 " +
-                        "5. 보낸사람의 이름도 답장에 넣어줘 " +
-                        "6. 답장만 작성해줘. 다른 정보는 포함하지 마. " +
+                        "4. 보낸사람의 이름을 답장에 넣어줘 " +
+                        "5. 답장만 작성해줘. 끝에 누가 줬는지 적지마 " +
                         "###정보### " +
                         "동화: \"%s\" " +
                         "역할: \"%s\" " +
@@ -70,7 +69,7 @@ public class LetterServiceImpl implements LetterService {
         headers.setBearerAuth(apiKey);
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-4");
+        requestBody.put("model", "gpt-4o");
         requestBody.put("messages", Arrays.asList(
                 Map.of("role", "user", "content", prompt)
         ));
