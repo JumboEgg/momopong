@@ -304,6 +304,17 @@ const handleInvitationAccept = async () => {
             book: `${inviteeName}님이 "${contentTitle}" 여행 초대를 거절했어요`,
             sketch: `${inviteeName}님이 "${contentTitle}" 함께 그리기를 거절했어요`,
           });
+
+          // 스케치일 경우 초대자를 친구 선택 페이지로 돌려보냄
+          if (contentType === 'SKETCH') {
+            navigate('/drawing', {
+              state: {
+                waitingForResponse: false, // 대기 상태 해제
+                templateId: Number(contentId),
+              },
+              replace: true,
+            });
+          }
         }
       });
 

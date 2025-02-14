@@ -43,15 +43,22 @@ function Drawing() {
   const {
     friend, setFriend, isConnected, setIsConnected,
   } = useFriends();
-  const { socket, setConnect } = useSocketStore();
+  const { socket, setConnect, isConnected: socketConnected } = useSocketStore();
   const location = useLocation();
   const {
     waitingForResponse,
     isAccepted,
   } = location.state || {};
 
-   // 기본 초기화용 useEffect
-    useEffect(() => {
+  // socketStore의 연결 상태 변화를 friendStore에 동기화
+  useEffect(() => {
+    if (mode === 'together') {
+      setIsConnected(socketConnected);
+    }
+  }, [socketConnected, mode]);
+
+  // 기본 초기화용 useEffect
+  useEffect(() => {
     if (location.state?.templateId) {
       // 한 번만 설정되도록
       if (!template || template.sketchId !== location.state.templateId) {
@@ -83,22 +90,10 @@ function Drawing() {
       if (isParticipating) {
         setConnect(true);
 
-        // 소켓과 템플릿이 모두 있을 때만 방 입장 처리
         if (socket && template) {
           const roomId = `drawing_${template.sketchId}`;
           socket.emit('join-room', roomId);
           console.log(`Joining room: ${roomId}`);
-
-          // 소켓 이벤트 리스너 설정
-          socket.on('room-joined', () => {
-            setIsConnected(true);
-            console.log('Successfully joined room');
-          });
-
-          socket.on('join-room-error', (error) => {
-            console.error('Failed to join room:', error);
-            setIsConnected(false);
-          });
 
           // friend 정보 설정
           if (location.state?.participantName && !friend) {
@@ -111,24 +106,15 @@ function Drawing() {
             });
           }
 
-          // Cleanup
           return () => {
             socket.emit('leave-room', roomId);
-            socket.off('room-joined');
-            socket.off('join-room-error');
-            setIsConnected(false);
           };
         }
       }
     }
 
-    // 항상 cleanup 함수 반환
-    return () => {
-      if (socket) {
-        setIsConnected(false);
-      }
-    };
-  }, [mode, isAccepted, location.state?.participantName, socket, template, friend]); // 의존성 배열 추가
+    return undefined;
+  }, [mode, isAccepted, location.state?.participantName, socket, template, friend]);
 
   const content = () => {
     if (!template) {
@@ -141,32 +127,42 @@ function Drawing() {
 
     // 함께하기 모드일 때
     if (mode === 'together') {
+      // 초대자 대기 상태
       if (waitingForResponse) {
         return <InvitationWaitPage />;
       }
 
-      // 초대가 수락되었거나 초대받은 상태에서는 friend가 설정되어 있어야 함
-      if (!friend) {
-        if (isAccepted || location.state?.participantName) {
-          // friend 정보 설정이 필요한 상태
-          return <InvitationWaitPage />; // 또는 다른 로딩 상태
-        }
-        return <FriendSelection />;
-      }
-
-      if (friend && !socket) {
-        return <NetworkErrorPage />;
-      }
-
-      if (friend && socket && !isConnected) {
-        return <InvitationWaitPage />;
-      }
-
-      if (!imageData) {
-        console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
-        return <DrawingPage />;
+    // 연결 준비 상태 (초대 수락 직후)
+    if (isAccepted || location.state?.participantName) {
+      if (!isConnected) {
+        return (
+          <InvitationWaitPage
+            message="함께 그리기 준비 중이에요..."
+            showTimer={false}
+            duration={2}
+            onComplete={() => setIsConnected(true)}
+          />
+        );
       }
     }
+
+    // 친구 선택
+    if (!friend) {
+      return <FriendSelection />;
+    }
+    if (friend && !socket) {
+      return <NetworkErrorPage />;
+    }
+
+    if (friend && socket && !isConnected) {
+      return <InvitationWaitPage />;
+    }
+
+    if (!imageData) {
+      // console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
+      return <DrawingPage />;
+    }
+  }
 
     // 싱글모드
     if (mode === 'single' && !imageData) {

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
-import { useFriends } from '@/stores/friendStore';
+// import { useFriends } from '@/stores/friendStore';
 
 export interface DrawingData {
   status: string;
@@ -13,6 +13,7 @@ export interface DrawingData {
 
 interface SocketStore {
   connect: boolean;
+  isConnected: boolean; // 추가
   setConnect: (connected: boolean, invitation?: string) => void;
   roomId: string | null;
   setRoomId: (roomId: string | null) => void;
@@ -25,6 +26,7 @@ interface SocketStore {
 
 const useSocketStore = create<SocketStore>((set, get) => ({
   connect: false,
+  isConnected: false, // 추가
   roomId: null,
   socket: null,
 
@@ -33,8 +35,6 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     if (connection) {
       get().connectSocket(invitationId);
-      // // 방에 입장
-      // get().setRoomId(invitationId);
     } else {
       get().disconnectSocket();
     }
@@ -55,7 +55,6 @@ const useSocketStore = create<SocketStore>((set, get) => ({
     console.info(`join-room: ${roomId}`);
   },
 
-  // 소켓 연결 및 방 자동 입장
   connectSocket: (invitationId?: string) => {
     const { socket } = get();
     if (socket) return;
@@ -69,8 +68,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     newSocket.on('connect', () => {
       console.info('WebSocket 연결 성공!');
-      const { setIsConnected } = useFriends();
-      setIsConnected(true); // 소켓 연결 성공시 설정
+      set({ isConnected: true }); // 소켓 store 자체에서 상태 관리
 
       const roomId = invitationId ? `drawing_${invitationId}` : null;
       if (roomId) {
@@ -82,7 +80,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     newSocket.on('disconnect', () => {
       console.warn(' WebSocket 연결 종료');
-      set({ socket: null, roomId: null });
+      set({ socket: null, roomId: null, isConnected: false });
     });
 
     set({ socket: newSocket });
@@ -98,7 +96,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
     }
 
     socket.disconnect();
-    set({ socket: null, roomId: null });
+    set({ socket: null, roomId: null, isConnected: false });
     console.warn('WebSocket 연결 종료');
   },
 }));
