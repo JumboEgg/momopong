@@ -12,8 +12,4 @@ public class ChildStatusDto {
     private Long childId;
     private String name;
     private StatusType status;
-
-    public void updateStatus(StatusType status) {
-        this.status = status;
-    }
 }
