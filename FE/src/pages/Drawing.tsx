@@ -11,8 +11,8 @@ import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useSketchList } from '@/stores/drawing/sketchListStore';
 // import { Friend, StatusType } from '@/types/friend';
-import InvitationWaitPage from '../components/common/multiplayPages/invitationWaitPage';
-import NetworkErrorPage from '../components/common/multiplayPages/networkerrorPage';
+import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
+import NetworkErrorPage from '../components/common/multiplayPages/NetworkerrorPage';
 
 const getTemplateFilename = (id: number): string => {
   const fileMap: Record<number, string> = {
@@ -41,7 +41,7 @@ function Drawing() {
 
   const { setSketchList } = useSketchList();
   const {
-    friend, setFriend, isConnected,
+    friend, setFriend, isConnected, setIsConnected,
   } = useFriends();
   const { socket, setConnect } = useSocketStore();
   const location = useLocation();
@@ -73,26 +73,62 @@ function Drawing() {
   }, [location.state]);
 
   // 소켓 연결 관리
+  // 기본 초기화용 useEffect는 그대로 유지
+
+  // 소켓 연결 관리
   useEffect(() => {
     if (mode === 'together') {
       const isParticipating = isAccepted || location.state?.participantName;
 
       if (isParticipating) {
         setConnect(true);
-        // isConnected; // 여기 추가
 
-        if (location.state?.participantName && !friend) {
-          setFriend({
-            id: location.state?.participantId,
-            childId: location.state?.participantId,
-            name: location.state?.participantName,
-            profile: location.state?.participantProfile || '',
-            status: 'DRAWING',
+        // 소켓과 템플릿이 모두 있을 때만 방 입장 처리
+        if (socket && template) {
+          const roomId = `drawing_${template.sketchId}`;
+          socket.emit('join-room', roomId);
+          console.log(`Joining room: ${roomId}`);
+
+          // 소켓 이벤트 리스너 설정
+          socket.on('room-joined', () => {
+            setIsConnected(true);
+            console.log('Successfully joined room');
           });
+
+          socket.on('join-room-error', (error) => {
+            console.error('Failed to join room:', error);
+            setIsConnected(false);
+          });
+
+          // friend 정보 설정
+          if (location.state?.participantName && !friend) {
+            setFriend({
+              id: location.state?.participantId,
+              childId: location.state?.participantId,
+              name: location.state?.participantName,
+              profile: location.state?.participantProfile || '',
+              status: 'DRAWING',
+            });
+          }
+
+          // Cleanup
+          return () => {
+            socket.emit('leave-room', roomId);
+            socket.off('room-joined');
+            socket.off('join-room-error');
+            setIsConnected(false);
+          };
         }
       }
     }
-  }, [mode, isAccepted, location.state?.participantName]);
+
+    // 항상 cleanup 함수 반환
+    return () => {
+      if (socket) {
+        setIsConnected(false);
+      }
+    };
+  }, [mode, isAccepted, location.state?.participantName, socket, template, friend]); // 의존성 배열 추가
 
   const content = () => {
     if (!template) {
