@@ -3,12 +3,12 @@ import ReadingMode from '@/components/stories/StoryMode/ReadingMode';
 import TogetherMode from '@/components/stories/StoryMode/TogetherMode';
 import StorySelection from '@/components/stories/StoryMode/StorySelection';
 import ModeSelection from '@/components/stories/ModeSelection/ModeSelection';
-import { useFriends } from '@/stores/friendStore';
-import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
-import { useStory } from '@/stores/storyStore';
-import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
+import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
+import { useFriends } from '@/stores/friendStore';
+import { useStory } from '@/stores/storyStore';
+import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useBookList } from '@/stores/book/bookListStore';
 
 function Story() {

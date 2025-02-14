@@ -6,13 +6,13 @@ import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/components/stories/StoryMode/FriendSelection';
 import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
+import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
+import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useSketchList } from '@/stores/drawing/sketchListStore';
 // import { Friend, StatusType } from '@/types/friend';
-import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
-import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
 
 const getTemplateFilename = (id: number): string => {
   const fileMap: Record<number, string> = {
