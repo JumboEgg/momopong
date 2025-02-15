@@ -51,14 +51,14 @@ export const useReportStore = create<ReportStore>((set) => ({
         );
 
         if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status}`);
+          throw new Error(`Loading Activity failed: ${response.status}`);
         }
 
         const data = await response.json();
 
         set({ analysis: data });
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error loading activity:', error);
       throw error;
     }
   },
@@ -78,14 +78,14 @@ export const useReportStore = create<ReportStore>((set) => ({
         );
 
         if (!response.ok) {
-          throw new Error(`Upload failed: ${response.status}`);
+          throw new Error(`Loading History failed: ${response.status}`);
         }
 
         const data = await response.json();
 
         set({ history: data });
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('Error loading history:', error);
       throw error;
     }
   },
@@ -117,7 +117,7 @@ export const useReportStore = create<ReportStore>((set) => ({
 
       set({ sketches: data });
     } catch (error) {
-      console.error('Error loading image:', error);
+      console.error('Error loading sketches:', error);
       throw error;
     }
   },

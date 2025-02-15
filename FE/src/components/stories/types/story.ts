@@ -4,20 +4,6 @@ export type StoryMode = 'reading' | 'together';
 
 export type CharacterType = 'narration' | 'role1' | 'role2';
 
-export interface Friend {
-  id: number;
-  childId: number;
-  name: string;
-  profile: string;
-  avatar: string;
-}
-
-export interface StoryLine {
-  type: CharacterType;
-  text: string;
-  audioFiles: string[];
-}
-
 export interface RecordingData {
   characterType: CharacterType;
   audioUrl: string;

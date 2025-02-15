@@ -13,7 +13,10 @@ import { useBookList } from '@/stores/book/bookListStore';
 
 function Story() {
   const {
-    mode, setMode, bookId, setBookId, setCurrentIndex,
+    mode, setMode,
+    bookId, setBookId,
+    setCurrentIndex,
+    setBookRecordId,
   } = useStory();
 
   const {
@@ -25,6 +28,7 @@ function Story() {
     setBookId(null);
     setCurrentIndex(0);
     setBookList();
+    setBookRecordId(null);
   }, []);
 
   const {

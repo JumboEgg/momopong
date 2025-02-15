@@ -10,12 +10,19 @@ export const STORY_ROLES = {
 } as const;
 
 interface RoleState {
+  inviterId: number | null;
   inviterRole: StoryRole | null;
   inviteeRole: StoryRole | null;
   bookId: number | null;
-  // 역할에 매핑된 사용자 ID 추가
+
+  // 역할에 매핑된 사용자 ID
   role1UserId: number | null;
   role2UserId: number | null;
+
+  // 독서 기록 저장 id
+  role1RecordId: number | null;
+  role2RecordId: number | null;
+
   setRoles: (
     inviterRole: StoryRole,
     inviteeRole: StoryRole,
@@ -26,22 +33,29 @@ interface RoleState {
   clearRoles: () => void;
   getCurrentRole: (userId: number) => StoryRole | null;
   getUserIdByRole: (role: StoryRole) => number | null;
+
+  setRole1RecordId: (id: number | null) => void;
+  setRole2RecordId: (id: number | null) => void;
 }
 
 export const useRoleStore = create<RoleState>()(
   persist(
     (set, get) => ({
+      inviterId: null,
       inviterRole: null,
       inviteeRole: null,
       bookId: null,
       role1UserId: null,
       role2UserId: null,
+      role1RecordId: null,
+      role2RecordId: null,
 
       setRoles: (inviterRole, inviteeRole, bookId, inviterId, inviteeId) => {
         console.log('Setting roles:', {
- inviterRole, inviteeRole, bookId, inviterId, inviteeId,
-});
+          inviterRole, inviteeRole, bookId, inviterId, inviteeId,
+        });
         set({
+          inviterId,
           inviterRole,
           inviteeRole,
           bookId,
@@ -68,6 +82,9 @@ export const useRoleStore = create<RoleState>()(
         const state = get();
         return role === STORY_ROLES.PRINCESS ? state.role1UserId : state.role2UserId;
       },
+
+      setRole1RecordId: (id) => set({ role1RecordId: id }),
+      setRole2RecordId: (id) => set({ role2RecordId: id }),
     }),
     {
       name: 'story-role-storage',

@@ -1,11 +1,9 @@
 import useSubAccountStore from '@/stores/subAccountStore';
 
-const endBookRecordSession = async () => {
+const endBookRecordSession = async (bookRecordId: number) => {
     try {
         const { accessToken } = useSubAccountStore.getState().childToken;
 
-        // TODO : roleStore에 저장된 데이터로 교체
-        const bookRecordId = 5;
         const data = {
             recordId: bookRecordId,
         };
@@ -25,6 +23,8 @@ const endBookRecordSession = async () => {
         if (!response.ok) {
             throw new Error(`Error ending book record: ${response.status}`);
         }
+
+        console.log('book record ended: ', bookRecordId);
     } catch (error) {
         console.error(error);
         throw error;

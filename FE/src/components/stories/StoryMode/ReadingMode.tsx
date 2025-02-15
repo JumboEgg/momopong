@@ -3,20 +3,28 @@ import {
   useCallback,
   useState,
   ReactElement,
+  useEffect,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
-import AudioPlayer from '../AudioPlayer';
+import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
+import { BookParticiPationRecordData } from '@/types/book';
+import useSubAccountStore from '@/stores/subAccountStore';
+import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
 import StoryIllustration from './StoryIllustration';
+import AudioPlayer from '../AudioPlayer';
 
 function ReadingMode(): ReactElement {
   const navigate = useNavigate();
   const {
+    bookId,
     currentIndex,
     setCurrentIndex,
     audioEnabled,
     toggleAudio,
+    bookRecordId,
+    setBookRecordId,
   } = useStory();
 
   const { bookContent } = useBookContent();
@@ -24,6 +32,27 @@ function ReadingMode(): ReactElement {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [showEndOverlay, setShowEndOverlay] = useState(false);
+
+  // 읽기 기록 생성 여부 확인
+  const isRecording = useRef(false);
+  // 읽기 기록 저장
+  const saveReadingSession = async () => {
+    const data: BookParticiPationRecordData = {
+      childId: useSubAccountStore.getState().selectedAccount?.childId ?? 0,
+      bookId: bookId ?? 0,
+      role: '',
+      mode: 'SINGLE',
+    };
+    const id = await makeBookRecord(data);
+    setBookRecordId(id);
+  };
+
+  // 읽기 시작 시 도서 읽기 정보 저장
+  useEffect(() => {
+    if (isRecording.current) return;
+    isRecording.current = true;
+    saveReadingSession();
+  }, []);
 
   const stopCurrentAudio = useCallback(() => {
     if (audioRef.current) {
@@ -77,6 +106,8 @@ function ReadingMode(): ReactElement {
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
     } else {
+      // 읽기 종료 시 읽기 기록 정보 갱신
+      endBookRecordSession(bookRecordId ?? 0);
       setShowEndOverlay(true);
     }
   }, [currentIndex, currentContentIndex, stopCurrentAudio, setCurrentIndex]);
@@ -86,6 +117,8 @@ function ReadingMode(): ReactElement {
     setCurrentIndex(0);
     setCurrentContentIndex(0);
     setShowEndOverlay(false);
+    setBookRecordId(null);
+    isRecording.current = false;
   }, [stopCurrentAudio, setCurrentIndex]);
 
   const handleGoHome = useCallback(() => {

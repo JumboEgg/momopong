@@ -34,13 +34,18 @@ function ActivityTab() {
   return (
     <div className="flex flex-col w-full h-full gap-y-5">
       <div className="text-xl">
-        <span className="text-[steelblue]">
+        <span>
           { history.length
-          ? `${history[0].bookTitle}}을(를) 가장 많이 읽었어요.`
+          ? (
+            <div>
+              <span className="text-[steelblue]">{history[0].bookTitle}</span>
+              을(를) 가장 많이 읽었어요.
+            </div>
+          )
           : '아직 책을 읽지 않았어요'}
         </span>
       </div>
-      <div className="w-full h-full flex justify-center items-center bg-blue-100 border-4 border-blue-300 rounded-2xl font-sans font-bold">
+      <div className="w-full h-full flex justify-center items-center bg-blue-100 border-4 border-blue-300 rounded-2xl font-sans font-bold p-4">
         <div className="w-full grid grid-cols-3 justify-evenly items-baseline">
           {readData}
         </div>

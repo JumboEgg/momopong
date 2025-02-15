@@ -21,8 +21,9 @@ const makeBookRecord = async (recordData: BookParticiPationRecordData) => {
             throw new Error(`Book record table creation failed: ${response.status}`);
         }
 
-        // TODO : 테이블 생성 결과 roleStore에 저장
         const data: BookParticipationRecordInfo = await response.json();
+
+        console.log('book record created: ', data);
 
         return data.bookRecordId;
     } catch (error) {

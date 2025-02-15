@@ -30,11 +30,6 @@ export interface BookContentInfo {
     pages: PageInfo[];
 }
 
-export interface RecordInfo {
-    path: string;
-    fileName: string;
-}
-
 export interface BookParticiPationRecordData {
     childId: number;
     bookId: number;

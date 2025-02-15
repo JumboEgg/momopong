@@ -9,10 +9,14 @@ interface StoryStore {
   setBookId: (id: number | null) => void // 타입 수정
   currentIndex: number;
   setCurrentIndex: (idx: number) => void;
+  currentAudioIndex: number;
+  setCurrentAudioIndex: (idx: number) => void;
   recordings: Map<number, RecordingData>;
   addRecording: (idx: number, record: RecordingData) => void;
   audioEnabled: boolean;
   toggleAudio: () => void;
+  bookRecordId: number | null;
+  setBookRecordId: (id: number | null) => void;
 }
 
 // Zustand 상태 훅 생성
@@ -26,6 +30,9 @@ const useStoryStore = create<StoryStore>((set, get) => ({
   currentIndex: 0,
   setCurrentIndex: (idx) => set({ currentIndex: idx }),
 
+  currentAudioIndex: 0,
+  setCurrentAudioIndex: (idx) => set({ currentAudioIndex: idx }),
+
   recordings: new Map(),
   addRecording: (idx, record) => set((state) => {
     const newMap = new Map(state.recordings);
@@ -35,6 +42,9 @@ const useStoryStore = create<StoryStore>((set, get) => ({
 
   audioEnabled: true,
   toggleAudio: () => set({ audioEnabled: !get().audioEnabled }),
+
+  bookRecordId: null,
+  setBookRecordId: (id) => set({ bookRecordId: id }),
 }));
 
 // Zustand에서 상태를 가져오는 커스텀 훅

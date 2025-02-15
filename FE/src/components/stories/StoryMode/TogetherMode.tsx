@@ -4,12 +4,18 @@ import {
   useEffect,
   useCallback,
   useMemo,
+  useRef,
 } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import { useFriends } from '@/stores/friendStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
+import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
+import { BookParticiPationRecordData, PageRecordData } from '@/types/book';
+import { useRoleStore } from '@/stores/roleStore';
+import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
+import { useRecordList } from '@/stores/book/bookRecordListStore';
 import IntegratedRoom from './IntegratedRoom';
 import AudioPlayer from '../AudioPlayer';
 import StoryIllustration from './StoryIllustration';
@@ -34,7 +40,27 @@ function TogetherMode() {
   const { friend } = useFriends();
   const { bookContent } = useBookContent();
   const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
-  const { currentIndex, setCurrentIndex, audioEnabled } = useStory();
+  const {
+    bookId,
+    currentIndex, setCurrentIndex,
+    audioEnabled,
+    bookRecordId, setBookRecordId,
+  } = useStory();
+
+  const {
+    inviterId,
+    role1UserId,
+    role2UserId,
+    role1RecordId, setRole1RecordId,
+    role2RecordId, setRole2RecordId,
+  } = useRoleStore();
+
+  const {
+    addRecord, uploadRecord,
+  } = useRecordList();
+
+  // inviter/invitee 구분용 id 정보
+  const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
   // 상태 관리
   const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
@@ -46,10 +72,52 @@ function TogetherMode() {
   const currentPage = bookContent?.pages[currentIndex];
   const currentContent = currentPage?.audios[currentContentIndex];
 
-  // 역할 초기 설정
+  // 읽기 기록 생성 여부 확인
+  const isRecording = useRef(false);
+
+  // 읽기 기록 저장
+  const saveReadingSession = async () => {
+    if (inviterId !== myId) return;
+
+    // role1 사용자의 DB 생성
+    const role1Data: BookParticiPationRecordData = {
+      childId: role1UserId ?? 0,
+      bookId: bookId ?? 0,
+      role: bookContent?.role1 ?? 'role1',
+      mode: 'MULTI',
+    };
+    console.log('role1: ', role1Data);
+    const role1Id = await makeBookRecord(role1Data);
+    if (role1UserId === myId) setBookRecordId(role1Id);
+    setRole1RecordId(role1Id);
+
+    // role2 사용자의 DB 생성
+    const role2Data: BookParticiPationRecordData = {
+      childId: role2UserId ?? 0,
+      bookId: bookId ?? 0,
+      role: bookContent?.role2 ?? 'role2',
+      mode: 'MULTI',
+    };
+    console.log('role1: ', role2Data);
+    const role2Id = await makeBookRecord(role2Data);
+    if (role1UserId === myId) setBookRecordId(role2Id);
+    setRole2RecordId(role2Id);
+  };
+
   useEffect(() => {
-    const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
-    setUserRole(randomRole);
+    // 역할 초기 설정
+    // const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
+    // setUserRole(randomRole);
+
+    // roleStore에 저장된 역할 배정
+    if (role1UserId === myId) {
+      setUserRole('role1');
+    } else setUserRole('role2');
+
+    // 읽기 시작 시 도서 읽기 정보 저장
+    if (isRecording.current) return;
+    isRecording.current = true;
+    saveReadingSession();
   }, []);
 
   // 현재 사용자 차례 확인
@@ -57,6 +125,11 @@ function TogetherMode() {
     if (!userRole || !currentContent) return false;
     return currentContent.role === userRole;
   }, [userRole, currentContent]);
+
+  useEffect(() => {
+    if (!currentPage) return;
+    uploadRecord();
+  }, [currentIndex]);
 
   // 다음 페이지/컨텐츠로 이동
   const handleNext = useCallback(() => {
@@ -71,6 +144,9 @@ function TogetherMode() {
     } else if (currentIndex < storyData.length - 1) {
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
+    } else {
+      // 읽기 종료 시 읽기 기록 정보 갱신
+      endBookRecordSession(bookRecordId ?? 0);
     }
   }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
 
@@ -111,14 +187,37 @@ function TogetherMode() {
     }
   }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
 
+  // 오디오 정보 저장
+  const addAudioToList = (audioBlob: Blob | null) => {
+    console.log(`page: ${currentIndex + 1}, audio: ${currentContentIndex + 1}`);
+    // 저장할 데이터
+    const pageData: PageRecordData = {
+        bookRecordId: role1RecordId ?? 0,
+        partnerBookRecordId: role2RecordId ?? 0,
+        bookRecordPageNumber: currentIndex + 1,
+        pagePath: currentPage?.pagePath ?? '',
+        audioPath: currentContent?.path ?? '',
+        role: currentContent?.role ?? 'narration',
+        text: currentContent?.text ?? '',
+        audioNumber: currentContentIndex + 1,
+    };
+    addRecord(pageData, audioBlob);
+  };
+
   // 내레이션 오디오 완료 처리
   const handleNarrationComplete = useCallback(() => {
+    if (currentContent?.role === 'narration') {
+      addAudioToList(null);
+    }
     handleNext();
   }, [handleNext]);
 
   const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
     // 녹음된 오디오 blob 처리
     console.log('녹음 완료:', participantId, audioBlob);
+
+    // 오디오 저장
+    addAudioToList(audioBlob ?? null);
 
     // 녹음 상태 업데이트
     setRecordingStates((prev) => ({

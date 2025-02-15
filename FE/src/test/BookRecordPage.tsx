@@ -64,7 +64,7 @@ function BookRecordPage() {
         <button type="button" onClick={() => makeBookRecord(bookSessionData)}>
           bookRecord 시작
         </button>
-        <button type="button" onClick={endBookRecordSession}>
+        <button type="button" onClick={() => endBookRecordSession(1)}>
           bookRecord 끝내기
         </button>
         <button type="button" onClick={() => addRecord(pageData, audio)}>

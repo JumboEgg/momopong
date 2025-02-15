@@ -5,7 +5,7 @@ import uploadStoryAudioToS3 from '@/utils/bookS3/pageAudioS3Upload';
 
 interface RecordListStore {
   recordList: PageRecordData[];
-  addRecord: (pageData: PageRecordData, audio: Blob) => void;
+  addRecord: (pageData: PageRecordData, audio: Blob | null) => void;
   clearRecordList: () => void;
   uploadRecord: () => void;
 }
@@ -19,27 +19,21 @@ const useRecordListStore = create<RecordListStore>()(
         try {
           // narration은 기존 S3를 저장
           if (pageData.role === 'narration') {
+            const data = pageData;
+            [data.audioPath] = pageData.audioPath.split('?');
             set({ recordList: [...get().recordList, pageData] });
             return;
+          }
+
+          if (!audioBlob) {
+            throw new Error('Audio is not recorded');
           }
 
           // 본인 대사일 경우에만 audio 정보 저장 시도
           const { fileName } = await uploadStoryAudioToS3(audioBlob);
 
-          // TODO : roleStore에서 정보 가져오기
-          const inviterRecordId = 5;
-          const inviteeRecordId = 6;
-
-          const data: PageRecordData = {
-            bookRecordId: inviterRecordId,
-            partnerBookRecordId: inviteeRecordId,
-            bookRecordPageNumber: pageData.bookRecordPageNumber,
-            pagePath: pageData.pagePath,
-            audioPath: fileName,
-            role: pageData.role,
-            text: pageData.text,
-            audioNumber: pageData.audioNumber,
-          };
+          const data = pageData;
+          data.audioPath = fileName;
 
             set({ recordList: [...get().recordList, data] });
         } catch (error) {
@@ -53,6 +47,7 @@ const useRecordListStore = create<RecordListStore>()(
           const { accessToken } = useSubAccountStore.getState().childToken;
 
           get().recordList.forEach(async (record) => {
+            console.log('uploading record: ', record);
             const response = await fetch(
               `${import.meta.env.VITE_API_BASE_URL}/book/record-page/save`,
               {
