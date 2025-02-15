@@ -1,4 +1,3 @@
-// 수정한거임
 import {
   useState,
   useEffect,
@@ -7,6 +6,7 @@ import {
 } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
+import { useRoomStore } from '@/stores/roomStore'; // ✅ LiveKit 상태 추가
 import { useFriends } from '@/stores/friendStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
@@ -14,7 +14,6 @@ import IntegratedRoom from './IntegratedRoom';
 import AudioPlayer from '../AudioPlayer';
 import StoryIllustration from './StoryIllustration';
 import storyData from '../data/cinderella';
-// import { getAudioUrl } from '../utils/audioUtils';
 
 interface LocationState {
   roomName: string;
@@ -29,8 +28,14 @@ interface RecordingState {
 }
 
 function TogetherMode() {
+  // 방 이름 관리
   const location = useLocation();
   const { roomName } = location.state as LocationState;
+  
+  // LiveKit에서 페이지 동기화 관리
+  const { currentPage, sendPageUpdate } = useRoomStore();
+  
+  // 친구, 책 컨텐츠, 서브 계정, 스토리 상태 가져오기
   const { friend } = useFriends();
   const { bookContent } = useBookContent();
   const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
@@ -43,8 +48,8 @@ function TogetherMode() {
   const [isWaitingForOther, setIsWaitingForOther] = useState(false);
 
   // 현재 페이지 및 컨텐츠 계산
-  const currentPage = bookContent?.pages[currentIndex];
-  const currentContent = currentPage?.audios[currentContentIndex];
+  const currentPageData = bookContent?.pages[currentIndex];
+  const currentContent = currentPageData?.audios[currentContentIndex];
 
   // 역할 초기 설정
   useEffect(() => {
@@ -58,21 +63,40 @@ function TogetherMode() {
     return currentContent.role === userRole;
   }, [userRole, currentContent]);
 
-  // 다음 페이지/컨텐츠로 이동
+  /**
+   * 🔄 LiveKit에서 받은 `currentPage`를 현재 사용자의 `currentIndex`에 반영
+   */
+  useEffect(() => {
+    if (currentPage !== currentIndex) {
+      console.log(`🔄 페이지 동기화: ${currentPage} → ${currentIndex}`);
+      setCurrentIndex(currentPage);
+      setCurrentContentIndex(0);
+    }
+  }, [currentPage, currentIndex, setCurrentIndex]);
+
+  /**
+   * ✅ 다음 페이지/컨텐츠로 이동하며 LiveKit에 변경 전송
+   */
   const handleNext = useCallback(() => {
-    if (!currentPage) return;
+    if (!currentPageData) return;
 
     // 녹음 상태 초기화
     setRecordingStates({});
     setIsWaitingForOther(false);
 
-    if (currentContentIndex < currentPage.audios.length - 1) {
+    if (currentContentIndex < currentPageData.audios.length - 1) {
       setCurrentContentIndex((prev) => prev + 1);
     } else if (currentIndex < storyData.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      const nextPage = currentIndex + 1;
+      
+      // ✅ 다음 페이지로 이동
+      setCurrentIndex(nextPage);
       setCurrentContentIndex(0);
+
+      // ✅ LiveKit을 통해 페이지 변경 브로드캐스트
+      sendPageUpdate(nextPage);
     }
-  }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
+  }, [currentIndex, currentContentIndex, currentPageData, setCurrentIndex, sendPageUpdate]);
 
   // 녹음 상태 변경 처리
   const handleRecordingStateChange = useCallback(
@@ -90,26 +114,28 @@ function TogetherMode() {
 
   // 모든 참가자의 녹음 완료 여부 확인
   useEffect(() => {
-    const allParticipantsCompleted = Object
-    .values(recordingStates).every((state) => state.isCompleted);
+    const allParticipantsCompleted = Object.values(recordingStates).every(
+      (state) => state.isCompleted
+    );
 
-    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
     if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      // 현재 페이지의 모든 컨텐츠를 확인
-      if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
-        // 아직 페이지 내 다음 컨텐츠가 있다면 다음 컨텐츠로 이동
+      if (currentContentIndex < (currentPageData?.audios.length ?? 0) - 1) {
         setCurrentContentIndex((prev) => prev + 1);
       } else if (currentIndex < storyData.length - 1) {
-        // 페이지 내 컨텐츠를 모두 완료했다면 다음 페이지로 이동
-        setCurrentIndex(currentIndex + 1);
+        const nextPage = currentIndex + 1;
+        
+        // ✅ 다음 페이지로 이동
+        setCurrentIndex(nextPage);
         setCurrentContentIndex(0);
+
+        // ✅ LiveKit을 통해 페이지 변경 브로드캐스트
+        sendPageUpdate(nextPage);
       }
 
-      // 녹음 상태 초기화
       setRecordingStates({});
       setIsWaitingForOther(false);
     }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+  }, [recordingStates, currentIndex, currentContentIndex, currentPageData]);
 
   // 내레이션 오디오 완료 처리
   const handleNarrationComplete = useCallback(() => {
@@ -117,80 +143,62 @@ function TogetherMode() {
   }, [handleNext]);
 
   const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
-    // 녹음된 오디오 blob 처리
     console.log('녹음 완료:', participantId, audioBlob);
 
-    // 녹음 상태 업데이트
     setRecordingStates((prev) => ({
       ...prev,
       [participantId]: {
         isRecording: false,
         isCompleted: true,
-        audioBlob, // 오디오 blob 저장
+        audioBlob,
       },
     }));
 
-    // 대기 상태 설정
     setIsWaitingForOther(true);
   }, []);
 
   return (
     <div className="w-full h-screen relative">
-      {/* 동화 컨텐츠 영역 */}
       <div className="w-full h-full px-6 pb-48 pt-6">
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
-          <p className="text-gray-600">
-            내 역할:
-            {userRole === 'role2' ? '왕자님' : '신데렐라'}
-          </p>
-          <p className="text-gray-600">
-            함께 읽는 친구:
-            {friend?.name || ''}
-          </p>
+          <p className="text-gray-600">내 역할: {userRole === 'role2' ? '왕자님' : '신데렐라'}</p>
+          <p className="text-gray-600">함께 읽는 친구: {friend?.name || ''}</p>
         </div>
 
         <StoryIllustration
-          pageNumber={currentPage?.pageNumber ?? 0}
           currentContentIndex={currentContentIndex}
           onPrevious={() => {
             if (currentIndex > 0) {
               setCurrentIndex(currentIndex - 1);
               setCurrentContentIndex(0);
+              sendPageUpdate(currentIndex - 1); // ✅ 이전 페이지 전송
             }
           }}
           onNext={handleNext}
-          isFirst={currentIndex === 0}
-          isLast={currentIndex === storyData.length - 1}
           userRole={userRole || undefined}
           currentContent={currentContent}
-          illustration={currentPage?.pagePath ?? ''}
+          illustration={currentPageData?.pagePath ?? ''}
+          totalPages={storyData.length}
         />
 
-        {/* 녹음 대기 상태 표시 */}
         {isWaitingForOther && (
           <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 px-6 py-3 rounded-full shadow-lg">
             상대방의 녹음이 끝날 때까지 기다려주세요...
           </div>
         )}
 
-        {/* 오디오 플레이어 (내레이션) */}
         {currentContent?.role === 'narration' && audioEnabled && currentContent.order && (
           <div className="hidden">
             <AudioPlayer
               audioFiles={[currentContent.path ?? '']}
               autoPlay
               onEnded={handleNarrationComplete}
-              onError={() => {
-                console.error('Audio playback failed');
-                handleNext();
-              }}
+              onError={handleNext}
             />
           </div>
         )}
       </div>
-
-      {/* 화상 비디오 영역 */}
       {userRole && (
         <IntegratedRoom
           roomName={roomName}
@@ -198,9 +206,7 @@ function TogetherMode() {
           userRole={userRole}
           isUserTurn={isUserTurn}
           onRecordingComplete={handleRecordingComplete}
-          onRecordingStatusChange={(participantId: string, status) => {
-            handleRecordingStateChange(participantId, status);
-          }}
+          onRecordingStatusChange={handleRecordingStateChange}
         />
       )}
     </div>

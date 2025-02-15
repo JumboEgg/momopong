@@ -67,16 +67,25 @@ export interface RecordingButtonProps {
 }
 
 // StoryIllustration.tsx
+// export interface StoryIllustrationProps {
+//   pageNumber: number;
+//   currentContentIndex: number;
+//   onPrevious: () => void;
+//   onNext: () => void;
+//   isFirst: boolean;
+//   isLast: boolean;
+//   userRole?: 'role1' | 'role2';
+//   currentContent: BookAudioInfo | undefined;
+//   illustration: string;
+// }
 export interface StoryIllustrationProps {
-  pageNumber: number;
-  currentContentIndex: number;
+  currentContentIndex: number; // ✅ 현재 페이지의 콘텐츠 인덱스 추가
   onPrevious: () => void;
   onNext: () => void;
-  isFirst: boolean;
-  isLast: boolean;
-  userRole?: 'role1' | 'role2';
+  userRole: 'role2' | 'role1' | undefined;
   currentContent: BookAudioInfo | undefined;
   illustration: string;
+  totalPages: number; // ✅ 전체 페이지 수 추가
 }
 
 export interface Story {

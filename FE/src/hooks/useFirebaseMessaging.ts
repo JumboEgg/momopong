@@ -8,6 +8,7 @@ import { useFriendListStore } from '@/stores/friendListStore';
 import useToastStore from '@/stores/toastStore';
 import { ContentType } from '@/types/invitation';
 import type { NotificationType } from '@/types/notification';
+import { useRoomStore } from '@/stores/roomStore'; // LiveKit 방 관리 store 추가
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -41,6 +42,7 @@ export const useFirebaseMessaging = () => {
   const navigate = useNavigate();
   const { setFCMToken } = useFCMStore();
   const { rejectInvitation, acceptInvitation } = useFriendListStore();
+  const { connectToRoom } = useRoomStore();
 
   const [invitationModal, setInvitationModal] = useState<InvitationModal>({
     isOpen: false,
@@ -107,6 +109,8 @@ const handleInvitationAccept = async () => {
           },
         });
       } else if (contentType === 'BOOK') {
+        const roomName = `book-${contentId}`;
+        await connectToRoom(roomName, inviteeName); // LiveKit 방 생성 및 입장
         navigate(`/book/${contentId}/together`, {
           state: {
             roomName: `book-${contentId}`,
