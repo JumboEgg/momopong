@@ -86,7 +86,6 @@ function TogetherMode() {
       role: bookContent?.role1 ?? 'role1',
       mode: 'MULTI',
     };
-    console.log('role1: ', role1Data);
     const role1Id = await makeBookRecord(role1Data);
     if (role1UserId === myId) setBookRecordId(role1Id);
     setRole1RecordId(role1Id);
@@ -98,7 +97,6 @@ function TogetherMode() {
       role: bookContent?.role2 ?? 'role2',
       mode: 'MULTI',
     };
-    console.log('role1: ', role2Data);
     const role2Id = await makeBookRecord(role2Data);
     if (role1UserId === myId) setBookRecordId(role2Id);
     setRole2RecordId(role2Id);

@@ -47,7 +47,6 @@ const useRecordListStore = create<RecordListStore>()(
           const { accessToken } = useSubAccountStore.getState().childToken;
 
           get().recordList.forEach(async (record) => {
-            console.log('uploading record: ', record);
             const response = await fetch(
               `${import.meta.env.VITE_API_BASE_URL}/book/record-page/save`,
               {
