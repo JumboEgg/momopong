@@ -29,11 +29,11 @@ public class BookRecordPage {
     private List<BookRecordSketch> bookRecordSketchList = new ArrayList<>();
 
     @Column(name="book_record_page_number")
-    private Long bookRecordPageNumber;
+    private int bookRecordPageNumber;
 
     private String pagePath; // 페이지 이미지 경로
     private String audioPath; // 음성 파일 경로
     private String role; // 역할
     private String text; // 대사
-    private Long audioNumber; // 음성 순서
+    private int audioNumber; // 음성 순서
 }
