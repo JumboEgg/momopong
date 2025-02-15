@@ -1,5 +1,5 @@
 export interface JwtToken {
-  grantType: string;
+  grantType?: string;
   accessToken: string;
   refreshToken: string;
 }

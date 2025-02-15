@@ -1,4 +1,5 @@
 // components/ParentAuthModal.tsx
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import NumberPad from '@/components/common/numberpad/NumberPad';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
@@ -19,7 +20,13 @@ function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
     setUserInput,
     clearLastInput,
     checkAnswer,
+    resetAuth, // 문제 초기화
   } = useParentAuthStore();
+
+    // 컴포넌트 마운트 시 상태 초기화
+    useEffect(() => {
+      resetAuth();
+    }, [resetAuth]);
 
   const handleNumberClick = (value: number) => {
     setUserInput(value);
@@ -28,7 +35,8 @@ function ParentAuthModal({ onClose }: ParentAuthModalProps): JSX.Element {
   const handleSubmit = () => {
     const correct = checkAnswer();
     if (correct) {
-      navigate('/Parent');
+      // 현재 페이지를 히스토리 스택에서 교체
+      navigate('/Parent', { replace: true });
     }
   };
 

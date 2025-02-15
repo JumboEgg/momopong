@@ -21,11 +21,12 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   // 컴포넌트 마운트 시 'list' 버튼에 포커스
   useEffect(() => {
     setFocusedButton('list');
+    setActiveTab('list'); // activeTab도 함께 설정
   }, []);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
-    setFocusedButton(tab); // 탭 변경 시 포커스도 변경
+    setFocusedButton(tab);
   };
 
   const handleOpenAddFriendModal = () => {
@@ -33,13 +34,14 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   };
 
   return (
+    // dim 처리 영역
     <div
       className="fixed top-0 left-0 w-full h-full z-30
       bg-[#00000060]
       flex items-center justify-center"
     >
-      <div className="w-1/2 min-h-[85vh] bg-broom-200 border-10 border-tainoi-400
-        flex flex-col absolute items-center justify-between p-8 rounded-[2vw] overflow-hidden"
+      <div className="w-[90%] md:w-1/2 h-[80vh] min-h-[600px] max-h-[800px] bg-broom-200 border-10 border-tainoi-400
+      flex flex-col absolute items-center p-4 md:p-8 rounded-[2vw]"
       >
         <IconCircleButton
           size="xs"
@@ -67,7 +69,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           </TextButton>
         </div>
         {/* 탭으로 전환되는 부분 */}
-        <div className="flex-1 w-full overflow-y-auto my-8">
+        <div className="flex-1 w-full overflow-y-auto my-4 md:my-8 px-2 md:px-4 customScrollbar yellow">
           {activeTab === 'list' ? (
             <FriendList />
           ) : (

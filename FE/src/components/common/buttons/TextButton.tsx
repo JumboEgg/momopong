@@ -37,13 +37,16 @@ function TextButton({
     // 아이 화면에서 자주 보일 버튼
     white: `
     ${disabled
-    ? 'bg-gray-200 text-gray-600 border-gray-300 cursor-not-allowed'
-    : `
-        bg-white text-black border-tainoi-300
-        hover:bg-tainoi-200
-        active:bg-tainoi-300
-        ${hasFocus ? 'focus:bg-tainoi-300 focus:outline-none focus:border-white' : 'focus:outline-none'}
-      `
+      ? 'bg-gray-200 text-gray-600 border-gray-300 cursor-not-allowed'
+      : `
+          ${hasFocus
+            ? 'bg-tainoi-200 text-black border-white' // 활성화된 상태
+            : 'bg-white text-black border-tainoi-300' // 비활성화된 상태
+          }
+          hover:bg-tainoi-200
+          active:bg-tainoi-300
+          focus:outline-none
+        `
 }
   `,
     // 부모 화면 등에서 자주 보일 버튼

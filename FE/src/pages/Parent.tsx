@@ -1,26 +1,41 @@
-import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { IconCircleButton, TextCircleButton } from '@/components/common/buttons/CircleButton';
 import ActivityTab from '@/components/parentReport/tabs/ActivityTab';
 import CraftsTab from '@/components/parentReport/tabs/CraftsTab';
 import ReportTab from '@/components/parentReport/tabs/ReportTab';
 import { useReportStore } from '@/stores/reportStore';
-import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { faArrowLeft, faSignOutAlt } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { useNavigate } from 'react-router-dom';
 import '@/components/common/scrollbar.css';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { useEffect } from 'react';
+import { useParentAuthStore } from '@/stores/parentAuthStore';
+import { useLoginStore } from '@/stores/loginStore';
 
 function Parent() {
   const navigate = useNavigate();
   const {
     subAccounts,
   } = useSubAccountStore();
+  const { resetAuth } = useParentAuthStore();
+  const { logout } = useLoginStore();
 
   const {
     childIdx, setChildIdx,
     reportTab, setReportTab,
     setAnalysis, setHistory, setSketches, setLetters,
   } = useReportStore();
+
+  // 로그아웃 핸들러
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
+
+  // 인증 관련 상태 초기화
+  useEffect(() => () => {
+      resetAuth();
+    }, [resetAuth]);
 
   useEffect(() => {
     if (!subAccounts) return;
@@ -50,13 +65,19 @@ function Parent() {
 
   return (
     <div className="w-screen h-screen relative bg-pink-200 flex font-[BMJUA]">
-      <div className="absolute top-5 left-5">
+      <div className="absolute top-5 w-full px-5 flex justify-between">
         <IconCircleButton
           size="sm"
           variant="action"
-          className=""
           onClick={() => navigate('/parents/:parent_id/children')}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
+        />
+        <TextCircleButton
+          size="sm"
+          variant="action"
+          onClick={handleLogout}
+          text="로그아웃"
+          icon={<FontAwesomeIcon icon={faSignOutAlt} size="sm" />}
         />
       </div>
       <div className="w-full h-full flex items-center justify-center p-8">
