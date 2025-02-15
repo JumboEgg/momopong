@@ -43,8 +43,15 @@ public class ReportServiceImpl implements ReportService {
         long readingMinutesSingle = 0, readingMinutesMulti = 0; // 독서 시간
         int earlyExitCount = 0; // 증도 퇴장 횟수
         for (BookParticipationRecord bookRecord : bookRecordList) {
+            // 중도 퇴장했거나 종료 시간이 없으면 활동 시간 세지 않기
             // 중도 퇴장 횟수
-            if (bookRecord.isEarlyExit()) earlyExitCount++;
+            if (bookRecord.isEarlyExit()) {
+                earlyExitCount++;
+                continue;
+            }
+
+            // 종료 시간 없음
+            if (bookRecord.getEndTime() == null) continue;
 
             // 싱글 모드 / 멀티 모드 별 독서 시간
             long minutes = Duration.between(bookRecord.getStartTime(), bookRecord.getEndTime()).toMinutes();
@@ -57,8 +64,15 @@ public class ReportServiceImpl implements ReportService {
 
         long sketchingMinutesSingle = 0, sketchingMinutesMulti = 0;
         for (SketchParticipationRecord sketchRecord : sketchRecordList) {
+            // 중도 퇴장했거나 종료 시간이 없으면 활동 시간 세지 않기
             // 중도 퇴장 횟수
-            if (sketchRecord.isEarlyExit()) earlyExitCount++;
+            if (sketchRecord.isEarlyExit()) {
+                earlyExitCount++;
+                continue;
+            }
+
+            // 종료 시간 없음
+            if (sketchRecord.getEndTime() == null) continue;
 
             // 싱글 모드 / 멀티 모드 별 그린 시간
             long minutes = Duration.between(sketchRecord.getStartTime(), sketchRecord.getEndTime()).toMinutes();

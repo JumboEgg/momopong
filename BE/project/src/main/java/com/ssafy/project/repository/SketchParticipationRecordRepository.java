@@ -17,6 +17,9 @@ public interface SketchParticipationRecordRepository extends JpaRepository<Sketc
             SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)), 0)
             FROM sketch_participation_record
             WHERE child_id = :childId
+            AND early_exit = FALSE
+            AND start_time IS NOT NULL
+            AND end_time IS NOT NULL
             AND start_time between :start and :end
             """, nativeQuery = true)
     Long totalBetweenTime(@Param("childId") Long childId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);

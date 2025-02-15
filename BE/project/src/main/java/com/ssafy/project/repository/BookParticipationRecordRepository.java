@@ -9,6 +9,8 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+
 public interface BookParticipationRecordRepository extends JpaRepository<BookParticipationRecord, Long> {
     // 아이별 동화 참여 기록 조회
     List<BookParticipationRecord> findAllByChild(Child child);
@@ -18,6 +20,9 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
         SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)), 0)
         FROM book_participation_record
         WHERE child_id = :childId
+        AND early_exit = FALSE
+        AND start_time IS NOT NULL
+        AND end_time IS NOT NULL
         AND start_time between :start and :end
     """, nativeQuery = true)
     Long totalBetweenTime(@Param("childId") Long childId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
@@ -37,4 +42,6 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
             on a.book_id = b.book_id;
         """, nativeQuery = true)
     List<ActivityHistoryDto> mostReadBooks(@Param("childId") Long childId);
+
+    Optional<BookParticipationRecord> findByIdAndChild(Long bookRecordId, Child child);
 }
