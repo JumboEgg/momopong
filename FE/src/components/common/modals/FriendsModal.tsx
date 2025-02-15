@@ -21,11 +21,12 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   // 컴포넌트 마운트 시 'list' 버튼에 포커스
   useEffect(() => {
     setFocusedButton('list');
+    setActiveTab('list'); // activeTab도 함께 설정
   }, []);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
-    setFocusedButton(tab); // 탭 변경 시 포커스도 변경
+    setFocusedButton(tab);
   };
 
   const handleOpenAddFriendModal = () => {

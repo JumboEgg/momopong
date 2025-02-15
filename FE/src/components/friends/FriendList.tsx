@@ -56,15 +56,14 @@ function FriendList(): JSX.Element {
   }
 
   return (
-    <div className="bg-white rounded-lg p-4 shadow-md">
+    <div className="bg-witch-haze-50 rounded-lg p-4">
       <div className="flex justify-between mb-4">
-        <h2 className="text-xl font-bold">친구 목록</h2>
         <span className="text-gray-500">
           {friends.length}
           명
         </span>
       </div>
-      <div>
+      <div className="divide-y divide-gray-200">
         {friends.map((friend) => (
           <FriendListItem
             key={friend.childId}
