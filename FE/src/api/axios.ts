@@ -5,6 +5,7 @@ import axios, {
 } from 'axios';
 import type { RefreshResponse } from '@/types/auth';
 import { tokenService } from '@/services/tokenService';
+import useAuthStore from '@/stores/authStore';
 
 const publicPaths = [
   '/parents/signup',
@@ -117,8 +118,14 @@ api.interceptors.response.use(
       );
 
       // 새 토큰 저장
-      tokenService.setParentToken(response.data.jwtToken.accessToken);
-      tokenService.setRefreshToken(response.data.jwtToken.refreshToken);
+      const newTokens = {
+        accessToken: response.data.jwtToken.accessToken,
+        refreshToken: response.data.jwtToken.refreshToken,
+      };
+
+      tokenService.setParentToken(newTokens.accessToken);
+      tokenService.setRefreshToken(newTokens.refreshToken);
+      useAuthStore.getState().setTokens(newTokens);
 
       // 자녀 계정 재로그인
       const currentChildId = tokenService.getCurrentChildId();
@@ -135,7 +142,13 @@ api.interceptors.response.use(
       return await api(originalRequest);
     } catch (refreshError) {
       processQueue(refreshError as Error);
+
+      // 토큰 갱신 실패 시 전체 상태 초기화
       tokenService.clearAllTokens();
+      useAuthStore.getState().reset();
+
+      window.location.href = '/signin';
+
       return await Promise.reject(refreshError);
     } finally {
       isRefreshing = false;
