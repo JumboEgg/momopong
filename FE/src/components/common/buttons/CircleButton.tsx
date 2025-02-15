@@ -7,7 +7,7 @@ interface CircleButtonBaseProps {
   icon: React.ReactNode;
   size: CircleButtonSize;
   variant: CircleButtonVariant;
-  className: string;
+  className?: string;
   disabled?: boolean;
   hasFocus?: boolean;
   onClick?: () => void;
