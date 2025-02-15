@@ -13,10 +13,10 @@ import lombok.NoArgsConstructor;
 public class BookRecordPageDto {
     private Long bookRecordId;
     private Long partnerBookRecordId;
-    private Long bookRecordPageNumber;
+    private int bookRecordPageNumber;
     private String pagePath;
     private String audioPath;
     private String role;
     private String text;
-    private Long audioNumber;
+    private int audioNumber;
 }

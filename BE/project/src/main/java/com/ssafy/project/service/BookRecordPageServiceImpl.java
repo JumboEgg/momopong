@@ -4,6 +4,7 @@ package com.ssafy.project.service;
 import com.ssafy.project.domain.record.BookParticipationRecord;
 import com.ssafy.project.domain.record.BookRecordPage;
 import com.ssafy.project.dto.record.BookRecordPageDto;
+import com.ssafy.project.dto.record.BookRecordPageIdDto;
 import com.ssafy.project.repository.BookParticipationRecordRepository;
 import com.ssafy.project.repository.BookRecordPageRepository;
 import jakarta.transaction.Transactional;
@@ -17,7 +18,9 @@ public class BookRecordPageServiceImpl implements BookRecordPageService{
 
     private final BookParticipationRecordRepository bookParticipationRecordRepository;
     private final BookRecordPageRepository bookRecordPageRepository;
-    public void saveRecordPage(BookRecordPageDto bookRecordPageDto){
+
+    @Override
+    public BookRecordPageIdDto saveRecordPage(BookRecordPageDto bookRecordPageDto){
         // 나의 book record
         BookParticipationRecord bookParticipationRecord = bookParticipationRecordRepository.findById(bookRecordPageDto.getBookRecordId())
             .orElseThrow(() -> new RuntimeException("Book record not found"));
@@ -35,7 +38,6 @@ public class BookRecordPageServiceImpl implements BookRecordPageService{
                 .audioNumber(bookRecordPageDto.getAudioNumber())
                 .build();
 
-
         BookRecordPage partnerbookRecordPage = BookRecordPage.builder()
                 .bookParticipationRecord(partnerBookrecord)
                 .bookRecordPageNumber(bookRecordPageDto.getBookRecordPageNumber())
@@ -46,7 +48,12 @@ public class BookRecordPageServiceImpl implements BookRecordPageService{
                 .audioNumber(bookRecordPageDto.getAudioNumber())
                 .build();
 
-        bookRecordPageRepository.save(bookRecordPage);
-        bookRecordPageRepository.save(partnerbookRecordPage);
+        BookRecordPage savedPage = bookRecordPageRepository.save(bookRecordPage);
+        BookRecordPage savedPartnerPage = bookRecordPageRepository.save(partnerbookRecordPage);
+
+        return BookRecordPageIdDto.builder()
+                .pageId(savedPage.getId())
+                .partnerPageId(savedPartnerPage.getId())
+                .build();
     };
 }

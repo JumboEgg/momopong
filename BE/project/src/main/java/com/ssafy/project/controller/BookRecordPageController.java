@@ -3,6 +3,7 @@ package com.ssafy.project.controller;
 
 import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.record.BookRecordPageDto;
+import com.ssafy.project.dto.record.BookRecordPageIdDto;
 import com.ssafy.project.service.BookRecordPageService;
 import com.ssafy.project.service.PresignedUrlService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -32,17 +33,10 @@ public class BookRecordPageController {
 
     //페이지 기록 저장
     @PostMapping("/save")
-    public ResponseEntity<Void> saveRecordPage(
+    public ResponseEntity<BookRecordPageIdDto> saveRecordPage(
             @RequestBody BookRecordPageDto bookRecordPageDto){
+        BookRecordPageIdDto bookRecordPageIdDto = bookRecordPageService.saveRecordPage(bookRecordPageDto);
 
-        bookRecordPageService.saveRecordPage(
-                bookRecordPageDto
-        );
-
-        return ResponseEntity.ok().build();
-
+        return ResponseEntity.ok(bookRecordPageIdDto);
     }
-
-
-
 }

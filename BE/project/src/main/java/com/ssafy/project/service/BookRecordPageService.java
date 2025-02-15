@@ -2,7 +2,8 @@ package com.ssafy.project.service;
 
 
 import com.ssafy.project.dto.record.BookRecordPageDto;
+import com.ssafy.project.dto.record.BookRecordPageIdDto;
 
 public interface BookRecordPageService {
-    void saveRecordPage(BookRecordPageDto bookRecordPageDto);
+    BookRecordPageIdDto saveRecordPage(BookRecordPageDto bookRecordPageDto);
 }
