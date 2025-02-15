@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import TextButton from '@/components/common/buttons/TextButton';
 import ParentAuthModal from '@/components/common/modals/ParentAuthModal';
 import useAuthStore from '@/stores/authStore';
@@ -46,12 +46,7 @@ function SubAccountPage(): React.ReactElement | null {
         {isModalOpen && <ParentAuthModal onClose={handleCloseModal} />}
       </div>
       <div className="max-w-6xl mx-auto">
-        <Routes>
-          <Route
-            path="/"
-            element={<SubAccountGrid onAdd={handleAddAccount} />}
-          />
-        </Routes>
+        <SubAccountGrid onAdd={handleAddAccount} />
       </div>
     </div>
   );

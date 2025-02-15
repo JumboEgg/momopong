@@ -1,3 +1,4 @@
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import useSubAccountStore from '@/stores/subAccountStore';
@@ -5,18 +6,15 @@ import useAuthStore from '@/stores/authStore';
 import ImageUpload from '@/components/ImageUpload';
 import TextButton from '@/components/common/buttons/TextButton';
 
-interface SubAccountFormProps {
-  mode?: 'create' | 'edit';
-}
-
 interface ValidationErrors {
   name?: string;
   birth?: string;
   gender?: string;
+  terms?: string;
   profile?: string;
 }
 
-function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
+function SubAccountForm(): JSX.Element {
   const { user } = useAuthStore();
   const navigate = useNavigate();
   const {
@@ -31,7 +29,6 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
   const [localError, setLocalError] = useState<string | null>(null);
   const [isImageUploading, setIsImageUploading] = useState(false);
   const [termsAgreed, setTermsAgreed] = useState(false);
-  const [termsError, setTermsError] = useState<string>('');
 
   useEffect(() => {
     if (user?.parentId) {
@@ -44,43 +41,37 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
 
     if (!formData.name.trim()) {
       errors.name = '이름을 입력해주세요';
-    } else if (formData.name.length > 10) {
-      errors.name = '이름은 10자 이내로 입력해주세요';
     }
 
     if (!formData.birth) {
       errors.birth = '생년월일을 선택해주세요';
-    } else {
-      const birthDate = new Date(formData.birth);
-      const today = new Date();
-
-      if (birthDate > today) {
-        errors.birth = '올바른 생년월일을 선택해주세요';
-      }
     }
 
     if (!formData.gender) {
       errors.gender = '성별을 선택해주세요';
     }
 
-    if (formData.profile === '/images/default-profile.jpg') {
+    if (!formData.profile || formData.profile === '/images/default-profile.jpg') {
       errors.profile = '프로필 이미지를 선택해주세요';
+    }
+
+    if (!termsAgreed) {
+      errors.terms = '[필수] 아이 정보 수집 및 이용에 동의해주세요';
     }
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (e:
+    React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormField(name, value);
-    // 입력 시 해당 필드의 에러 메시지 제거
     setValidationErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleImageChange = (fileName: string) => {
     setFormField('profile', fileName);
-    setValidationErrors((prev) => ({ ...prev, profile: undefined }));
   };
 
   const handleImageUploadStart = () => {
@@ -94,12 +85,6 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLocalError(null);
-
-    // terms 체크 여부 확인
-    if (!termsAgreed) {
-      setTermsError('아이 정보 수집 및 이용에 동의해주세요');
-      return;
-    }
 
     if (isImageUploading) {
       setLocalError('이미지 업로드가 완료될 때까지 기다려주세요.');
@@ -122,70 +107,43 @@ function SubAccountForm({ mode = 'create' }: SubAccountFormProps): JSX.Element {
     }
   };
 
-  // 체크박스 핸들러
-const handleTermsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  setTermsAgreed(e.target.checked);
-  if (e.target.checked) {
-    setTermsError('');
-  }
-};
-
-  const getButtonText = () => {
-    if (isLoading) return '처리중...';
-    if (mode === 'edit') return '수정';
-    return '확인';
-  };
-
-  const handleCancel = () => {
-    const confirmLeave = window.confirm('작성 중인 내용이 저장되지 않습니다. 취소하시겠습니까?');
-    if (confirmLeave) {
-      navigate(`/parents/${user?.parentId}/children`);
-    }
+  const handleTermsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setTermsAgreed(e.target.checked);
+    setValidationErrors((prev) => ({ ...prev, terms: undefined }));
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto pt-8">
-      <h1 className="text-xl font-medium text-center mb-6">
-        함께할 아이의 정보를 입력해주세요
-      </h1>
-
-      <div className="bg-white rounded-2xl p-8">
-        {(storeError || localError) && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-md">
-            {storeError || localError}
-          </div>
-        )}
+    <div className="min-h-screen bg-sky-100 flex items-center justify-center relative p-4">
+      <div className="w-4/5 h-[650px] bg-white rounded-3xl p-12">
+        <h1 className="text-3xl font-bold font-[BMDOHYEON] text-center mb-12">
+          함께할 아이의 정보를 입력해주세요
+        </h1>
 
         <form onSubmit={handleSubmit}>
-          <div className="flex gap-8">
-            <div className="w-48">
-              <div className="relative">
+          <div className="flex gap-16">
+            <div className="flex-1 flex flex-col items-center">
+              <div className="w-[400px] h-[400px] relative mb-4 bg-gray-50 rounded-2xl">
                 <ImageUpload
                   currentImage={formData.profile}
                   onImageChange={handleImageChange}
                   onUploadStart={handleImageUploadStart}
                   onUploadComplete={handleImageUploadComplete}
                 />
-                <span className="absolute left-0 top-1/2 transform -translate-x-full -translate-y-1/2 text-sm text-gray-500 whitespace-nowrap pr-2">
-                  이미
-                </span>
               </div>
-              <div className="text-center">
-                <span className="text-sm text-gray-500">미설정시</span>
-              </div>
+              <p className="text-sm text-gray-500">미설정시 기본 프로필 사진으로 설정됩니다</p>
             </div>
 
-            <div className="flex-1 space-y-4">
+            <div className="flex-1 space-y-8">
               <div>
-                <div className="text-sm mb-1">애칭</div>
+                <label htmlFor="name" className="block text-base mb-2">애칭</label>
                 <input
+                  id="name"
                   type="text"
                   name="name"
                   value={formData.name}
                   onChange={handleChange}
-                  placeholder="이름을 입력하세요"
-                  className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  aria-label="애칭"
+                  placeholder="애칭을 입력해주세요"
+                  className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-lg"
                 />
                 {validationErrors.name && (
                   <p className="mt-1 text-sm text-red-600">{validationErrors.name}</p>
@@ -193,62 +151,82 @@ const handleTermsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
               </div>
 
               <div>
-                <div className="text-sm mb-1">생년월일</div>
+                <label htmlFor="birth" className="block text-base mb-2">생년월일</label>
                 <input
+                  id="birth"
                   type="date"
                   name="birth"
                   value={formData.birth}
                   onChange={handleChange}
-                  className="w-full h-12 px-4 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500"
-                  aria-label="생년월일"
+                  className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-lg"
                 />
                 {validationErrors.birth && (
                   <p className="mt-1 text-sm text-red-600">{validationErrors.birth}</p>
                 )}
               </div>
 
-              <div className="flex items-start pt-2">
-                <input
-                  type="checkbox"
-                  checked={termsAgreed}
-                  onChange={handleTermsChange}
-                  className="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded"
-                  aria-label="약관 동의"
-                />
-                <div className="ml-3">
-                  <span className="text-sm">
-                    [필수] 아이 정보 수집 및 이용에 동의합니다
-                  </span>
-                  <p className="text-sm text-gray-500">
-                    해당 정보는 컨텐츠 플레이를 위해서만 사용됩니다
-                  </p>
-                  {termsError && (
-                    <p className="text-sm text-red-600">{termsError}</p>
-                  )}
+              <div>
+                <label htmlFor="gender" className="block text-base mb-2">성별</label>
+                <select
+                  id="gender"
+                  name="gender"
+                  value={formData.gender || ''}
+                  onChange={handleChange}
+                  className="w-full h-12 px-4 rounded-xl border border-gray-200 bg-gray-50 text-lg"
+                >
+                  <option value="">성별을 선택하세요</option>
+                  <option value="남자">남자</option>
+                  <option value="여자">여자</option>
+                </select>
+                {validationErrors.gender && (
+                  <p className="mt-1 text-sm text-red-600">{validationErrors.gender}</p>
+                )}
+              </div>
+
+              <div className="pt-4">
+                <div className="flex items-start space-x-3">
+                  <input
+                    type="checkbox"
+                    checked={termsAgreed}
+                    onChange={handleTermsChange}
+                    className="mt-1 h-4 w-4 rounded border-gray-300"
+                  />
+                  <div>
+                    <p className="text-sm">[필수] 아이 정보 수집 및 이용에 동의합니다</p>
+                    <p className="text-sm text-gray-500">해당 정보는 컨텐츠 플레이를 위해서만 사용됩니다.</p>
+                    {validationErrors.terms && (
+                      <p className="mt-1 text-sm text-red-600">{validationErrors.terms}</p>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-center space-x-3 pt-4">
+              <div className="flex justify-center space-x-4">
                 <TextButton
-                  type="button"
                   size="md"
                   variant="gray"
-                  onClick={handleCancel}
+                  onClick={() => navigate(-1)}
                 >
                   취소
                 </TextButton>
                 <TextButton
-                  type="submit"
                   size="md"
                   variant="blue"
+                  type="submit"
                   disabled={isLoading}
                 >
-                  {getButtonText()}
+                  확인
                 </TextButton>
               </div>
             </div>
           </div>
         </form>
+
+        {(storeError || localError) && (
+          <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-md">
+            {storeError || localError}
+          </div>
+        )}
       </div>
     </div>
   );
