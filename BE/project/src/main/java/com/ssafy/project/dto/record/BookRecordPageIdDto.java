@@ -8,6 +8,6 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 public class BookRecordPageIdDto {
-    private Long pageId;
-    private Long partnerPageId;
+    private Long bookRecordPageId;
+    private Long partnerBookRecordPageId;
 }

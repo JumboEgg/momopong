@@ -52,8 +52,8 @@ public class BookRecordPageServiceImpl implements BookRecordPageService{
         BookRecordPage savedPartnerPage = bookRecordPageRepository.save(partnerbookRecordPage);
 
         return BookRecordPageIdDto.builder()
-                .pageId(savedPage.getId())
-                .partnerPageId(savedPartnerPage.getId())
+                .bookRecordPageId(savedPage.getId())
+                .partnerBookRecordPageId(savedPartnerPage.getId())
                 .build();
     };
 }
