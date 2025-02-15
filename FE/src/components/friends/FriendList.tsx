@@ -56,21 +56,26 @@ function FriendList(): JSX.Element {
   }
 
   return (
-    <div className="bg-witch-haze-50 rounded-lg p-4">
-      <div className="flex justify-between mb-4">
-        <span className="text-gray-500">
-          {friends.length}
-          명
-        </span>
+    <div className="bg-witch-haze-50 rounded-lg">
+      {/* 친구 수를 보여주는 헤더 - 고정 */}
+      <div className="sticky top-0 p-4 bg-witch-haze-50">
+        <div className="flex justify-end">
+          <span className="text-gray-500">
+            {friends.length}
+            명
+          </span>
+        </div>
       </div>
-      <div className="divide-y divide-gray-200">
-        {friends.map((friend) => (
+      <div className="px-4">
+        {friends.map((friend, index) => (
           <FriendListItem
             key={friend.childId}
             friend={friend}
+            isLast={index === friends.length - 1}
           />
         ))}
       </div>
+      ;
     </div>
   );
 }

@@ -2,6 +2,7 @@ import type { Friend } from '@/types/friend';
 
 interface FriendListItemProps {
   friend: Friend;
+  isLast?: boolean;
 }
 
 const getStatusColor = (status: Friend['status']) => {
@@ -34,25 +35,27 @@ const getStatusText = (status: Friend['status']) => {
   }
 };
 
-function FriendListItem({ friend }: FriendListItemProps): JSX.Element {
+function FriendListItem({ friend, isLast }: FriendListItemProps): JSX.Element {
   const statusColor = getStatusColor(friend.status);
   const statusText = getStatusText(friend.status);
   return (
-    <div className="flex items-center justify-between py-3 border-b border-gray-200 last:border-0">
-      <div className="flex items-center space-x-3">
-        <div className="relative">
-          <img
-            src={friend.profile}
-            alt={`${friend.name} profile`}
-            className="w-12 h-12 rounded-full"
-          />
+    <div className="flex items-center justify-between py-3">
+      <div className={`flex items-center justify-between w-[95%] mx-auto ${!isLast && 'border-b border-gray-200'} pb-3`}>
+        <div className="flex items-center space-x-3">
+          <div className="relative">
+            <img
+              src={friend.profile}
+              alt={`${friend.name} profile`}
+              className="w-12 h-12 rounded-full"
+            />
+          </div>
+          <span className="text-lg font-medium font-[BMJUA]">{friend.name}</span>
         </div>
-        <span className="text-lg font-medium">{friend.name}</span>
-      </div>
-      <div className="flex items-center">
-        <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${statusColor} text-white text-sm`}>
-          <div className="w-2 h-2 rounded-full bg-white" />
-          <span>{statusText}</span>
+        <div className="flex items-center">
+          <div className={`flex items-center space-x-2 px-3 py-1 rounded-full ${statusColor} text-white text-sm`}>
+            <div className="w-2 h-2 rounded-full bg-white" />
+            <span>{statusText}</span>
+          </div>
         </div>
       </div>
     </div>
