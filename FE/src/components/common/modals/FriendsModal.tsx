@@ -8,7 +8,7 @@ import TextButton from '../buttons/TextButton';
 import { IconCircleButton } from '../buttons/CircleButton';
 
 interface FriendsModalProps {
-  onClose: () => void; // onClose 함수를 받아올 Props
+  onClose: () => void;
 }
 
 type TabType = 'list' | 'request';
@@ -16,12 +16,11 @@ type TabType = 'list' | 'request';
 function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabType>('list');
   const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
-  const [focusedButton, setFocusedButton] = useState<TabType>('list'); // 포커스 상태 추가
+  const [focusedButton, setFocusedButton] = useState<TabType>('list');
 
-  // 컴포넌트 마운트 시 'list' 버튼에 포커스
   useEffect(() => {
     setFocusedButton('list');
-    setActiveTab('list'); // activeTab도 함께 설정
+    setActiveTab('list');
   }, []);
 
   const handleTabChange = (tab: TabType) => {
@@ -34,25 +33,52 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   };
 
   return (
-    // dim 처리 영역
     <div
-      className="fixed top-0 left-0 w-full h-full z-30
-      bg-[#00000060]
-      flex items-center justify-center"
+      className="fixed inset-0 z-30
+        bg-black/60
+        flex items-center justify-center
+        p-4 sm:p-6 md:p-8"
     >
-      <div className="w-[90%] md:w-1/2 h-[80vh] min-h-[600px] max-h-[800px] bg-broom-200 border-10 border-tainoi-400
-      flex flex-col absolute items-center p-4 md:p-8 rounded-[2vw]"
+      {/* 모달 영역 */}
+      <div
+        className="
+          relative
+          w-[95%] sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-1/2
+          h-[80vh] min-h-[500px] sm:min-h-[550px] md:min-h-[600px]
+          max-h-[600px] sm:max-h-[700px] md:max-h-[800px]
+          bg-broom-200
+          border-6 sm:border-8 md:border-10 border-tainoi-400
+          rounded-[3vw] sm:rounded-[2.5vw] md:rounded-[2vw]
+          flex flex-col
+          p-3 sm:p-4 md:p-6 lg:p-8
+          overflow-hidden
+        "
       >
+        {/* 닫기 버튼 */}
         <IconCircleButton
           size="xs"
           variant="action"
-          className="absolute top-4 right-4 font-semibold"
+          className="
+            absolute
+            top-2 sm:top-3 md:top-4
+            right-2 sm:right-3 md:right-4
+            font-semibold
+            z-10
+          "
           onClick={onClose}
           icon={<FontAwesomeIcon icon={faX} size="lg" />}
         />
-        <div className="relative space-x-10 top-5">
+
+        {/* 탭 버튼 영역 */}
+        <div className="
+          relative
+          flex justify-center
+          space-x-4 sm:space-x-6 md:space-x-8 lg:space-x-10
+          px-2 sm:px-3 md:px-4 lg:px-5
+        "
+        >
           <TextButton
-            size="lg"
+            size="md"
             variant="white"
             hasFocus={focusedButton === 'list'}
             onClick={() => handleTabChange('list')}
@@ -60,7 +86,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
             친구 목록
           </TextButton>
           <TextButton
-            size="lg"
+            size="md"
             variant="white"
             hasFocus={focusedButton === 'request'}
             onClick={() => handleTabChange('request')}
@@ -68,21 +94,38 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
             친구 요청
           </TextButton>
         </div>
-        {/* 탭으로 전환되는 부분 */}
-        <div className="flex-1 w-full overflow-y-auto my-4 md:my-8 px-2 md:px-4 customScrollbar yellow">
+
+        {/* Content Area */}
+        <div className="
+          flex-1
+          w-full
+          overflow-y-auto
+          my-1 sm:my-1 md:my-2 lg:my-3
+          px-2 sm:px-3 md:px-4
+          customScrollbar yellow
+        "
+        >
           {activeTab === 'list' ? (
             <FriendList />
           ) : (
             <FriendRequestList />
           )}
         </div>
-        <TextButton
-          size="xl"
-          variant="rounded"
-          onClick={handleOpenAddFriendModal}
+
+        {/* Add Friend Button */}
+        <div className="
+          mt-1 sm:mt-2 md:mt-3
+          flex justify-center
+        "
         >
-          친구 추가하기
-        </TextButton>
+          <TextButton
+            size="lg"
+            variant="rounded"
+            onClick={handleOpenAddFriendModal}
+          >
+            친구 추가하기
+          </TextButton>
+        </div>
 
         {isAddFriendModalOpen && (
           <AddFriendModal
