@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import useFriendRequestStore from '@/stores/friendRequestStore';
 import useSubAccountStore from '@/stores/subAccountStore';
+import PopText from '../PopText';
 
 interface AddFriendModalProps {
   onClose: () => void;
@@ -58,8 +59,17 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
   };
 
   return (
-    <div className="fixed top-0 left-0 w-full h-full z-30 bg-[#00000060] flex items-center justify-center">
-      <div className="w-[750px] min-h-[490px] bg-[#FFF08E] border-10 border-white flex flex-col relative items-center justify-around p-4 rounded-[2vw] overflow-hidden">
+    <div className="fixed inset-0 z-30 bg-black/60 flex items-center justify-center p-4">
+      <div className="
+        relative
+        w-[95%] sm:w-[85%] md:w-[%]
+        max-w-[500px]
+        bg-[#FFF08E]
+        border-6 sm:border-8 md:border-10 border-white
+        rounded-[3vw] sm:rounded-[2.5vw] md:rounded-[2vw]
+        p-4 sm:p-6 md:p-8
+      "
+      >
         <IconCircleButton
           icon={<FontAwesomeIcon icon={faXmark} size="lg" />}
           size="sm"
@@ -68,24 +78,65 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
           onClick={onClose}
         />
 
-        <div className="text-center mb-8">
-          <h2 className="text-2xl font-bold mb-4">친구 코드를 입력하세요</h2>
-          <p className="bg-white px-4 py-2 rounded-lg min-w-[120px] min-h-10 text-xl">
-            {friendCode}
-          </p>
-          {error && (
-            <p className="text-red-500 mt-2 text-sm">{error}</p>
-          )}
-        </div>
+        {/* height < 500px일 때 row, 그 외에는 column */}
+        <div className="
+          flex
+          min-h-[400px]
+          flex-col
+          items-center
+          gap-4
+          [@media(max-height:500px)]:flex-row
+          [@media(max-height:500px)]:items-center
+          [@media(max-height:500px)]:justify-around
+        "
+        >
+          {/* 왼쪽(또는 상단) 영역 */}
+          <div className="
+            flex flex-col items-center gap-2
+            [@media(max-height:500px)]:w-1/2
+          "
+          >
+            <PopText
+              strokeWidth={2}
+              strokeColor="white"
+              className="text-tainoi-500 font-[BMJUA]"
+              fontSize="text-lg sm:text-xl"
+            >
+              친구 코드를 입력하세요
+            </PopText>
 
-        <NumberPad
-          onNumberClick={handleNumberClick}
-          onSubmit={handleSubmit}
-          onClear={clearLastInput}
-        />
+            <div className="
+              w-[160px] sm:w-[180px]
+              h-[36px] sm:h-[40px]
+              bg-white rounded-lg
+              flex items-center justify-center
+              text-base sm:text-lg
+              font-[BMJUA]
+            "
+            >
+              {friendCode}
+            </div>
+
+            <div className="h-2 text-md text-red-500">
+              {error}
+            </div>
+          </div>
+
+          {/* 오른쪽(또는 하단) 영역 */}
+          <div className="
+            [@media(max-height:500px)]:w-1/2
+            [@media(max-height:500px)]:scale-75
+          "
+          >
+            <NumberPad
+              onNumberClick={handleNumberClick}
+              onSubmit={handleSubmit}
+              onClear={clearLastInput}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-
 export default AddFriendModal;

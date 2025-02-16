@@ -16,6 +16,7 @@ function CustomInput({
   value,
   required,
   onChange,
+  className,
   ...rest
 }: CustomInputProps) {
   const inputId = React.useId(); // 실제 id
@@ -40,6 +41,9 @@ function CustomInput({
         required={required}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
+        className={`w-full px-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          isFocused ? 'ring-2 ring-blue-500' : ''
+        } ${className || ''}`}
         // eslint-disable-next-line react/jsx-props-no-spreading
         {...rest}
       />

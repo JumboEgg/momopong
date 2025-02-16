@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl';
+export type ProfileImgSize = 'sm' | 'md' | 'lg' | 'xl' | 'responsive';
 type ProfileImgShape = 'circle' | 'square';
 
 interface ProfileImgProps {
@@ -36,6 +36,7 @@ function ProfileImage({
     md: 'w-20 h-20', // 프로필카드 이동
     lg: 'w-65 h-65', // 서브계정 그리드
     xl: 'w-100 h-100', // 프로필카드, 서브계정 가입
+    responsive: 'w-full h-full', // 부모 컨테이너에 맞춰 조절
   } as const;
 
   const shapeClasses = {
