@@ -120,7 +120,6 @@ function SubAccountForm(): JSX.Element {
         p-4 sm:p-6 md:p-8
       "
       >
-        {/* 제목의 마진 축소 */}
         <h1 className="text-xl sm:text-2xl md:text-3xl font-[BMJUA] text-center mb-4 sm:mb-6">
           함께할 아이의 정보를 입력해주세요
         </h1>

@@ -6,7 +6,6 @@ import useAuthStore from '@/stores/authStore';
 import { useLoginStore } from '@/stores/loginStore';
 import type { LoginRequest } from '@/types/auth';
 
-// 유효성 검사를 위한 인터페이스
 interface FormErrors {
   email?: string;
   password?: string;
@@ -21,7 +20,6 @@ function Login(): JSX.Element {
 
   const [errors, setErrors] = useState<FormErrors>({});
 
-  // 필요한 상태만 선택적으로 구독(불필요한 리렌더/무한루프 방지)
   const login = useLoginStore((state) => state.login);
   const isLoading = useLoginStore((state) => state.isLoading);
   const error = useLoginStore((state) => state.error);
@@ -38,13 +36,13 @@ function Login(): JSX.Element {
     if (!password) return '비밀번호는 필수입니다';
     return undefined;
   };
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // 입력 중에는 에러 메시지를 지웁니다
     setErrors((prev) => ({
       ...prev,
       [name]: '',
@@ -67,27 +65,24 @@ function Login(): JSX.Element {
       }));
     }
   };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // 제출 시점에 모든 필드 다시 검증
     const emailError = validateEmail(formData.email);
     const passwordError = validatePassword(formData.password);
 
-    // 새로운 에러 상태 설정
     setErrors({
       email: emailError,
       password: passwordError,
     });
 
-    // 에러가 하나라도 있으면 제출하지 않음
     if (emailError || passwordError) {
       return;
     }
 
     try {
       await login(formData);
-      // login이 완료된 후 약간의 딜레이를 두고 라우팅
       setTimeout(() => {
         const { user } = useAuthStore.getState();
         if (user?.parentId) {
@@ -95,68 +90,79 @@ function Login(): JSX.Element {
         } else {
           console.error('User data not available:', user);
         }
-      }, 1000); // 1초 딜레이 추가
+      }, 1000);
     } catch (err) {
       console.error('Login failed:', err);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
+    <div
+      className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center"
+      style={{ backgroundImage: "url('/images/login.jpeg')" }}
+    >
+      <div className="w-96 p-8 space-y-6">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-gray-900">동화가 가득한 세계,</h1>
-          <h2 className="text-xl text-gray-600">동화누리에 오신 것을 환영합니다.</h2>
+          <h1 className="text-3xl font-[BMJUA] text-gray-900">모험 가득한 동화나라!</h1>
+          <span className="text-2xl font-[BMJUA] text-tainoi-500">모모퐁</span>
+          <span className="text-2xl font-[BMJUA] text-gray-900">에 오신 것을 환영합니다</span>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 mt-8">
           <div className="space-y-4">
             <CustomInput
-              label="이메일"
               type="email"
               name="email"
-              placeholder="이메일을 입력하세요"
+              placeholder="email"
               value={formData.email}
               onChange={handleChange}
               onBlur={handleBlur}
               errorMessage={errors.email}
               required
+              className="max-w-[320px] h-12 rounded-xl bg-white"
             />
             <CustomInput
-              label="비밀번호"
               type="password"
               name="password"
-              placeholder="비밀번호를 입력하세요"
+              placeholder="password"
               value={formData.password}
               onChange={handleChange}
               onBlur={handleBlur}
               errorMessage={errors.password}
               required
+              className="max-w-[320px] h-12 rounded-xl bg-white"
             />
+          </div>
+
+          <div className="text-right">
+            <button type="button" className="text-sm text-gray-600">
+              비밀번호 찾기
+            </button>
           </div>
 
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
 
-          <div className="pt-4">
+          <div className="pt-4 space-y-3">
             <TextButton
               size="lg"
               variant="blue"
               type="submit"
               disabled={isLoading}
-              className="w-full"
+              className="w-full bg-blue-500 text-white rounded-lg py-3"
             >
               {isLoading ? '로그인 중...' : '로그인'}
             </TextButton>
+
+            <TextButton
+              size="lg"
+              variant="gray"
+              onClick={() => navigate('/parents/signup')}
+              className="w-full bg-gray-800 border-gray-800 text-white rounded-lg py-3"
+            >
+              회원가입
+            </TextButton>
           </div>
         </form>
-        <TextButton
-          size="lg"
-          variant="gray"
-          onClick={() => navigate('/parents/signup')}
-          className="w-full"
-        >
-          회원가입
-        </TextButton>
       </div>
     </div>
   );

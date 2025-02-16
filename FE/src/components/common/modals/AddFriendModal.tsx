@@ -124,9 +124,9 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
 
           {/* 오른쪽(또는 하단) 영역 */}
           <div className="
-        [@media(max-height:500px)]:w-1/2
-        [@media(max-height:500px)]:scale-75
-      "
+            [@media(max-height:500px)]:w-1/2
+            [@media(max-height:500px)]:scale-75
+          "
           >
             <NumberPad
               onNumberClick={handleNumberClick}
