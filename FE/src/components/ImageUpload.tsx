@@ -7,6 +7,7 @@ interface ImageUploadProps {
   onImageChange: (fileName: string) => void;
   onUploadStart: () => void;
   onUploadComplete: () => void;
+  className?: string; // 외부에서 스타일 추가할 수 있도록
 }
 
 function ImageUpload({
@@ -14,7 +15,7 @@ function ImageUpload({
   onImageChange,
   onUploadStart,
   onUploadComplete,
-
+  className = '',
 }: ImageUploadProps): JSX.Element {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
@@ -60,20 +61,48 @@ function ImageUpload({
   };
 
   return (
-    <div className="">
-      <div className="relative w-32 h-32">
+    <div className={`w-full h-full flex flex-col ${className}`}>
+      {/* 안내 텍스트를 상단으로 이동하고 선택적으로 표시 */}
+      {!currentImage && (
+        <p className="
+          mb-2
+          text-xs sm:text-sm
+          text-gray-500
+          text-center
+        "
+        >
+          이미지를 클릭하여 업로드하세요
+        </p>
+      )}
+
+      {/* 이미지 컨테이너가 전체 영역을 차지하도록 수정 */}
+      <div className="relative w-full h-full aspect-square">
         <ProfileImage
           src={localPreview}
           alt="프로필 이미지"
-          size="xl"
+          size="responsive"
           shape="square"
           border
-          className={`cursor-pointer ${isUploading ? 'opacity-50' : ''}`}
+          className={`
+            w-full h-full 
+            object-cover
+            rounded-2xl
+            cursor-pointer 
+            transition-opacity duration-200
+            hover:opacity-90
+            ${isUploading ? 'opacity-50' : ''}
+          `}
           onClick={() => !isUploading && fileInputRef.current?.click()}
         />
+
         {isUploading && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500" />
+            <div className="
+              animate-spin rounded-full
+              h-6 w-6 sm:h-8 sm:w-8 md:h-10 md:w-10
+              border-b-2 border-blue-500
+            "
+            />
           </div>
         )}
       </div>
@@ -86,10 +115,6 @@ function ImageUpload({
         className="hidden"
         disabled={isUploading}
       />
-
-      <p className="mt-2 text-sm text-gray-500">
-        {isUploading ? '업로드 중...' : '이미지를 클릭하여 업로드하세요'}
-      </p>
     </div>
   );
 }
