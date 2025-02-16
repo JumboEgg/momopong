@@ -22,13 +22,13 @@ interface IntegratedRoomProps {
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
-  // setPartnerReady?: (isReady: boolean) => void;
 }
 
 interface ParticipantTrack {
   participant: LocalParticipant | RemoteParticipant;
   trackPublication?: Track;
 }
+
 
 function IntegratedRoom({
   roomName,
@@ -38,16 +38,29 @@ function IntegratedRoom({
   onRecordingComplete,
   onRecordingStatusChange,
 }: IntegratedRoomProps) {
-  const [room, setRoom] = useState<Room | null>(null);
+  // const [room, setRoom] = useState<Room | null>(null);
+  // const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
+  // const [isRecording, setIsRecording] = useState(false);
+  // const [timeLeft, setTimeLeft] = useState(20);
+  // const [connectionError, setConnectionError] = useState<string | null>(null);
+  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
+  // const audioStreamRef = useRef<MediaStream | null>(null);
+  // const { confirmReady, setPartnerReady } = useRoomStore();
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
-  const { confirmReady, setPartnerReady } = useRoomStore();
+  const { 
+    room, 
+    setRoom,
+    confirmReady, 
+    setPartnerReady 
+  } = useRoomStore();
 
+  
   // 토큰 가져오기
   const getToken = useCallback(async () => {
     try {
@@ -275,6 +288,7 @@ function IntegratedRoom({
         await newRoom.localParticipant.setCameraEnabled(true);
         await newRoom.localParticipant.setMicrophoneEnabled(false);
 
+        // room을 전역 상태로 설정
         setRoom(newRoom);
         updateParticipants(newRoom);
       } catch (error) {
@@ -291,9 +305,10 @@ function IntegratedRoom({
       isMounted = false;
       if (room) {
         room.disconnect();
+        setRoom(null);  // room 상태 초기화
       }
     };
-  }, [roomName, participantName, getToken, updateParticipants]);
+  }, [roomName, participantName, getToken, updateParticipants, setRoom]);
 
   // 리소스 정리
   useEffect(

@@ -38,44 +38,43 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
   }, [isInvitationAccepted]);
 
   // 데이터 리스너 추가
-  useEffect(() => {
-    if (!room) return;
+// GreetingPage.tsx 내의 useEffect 훅에서
+useEffect(() => {
+  if (!room) return;
 
-    const handleDataReceived = (payload: Uint8Array) => {
-      try {
-        const message = JSON.parse(new TextDecoder().decode(payload));
-        console.log('🌈 Received Data Message:', message);
+  const handleDataReceived = (payload: Uint8Array) => {
+    try {
+      const message = JSON.parse(new TextDecoder().decode(payload));
+      console.log('🌈 Received Data Message:', message);
 
-        if (message.type === 'ready_status') {
-          console.log('📣 Received Ready Status', {
-            status: message.status,
-            sender: message.sender,
-          });
-          // 상대방의 준비 상태 업데이트
-          setPartnerReady(message.status);
-        } else if (message.type === 'start_story') {
-          console.log('🚀 Received Start Story', {
-            status: message.status,
-            sender: message.sender,
-          });
-
-          // 스토리 시작 상태 확정
-          confirmReady(true); // 무조건 true로 설정
+      if (message.type === 'ready_status') {
+        console.log('📣 Received Ready Status', {
+          status: message.status,
+          sender: message.sender,
+        });
+        // 여기에 상대방 준비완료 메시지 추가
+        if (message.status) {
+          console.log('🎉 상대방 준비완료!!');
         }
-      } catch (error) {
-        console.error('데이터 처리 오류:', error);
+        setPartnerReady(message.status);
+      } else if (message.type === 'start_story') {
+        console.log('🚀 Received Start Story', {
+          status: message.status,
+          sender: message.sender,
+        });
+        confirmReady(true);
       }
-    };
+    } catch (error) {
+      console.error('데이터 처리 오류:', error);
+    }
+  };
 
-    // LiveKit 이벤트 리스너 추가
-    room.on(RoomEvent.DataReceived, handleDataReceived);
+  room.on(RoomEvent.DataReceived, handleDataReceived);
 
-    // 클린업 함수
-    // eslint-disable-next-line consistent-return
-    return () => {
-      room.off(RoomEvent.DataReceived, handleDataReceived);
-    };
-  }, [room, setPartnerReady, confirmReady]);
+  return () => {
+    room.off(RoomEvent.DataReceived, handleDataReceived);
+  };
+}, [room, setPartnerReady, confirmReady]);
 
   const handleReady = () => {
     console.log('🎯 handleReady 호출', {
@@ -88,6 +87,8 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       } : 'null',
     });
 
+    console.log("룸 호출",room);
+    console.log("룸 이름",roomName)
     if (timeLeft > 0 && !isReady) {
       // 1. 먼저 자신의 ready 상태를 true로 설정
       setIsReady(true);
