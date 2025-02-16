@@ -87,8 +87,6 @@ useEffect(() => {
       } : 'null',
     });
 
-    console.log("룸 호출",room);
-    console.log("룸 이름",roomName)
     if (timeLeft > 0 && !isReady) {
       // 1. 먼저 자신의 ready 상태를 true로 설정
       setIsReady(true);

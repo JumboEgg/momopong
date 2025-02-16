@@ -38,15 +38,6 @@ function IntegratedRoom({
   onRecordingComplete,
   onRecordingStatusChange,
 }: IntegratedRoomProps) {
-  // const [room, setRoom] = useState<Room | null>(null);
-  // const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
-  // const [isRecording, setIsRecording] = useState(false);
-  // const [timeLeft, setTimeLeft] = useState(20);
-  // const [connectionError, setConnectionError] = useState<string | null>(null);
-  // // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
-  // const audioStreamRef = useRef<MediaStream | null>(null);
-  // const { confirmReady, setPartnerReady } = useRoomStore();
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
