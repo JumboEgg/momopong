@@ -32,7 +32,7 @@ function FriendRequestList(): JSX.Element {
 
   if (requests.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center h-full">
+      <div className="flex justify-center items-center h-48 sm:h-64 md:h-80 text-sm sm:text-base md:text-lg text-gray-500">
         <p className="text-gray-500">받은 친구 요청이 없습니다.</p>
       </div>
     );

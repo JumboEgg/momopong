@@ -67,7 +67,7 @@ function TextButton({
       ? 'rounded-full bg-gray-200 border-4 sm:border-8 text-gray-600 border-gray-300 cursor-not-allowed'
       : `
           rounded-full
-          bg-broom-400 text-black border-4 sm:border-8 border-tainoi-400
+          bg-witch-haze-200 text-black border-4 sm:border-8 border-tainoi-400
           hover:bg-tainoi-400
           active:bg-tainoi-400
           ${

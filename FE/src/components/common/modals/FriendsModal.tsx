@@ -45,17 +45,17 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
       <div className="
         relative
         w-[95%] sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-1/2
-        h-auto  // 고정 높이 대신 자동으로 조절
-        min-h-[400px]  // 최소 높이 설정
-        max-h-[85vh]   // 뷰포트 높이의 85%로 제한
-        bg-broom-200
+        h-auto sm:h-[550px] md:h-[600px]
+        min-h-[400px]
+        max-h-[85vh]
+        bg-witch-haze-300
         border-6 sm:border-8 md:border-10 border-tainoi-400
         rounded-[3vw] sm:rounded-[2.5vw] md:rounded-[2vw]
         flex flex-col
         px-3 sm:px-4 md:px-6 lg:px-8
-        pt-12 sm:pt-14 md:pt-16
+        pt-8 sm:pt-9 md:pt-10
         pb-3 sm:pb-4 md:pb-6
-        overflow-y-auto  // 내용이 넘칠 때 스크롤 가능하도록
+        overflow-y-auto
       "
       >
         {/* 닫기 버튼 */}
@@ -78,7 +78,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           relative
           flex justify-center
           space-x-4 sm:space-x-6 md:space-x-8 lg:space-x-10
-          px-2 sm:px-3 md:px-4 lg:px-5
+          px-1 sm:px-2 md:px-3 lg:px-4
         "
         >
           <TextButton
