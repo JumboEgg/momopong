@@ -10,7 +10,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface SketchParticipationRecordRepository extends JpaRepository<SketchParticipationRecord, Long> {
+    // 아이별 그림 참여 기록 조회
     List<SketchParticipationRecord> findAllByChild(Child child);
+
+    // 아이별 & 기간별 BookParticipationRecord 조회
+    @Query(value = """
+        SELECT s FROM SketchParticipationRecord s
+        WHERE s.child = :child
+        AND s.startTime IS NOT NULL
+        AND s.endTime IS NOT NULL
+        AND s.startTime BETWEEN :start AND :end
+        AND s.endTime BETWEEN :start AND :end
+    """)
+    List<SketchParticipationRecord> findSketchRecordByPeriod(@Param("child") Child child, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
     // 기간별 시간 조회
     @Query(value = """
@@ -21,6 +33,7 @@ public interface SketchParticipationRecordRepository extends JpaRepository<Sketc
             AND start_time IS NOT NULL
             AND end_time IS NOT NULL
             AND start_time between :start and :end
+            AND end_time BETWEEN :start and :end
             """, nativeQuery = true)
     Long totalBetweenTime(@Param("childId") Long childId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 }

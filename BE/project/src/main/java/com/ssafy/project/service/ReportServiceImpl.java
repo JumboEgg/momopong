@@ -37,14 +37,21 @@ public class ReportServiceImpl implements ReportService {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new NotFoundException("해당 자식 사용자를 찾을 수 없습니다"));
 
-        List<BookParticipationRecord> bookRecordList = bookParticipationRecordRepository.findAllByChild(child);
-        List<SketchParticipationRecord> sketchRecordList = sketchParticipationRecordRepository.findAllByChild(child);
+        LocalDateTime now = LocalDateTime.now();
+        log.info("now={}", now);
 
-        long readingMinutesSingle = 0, readingMinutesMulti = 0; // 독서 시간
+        long readingMinutesSingle = 0, readingMinutesMulti = 0; // 이번주 독서 시간 (싱글, 멀티)
+        long sketchingMinutesSingle = 0, sketchingMinutesMulti = 0; // 이번주 그린 시간 (싱글, 멀티)
+        long thisMonthMinutes = 0, thisWeekMinutes = 0, lastWeekMinutes = 0; // 이번달, 이번주, 저번주 총 활동 시간
         int earlyExitCount = 0; // 증도 퇴장 횟수
+
+        // 이번주
+        LocalDateTime startOfWeek = now.with(DayOfWeek.MONDAY).truncatedTo(ChronoUnit.DAYS); // 이번주 시작일
+        LocalDateTime endOfWeek = now.with(DayOfWeek.SUNDAY).truncatedTo(ChronoUnit.DAYS); // 이번주 종료일
+
+        List<BookParticipationRecord> bookRecordList = bookParticipationRecordRepository.findBookRecordByPeriod(child, startOfWeek, endOfWeek);
         for (BookParticipationRecord bookRecord : bookRecordList) {
-            // 중도 퇴장했거나 종료 시간이 없으면 활동 시간 세지 않기
-            // 중도 퇴장 횟수
+            // 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
             if (bookRecord.isEarlyExit()) {
                 earlyExitCount++;
                 continue;
@@ -54,21 +61,23 @@ public class ReportServiceImpl implements ReportService {
             LocalDateTime endTime = bookRecord.getEndTime();
 
             // 종료 시간 없음 or 종료 시간이 시작 시간보다 더 빠른 상황 (비정상적인 상황)
-            if (startTime == null || endTime == null || endTime.isBefore(startTime)) continue;
+            if (startTime == null || endTime == null || endTime.isBefore(startTime)) {
+                continue;
+            }
 
-            // 싱글 모드 / 멀티 모드 별 독서 시간
+            // 참여 시간 더하기
             long minutes = Duration.between(startTime, endTime).toMinutes();
-            if (bookRecord.getMode() == ParticipationMode.SINGLE) {
+            thisWeekMinutes += minutes; // 이번주
+            if (bookRecord.getMode() == ParticipationMode.SINGLE) { // 싱글 모드
                 readingMinutesSingle += minutes;
-            } else {
+            } else { // 멀티 모드
                 readingMinutesMulti += minutes;
             }
         }
 
-        long sketchingMinutesSingle = 0, sketchingMinutesMulti = 0;
+        List<SketchParticipationRecord> sketchRecordList = sketchParticipationRecordRepository.findSketchRecordByPeriod(child, startOfWeek, endOfWeek);
         for (SketchParticipationRecord sketchRecord : sketchRecordList) {
-            // 중도 퇴장했거나 종료 시간이 없으면 활동 시간 세지 않기
-            // 중도 퇴장 횟수
+            // 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
             if (sketchRecord.isEarlyExit()) {
                 earlyExitCount++;
                 continue;
@@ -78,41 +87,29 @@ public class ReportServiceImpl implements ReportService {
             LocalDateTime endTime = sketchRecord.getEndTime();
 
             // 종료 시간 없음 or 종료 시간이 시작 시간보다 더 빠른 상황 (비정상적인 상황)
-            if (startTime == null || endTime == null || endTime.isBefore(startTime)) continue;
+            if (startTime == null || endTime == null || endTime.isBefore(startTime)) {
+                continue;
+            }
 
-            // 싱글 모드 / 멀티 모드 별 그린 시간
+            // 참여 시간 더하기
             long minutes = Duration.between(startTime, endTime).toMinutes();
-            if (sketchRecord.getMode() == ParticipationMode.SINGLE) {
+            thisWeekMinutes += minutes; // 이번주
+            if (sketchRecord.getMode() == ParticipationMode.SINGLE) { // 싱글 모드
                 sketchingMinutesSingle += minutes;
-            } else {
+            } else { // 멀티 모드
                 sketchingMinutesMulti += minutes;
             }
         }
 
-        long thisMonthMinutes = 0, thisWeekMinutes = 0, lastWeekMinutes = 0;
-        LocalDateTime now = LocalDateTime.now();
-        log.info("now={}", now);
-
-        // 이번달 이용 시간
-        LocalDateTime startOfMonth = now.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);  // 이번달 1일
-        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusDays(1).truncatedTo(ChronoUnit.DAYS);  // 이번달 말일
-        thisMonthMinutes += getTotalBetweenTime(childId, startOfMonth, endOfMonth);
-        log.info("startOfMonth={}", startOfMonth);
-        log.info("endOfMonth={}", endOfMonth);
-
-        // 이번주 이용 시간
-        LocalDateTime startOfWeek = now.with(DayOfWeek.MONDAY).truncatedTo(ChronoUnit.DAYS); // 이번주 시작일
-        LocalDateTime endOfWeek = now.with(DayOfWeek.SUNDAY).truncatedTo(ChronoUnit.DAYS); // 이번주 종료일
-        thisWeekMinutes += getTotalBetweenTime(childId, startOfWeek, endOfWeek);
-        log.info("startOfWeek={}", startOfWeek);
-        log.info("endOfWeek={}", endOfWeek);
-
-        // 저번주 이용 시간
+        // 저번주
         LocalDateTime startOfLastWeek = startOfWeek.minusWeeks(1);
         LocalDateTime endOfLastWeek = endOfWeek.minusWeeks(1);
         lastWeekMinutes += getTotalBetweenTime(childId, startOfLastWeek, endOfLastWeek);
-        log.info("startOfLastWeek={}", startOfLastWeek);
-        log.info("endOfLastWeek={}", endOfLastWeek);
+
+        // 이번달
+        LocalDateTime startOfMonth = now.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);  // 이번달 1일
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusDays(1).truncatedTo(ChronoUnit.DAYS);  // 이번달 말일
+        thisMonthMinutes += getTotalBetweenTime(childId, startOfMonth, endOfMonth);
 
         return ActivityAnalysisDto.builder()
                 // 독서 시간
