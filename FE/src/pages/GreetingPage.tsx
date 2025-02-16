@@ -235,6 +235,7 @@ useEffect(() => {
         isUserTurn
         onRecordingComplete={() => {}}
         onRecordingStatusChange={() => {}}
+        variant="greeting"  // 이 prop 추가
       />
     </div>
   );

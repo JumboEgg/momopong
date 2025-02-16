@@ -22,6 +22,7 @@ interface IntegratedRoomProps {
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
+  variant?: 'greeting' | 'story';  // 레이아웃 variant 추가
 }
 
 interface ParticipantTrack {
@@ -37,6 +38,7 @@ function IntegratedRoom({
   isUserTurn,
   onRecordingComplete,
   onRecordingStatusChange,
+  variant = 'story'
 }: IntegratedRoomProps) {
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -354,7 +356,10 @@ function IntegratedRoom({
     }
 
     return (
-      <div className="flex flex-col items-center gap-2">
+      <div className={`
+        flex flex-col items-center gap-2
+        ${variant === 'greeting' ? 'mt-6' : ''}
+      `}>
         {isRecording && (
           <div className="w-32 h-2 bg-gray-200 rounded mb-2">
             <div
@@ -372,6 +377,7 @@ function IntegratedRoom({
             className={`
               px-4 py-2 rounded-full text-white font-medium transition-colors whitespace-nowrap
               ${isRecording ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}
+              ${variant === 'greeting' ? 'text-lg px-6 py-3' : ''}
             `}
           >
             {isRecording ? `${timeLeft}초` : '녹음 시작'}
@@ -380,18 +386,12 @@ function IntegratedRoom({
           {isRecording && (
             <button
               type="button"
-              onClick={() => {
-                console.log('완료 버튼 클릭', {
-                  isUserTurn,
-                  isRecording,
-                  mediaRecorderState: mediaRecorder?.state,
-                });
-                stopRecording();
-              }}
-              className="
+              onClick={stopRecording}
+              className={`
                 px-4 py-2 rounded-full text-white font-medium
                 bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap
-              "
+                ${variant === 'greeting' ? 'text-lg px-6 py-3' : ''}
+              `}
             >
               완료
             </button>
@@ -400,6 +400,11 @@ function IntegratedRoom({
       </div>
     );
   };
+  useEffect(() => {
+    if (room) {
+      room.localParticipant.setMicrophoneEnabled(variant === 'greeting');
+    }
+  }, [variant, room]);
 
   const renderParticipantVideo = (index: number) => {
     if (!participants[index]) {
@@ -410,7 +415,11 @@ function IntegratedRoom({
     const isLocal = participant === room?.localParticipant;
 
     return (
-      <div className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden">
+      <div className={`
+        relative bg-gray-800 rounded-lg overflow-hidden
+        ${variant === 'greeting' ? 'w-[320px] h-[240px]' : 'w-48 h-36'}
+        ${variant === 'greeting' ? 'shadow-lg' : ''}
+      `}>
         <video
           ref={(element) => {
             if (element && trackPublication) {
@@ -425,8 +434,15 @@ function IntegratedRoom({
           <track kind="captions" />
         </video>
 
-        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
-          <span className="text-white text-sm truncate">
+        <div className={`
+          absolute bottom-2 left-2 right-2 
+          flex justify-between items-center
+          ${variant === 'greeting' ? 'bg-black bg-opacity-40 p-2 rounded' : ''}
+        `}>
+          <span className={`
+            text-white truncate
+            ${variant === 'greeting' ? 'text-base' : 'text-sm'}
+          `}>
             <span>{participant.name || participant.identity}</span>
             {isLocal && <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>}
           </span>
@@ -436,6 +452,20 @@ function IntegratedRoom({
               title={isUserTurn ? '내 차례' : '상대방 차례'}
             />
           )}
+        </div>
+      </div>
+    );
+  };
+  // 방(화면)에 따른 레이아웃 변경
+  if (variant === 'greeting') {
+    return (
+      <div className="w-full max-w-4xl mx-auto mt-8">
+        <div className="grid grid-cols-2 gap-8 place-items-center">
+          {renderParticipantVideo(0)}
+          {renderParticipantVideo(1)}
+        </div>
+        <div className="mt-8 flex justify-center">
+          {renderRecordingButton()}
         </div>
       </div>
     );
