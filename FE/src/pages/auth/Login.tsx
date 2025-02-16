@@ -98,8 +98,11 @@ function Login(): JSX.Element {
 
   return (
     <div
-      className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center"
-      style={{ backgroundImage: "url('/images/login.jpeg')" }}
+      className="flex flex-col items-center justify-center min-h-screen bg-cover bg-center overflow-hidden"
+      style={{
+        backgroundImage: "url('/images/login.jpeg')",
+        backgroundAttachment: 'fixed',
+      }}
     >
       <div className="w-96 p-8 space-y-6">
         <div className="text-center space-y-2">
