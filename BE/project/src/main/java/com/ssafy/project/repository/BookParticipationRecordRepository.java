@@ -20,9 +20,7 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
         SELECT b FROM BookParticipationRecord b
         WHERE b.child = :child
         AND b.startTime IS NOT NULL
-        AND b.endTime IS NOT NULL
         AND b.startTime BETWEEN :start AND :end
-        AND b.endTime BETWEEN :start AND :end
     """)
     List<BookParticipationRecord> findBookRecordByPeriod(@Param("child") Child child, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 

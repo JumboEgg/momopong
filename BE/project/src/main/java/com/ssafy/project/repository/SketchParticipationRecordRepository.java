@@ -18,9 +18,7 @@ public interface SketchParticipationRecordRepository extends JpaRepository<Sketc
         SELECT s FROM SketchParticipationRecord s
         WHERE s.child = :child
         AND s.startTime IS NOT NULL
-        AND s.endTime IS NOT NULL
         AND s.startTime BETWEEN :start AND :end
-        AND s.endTime BETWEEN :start AND :end
     """)
     List<SketchParticipationRecord> findSketchRecordByPeriod(@Param("child") Child child, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 

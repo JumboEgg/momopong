@@ -51,9 +51,9 @@ public class ReportServiceImpl implements ReportService {
 
         List<BookParticipationRecord> bookRecordList = bookParticipationRecordRepository.findBookRecordByPeriod(child, startOfWeek, endOfWeek);
         for (BookParticipationRecord bookRecord : bookRecordList) {
-            // 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
+            // 멀티 플레이 중 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
             if (bookRecord.isEarlyExit()) {
-                earlyExitCount++;
+                if (bookRecord.getMode() == ParticipationMode.MULTI) earlyExitCount++;
                 continue;
             }
 
@@ -77,9 +77,9 @@ public class ReportServiceImpl implements ReportService {
 
         List<SketchParticipationRecord> sketchRecordList = sketchParticipationRecordRepository.findSketchRecordByPeriod(child, startOfWeek, endOfWeek);
         for (SketchParticipationRecord sketchRecord : sketchRecordList) {
-            // 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
+            // 멀티 플레이 중 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
             if (sketchRecord.isEarlyExit()) {
-                earlyExitCount++;
+                if (sketchRecord.getMode() == ParticipationMode.MULTI) earlyExitCount++;
                 continue;
             }
 
