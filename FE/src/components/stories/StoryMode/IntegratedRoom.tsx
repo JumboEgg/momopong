@@ -13,6 +13,7 @@ import {
   VideoPresets,
   Track,
 } from 'livekit-client';
+import { useRoomStore } from '@/stores/roomStore';
 
 interface IntegratedRoomProps {
   roomName: string;
@@ -21,6 +22,7 @@ interface IntegratedRoomProps {
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
+  // setPartnerReady?: (isReady: boolean) => void;
 }
 
 interface ParticipantTrack {
@@ -44,6 +46,7 @@ function IntegratedRoom({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
+  const { confirmReady, setPartnerReady } = useRoomStore();
 
   // 토큰 가져오기
   const getToken = useCallback(async () => {
@@ -237,6 +240,10 @@ function IntegratedRoom({
             const message = JSON.parse(new TextDecoder().decode(payload));
             if (message.type === 'recording_status' && message.content.sender !== newRoom.localParticipant.identity) {
               onRecordingStatusChange(message.content.sender, message.content.recordingStatus);
+            } else if (message.type === 'ready_status') {
+              setPartnerReady(message.status);
+            } else if (message.type === 'start_story') {
+              confirmReady(message.status);
             }
           } catch (error) {
             console.error('데이터 처리 오류:', error);

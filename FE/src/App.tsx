@@ -26,6 +26,7 @@ import MyLetters from './components/myhouse/myletters';
 import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 import FriendSelection from './pages/FriendSelection';
+import GreetingPage from './pages/GreetingPage';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
@@ -191,6 +192,16 @@ function App(): JSX.Element {
           element={(
             <ProtectedRoute>
               <LetterPage />
+            </ProtectedRoute>
+          )}
+        />
+
+        {/* 동화 같이읽기 전 인사방 라우팅 */}
+        <Route
+          path="/greeting"
+          element={(
+            <ProtectedRoute>
+              <GreetingPage onBothReady={() => {}} />
             </ProtectedRoute>
           )}
         />
