@@ -45,30 +45,35 @@ function NumberPad({ onNumberClick, onSubmit, onClear }: NumberPadProps): JSX.El
 
   return (
     <div className="
-      grid grid-cols-3
-      gap-1 sm:gap-2 md:gap-3
-      w-[200px] sm:w-[240px] md:w-[280px] lg:w-[320px]
-      mx-auto
-    "
+        grid grid-cols-3
+        gap-1 sm:gap-1.5 md:gap-2
+        max-h-[450px]  // 최대 높이 제한
+        w-[200px] sm:w-[240px] md:w-[280px]
+        mx-auto
+        [&.h-screen<412px]:scale-75  // 높이가 412px 미만일 때 크기 축소
+        [&.h-screen<412px]:transform-origin-top  // 상단 기준으로 축소
+      "
     >
       {buttons.map(({ id, value, onClick }) => (
         <div
           key={id}
           className="
-            w-full
-            aspect-square
-            flex items-center justify-center
-          "
+              w-full
+              aspect-square
+              flex items-center justify-center
+              [&.h-screen<412px]:p-1  // 높이가 작을 때 패딩 축소
+            "
         >
           <NumberButton
             value={value}
             onClick={onClick}
             variant={getVariant(id)}
+            className="[&.h-screen<412px]:min-w-0 [&.h-screen<412px]:min-h-0"
           />
         </div>
-      ))}
+        ))}
     </div>
   );
-}
+  }
 
 export default NumberPad;
