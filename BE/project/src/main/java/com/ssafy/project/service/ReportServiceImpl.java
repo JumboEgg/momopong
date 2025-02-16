@@ -47,7 +47,9 @@ public class ReportServiceImpl implements ReportService {
 
         // 이번주
         LocalDateTime startOfWeek = now.with(DayOfWeek.MONDAY).truncatedTo(ChronoUnit.DAYS); // 이번주 시작일
-        LocalDateTime endOfWeek = now.with(DayOfWeek.SUNDAY).truncatedTo(ChronoUnit.DAYS); // 이번주 종료일
+        LocalDateTime endOfWeek = now.with(DayOfWeek.SUNDAY).truncatedTo(ChronoUnit.DAYS).plusDays(1); // 이번주 종료일
+        log.info("startOfWeek={}", startOfWeek);
+        log.info("endOfWeek={}", endOfWeek);
 
         List<BookParticipationRecord> bookRecordList = bookParticipationRecordRepository.findBookRecordByPeriod(child, startOfWeek, endOfWeek);
         for (BookParticipationRecord bookRecord : bookRecordList) {
@@ -105,11 +107,15 @@ public class ReportServiceImpl implements ReportService {
         LocalDateTime startOfLastWeek = startOfWeek.minusWeeks(1);
         LocalDateTime endOfLastWeek = endOfWeek.minusWeeks(1);
         lastWeekMinutes += getTotalBetweenTime(childId, startOfLastWeek, endOfLastWeek);
+        log.info("startOfLastWeek={}", startOfLastWeek);
+        log.info("endOfLastWeek={}", endOfLastWeek);
 
         // 이번달
         LocalDateTime startOfMonth = now.withDayOfMonth(1).truncatedTo(ChronoUnit.DAYS);  // 이번달 1일
-        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusDays(1).truncatedTo(ChronoUnit.DAYS);  // 이번달 말일
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusDays(1).truncatedTo(ChronoUnit.DAYS).plusDays(1);  // 이번달 말일
         thisMonthMinutes += getTotalBetweenTime(childId, startOfMonth, endOfMonth);
+        log.info("startOfMonth={}", startOfMonth);
+        log.info("endOfMonth={}", endOfMonth);
 
         return ActivityAnalysisDto.builder()
                 // 독서 시간
