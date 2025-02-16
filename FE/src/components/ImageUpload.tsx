@@ -52,7 +52,7 @@ function ImageUpload({
       URL.revokeObjectURL(previewUrl);
     } catch (error) {
       console.error('File upload failed:', error);
-      // 업로드 실패시 미리보기 원복
+      // 업로드 실패시 미리보기 복구
       setLocalPreview(currentImage);
       URL.revokeObjectURL(previewUrl);
     } finally {

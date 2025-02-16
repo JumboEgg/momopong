@@ -92,9 +92,9 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
         >
           {/* 왼쪽(또는 상단) 영역 */}
           <div className="
-        flex flex-col items-center gap-2
-        [@media(max-height:500px)]:w-1/2
-      "
+            flex flex-col items-center gap-2
+            [@media(max-height:500px)]:w-1/2
+          "
           >
             <PopText
               strokeWidth={2}
