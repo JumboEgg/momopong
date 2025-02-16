@@ -61,6 +61,7 @@ function TogetherMode() {
 
   // inviter/invitee 구분용 id 정보
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
+  const myRole = myId === role1UserId ? 'role1' : 'role2';
 
   // 상태 관리
   const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
@@ -74,6 +75,9 @@ function TogetherMode() {
 
   // 읽기 기록 생성 여부 확인
   const isRecording = useRef(false);
+
+  // 녹음
+  const recordBlob = useRef<Blob | null>(null);
 
   // 읽기 기록 저장
   const saveReadingSession = async () => {
@@ -103,10 +107,6 @@ function TogetherMode() {
   };
 
   useEffect(() => {
-    // 역할 초기 설정
-    // const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
-    // setUserRole(randomRole);
-
     // roleStore에 저장된 역할 배정
     if (role1UserId === myId) {
       setUserRole('role1');
@@ -156,48 +156,26 @@ function TogetherMode() {
         [participantId]: {
           isRecording: status === 'recording',
           isCompleted: status === 'completed',
+          audio: null,
         },
       }));
     },
     [],
   );
 
-  // 모든 참가자의 녹음 완료 여부 확인
-  useEffect(() => {
-    const allParticipantsCompleted = Object
-    .values(recordingStates).every((state) => state.isCompleted);
-
-    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
-    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      // 현재 페이지의 모든 컨텐츠를 확인
-      if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
-        // 아직 페이지 내 다음 컨텐츠가 있다면 다음 컨텐츠로 이동
-        setCurrentContentIndex((prev) => prev + 1);
-      } else if (currentIndex < storyData.length - 1) {
-        // 페이지 내 컨텐츠를 모두 완료했다면 다음 페이지로 이동
-        setCurrentIndex(currentIndex + 1);
-        setCurrentContentIndex(0);
-      }
-
-      // 녹음 상태 초기화
-      setRecordingStates({});
-      setIsWaitingForOther(false);
-    }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
-
   // 오디오 정보 저장
   const addAudioToList = (audioBlob: Blob | null) => {
-    console.log(`page: ${currentIndex + 1}, audio: ${currentContentIndex + 1}`);
+    console.log(`page: ${currentPage?.pageNumber ?? 1}, audio: ${currentContent?.order ?? 1}`);
     // 저장할 데이터
     const pageData: PageRecordData = {
         bookRecordId: role1RecordId ?? 0,
         partnerBookRecordId: role2RecordId ?? 0,
-        bookRecordPageNumber: currentIndex + 1,
+        bookRecordPageNumber: currentPage?.pageNumber ?? 1,
         pagePath: currentPage?.pagePath ?? '',
         audioPath: currentContent?.path ?? '',
         role: currentContent?.role ?? 'narration',
         text: currentContent?.text ?? '',
-        audioNumber: currentContentIndex + 1,
+        audioNumber: currentContent?.order ?? 1,
     };
     addRecord(pageData, audioBlob);
   };
@@ -206,16 +184,31 @@ function TogetherMode() {
   const handleNarrationComplete = useCallback(() => {
     if (currentContent?.role === 'narration') {
       addAudioToList(null);
+    } else if (currentContent?.role === myRole) {
+      addAudioToList(recordBlob.current);
     }
     handleNext();
   }, [handleNext]);
 
+  // 모든 참가자의 녹음 완료 여부 확인
+  useEffect(() => {
+    const allParticipantsCompleted = Object
+    .values(recordingStates).every((state) => state.isCompleted);
+
+    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
+    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
+      handleNarrationComplete();
+
+      // 녹음 상태 초기화
+      setRecordingStates({});
+      setIsWaitingForOther(false);
+    }
+  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+
   const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
     // 녹음된 오디오 blob 처리
     console.log('녹음 완료:', participantId, audioBlob);
-
-    // 오디오 저장
-    addAudioToList(audioBlob ?? null);
+    recordBlob.current = audioBlob ?? null;
 
     // 녹음 상태 업데이트
     setRecordingStates((prev) => ({
@@ -223,7 +216,6 @@ function TogetherMode() {
       [participantId]: {
         isRecording: false,
         isCompleted: true,
-        audioBlob, // 오디오 blob 저장
       },
     }));
 
@@ -235,7 +227,7 @@ function TogetherMode() {
     <div className="w-full h-screen relative">
       {/* 동화 컨텐츠 영역 */}
       <div className="w-full h-full px-6 pb-48 pt-6">
-        <div className="mb-6">
+        <div className="mb-6 hidden">
           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
           <p className="text-gray-600">
             내 역할:

@@ -118,7 +118,7 @@ function CraftsTab({ childName }: CraftsTabProps) {
     if (selectedCraftsTab === 'reading') setHistory(readingHistory);
     else if (selectedCraftsTab === 'drawing') setHistory(drawingHistory);
     else setHistory(letterHistory);
-  }, [selectedCraftsTab]);
+  }, [selectedCraftsTab, drawingHistory, letterHistory]);
 
   return (
     <div className="w-full h-full">

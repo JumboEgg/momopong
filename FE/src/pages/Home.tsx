@@ -12,7 +12,7 @@ function HomePage() {
   const { selectedAccount } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
-     | '/test' | '/book/letter' | '/book/record'): void => {
+     | '/test' | '/book/letter'): void => {
     navigate(path);
   };
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
@@ -75,16 +75,6 @@ function HomePage() {
         className="cursor-pointer flex flex-col items-center"
       >
         <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleNavigation('/book/record')}
-        className="cursor-pointer flex flex-col items-center"
-      >
-        <p className="fixed top-5 left-[50%] text-xs mt-1 border-2">
-          도서 정보 저장 테스트
-        </p>
       </button>
 
       {isModalOpen && (

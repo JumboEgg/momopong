@@ -31,7 +31,7 @@ function DrawingSelection(): JSX.Element {
         <img
           src={getOutlinePath(template.sketchPath) ?? ''}
           alt={template.sketchTitle}
-          className="w-full bg-amber-50 rounded-2xl"
+          className="w-full bg-amber-50 rounded-2xl aspect-8/5"
         />
       </div>
       <div

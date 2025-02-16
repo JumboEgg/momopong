@@ -30,8 +30,6 @@ import FriendSelection from './pages/FriendSelection';
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
 
-import BookRecordPage from './test/BookRecordPage';
-
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
   // const { toast } = useFirebaseMessaging();
@@ -177,15 +175,6 @@ function App(): JSX.Element {
             </ProtectedRoute>
           )}
         />
-        <Route
-          path="/book/record"
-          element={(
-            <ProtectedRoute>
-              <BookRecordPage />
-            </ProtectedRoute>
-          )}
-        />
-
         <Route
           path="/book/letter"
           element={(

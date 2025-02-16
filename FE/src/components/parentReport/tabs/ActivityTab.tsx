@@ -3,8 +3,6 @@ import { ActivityHistoryInfo } from '@/types/report';
 import { getCoverPath } from '@/utils/format/imgPath';
 
 function BookReport({ bookData }: { bookData: ActivityHistoryInfo }) {
-  console.log(bookData);
-
   return (
     <div className="flex flex-col justify-center items-center w-full py-3">
       <div className="w-[80%] mb-2">
