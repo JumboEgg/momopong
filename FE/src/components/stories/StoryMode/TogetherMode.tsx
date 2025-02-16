@@ -21,6 +21,7 @@ import AudioPlayer from '../AudioPlayer';
 import StoryIllustration from './StoryIllustration';
 import storyData from '../data/cinderella';
 // import { getAudioUrl } from '../utils/audioUtils';
+import { useRoomStore } from '@/stores/roomStore';
 
 interface LocationState {
   roomName: string;
@@ -34,12 +35,15 @@ interface RecordingState {
   };
 }
 
+
+
 function TogetherMode() {
   const location = useLocation();
   const { roomName } = location.state as LocationState;
   const { friend } = useFriends();
   const { bookContent } = useBookContent();
   const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
+
   const {
     bookId,
     currentIndex, setCurrentIndex,
@@ -59,6 +63,27 @@ function TogetherMode() {
     addRecord, uploadRecord,
   } = useRecordList();
 
+  const {
+    room,
+    participants,  // ✅ useRoomStore에서 participants 가져옴 (제거 X)
+    isRecording: roomIsRecording,
+    timeLeft,
+    connectionError,
+    mediaRecorder,
+    connectToRoom,
+    startRecording,
+    stopRecording,
+    broadcastRecordingStatus,
+    updateParticipants, // ✅ useRoomStore에서 updateParticipants 가져옴
+  } = useRoomStore();
+
+  // ✅ TogetherMode.tsx (participants가 변경될 때 로그 출력)
+  useEffect(() => {
+    console.log("🔥 TogetherMode participants 변경됨:::::::", participants);
+  }, [participants]);
+
+
+  
   // inviter/invitee 구분용 id 정보
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
@@ -101,6 +126,33 @@ function TogetherMode() {
     if (role1UserId === myId) setBookRecordId(role2Id);
     setRole2RecordId(role2Id);
   };
+  // 방 접속
+  useEffect(() => {
+    let isMounted = true;
+
+    const connect = async () => {
+      try {
+        if (!userRole) return;  // userRole이 설정된 후에만 연결 시도
+        console.log("접속!")
+        await connectToRoom(
+          roomName, 
+          selectedAccount?.name || 'Anonymous'
+        );
+        if (!isMounted) return;
+        console.log('Room connection successful');
+      } catch (error) {
+        if (!isMounted) return;
+        console.error('Failed to connect to room:', error);
+        alert('화상 연결에 실패했습니다. 다시 시도해주세요.');
+      }
+    };
+    connect();
+
+
+    return () => {
+      isMounted = false;
+    };
+  }, [roomName, selectedAccount?.name, userRole, connectToRoom]); // connectToRoom 의존성 추가
 
   useEffect(() => {
     // 역할 초기 설정
@@ -187,7 +239,7 @@ function TogetherMode() {
 
   // 오디오 정보 저장
   const addAudioToList = (audioBlob: Blob | null) => {
-    console.log(`page: ${currentIndex + 1}, audio: ${currentContentIndex + 1}`);
+    console.log("오디오 저장",`page: ${currentIndex + 1}, audio: ${currentContentIndex + 1}`);
     // 저장할 데이터
     const pageData: PageRecordData = {
         bookRecordId: role1RecordId ?? 0,
@@ -289,15 +341,20 @@ function TogetherMode() {
 
       {/* 화상 비디오 영역 */}
       {userRole && (
+        // <IntegratedRoom
+        //   roomName={roomName} // 🔹 방 이름 (반드시 있어야 함)
+        //   participantName={selectedAccount?.name || 'Anonymous'} // 🔹 참가자 이름
+        //   userRole={userRole} // 🔹 사용자 역할 ('role1' 또는 'role2'여야 함)
+        //   isUserTurn={isUserTurn} // 🔹 현재 사용자의 차례인지 여부 (true/false)
+        //   onRecordingComplete={handleRecordingComplete} // 🔹 녹음 완료 시 실행될 함수
+        //   onRecordingStatusChange={handleRecordingStateChange} // 🔹 녹음 상태 변경 시 실행될 함수
+        // />
         <IntegratedRoom
-          roomName={roomName}
-          participantName={selectedAccount?.name || 'Anonymous'}
+          participants={participants}  // ✅ useRoomStore의 participants를 그대로 전달
           userRole={userRole}
-          isUserTurn={isUserTurn}
-          onRecordingComplete={handleRecordingComplete}
-          onRecordingStatusChange={(participantId: string, status) => {
-            handleRecordingStateChange(participantId, status);
-          }}
+          isUserTurn={currentContent?.role === userRole}
+          onRecordingComplete={() => {}}
+          onRecordingStatusChange={() => {}}
         />
       )}
     </div>
