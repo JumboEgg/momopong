@@ -50,11 +50,14 @@ public class ReportServiceImpl implements ReportService {
                 continue;
             }
 
-            // 종료 시간 없음
-            if (bookRecord.getEndTime() == null) continue;
+            LocalDateTime startTime = bookRecord.getStartTime();
+            LocalDateTime endTime = bookRecord.getEndTime();
+
+            // 종료 시간 없음 or 종료 시간이 시작 시간보다 더 빠른 상황 (비정상적인 상황)
+            if (startTime == null || endTime == null || endTime.isBefore(startTime)) continue;
 
             // 싱글 모드 / 멀티 모드 별 독서 시간
-            long minutes = Duration.between(bookRecord.getStartTime(), bookRecord.getEndTime()).toMinutes();
+            long minutes = Duration.between(startTime, endTime).toMinutes();
             if (bookRecord.getMode() == ParticipationMode.SINGLE) {
                 readingMinutesSingle += minutes;
             } else {
@@ -71,11 +74,14 @@ public class ReportServiceImpl implements ReportService {
                 continue;
             }
 
-            // 종료 시간 없음
-            if (sketchRecord.getEndTime() == null) continue;
+            LocalDateTime startTime = sketchRecord.getStartTime();
+            LocalDateTime endTime = sketchRecord.getEndTime();
+
+            // 종료 시간 없음 or 종료 시간이 시작 시간보다 더 빠른 상황 (비정상적인 상황)
+            if (startTime == null || endTime == null || endTime.isBefore(startTime)) continue;
 
             // 싱글 모드 / 멀티 모드 별 그린 시간
-            long minutes = Duration.between(sketchRecord.getStartTime(), sketchRecord.getEndTime()).toMinutes();
+            long minutes = Duration.between(startTime, endTime).toMinutes();
             if (sketchRecord.getMode() == ParticipationMode.SINGLE) {
                 sketchingMinutesSingle += minutes;
             } else {
