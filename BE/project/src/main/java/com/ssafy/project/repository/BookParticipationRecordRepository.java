@@ -15,6 +15,18 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
     // 아이별 동화 참여 기록 조회
     List<BookParticipationRecord> findAllByChild(Child child);
 
+    // 아이별 & 기간별 BookParticipationRecord 조회
+    @Query(value = """
+        SELECT b FROM BookParticipationRecord b
+        WHERE b.child = :child
+        AND b.startTime IS NOT NULL
+        AND b.endTime IS NOT NULL
+        AND b.startTime BETWEEN :start AND :end
+        AND b.endTime BETWEEN :start AND :end
+    """)
+    List<BookParticipationRecord> findBookRecordByPeriod(@Param("child") Child child, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
+
+
     // 기간별 시간 조회
     @Query(value = """
         SELECT COALESCE(SUM(TIMESTAMPDIFF(MINUTE, start_time, end_time)), 0)
@@ -23,7 +35,8 @@ public interface BookParticipationRecordRepository extends JpaRepository<BookPar
         AND early_exit = FALSE
         AND start_time IS NOT NULL
         AND end_time IS NOT NULL
-        AND start_time between :start and :end
+        AND start_time BETWEEN :start and :end
+        AND end_time BETWEEN :start and :end
     """, nativeQuery = true)
     Long totalBetweenTime(@Param("childId") Long childId, @Param("start") LocalDateTime start, @Param("end") LocalDateTime end);
 
