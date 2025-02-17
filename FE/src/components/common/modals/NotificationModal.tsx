@@ -1,10 +1,7 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faEnvelope } from '@fortawesome/free-regular-svg-icons';
-import NotificationList from '@/components/common/NotificationList';
 import { faX } from '@fortawesome/free-solid-svg-icons';
-import { useState } from 'react';
 import { IconCircleButton } from '../buttons/CircleButton';
-import TextButton from '../buttons/TextButton';
 import RecentLetterList from '../RecentLetterList';
 import '@/components/common/scrollbar.css';
 
@@ -13,8 +10,6 @@ interface NotificationModalProps {
 }
 
 function NotificationModal({ onClose }: NotificationModalProps): JSX.Element {
-  const [selectedTab, setSelectedTab] = useState<string>('notification');
-
   return (
     <div
       role="presentation"
@@ -37,28 +32,10 @@ function NotificationModal({ onClose }: NotificationModalProps): JSX.Element {
         />
         <div className="space-x-3 flex w-full text-4xl font-[BMJUA]">
           <FontAwesomeIcon className="text-tainoi-500" icon={faEnvelope} size="lg" />
-          <h1>받은 편지</h1>
-        </div>
-        <div className="flex w-full justify-evenly">
-          <TextButton
-            size="md"
-            variant="white"
-            hasFocus={selectedTab === 'notification'}
-            onClick={() => setSelectedTab('notification')}
-          >
-            초대 알림
-          </TextButton>
-          <TextButton
-            size="md"
-            variant="white"
-            hasFocus={selectedTab === 'letter'}
-            onClick={() => setSelectedTab('letter')}
-          >
-            최근 편지
-          </TextButton>
+          <h1>오늘 받은 편지</h1>
         </div>
         <div className="w-full h-[calc(80vh-200px)] overflow-y-scroll customScrollbar yellow">
-          { selectedTab === 'notification' ? <NotificationList /> : <RecentLetterList /> }
+          <RecentLetterList />
         </div>
       </div>
     </div>
