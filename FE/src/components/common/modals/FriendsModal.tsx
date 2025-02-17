@@ -1,6 +1,6 @@
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faX } from '@fortawesome/free-solid-svg-icons';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import FriendList from '@/components/friends/FriendList';
 import FriendRequestList from '@/components/friends/FriendRequestList';
 import AddFriendModal from './AddFriendModal';
@@ -16,16 +16,16 @@ type TabType = 'list' | 'request';
 function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
   const [activeTab, setActiveTab] = useState<TabType>('list');
   const [isAddFriendModalOpen, setIsAddFriendModalOpen] = useState(false);
-  const [focusedButton, setFocusedButton] = useState<TabType>('list');
+  // const [focusedButton, setFocusedButton] = useState<TabType>('list');
 
-  useEffect(() => {
-    setFocusedButton('list');
-    setActiveTab('list');
-  }, []);
+  // useEffect(() => {
+  //   setFocusedButton('list');
+  //   setActiveTab('list');
+  // }, []);
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
-    setFocusedButton(tab);
+    // setFocusedButton(tab);
   };
 
   const handleOpenAddFriendModal = () => {
@@ -84,7 +84,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           <TextButton
             size="md"
             variant="white"
-            hasFocus={focusedButton === 'list'}
+            hasFocus={activeTab === 'list'}
             onClick={() => handleTabChange('list')}
           >
             친구 목록
@@ -92,7 +92,7 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           <TextButton
             size="md"
             variant="white"
-            hasFocus={focusedButton === 'request'}
+            hasFocus={activeTab === 'request'}
             onClick={() => handleTabChange('request')}
           >
             친구 요청
@@ -110,11 +110,12 @@ function FriendsModal({ onClose }: FriendsModalProps): JSX.Element {
           customScrollbar yellow
         "
         >
-          {activeTab === 'list' ? (
+          <div className={activeTab === 'list' ? 'block' : 'hidden'}>
             <FriendList />
-          ) : (
+          </div>
+          <div className={activeTab === 'request' ? 'block' : 'hidden'}>
             <FriendRequestList />
-          )}
+          </div>
         </div>
 
         {/* Add Friend Button */}

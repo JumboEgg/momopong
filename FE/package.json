@@ -25,6 +25,7 @@
     "firebase": "^11.3.0",
     "glob": "^11.0.1",
     "livekit-client": "^2.8.1",
+    "lodash": "^4.17.21",
     "lru-cache": "^11.0.2",
     "lucide-react": "^0.471.1",
     "openvidu-browser": "^2.31.0",
@@ -44,6 +45,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
+    "@types/lodash": "^4.17.15",
     "@types/node": "^22.12.0",
     "@types/prop-types": "^15.7.14",
     "@types/react": "^18.3.18",

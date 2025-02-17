@@ -1,19 +1,18 @@
 import { useStory } from '@/stores/storyStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 function ModeSelection(): JSX.Element {
-  const { setMode, bookId } = useStory(); // bookId가 여기서 제대로 있는지 확인
+  const { setMode, bookId } = useStory();
   const { bookContent, setBookContent } = useBookContent();
-
-  console.log('ModeSelection bookId:', bookId); // 디버깅용
 
   const handleModeSelection = async (mode: 'reading' | 'together') => {
     try {
       if (mode === 'together' && bookId) {
-        await setBookContent(bookId);
-        // bookId를 숫자로 확실하게 변환
+        setBookContent(bookId);
         const numericBookId = Number(bookId);
-        console.log('Setting content with bookId:', numericBookId); // 디버깅용
 
         window.history.replaceState({
           contentId: numericBookId,
@@ -28,30 +27,53 @@ function ModeSelection(): JSX.Element {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          {bookContent?.bookTitle || '동화'}
-        </h1>
-        <div className="flex justify-center gap-4">
-          <button
-            type="button"
-            onClick={() => handleModeSelection('reading')}
-            className="py-4 px-6 text-lg font-semibold text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
-          >
-            읽기 모드
-          </button>
-          <button
-            type="button"
-            onClick={() => handleModeSelection('together')}
-            className="py-4 px-6 text-lg font-semibold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-          >
-            함께 읽기 모드
-          </button>
+    <div className="h-full w-full bg-[#FCEDBA]">
+      <div className="absolute mt-5 ml-5">
+        <IconCircleButton
+          size="sm"
+          variant="action"
+          onClick={() => window.history.back()}
+          icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
+        />
+      </div>
+      <div className="h-full w-full flex items-center justify-evenly columns-2">
+        <div className="max-w-md flex justify-center">
+          <div className="space-y-4 w-[80%] hover:w-full duration-200">
+            <button
+              type="button"
+              onClick={() => handleModeSelection('reading')}
+              className="py-4 px-6 text-lg hover:text-2xl duration-200 font-semibold flex flex-col"
+            >
+              <div className="w-full max-w-xl min-w-40 self-center">
+                <img
+                  src="/images/icons/reading.png"
+                  alt="reading mode"
+                />
+              </div>
+              <div className="self-center">읽기 모드</div>
+            </button>
+          </div>
+        </div>
+        <div className="max-w-md flex justify-center">
+          <div className="space-y-4 w-[80%] hover:w-full duration-200">
+            <button
+              type="button"
+              onClick={() => handleModeSelection('together')}
+              className="py-4 px-6 text-lg hover:text-2xl duration-200 font-semibold flex flex-col"
+            >
+              <div className="w-full max-w-xl min-w-40 self-center">
+                <img
+                  src="/images/icons/friendship.png"
+                  alt="together mode"
+                />
+              </div>
+              <div className="self-center">함께 읽기 모드</div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
-}
+ }
 
-export default ModeSelection;
+ export default ModeSelection;
