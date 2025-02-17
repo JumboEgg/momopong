@@ -293,6 +293,7 @@ const handleInvitationAccept = async () => {
               replace: true,
             });
           } else if (contentType === 'BOOK') {
+            // 인사방으로 먼저 이동
             navigate('/greeting', {
               state: {
                 roomName: `book-${contentId}`,
