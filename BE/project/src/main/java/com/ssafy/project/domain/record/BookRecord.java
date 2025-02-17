@@ -17,7 +17,6 @@ import java.util.List;
 @Getter
 @Builder
 @AllArgsConstructor
-@Table(name = "book_participation_record")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @EntityListeners(AuditingEntityListener.class)
 public class BookRecord {
