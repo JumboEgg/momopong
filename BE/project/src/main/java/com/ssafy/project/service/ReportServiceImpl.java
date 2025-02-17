@@ -1,13 +1,13 @@
 package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
-import com.ssafy.project.domain.record.BookParticipationRecord;
+import com.ssafy.project.domain.record.BookRecord;
 import com.ssafy.project.domain.record.SketchParticipationRecord;
 import com.ssafy.project.domain.type.ParticipationMode;
 import com.ssafy.project.dto.report.ActivityAnalysisDto;
 import com.ssafy.project.dto.report.ActivityHistoryDto;
 import com.ssafy.project.exception.NotFoundException;
-import com.ssafy.project.repository.BookParticipationRecordRepository;
+import com.ssafy.project.repository.BookRecordRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.SketchParticipationRecordRepository;
 import jakarta.transaction.Transactional;
@@ -26,7 +26,7 @@ import java.util.List;
 @Transactional
 @RequiredArgsConstructor
 public class ReportServiceImpl implements ReportService {
-    private final BookParticipationRecordRepository bookParticipationRecordRepository;
+    private final BookRecordRepository bookParticipationRecordRepository;
     private final SketchParticipationRecordRepository sketchParticipationRecordRepository;
     private final ChildRepository childRepository;
 
@@ -51,8 +51,8 @@ public class ReportServiceImpl implements ReportService {
         log.info("startOfWeek={}", startOfWeek);
         log.info("endOfWeek={}", endOfWeek);
 
-        List<BookParticipationRecord> bookRecordList = bookParticipationRecordRepository.findBookRecordByPeriod(child, startOfWeek, endOfWeek);
-        for (BookParticipationRecord bookRecord : bookRecordList) {
+        List<BookRecord> bookRecordList = bookParticipationRecordRepository.findBookRecordByPeriod(child, startOfWeek, endOfWeek);
+        for (BookRecord bookRecord : bookRecordList) {
             // 멀티 플레이 중 중도 퇴장 횟수 세기 (중도 퇴장했다면 참여 시간 기록 X)
             if (bookRecord.isEarlyExit()) {
                 if (bookRecord.getMode() == ParticipationMode.MULTI) earlyExitCount++;
