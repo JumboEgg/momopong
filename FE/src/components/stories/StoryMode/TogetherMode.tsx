@@ -219,9 +219,45 @@ function TogetherMode() {
       },
     }));
 
-    // 대기 상태 설정
-    setIsWaitingForOther(true);
-  }, []);
+      // 대기 상태 설정
+      setIsWaitingForOther(true);
+    }, []);
+
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    console.log('RecordingStates 변경됨:', recordingStates);
+
+    // 각 상태의 세부 정보 로깅
+    Object.entries(recordingStates).forEach(([key, value]) => {
+      console.log(
+        `참가자 ${key} 상태:`,
+        `녹음 중: ${value.isRecording}, 
+        완료: ${value.isCompleted}`,
+      );
+    });
+
+    const allParticipantsCompleted = Object
+      .values(recordingStates)
+      .every((state) => state.isCompleted);
+
+    const participantCount = Object.keys(recordingStates).length;
+
+    console.log(`모든 참가자 완료: ${allParticipantsCompleted}`);
+    console.log(`참가자 수: ${participantCount}`);
+
+    if (allParticipantsCompleted && participantCount > 0) {
+      console.log('페이지 넘어가기 시도');
+
+      // 안전장치 추가
+      const timeoutId = setTimeout(() => {
+        handleNarrationComplete();
+        setRecordingStates({});
+        setIsWaitingForOther(false);
+      }, 100); // 짧은 지연 추가
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
 
   return (
     <div className="w-full h-screen relative">

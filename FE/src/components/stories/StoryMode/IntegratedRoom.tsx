@@ -13,6 +13,9 @@ import {
   VideoPresets,
   Track,
 } from 'livekit-client';
+import { useRoomStore } from '@/stores/roomStore';
+
+type VariantType = 'greeting' | 'story';
 
 interface IntegratedRoomProps {
   roomName: string;
@@ -21,6 +24,7 @@ interface IntegratedRoomProps {
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
+  variant?: VariantType; // 레이아웃 variant 추가
 }
 
 interface ParticipantTrack {
@@ -35,15 +39,20 @@ function IntegratedRoom({
   isUserTurn,
   onRecordingComplete,
   onRecordingStatusChange,
+  variant = 'story',
 }: IntegratedRoomProps) {
-  const [room, setRoom] = useState<Room | null>(null);
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
   const [timeLeft, setTimeLeft] = useState(20);
   const [connectionError, setConnectionError] = useState<string | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
+  const {
+    room,
+    setRoom,
+    confirmReady,
+    setPartnerReady,
+  } = useRoomStore();
 
   // 토큰 가져오기
   const getToken = useCallback(async () => {
@@ -219,6 +228,12 @@ function IntegratedRoom({
         const newRoom = new Room({
           adaptiveStream: true,
           dynacast: true,
+          // 오디오 설정 추가
+          audioCaptureDefaults: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
           videoCaptureDefaults: {
             resolution: VideoPresets.h720.resolution,
           },
@@ -237,6 +252,10 @@ function IntegratedRoom({
             const message = JSON.parse(new TextDecoder().decode(payload));
             if (message.type === 'recording_status' && message.content.sender !== newRoom.localParticipant.identity) {
               onRecordingStatusChange(message.content.sender, message.content.recordingStatus);
+            } else if (message.type === 'ready_status') {
+              setPartnerReady(message.status);
+            } else if (message.type === 'start_story') {
+              confirmReady(message.status);
             }
           } catch (error) {
             console.error('데이터 처리 오류:', error);
@@ -265,18 +284,28 @@ function IntegratedRoom({
         }
 
         await newRoom.localParticipant.setName(participantName);
-        await newRoom.localParticipant.setCameraEnabled(true);
-        await newRoom.localParticipant.setMicrophoneEnabled(false);
+    await newRoom.localParticipant.setCameraEnabled(true);
 
-        setRoom(newRoom);
-        updateParticipants(newRoom);
-      } catch (error) {
-        console.error('Room connection failed:', error);
-        if (isMounted) {
-          setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
-        }
+    if (variant === 'greeting') {
+      await newRoom.localParticipant.setMicrophoneEnabled(true);
+    }
+
+    // 오디오 트랙 구독 이벤트 수정
+    newRoom.on(RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === Track.Kind.Audio) {
+        track.attach();
       }
-    };
+    });
+
+    setRoom(newRoom);
+    updateParticipants(newRoom);
+  } catch (error) {
+    console.error('Room connection error:', error);
+    if (isMounted) {
+      setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+    }
+  }
+};
 
     connectToRoom();
 
@@ -284,9 +313,10 @@ function IntegratedRoom({
       isMounted = false;
       if (room) {
         room.disconnect();
+        setRoom(null); // room 상태 초기화
       }
     };
-  }, [roomName, participantName, getToken, updateParticipants]);
+  }, [roomName, participantName, getToken, updateParticipants, setRoom]);
 
   // 리소스 정리
   useEffect(
@@ -336,6 +366,10 @@ function IntegratedRoom({
   }
 
   const renderRecordingButton = () => {
+    // greeting 모드에서는 녹음 버튼을 렌더링하지 않음
+    if (variant === 'greeting') {
+      return null;
+    }
     if (!isUserTurn) {
       return null;
     }
@@ -367,18 +401,8 @@ function IntegratedRoom({
           {isRecording && (
             <button
               type="button"
-              onClick={() => {
-                console.log('완료 버튼 클릭', {
-                  isUserTurn,
-                  isRecording,
-                  mediaRecorderState: mediaRecorder?.state,
-                });
-                stopRecording();
-              }}
-              className="
-                px-4 py-2 rounded-full text-white font-medium
-                bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap
-              "
+              onClick={stopRecording}
+              className="px-4 py-2 rounded-full text-white font-medium bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap"
             >
               완료
             </button>
@@ -387,6 +411,12 @@ function IntegratedRoom({
       </div>
     );
   };
+
+  useEffect(() => {
+    if (room) {
+      room.localParticipant.setMicrophoneEnabled(variant === 'greeting');
+    }
+  }, [variant, room]);
 
   const renderParticipantVideo = (index: number) => {
     if (!participants[index]) {
@@ -397,7 +427,7 @@ function IntegratedRoom({
     const isLocal = participant === room?.localParticipant;
 
     return (
-      <div className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden">
+      <div className="relative w-96 h-64 bg-gray-800 rounded-lg overflow-hidden">
         <video
           ref={(element) => {
             if (element && trackPublication) {
@@ -412,8 +442,17 @@ function IntegratedRoom({
           <track kind="captions" />
         </video>
 
-        <div className="absolute bottom-2 left-2 right-2 flex justify-between items-center">
-          <span className="text-white text-sm truncate">
+        <div className={`
+          absolute bottom-2 left-2 right-2 
+          flex justify-between items-center
+          ${variant === 'greeting' ? 'bg-black bg-opacity-40 p-2 rounded' : ''}
+        `}
+        >
+          <span className={`
+            text-white truncate
+            ${variant === 'greeting' ? 'text-base' : 'text-sm'}
+          `}
+          >
             <span>{participant.name || participant.identity}</span>
             {isLocal && <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>}
           </span>
@@ -427,9 +466,23 @@ function IntegratedRoom({
       </div>
     );
   };
+  // 방(화면)에 따른 레이아웃 변경
+  if (variant === 'greeting') {
+    return (
+      <div className="w-full max-w-4xl mx-auto mt-8">
+        <div className="grid grid-cols-2 gap-8 place-items-center">
+          {renderParticipantVideo(0)}
+          {renderParticipantVideo(1)}
+        </div>
+        <div className="mt-8 flex justify-center">
+          {renderRecordingButton()}
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="fixed bottom-8 right-8 flex items-center gap-4">
+    <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
       {renderParticipantVideo(0)}
       {renderRecordingButton()}
       {renderParticipantVideo(1)}
