@@ -143,7 +143,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       partnerReady, // 상대방 준비 상태
       readyConfirmed, // 전체 준비 확정 상태
     });
-    if (isReady && partnerReady) {
+    if (isReady && partnerReady && !readyConfirmed) {
       console.log('🤝 Both users are ready');
       // 추가: 명시적으로 스토리 시작 메시지 송신
       if (room) {

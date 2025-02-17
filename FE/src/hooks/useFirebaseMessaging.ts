@@ -294,7 +294,7 @@ const handleInvitationAccept = async () => {
             });
           } else if (contentType === 'BOOK') {
             // 인사방으로 먼저 이동
-            navigate(`/book/${contentId}/together`, {
+            navigate('/greeting', {
               state: {
                 roomName: `book-${contentId}`,
                 participantName: inviterName,

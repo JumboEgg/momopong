@@ -162,29 +162,7 @@ function TogetherMode() {
     [],
   );
 
-  // 모든 참가자의 녹음 완료 여부 확인
-  useEffect(() => {
-    const allParticipantsCompleted = Object
-    .values(recordingStates).every((state) => state.isCompleted);
-
-    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
-    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      // 현재 페이지의 모든 컨텐츠를 확인
-      if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
-        // 아직 페이지 내 다음 컨텐츠가 있다면 다음 컨텐츠로 이동
-        setCurrentContentIndex((prev) => prev + 1);
-      } else if (currentIndex < storyData.length - 1) {
-        // 페이지 내 컨텐츠를 모두 완료했다면 다음 페이지로 이동
-        setCurrentIndex(currentIndex + 1);
-        setCurrentContentIndex(0);
-      }
-
-      // 녹음 상태 초기화
-      setRecordingStates({});
-      setIsWaitingForOther(false);
-    }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
-
+  // 🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀🚀(녹음 수정)
   // 오디오 정보 저장
   const addAudioToList = (audioBlob: Blob | null) => {
     console.log(`page: ${currentIndex + 1}, audio: ${currentContentIndex + 1}`);
@@ -226,6 +204,66 @@ function TogetherMode() {
         audioBlob, // 오디오 blob 저장
       },
     }));
+
+  // 모든 참가자의 녹음 완료 여부 확인
+  // useEffect(() => {
+  //   const allParticipantsCompleted = Object
+  //   .values(recordingStates)
+  //   .every((state) => state.isCompleted);
+
+  //   // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
+  //   if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
+  //     // 현재 페이지의 모든 컨텐츠를 확인
+  //     if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
+  //       // 아직 페이지 내 다음 컨텐츠가 있다면 다음 컨텐츠로 이동
+  //       setCurrentContentIndex((prev) => prev + 1);
+  //     } else if (currentIndex < storyData.length - 1) {
+  //       // 페이지 내 컨텐츠를 모두 완료했다면 다음 페이지로 이동
+  //       setCurrentIndex(currentIndex + 1);
+  //       setCurrentContentIndex(0);
+  //     }
+
+  //     // 녹음 상태 초기화
+  //     setRecordingStates({});
+  //     setIsWaitingForOther(false);
+  //   }
+  // }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+
+  // eslint-disable-next-line consistent-return
+  useEffect(() => {
+    console.log('RecordingStates 변경됨:', recordingStates);
+
+    // 각 상태의 세부 정보 로깅
+    Object.entries(recordingStates).forEach(([key, value]) => {
+      console.log(
+        `참가자 ${key} 상태:`,
+        `녹음 중: ${value.isRecording}, 
+        완료: ${value.isCompleted}`,
+      );
+    });
+
+    const allParticipantsCompleted = Object
+      .values(recordingStates)
+      .every((state) => state.isCompleted);
+
+    const participantCount = Object.keys(recordingStates).length;
+
+    console.log(`모든 참가자 완료: ${allParticipantsCompleted}`);
+    console.log(`참가자 수: ${participantCount}`);
+
+    if (allParticipantsCompleted && participantCount > 0) {
+      console.log('페이지 넘어가기 시도');
+
+      // 안전장치 추가
+      const timeoutId = setTimeout(() => {
+        handleNarrationComplete();
+        setRecordingStates({});
+        setIsWaitingForOther(false);
+      }, 100); // 짧은 지연 추가
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
 
     // 대기 상태 설정
     setIsWaitingForOther(true);

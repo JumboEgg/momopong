@@ -404,7 +404,7 @@ function IntegratedRoom({
     const isLocal = participant === room?.localParticipant;
 
     return (
-      <div className="relative w-48 h-36 bg-gray-800 rounded-lg overflow-hidden">
+      <div className="relative w-96 h-64 bg-gray-800 rounded-lg overflow-hidden">
         <video
           ref={(element) => {
             if (element && trackPublication) {
@@ -436,7 +436,7 @@ function IntegratedRoom({
   };
 
   return (
-    <div className="fixed bottom-8 right-8 flex items-center gap-4">
+    <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
       {renderParticipantVideo(0)}
       {renderRecordingButton()}
       {renderParticipantVideo(1)}
