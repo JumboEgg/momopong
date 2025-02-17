@@ -267,6 +267,7 @@ function TogetherMode() {
           <p className="text-gray-600">
             함께 읽는 친구:
             {friend?.name || ''}
+            {friend && ` (${role2UserId === myId ? '신데렐라' : '왕자님'})`}
           </p>
         </div>
 

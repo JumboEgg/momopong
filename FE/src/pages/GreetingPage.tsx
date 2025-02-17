@@ -174,6 +174,11 @@ useEffect(() => {
       });
 
       const myRole = role1UserId === myId ? 'role1' : 'role2';
+      console.log('역할 결정 디버그 - GreetingPage', {
+        myId,
+        role1UserId,
+        calculatedRole: myRole,
+      });
       navigate(`/book/${contentId}/together`, {
         state: {
           roomName,

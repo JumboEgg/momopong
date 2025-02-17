@@ -55,8 +55,8 @@ function StoryIllustration({
           다음
         </button>
       </div>
-      {/* 텍스트 오버레이 */}
-      <div className="absolute bottom-8 left-8">
+      {/* 텍스트 오버레이📣📣📣 */}
+      <div className="absolute top-8 left-8">
         <div className="bg-black bg-opacity-30 text-white p-6 rounded-lg max-w-xl">
           {relatedContents.map((content) => {
             const isUserTurn = userRole === content.role;

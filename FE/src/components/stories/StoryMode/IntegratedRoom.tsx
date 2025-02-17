@@ -454,7 +454,9 @@ function IntegratedRoom({
           `}
           >
             <span>{participant.name || participant.identity}</span>
-            {isLocal && <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>}
+            {isLocal
+              ? <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>
+              : <span>{` (${userRole === 'role2' ? '신데렐라' : '왕자님'})`}</span>}
           </span>
           {isLocal && (
             <div
