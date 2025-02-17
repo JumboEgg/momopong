@@ -27,11 +27,11 @@ const sizeClasses: Record<CircleButtonSize, string> = {
 };
 
 const sizeToIconSize: Record<CircleButtonSize, string> = {
-  xs: 'xs sm:sm',
-  sm: 'sm sm:lg',
+  xs: 'xs',
+  sm: 'sm',
   base: 'lg',
-  md: 'lg sm:xl',
-  lg: 'xl sm:2x',
+  md: 'lg',
+  lg: 'xl',
 };
 
 function IconCircleButton({
@@ -44,6 +44,14 @@ function IconCircleButton({
   onClick,
 }: CircleButtonBaseProps) {
   const baseClasses = 'rounded-full border-6 sm:border-8 md:border-10 transition-colors duration-100 focus:outline-none flex items-center justify-center';
+
+  const iconSizeClasses = {
+    xs: 'text-base sm:text-lg',
+    sm: 'text-2xl sm:text-3xl',
+    base: 'text-2xl sm:text-3xl',
+    md: 'text-4xl sm:text-5xl',
+    lg: 'text-5xl sm:text-6xl',
+  };
 
   const variantClasses: Record<CircleButtonVariant, string> = {
     default: 'bg-broom-200 text-black border-tainoi-300 hover:bg-tainoi-400 active:bg-tainoi-400',
@@ -71,13 +79,21 @@ function IconCircleButton({
         ${sizeClasses[size]}
         ${variantClasses[variant]}
         ${className}
+        flex items-center justify-center
       `}
       disabled={disabled}
       onClick={onClick}
     >
-      {React.cloneElement(icon as React.ReactElement, {
-        size: sizeToIconSize[size],
-      })}
+      <div className={`
+        ${iconSizeClasses[size]}
+        flex items-center justify-center w-full h-full
+      `}
+      >
+        {React.cloneElement(icon as React.ReactElement, {
+          size: sizeToIconSize[size],
+          className: 'flex-shrink-0', // 아이콘이 축소되지 않도록
+        })}
+      </div>
     </button>
   );
 }

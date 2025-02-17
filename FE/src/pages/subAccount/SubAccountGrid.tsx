@@ -27,22 +27,16 @@ function SubAccountGrid({ onAdd }: SubAccountGridProps): JSX.Element {
     try {
       setSelectedId(childId);
 
-      // Promise를 직접 생성하지 않고, setTimeout만 사용
       setTimeout(async () => {
-        const isFirstLogin = await loginSubAccount(childId);
-
-        if (isFirstLogin) {
-          navigate('/home');
-        } else {
-          navigate('/home');
-        }
+        await loginSubAccount(childId);
+        // 로딩 페이지로 먼저 이동
+        navigate('/loading');
       }, 400);
     } catch (err) {
       console.error('로그인 실패:', err);
       setSelectedId(null);
     }
   };
-
   useEffect(() => {
     fetchSubAccounts();
   }, []); //  컴포넌트 마운트 시 데이터 조회

@@ -7,13 +7,32 @@ interface TokenState {
 }
 class TokenService {
   private state: TokenState = {
-    parentToken: localStorage.getItem('auth-storage')
-      ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state?.accessToken || null : null,
+    parentToken: null, // 초기값을 null로 설정
     childToken: null,
-    refreshToken: localStorage.getItem('auth-storage')
-      ? JSON.parse(localStorage.getItem('auth-storage') || '{}').state?.refreshToken || null : null,
+    refreshToken: null,
     currentChildId: null,
   };
+
+  constructor() {
+    // 생성자에서 localStorage 체크 및 초기화
+    try {
+      const authStorage = localStorage.getItem('auth-storage');
+      if (authStorage) {
+        const parsedStorage = JSON.parse(authStorage);
+        if (parsedStorage.state) {
+          this.state = {
+            parentToken: parsedStorage.state.accessToken || null,
+            childToken: null,
+            refreshToken: parsedStorage.state.refreshToken || null,
+            currentChildId: parsedStorage.state.selectedChildId || null,
+          };
+        }
+      }
+    } catch (error) {
+      console.error('TokenService initialization error:', error);
+      this.clearAllTokens();
+    }
+  }
 
   // getAccessToken 메소드 추가
   getAccessToken(forceParent: boolean = false): string | null {
