@@ -34,14 +34,14 @@ function AudioPlayerComponent(
   const retryCountRef = useRef(0);
   const maxRetries = 3;
 
-  // Reset currentFileIndex when audioFiles change
+  // audioFiles가 변경되면 재생 상태 초기화
   useEffect(() => {
     if (JSON.stringify(filesRef.current) !== JSON.stringify(audioFiles)) {
       setCurrentFileIndex(0);
       filesRef.current = audioFiles;
       retryCountRef.current = 0;
 
-      // Ensure cleanup of current audio
+      // 현재 재생 중인 오디오 정지
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -70,11 +70,12 @@ function AudioPlayerComponent(
     };
   }, [ref]);
 
+  // 오디오 재생 처리 함수
   const handlePlay = useCallback(() => {
     if (!audioRef.current || !audioEnabled) return;
 
     audioRef.current.volume = 1;
-
+    // 자동 재생이 활성화된 경우
     if (autoPlay) {
       if (playAttemptRef.current) {
         clearTimeout(playAttemptRef.current);
@@ -92,12 +93,14 @@ function AudioPlayerComponent(
     }
   }, [audioEnabled, autoPlay]);
 
+  // 오디오 재생 완료 처리
   const handleAudioEnd = useCallback(() => {
     if (currentFileIndex < audioFiles.length - 1) {
+      // 다음 파일이 있으면 다음 파일 재생
       setCurrentFileIndex((prev) => prev + 1);
       retryCountRef.current = 0; // Reset retry count for next file
     } else {
-      // Ensure cleanup before calling onEnded
+      // 마지막 파일이면 정리 후 완료 콜백 호출
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
@@ -106,6 +109,7 @@ function AudioPlayerComponent(
     }
   }, [currentFileIndex, audioFiles.length, onEnded]);
 
+   // 재생 재시도 함수
   const retryPlayback = useCallback(() => {
     if (!audioRef.current) return;
 
@@ -127,6 +131,7 @@ function AudioPlayerComponent(
       });
   }, [audioFiles, currentFileIndex]);
 
+  // 오디오 에러 처리
   const handleError = useCallback((event: SyntheticEvent<HTMLAudioElement, Event>) => {
     console.error('Audio error:', event);
 
@@ -145,14 +150,16 @@ function AudioPlayerComponent(
       handleAudioEnd();
     }
   }, [handleAudioEnd, retryPlayback, onError]);
-
+  // 오디오 재생 관리
   useEffect(() => {
     handlePlay();
 
     return () => {
+      // 재생 시도 타이머가 있다면 제거
       if (playAttemptRef.current) {
         clearTimeout(playAttemptRef.current);
       }
+      // 재생 중인 오디오가 있다면 정지 및 초기화
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current.currentTime = 0;
