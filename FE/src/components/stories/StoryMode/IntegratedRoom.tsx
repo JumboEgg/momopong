@@ -15,6 +15,8 @@ import {
 } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
 
+type VariantType = 'greeting' | 'story';
+
 interface IntegratedRoomProps {
   roomName: string;
   participantName: string;
@@ -22,7 +24,7 @@ interface IntegratedRoomProps {
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
-  variant?: 'greeting' | 'story'; // 레이아웃 variant 추가
+  variant?: VariantType; // 레이아웃 variant 추가
 }
 
 interface ParticipantTrack {
@@ -226,6 +228,12 @@ function IntegratedRoom({
         const newRoom = new Room({
           adaptiveStream: true,
           dynacast: true,
+          // 오디오 설정 추가
+          audioCaptureDefaults: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+          },
           videoCaptureDefaults: {
             resolution: VideoPresets.h720.resolution,
           },
@@ -276,19 +284,28 @@ function IntegratedRoom({
         }
 
         await newRoom.localParticipant.setName(participantName);
-        await newRoom.localParticipant.setCameraEnabled(true);
-        await newRoom.localParticipant.setMicrophoneEnabled(false);
+    await newRoom.localParticipant.setCameraEnabled(true);
 
-        // room을 전역 상태로 설정
-        setRoom(newRoom);
-        updateParticipants(newRoom);
-      } catch (error) {
-        console.error('Room connection failed:', error);
-        if (isMounted) {
-          setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
-        }
+    if (variant === 'greeting') {
+      await newRoom.localParticipant.setMicrophoneEnabled(true);
+    }
+
+    // 오디오 트랙 구독 이벤트 수정
+    newRoom.on(RoomEvent.TrackSubscribed, (track) => {
+      if (track.kind === Track.Kind.Audio) {
+        track.attach();
       }
-    };
+    });
+
+    setRoom(newRoom);
+    updateParticipants(newRoom);
+  } catch (error) {
+    console.error('Room connection error:', error);
+    if (isMounted) {
+      setConnectionError(error instanceof Error ? error.message : 'Failed to connect');
+    }
+  }
+};
 
     connectToRoom();
 
@@ -349,16 +366,16 @@ function IntegratedRoom({
   }
 
   const renderRecordingButton = () => {
+    // greeting 모드에서는 녹음 버튼을 렌더링하지 않음
+    if (variant === 'greeting') {
+      return null;
+    }
     if (!isUserTurn) {
       return null;
     }
 
     return (
-      <div className={`
-        flex flex-col items-center gap-2
-        ${variant === 'greeting' ? 'mt-6' : ''}
-      `}
-      >
+      <div className="flex flex-col items-center gap-2">
         {isRecording && (
           <div className="w-32 h-2 bg-gray-200 rounded mb-2">
             <div
@@ -376,7 +393,6 @@ function IntegratedRoom({
             className={`
               px-4 py-2 rounded-full text-white font-medium transition-colors whitespace-nowrap
               ${isRecording ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}
-              ${variant === 'greeting' ? 'text-lg px-6 py-3' : ''}
             `}
           >
             {isRecording ? `${timeLeft}초` : '녹음 시작'}
@@ -386,11 +402,7 @@ function IntegratedRoom({
             <button
               type="button"
               onClick={stopRecording}
-              className={`
-                px-4 py-2 rounded-full text-white font-medium
-                bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap
-                ${variant === 'greeting' ? 'text-lg px-6 py-3' : ''}
-              `}
+              className="px-4 py-2 rounded-full text-white font-medium bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap"
             >
               완료
             </button>
@@ -399,6 +411,7 @@ function IntegratedRoom({
       </div>
     );
   };
+
   useEffect(() => {
     if (room) {
       room.localParticipant.setMicrophoneEnabled(variant === 'greeting');
