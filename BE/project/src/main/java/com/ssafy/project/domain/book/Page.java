@@ -26,9 +26,14 @@ public class Page {
     @OrderBy("audioNumber asc")
     private List<Audio> audioList = new ArrayList<>();
 
-    private int pageNumber; // 페이지 번호
+//    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
+//    @OrderBy("page.id asc")
+//    private List<Position> positionList = new ArrayList<>();
 
-    private String pagePath; // 동화 이미지 경로
+    private int pageNumber; // 페이지 번호
+    private String pagePath; // 페이지 이미지 경로
+    private boolean hasDrawing; // 그림 그리기 여부
+    private boolean hasObject; // 오브젝트 존재 여부
 
     public void addPage(Book book) {
         this.book = book;

@@ -1,11 +1,11 @@
 package com.ssafy.project.controller;
 
 import com.ssafy.project.dto.record.BookParticipationRecordDto;
-import com.ssafy.project.service.BookParticipationRecordService;
+import com.ssafy.project.service.BookRecordService;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,9 +14,9 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Book Participation Record API", description = "동화 참여 기록 관련 API")
 @RequestMapping("/api/book/record")
 @RequiredArgsConstructor
-public class BookParticipationRecordController {
+public class BookRecordController {
 
-    private final BookParticipationRecordService bookParticipationRecordService;
+    private final BookRecordService bookParticipationRecordService;
 
     @PostMapping("/save")
     @Operation(summary = "동화 참여 기록 저장", description = "사용자의 동화 참여 기록을 저장합니다.")

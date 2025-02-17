@@ -4,11 +4,11 @@ import com.ssafy.project.common.JsonConverter;
 import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.book.Book;
-import com.ssafy.project.domain.record.BookParticipationRecord;
+import com.ssafy.project.domain.record.BookRecord;
 import com.ssafy.project.domain.type.StatusType;
 import com.ssafy.project.dto.record.BookParticipationRecordDto;
 import com.ssafy.project.dto.user.ChildStatusDto;
-import com.ssafy.project.repository.BookParticipationRecordRepository;
+import com.ssafy.project.repository.BookRecordRepository;
 import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,9 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class BookParticipationRecordServiceImpl implements BookParticipationRecordService {
+public class BookRecordServiceImpl implements BookRecordService {
 
-    private final BookParticipationRecordRepository bookParticipationRecordRepository;
+    private final BookRecordRepository bookParticipationRecordRepository;
     private final BookRepository bookRepository;
     private final ChildRepository childRepository;
     private final RedisDao redisDao;
@@ -37,7 +37,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
         Book book = bookRepository.findById(recordDto.getBookId())
                 .orElseThrow(() -> new IllegalArgumentException("Invalid book ID"));
 
-        BookParticipationRecord savedRecord = BookParticipationRecord.builder()
+        BookRecord savedRecord = BookRecord.builder()
                 .child(child)
                 .book(book)
                 .role(recordDto.getRole())
@@ -57,7 +57,7 @@ public class BookParticipationRecordServiceImpl implements BookParticipationReco
     @Override
     @Transactional
     public BookParticipationRecordDto completeParticipation(Long recordId) {
-        BookParticipationRecord record = bookParticipationRecordRepository.findById(recordId)
+        BookRecord record = bookParticipationRecordRepository.findById(recordId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid record ID"));
 
         record.updateExitStatus(false);
