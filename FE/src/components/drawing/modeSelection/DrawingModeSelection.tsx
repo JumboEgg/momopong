@@ -31,7 +31,9 @@ function DrawingModeSelection(): JSX.Element {
           onClick={() => setTemplate(null)}
           icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
         />
-        <button type="button" onClick={() => setMode('story')}>스토리 모드 테스트</button>
+        <button type="button" onClick={() => setMode('story')}>
+          {' '}
+        </button>
       </div>
       <div className="h-full w-full flex items-center justify-evenly columns-2">
         <div className="max-w-md flex justify-center">

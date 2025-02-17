@@ -27,6 +27,7 @@ const fetchRequestsWithDebounce = debounce(async (
   }
 
   setStore({ lastFetchedChildId: childId });
+  // console.log('Fetching requests for childId:', childId);
 
   try {
     setStore({ isLoading: true, error: null });
