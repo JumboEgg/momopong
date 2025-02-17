@@ -9,8 +9,8 @@ import lombok.*;
 @NoArgsConstructor
 public class PositionDto {
     private String sketchPath;
-    private double x;
-    private double y;
-    private double ratio;
-    private double angle;
+    private Double x;
+    private Double y;
+    private Double ratio;
+    private Double angle;
 }
