@@ -20,6 +20,8 @@ import IntegratedRoom from './IntegratedRoom';
 import AudioPlayer from '../AudioPlayer';
 import StoryIllustration from './StoryIllustration';
 import storyData from '../data/cinderella';
+import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
+// TogetherMode.tsx 최상단에 추가
 // import { getAudioUrl } from '../utils/audioUtils';
 
 interface LocationState {
@@ -58,6 +60,10 @@ function TogetherMode() {
   const {
     addRecord, uploadRecord,
   } = useRecordList();
+
+  const [isDrawingMode, setIsDrawingMode] = useState(false);
+
+  
 
   // inviter/invitee 구분용 id 정보
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
@@ -187,8 +193,19 @@ function TogetherMode() {
     } else if (currentContent?.role === myRole) {
       addAudioToList(recordBlob.current);
     }
+  
+    // 현재 페이지에 드로잉이 있는 경우 드로잉 모드 활성화
+    if (currentPage?.hasDrawing) {
+      setIsDrawingMode(true);
+    } else {
+      handleNext();
+    }
+  }, [handleNext, currentPage, currentContent]); // myRole과 addAudioToList도 의존성 배열에 추가 필요
+
+  const handleDrawingSave = useCallback(() => {
+    setIsDrawingMode(false);
     handleNext();
-  }, [handleNext]);
+  }, [handleNext]); // setIsDrawingMode도 의존성 배열에 추가하는 것이 좋습니다
 
   // 모든 참가자의 녹음 완료 여부 확인
   useEffect(() => {
@@ -262,7 +279,7 @@ function TogetherMode() {
   return (
     <div className="w-full h-screen relative">
       {/* 동화 컨텐츠 영역 */}
-      <div className="w-full h-full px-6 pb-48 pt-6">
+      <div className={`w-full h-full px-6 pb-48 pt-6 ${isDrawingMode ? 'hidden' : ''}`}>
         <div className="mb-6 hidden">
           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
           <p className="text-gray-600">
@@ -316,7 +333,7 @@ function TogetherMode() {
       </div>
 
       {/* 화상 비디오 영역 */}
-      {userRole && (
+      {userRole && !isDrawingMode && (
         <IntegratedRoom
           roomName={roomName}
           participantName={selectedAccount?.name || 'Anonymous'}
@@ -327,6 +344,13 @@ function TogetherMode() {
             handleRecordingStateChange(participantId, status);
           }}
         />
+      )}
+
+      {/* 드로잉 모드 */}
+      {isDrawingMode && (
+        <div className="absolute inset-0 z-50">
+          <StoryDrawingPage/>
+        </div>
       )}
     </div>
   );
