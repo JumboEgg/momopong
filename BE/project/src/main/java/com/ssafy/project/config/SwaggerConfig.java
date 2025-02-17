@@ -36,7 +36,7 @@ public class SwaggerConfig {
 
     private Info apiInfo() {
         return new Info()
-                .title("모모핑 API")
+                .title("모모퐁 API")
                 .description("Let's practice SwaggerUI")
                 .version("1.0.0");
     }

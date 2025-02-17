@@ -18,6 +18,5 @@ public class BookListDto {
     private Integer totalPage;
     private String role1;
     private String role2;
-    private String sketch; // 도안 정보
     private List<PageDto> pages = new ArrayList<>();
 }

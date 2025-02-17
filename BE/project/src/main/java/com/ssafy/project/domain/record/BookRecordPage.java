@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Getter
 @Builder
@@ -23,14 +20,9 @@ public class BookRecordPage {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_record_id")
-    private BookParticipationRecord bookParticipationRecord;
+    private BookRecord bookRecord;
 
-    @OneToMany(mappedBy = "bookRecordPage", cascade = CascadeType.ALL)
-    private List<BookRecordSketch> bookRecordSketchList = new ArrayList<>();
-
-    @Column(name="book_record_page_number")
-    private int bookRecordPageNumber;
-
+    private int bookRecordPageNumber; //
     private String pagePath; // 페이지 이미지 경로
     private String audioPath; // 음성 파일 경로
     private String role; // 역할

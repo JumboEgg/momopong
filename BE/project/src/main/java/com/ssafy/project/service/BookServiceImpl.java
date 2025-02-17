@@ -6,21 +6,24 @@ import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Friend;
 import com.ssafy.project.domain.book.Book;
 import com.ssafy.project.domain.book.Page;
+import com.ssafy.project.domain.book.Position;
 import com.ssafy.project.domain.type.ContentType;
 import com.ssafy.project.domain.type.NotificationType;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.user.ChildStatusDto;
-import com.ssafy.project.dto.invitation.NotificationDto;
+import com.ssafy.project.dto.PositionDto;
 import com.ssafy.project.dto.book.AudioDto;
 import com.ssafy.project.dto.book.BookDto;
 import com.ssafy.project.dto.book.BookListDto;
 import com.ssafy.project.dto.book.PageDto;
+import com.ssafy.project.dto.invitation.NotificationDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.exception.*;
 import com.ssafy.project.firebase.FcmSendDto;
 import com.ssafy.project.firebase.FcmService;
 import com.ssafy.project.repository.BookRepository;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.FriendRepository;
+import com.ssafy.project.repository.PositionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +45,7 @@ public class BookServiceImpl implements BookService {
     private final JsonConverter jsonConverter;
     private final FcmService fcmService;
     private final CloudFrontService cloudFrontService;
+    private final PositionRepository positionRepository;
 
     // Redis 저장을 위한 KEY
     private static final String CHILD_STATUS_KEY = "child:status:%d"; // 자식 접속 상태 KEY
@@ -59,6 +63,7 @@ public class BookServiceImpl implements BookService {
     }
 
     // 동화 상세 페이지 조회 (동화 읽기)
+    // TODO: Query 조회로 변경?!
     @Override
     public BookListDto readBook(Long bookId) {
         Book book = bookRepository.findById(bookId)
@@ -67,6 +72,7 @@ public class BookServiceImpl implements BookService {
 
         // 동화 페이지 조회
         List<Page> pageList = book.getPageList();
+        log.info("pageList={}", pageList);
         List<PageDto> pageDtoList = pageList.stream()
                 .map(page -> {
                     List<AudioDto> audioDtoList = page.getAudioList().stream()
@@ -78,10 +84,26 @@ public class BookServiceImpl implements BookService {
                                     .build())
                             .toList();
 
+                    // 그림을 그려야 하거나 오브젝트를 보여줘야 하는 경우
+                    PositionDto positionDto = null;
+                    log.info("pageId={}", page.getId());
+                    log.info("hasDrawing={}", page.isHasDrawing());
+                    log.info("hasObject={}", page.isHasObject());
+
+                    if (page.isHasDrawing() || page.isHasObject()) {
+                        Position position = positionRepository.findByPage(page).orElse(null);
+                        if (position != null) { // null이 아닌 경우에만 오브젝트 정보 반환
+                            positionDto = position.entityToDto();
+                        }
+                    }
+
                     return PageDto.builder()
                             .pageId(page.getId())
                             .pageNumber(page.getPageNumber())
                             .pagePath(page.getPagePath())
+                            .position(positionDto)
+                            .hasDrawing(page.isHasDrawing())
+                            .hasObject(page.isHasObject())
                             .audios(audioDtoList)
                             .build();
                 })
@@ -94,7 +116,6 @@ public class BookServiceImpl implements BookService {
                 .role2(book.getRole2())
                 .totalPage(pageList.size())
                 .pages(pageDtoList)
-                .sketch(book.getSketch() != null ? book.getSketch().getSketchPath() : null)
                 .build();
     }
 
