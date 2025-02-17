@@ -31,8 +31,6 @@ const useSketchListStore = create<SketchListStore>()(
 
             const data = await response.json();
 
-            console.log(data);
-
             set({ sketchList: data });
         } catch (error) {
           console.error('Error uploading image:', error);
