@@ -19,19 +19,19 @@ interface TextCircleButtonProps extends CircleButtonBaseProps {
 }
 
 const sizeClasses: Record<CircleButtonSize, string> = {
-  xs: 'w-12 h-12 text-lg',
-  sm: 'w-18 h-18 text-3xl',
-  base: 'w-20 h-20 text-3xl',
-  md: 'w-28 h-28 text-5xl',
-  lg: 'w-45 h-45 text-6xl',
+  xs: 'w-8 h-8 sm:w-12 sm:h-12 text-base sm:text-lg',
+  sm: 'w-14 h-14 sm:w-18 sm:h-18 text-2xl sm:text-3xl',
+  base: 'w-16 h-16 sm:w-20 sm:h-20 text-2xl sm:text-3xl',
+  md: 'w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 text-4xl sm:text-5xl',
+  lg: 'w-32 h-32 sm:w-40 sm:h-40 md:w-45 md:h-45 text-5xl sm:text-6xl',
 };
 
 const sizeToIconSize: Record<CircleButtonSize, string> = {
-  xs: 'sm',
-  sm: 'lg',
+  xs: 'xs',
+  sm: 'sm',
   base: 'lg',
-  md: 'xl',
-  lg: '2x',
+  md: 'lg',
+  lg: 'xl',
 };
 
 function IconCircleButton({
@@ -43,7 +43,15 @@ function IconCircleButton({
   hasFocus,
   onClick,
 }: CircleButtonBaseProps) {
-  const baseClasses = 'rounded-full border-10 transition-colors duration-100 focus:outline-none flex items-center justify-center';
+  const baseClasses = 'rounded-full border-6 sm:border-8 md:border-10 transition-colors duration-100 focus:outline-none flex items-center justify-center';
+
+  const iconSizeClasses = {
+    xs: 'text-base sm:text-lg',
+    sm: 'text-2xl sm:text-3xl',
+    base: 'text-2xl sm:text-3xl',
+    md: 'text-4xl sm:text-5xl',
+    lg: 'text-5xl sm:text-6xl',
+  };
 
   const variantClasses: Record<CircleButtonVariant, string> = {
     default: 'bg-broom-200 text-black border-tainoi-300 hover:bg-tainoi-400 active:bg-tainoi-400',
@@ -71,13 +79,21 @@ function IconCircleButton({
         ${sizeClasses[size]}
         ${variantClasses[variant]}
         ${className}
+        flex items-center justify-center
       `}
       disabled={disabled}
       onClick={onClick}
     >
-      {React.cloneElement(icon as React.ReactElement, {
-        size: sizeToIconSize[size],
-      })}
+      <div className={`
+        ${iconSizeClasses[size]}
+        flex items-center justify-center w-full h-full
+      `}
+      >
+        {React.cloneElement(icon as React.ReactElement, {
+          size: sizeToIconSize[size],
+          className: 'flex-shrink-0', // 아이콘이 축소되지 않도록
+        })}
+      </div>
     </button>
   );
 }
@@ -93,7 +109,7 @@ function TextCircleButton({
   onClick,
 }: TextCircleButtonProps): JSX.Element {
   return (
-    <div className="flex flex-col items-center gap-1">
+    <div className="flex flex-col items-center gap-0.5 sm:gap-1">
       <IconCircleButton
         icon={icon}
         size={size}
@@ -103,9 +119,23 @@ function TextCircleButton({
         hasFocus={hasFocus}
         onClick={onClick}
       />
-      <span className="font-[BMJUA] text-md relative -mt-3.5">
-        {/* 바깥쪽 테두리용 텍스트 */}
-        <span className="absolute inset-0 text-transparent [-webkit-text-stroke:7px_black]">
+      <span className="
+        font-[BMJUA]
+        text-sm sm:text-md md:text-lg
+        relative
+        -mt-2 sm:-mt-3 md:-mt-3.5
+      "
+      >
+        {/* 바깥쪽 테두리용 텍스트 - 두께도 반응형으로 */}
+        <span className="
+          absolute
+          inset-0
+          text-transparent
+          [-webkit-text-stroke:4px_black]
+          sm:[-webkit-text-stroke:6px_black]
+          md:[-webkit-text-stroke:7px_black]
+        "
+        >
           {text}
         </span>
         {/* 안쪽 컬러 텍스트 */}

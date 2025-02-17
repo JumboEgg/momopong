@@ -14,7 +14,6 @@ const getVariant = (id: string): 'default' | 'action' => {
 };
 
 function NumberPad({ onNumberClick, onSubmit, onClear }: NumberPadProps): JSX.Element {
-  // 각 버튼에 대한 핸들러 정의
   const handleClick = (id: string) => {
     if (id === 'delete') {
       onClear();
@@ -24,7 +23,7 @@ function NumberPad({ onNumberClick, onSubmit, onClear }: NumberPadProps): JSX.El
       onNumberClick(Number(id));
     }
   };
-  // 버튼별 동작 제어
+
   const buttons = [
     { id: '1', value: '1', onClick: () => handleClick('1') },
     { id: '2', value: '2', onClick: () => handleClick('2') },
@@ -35,24 +34,46 @@ function NumberPad({ onNumberClick, onSubmit, onClear }: NumberPadProps): JSX.El
     { id: '7', value: '7', onClick: () => handleClick('7') },
     { id: '8', value: '8', onClick: () => handleClick('8') },
     { id: '9', value: '9', onClick: () => handleClick('9') },
-    { id: 'delete', value: <FontAwesomeIcon icon={faDeleteLeft} />, onClick: () => handleClick('delete') },
+    {
+      id: 'delete',
+      value: <FontAwesomeIcon icon={faDeleteLeft} className="text-xl sm:text-2xl md:text-3xl" />,
+      onClick: () => handleClick('delete'),
+    },
     { id: '0', value: '0', onClick: () => handleClick('0') },
     { id: 'enter', value: '↵', onClick: () => handleClick('enter') },
   ];
 
   return (
-    <div className="grid grid-cols-3 gap-1 w-[280px]">
+    <div className="
+        grid grid-cols-3
+        gap-1 sm:gap-1.5 md:gap-2
+        max-h-[450px]  // 최대 높이 제한
+        w-[200px] sm:w-[240px] md:w-[280px]
+        mx-auto
+        [&.h-screen<412px]:scale-75  // 높이가 412px 미만일 때 크기 축소
+        [&.h-screen<412px]:transform-origin-top  // 상단 기준으로 축소
+      "
+    >
       {buttons.map(({ id, value, onClick }) => (
-        <div key={id} className="w-full aspect-square">
+        <div
+          key={id}
+          className="
+              w-full
+              aspect-square
+              flex items-center justify-center
+              [&.h-screen<412px]:p-1  // 높이가 작을 때 패딩 축소
+            "
+        >
           <NumberButton
             value={value}
             onClick={onClick}
             variant={getVariant(id)}
+            className="[&.h-screen<412px]:min-w-0 [&.h-screen<412px]:min-h-0"
           />
         </div>
-      ))}
+        ))}
     </div>
   );
-}
+  }
 
 export default NumberPad;

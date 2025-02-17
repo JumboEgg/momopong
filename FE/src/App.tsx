@@ -27,11 +27,10 @@ import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 import FriendSelection from './pages/FriendSelection';
 import GreetingPage from './pages/GreetingPage';
+import LoadingPage from './components/common/LoadingPage';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
-
-import BookRecordPage from './test/BookRecordPage';
 
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
@@ -74,6 +73,14 @@ function App(): JSX.Element {
         />
 
         {/* Protected Routes */}
+        <Route
+          path="/loading"
+          element={(
+            <ProtectedRoute>
+              <LoadingPage />
+            </ProtectedRoute>
+          )}
+        />
         <Route
           path="/parents/:parent_id/children/*"
           element={(
@@ -178,15 +185,6 @@ function App(): JSX.Element {
             </ProtectedRoute>
           )}
         />
-        <Route
-          path="/book/record"
-          element={(
-            <ProtectedRoute>
-              <BookRecordPage />
-            </ProtectedRoute>
-          )}
-        />
-
         <Route
           path="/book/letter"
           element={(

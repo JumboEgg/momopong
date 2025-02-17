@@ -1,20 +1,22 @@
-import { FrameInfo } from '@/types/frame';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { BookItemInfo } from '@/types/book';
 import useSubAccountStore from '../subAccountStore';
 
 // Drawing 상태 관리 스토어
-interface DrawingHistoryStore {
-  drawingList: FrameInfo[];
-  setDrawingList: () => void;
+interface ReadingHistoryStore {
+  readingList: BookItemInfo[];
+  setReadingList: () => void;
 }
 
 // Zustand 상태 훅 생성
-const useDrawingHistoryStore = create<DrawingHistoryStore>()(
+const useReadingHistoryStore = create<ReadingHistoryStore>()(
   persist(
     (set) => ({
-      drawingList: [],
-      setDrawingList: async () => {
+      readingList: [],
+      setReadingList: async () => {
+        // TODO : 읽기 기록 조회 기능 연결
+        // 현재 API 미연결 상태
         try {
             // child token 얻기
             const { accessToken } = useSubAccountStore.getState().childToken;
@@ -25,7 +27,7 @@ const useDrawingHistoryStore = create<DrawingHistoryStore>()(
             }
 
             const response = await fetch(
-              `${import.meta.env.VITE_API_BASE_URL}/profile/${account?.childId}/frame`,
+              `${import.meta.env.VITE_API_BASE_URL}/profile/${account?.childId}/book`,
               {
                 method: 'GET',
                 headers: {
@@ -40,7 +42,7 @@ const useDrawingHistoryStore = create<DrawingHistoryStore>()(
 
             const data = await response.json();
 
-            set({ drawingList: data });
+            set({ readingList: data });
           } catch (error) {
             console.error('Error uploading image:', error);
             throw error;
@@ -48,13 +50,13 @@ const useDrawingHistoryStore = create<DrawingHistoryStore>()(
       },
     }),
     {
-      name: 'drawing-storage',
+      name: 'reading-history-storage',
       partialize: (state) => ({
-        drawingList: state.drawingList,
+        readingList: state.readingList,
       }),
     },
   ),
 );
 
 // Zustand에서 상태를 가져오는 커스텀 훅
-export const useDrawingHistory = (): DrawingHistoryStore => useDrawingHistoryStore();
+export const useReadingHistory = (): ReadingHistoryStore => useReadingHistoryStore();

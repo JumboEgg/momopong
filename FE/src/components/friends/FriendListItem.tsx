@@ -39,8 +39,8 @@ function FriendListItem({ friend, isLast }: FriendListItemProps): JSX.Element {
   const statusColor = getStatusColor(friend.status);
   const statusText = getStatusText(friend.status);
   return (
-    <div className="flex items-center justify-between py-3">
-      <div className={`flex items-center justify-between w-[95%] mx-auto ${!isLast && 'border-b border-gray-200'} pb-3`}>
+    <div className="flex items-center justify-between py-2">
+      <div className={`flex items-center justify-between w-[95%] mx-auto ${!isLast && 'border-b border-gray-200'} pb-6`}>
         <div className="flex items-center space-x-3">
           <div className="relative">
             <img
