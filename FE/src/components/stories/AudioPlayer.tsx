@@ -11,10 +11,10 @@ import {
 } from 'react';
 
 interface AudioPlayerProps {
-  audioFiles: string[];    // 재생할 오디오 파일 URL 배열
-  autoPlay: boolean;       // 자동 재생 여부
-  onEnded: () => void;    // 모든 오디오 재생 완료시 호출될 콜백
-  onError?: () => void;   // 오디오 재생 에러시 호출될 콜백
+  audioFiles: string[];
+  autoPlay: boolean;
+  onEnded: () => void;
+  onError?: () => void;
 }
 
 function AudioPlayerComponent(
@@ -150,8 +150,7 @@ function AudioPlayerComponent(
       handleAudioEnd();
     }
   }, [handleAudioEnd, retryPlayback, onError]);
-  
-  //오디오 재생 관리
+  // 오디오 재생 관리
   useEffect(() => {
     handlePlay();
 
