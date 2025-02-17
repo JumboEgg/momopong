@@ -26,6 +26,7 @@ import MyLetters from './components/myhouse/myletters';
 import LetterPage from './components/stories/StoryMode/LetterPage';
 import TogetherMode from './components/stories/StoryMode/TogetherMode';
 import FriendSelection from './pages/FriendSelection';
+import LoadingPage from './components/common/LoadingPage';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
@@ -73,6 +74,14 @@ function App(): JSX.Element {
         />
 
         {/* Protected Routes */}
+        <Route
+          path="/loading"
+          element={(
+            <ProtectedRoute>
+              <LoadingPage />
+            </ProtectedRoute>
+          )}
+        />
         <Route
           path="/parents/:parent_id/children/*"
           element={(
