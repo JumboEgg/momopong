@@ -6,17 +6,18 @@ import base64ToBlob from '../drawing/base64ToBlob';
 // Drawing 상태 관리 스토어
 interface BookSketchStore {
   sketch: string | null;
-  setSketch: (frameUrl: string) => void;
-  uploadSketch: () => void;
+  setSketch: (frameUrl: string) => void; // 그림 결과 S3에 전송
+  uploadSketch: (recordId: number) => void; // 자신의 bookRecordId 전달
 }
 
+// TODO : 그림 여러 개 사용 시 리스트로 변경
 // Zustand 상태 훅 생성
 const useBookSketchStore = create<BookSketchStore>()(
   persist(
     (set, get) => ({
         sketch: null,
         setSketch: (frameUrl) => set({ sketch: frameUrl }),
-        uploadSketch: async () => {
+        uploadSketch: async (recordId) => {
         try {
             if (!get().sketch) {
                 console.error('Cannot find sketch url');
@@ -60,7 +61,7 @@ const useBookSketchStore = create<BookSketchStore>()(
             }
 
             const data = {
-                bookRecordPageId: 10, // TODO : 현재 페이지 번호로 교체
+                bookRecordPageId: recordId,
                 bookRecordSketchPath: fileName,
             };
 

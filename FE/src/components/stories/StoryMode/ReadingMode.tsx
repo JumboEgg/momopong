@@ -52,7 +52,7 @@ function ReadingMode(): ReactElement {
     if (isRecording.current) return;
     isRecording.current = true;
     saveReadingSession();
-  }, []);
+  }, [isRecording.current]);
 
   const stopCurrentAudio = useCallback(() => {
     if (audioRef.current) {

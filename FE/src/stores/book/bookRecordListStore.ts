@@ -64,7 +64,7 @@ const useRecordListStore = create<RecordListStore>()(
             }
           });
 
-            set({ recordList: [] });
+          set({ recordList: [] });
         } catch (error) {
           console.error('Error uploading page audios:', error);
           throw error;
