@@ -22,14 +22,13 @@ interface IntegratedRoomProps {
   isUserTurn: boolean;
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
-  variant?: 'greeting' | 'story';  // 레이아웃 variant 추가
+  variant?: 'greeting' | 'story'; // 레이아웃 variant 추가
 }
 
 interface ParticipantTrack {
   participant: LocalParticipant | RemoteParticipant;
   trackPublication?: Track;
 }
-
 
 function IntegratedRoom({
   roomName,
@@ -38,7 +37,7 @@ function IntegratedRoom({
   isUserTurn,
   onRecordingComplete,
   onRecordingStatusChange,
-  variant = 'story'
+  variant = 'story',
 }: IntegratedRoomProps) {
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -46,14 +45,13 @@ function IntegratedRoom({
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
-  const { 
-    room, 
+  const {
+    room,
     setRoom,
-    confirmReady, 
-    setPartnerReady 
+    confirmReady,
+    setPartnerReady,
   } = useRoomStore();
 
-  
   // 토큰 가져오기
   const getToken = useCallback(async () => {
     try {
@@ -298,7 +296,7 @@ function IntegratedRoom({
       isMounted = false;
       if (room) {
         room.disconnect();
-        setRoom(null);  // room 상태 초기화
+        setRoom(null); // room 상태 초기화
       }
     };
   }, [roomName, participantName, getToken, updateParticipants, setRoom]);
@@ -359,7 +357,8 @@ function IntegratedRoom({
       <div className={`
         flex flex-col items-center gap-2
         ${variant === 'greeting' ? 'mt-6' : ''}
-      `}>
+      `}
+      >
         {isRecording && (
           <div className="w-32 h-2 bg-gray-200 rounded mb-2">
             <div
@@ -434,11 +433,13 @@ function IntegratedRoom({
           absolute bottom-2 left-2 right-2 
           flex justify-between items-center
           ${variant === 'greeting' ? 'bg-black bg-opacity-40 p-2 rounded' : ''}
-        `}>
+        `}
+        >
           <span className={`
             text-white truncate
             ${variant === 'greeting' ? 'text-base' : 'text-sm'}
-          `}>
+          `}
+          >
             <span>{participant.name || participant.identity}</span>
             {isLocal && <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>}
           </span>
@@ -465,7 +466,7 @@ function IntegratedRoom({
         </div>
       </div>
     );
-  };
+  }
 
   return (
     <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">

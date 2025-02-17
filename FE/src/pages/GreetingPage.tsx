@@ -71,6 +71,7 @@ useEffect(() => {
 
   room.on(RoomEvent.DataReceived, handleDataReceived);
 
+  // eslint-disable-next-line consistent-return
   return () => {
     room.off(RoomEvent.DataReceived, handleDataReceived);
   };
@@ -235,7 +236,7 @@ useEffect(() => {
         isUserTurn
         onRecordingComplete={() => {}}
         onRecordingStatusChange={() => {}}
-        variant="greeting"  // 이 prop 추가
+        variant="greeting" // 이 prop 추가
       />
     </div>
   );
