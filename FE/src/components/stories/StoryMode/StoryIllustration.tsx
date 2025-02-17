@@ -23,6 +23,12 @@ function StoryIllustration({
     return '등장인물';
   };
 
+  const ROLE_COLORS = {
+    role1: 'text-yellow-300', // 신데렐라
+    role2: 'text-green-300', // 왕자
+    narration: 'text-white', // 내레이션
+  } as const;
+
   return (
     <div style={{ height: '900px' }} className="relative w-full mx-auto mb-4">
       <img
@@ -58,14 +64,16 @@ function StoryIllustration({
             return (
               <div
                 key={`${pageNumber}-${content.role}-${content.text.substring(0, 20)}`}
-                className={`mb-4 last:mb-0 ${isUserTurn ? 'border-{yellow}-{100}' : ''}`}
+                className={`mb-4 last:mb-0 ${
+                  isUserTurn ? 'border-l-4 border-yellow-400 pl-3' : ''
+                }`}
               >
                 {content.role !== 'narration' && (
-                  <div className="text-sm font-medium text-gray-300 mb-1">{getSpeakerName(content.role)}</div>
+                <div className="text-sm font-medium text-gray-300 mb-1">
+                  {getSpeakerName(content.role)}
+                </div>
                 )}
-                <p
-                  className={`text-xl font-bold tracking-wide leading-relaxed ${isUserTurn ? 'text-yellow-200' : 'text-white'}`}
-                >
+                <p className={`text-xl font-bold tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}>
                   {content.text}
                 </p>
               </div>

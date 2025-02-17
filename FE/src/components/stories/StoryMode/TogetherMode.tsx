@@ -60,6 +60,7 @@ function TogetherMode() {
   } = useRecordList();
 
   // inviter/invitee 구분용 id 정보
+  const { getCurrentRole } = useRoleStore();
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
   // 상태 관리
@@ -102,21 +103,33 @@ function TogetherMode() {
     setRole2RecordId(role2Id);
   };
 
-  useEffect(() => {
-    // 역할 초기 설정
-    // const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
-    // setUserRole(randomRole);
+  // useEffect(() => {
+  //   // 역할 초기 설정
+  //   // const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
+  //   // setUserRole(randomRole);
 
-    // roleStore에 저장된 역할 배정
-    if (role1UserId === myId) {
-      setUserRole('role1');
-    } else setUserRole('role2');
+  //   // roleStore에 저장된 역할 배정
+  //   if (role1UserId === myId) {
+  //     setUserRole('role1');
+  //   } else setUserRole('role2');
+
+  //   // 읽기 시작 시 도서 읽기 정보 저장
+  //   if (isRecording.current) return;
+  //   isRecording.current = true;
+  //   saveReadingSession();
+  // }, []);
+  useEffect(() => {
+    const myRole = getCurrentRole(myId);
+    if (myRole) {
+      setUserRole(myRole);
+      console.log('Current Role:', myRole); // 디버깅용
+    }
 
     // 읽기 시작 시 도서 읽기 정보 저장
     if (isRecording.current) return;
     isRecording.current = true;
     saveReadingSession();
-  }, []);
+  }, [myId, getCurrentRole]);
 
   // 현재 사용자 차례 확인
   const isUserTurn = useMemo(() => {
@@ -253,7 +266,7 @@ function TogetherMode() {
           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
           <p className="text-gray-600">
             내 역할:
-            {userRole === 'role2' ? '왕자님' : '신데렐라'}
+            {getCurrentRole(myId) === 'role2' ? '왕자님' : '신데렐라'}
           </p>
           <p className="text-gray-600">
             함께 읽는 친구:
@@ -306,7 +319,7 @@ function TogetherMode() {
         <IntegratedRoom
           roomName={roomName}
           participantName={selectedAccount?.name || 'Anonymous'}
-          userRole={userRole}
+          userRole={getCurrentRole(myId) || 'role1'}
           isUserTurn={isUserTurn}
           onRecordingComplete={handleRecordingComplete}
           onRecordingStatusChange={(participantId: string, status) => {

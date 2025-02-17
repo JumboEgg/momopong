@@ -3,6 +3,7 @@ import { RoomEvent } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { useRoleStore } from '@/stores/roleStore';
 import IntegratedRoom from '../components/stories/StoryMode/IntegratedRoom';
 
 interface GreetingPageProps {
@@ -28,6 +29,8 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     setPartnerReady,
     room,
   } = useRoomStore();
+  const { role1UserId } = useRoleStore();
+  const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
   // 초대 수락으로 들어온 경우 추가 로직
   useEffect(() => {
@@ -169,11 +172,14 @@ useEffect(() => {
         roomName,
         participantName: selectedAccount?.name,
       });
+
+      const myRole = role1UserId === myId ? 'role1' : 'role2';
       navigate(`/book/${contentId}/together`, {
         state: {
           roomName,
           participantName: selectedAccount?.name,
           isStoryStarted: true,
+          userRole: myRole, // 역할 정보 추가
         },
       });
     }
@@ -232,7 +238,7 @@ useEffect(() => {
       <IntegratedRoom
         roomName={roomName}
         participantName={selectedAccount?.name || 'Anonymous'}
-        userRole={selectedAccount?.name?.includes('왕자') ? 'role2' : 'role1'}
+        userRole={useRoleStore.getState().getCurrentRole(myId) || 'role1'}
         isUserTurn
         onRecordingComplete={() => {}}
         onRecordingStatusChange={() => {}}
