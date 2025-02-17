@@ -4,9 +4,11 @@ import api from '@/api/axios';
 import { FriendRequest } from '@/types/friend';
 import { AxiosError } from 'axios';
 import { tokenService } from '@/services/tokenService';
+import debounce from 'lodash/debounce';
 
 interface FriendRequestState {
   requests: FriendRequest[];
+  lastFetchedChildId: number | null;
   isLoading: boolean;
   error: string | null;
   fetchRequests: (childId: number) => Promise<void>;
@@ -15,38 +17,48 @@ interface FriendRequestState {
   rejectRequest: (childId: number, friendId: number) => Promise<void>;
 }
 
-const useFriendRequestStore = create<FriendRequestState>((set) => ({
+const fetchRequestsWithDebounce = debounce(async (
+  childId: number,
+  store: Pick<FriendRequestState, 'lastFetchedChildId' | 'requests'>,
+  setStore: (state: Partial<FriendRequestState>) => void,
+ ) => {
+  if (store.lastFetchedChildId === childId && store.requests.length) {
+    return;
+  }
+
+  setStore({ lastFetchedChildId: childId });
+  // console.log('Fetching requests for childId:', childId);
+
+  try {
+    setStore({ isLoading: true, error: null });
+
+    const activeToken = tokenService.getActiveToken();
+    if (!activeToken) {
+      throw new Error('로그인이 필요합니다.');
+    }
+
+    const response = await api.get(`/children/${childId}/friend-requests`);
+    setStore({ requests: response.data, isLoading: false });
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      const errorMessage = err.response?.status === 403
+        ? '권한이 없습니다. 자녀 계정으로 로그인되어 있는지 확인해주세요.'
+        : '친구 요청 목록을 불러오는데 실패했습니다.';
+      setStore({ error: errorMessage, isLoading: false });
+    } else {
+      setStore({ error: '친구 요청 목록을 불러오는대 실패했습니다.', isLoading: false });
+    }
+  }
+ }, 300);
+
+ const useFriendRequestStore = create<FriendRequestState>((set, get) => ({
+  lastFetchedChildId: null,
   requests: [],
   isLoading: false,
   error: null,
 
   fetchRequests: async (childId: number) => {
-    try {
-      set({ isLoading: true, error: null });
-
-      // 현재 활성화된 토큰 확인
-      const activeToken = tokenService.getActiveToken();
-      if (!activeToken) {
-        throw new Error('로그인이 필요합니다.');
-      }
-
-      console.log('Fetching requests for childId:', childId);
-      const response = await api.get(`/children/${childId}/friend-requests`);
-      console.log('Fetched requests:', response.data);
-
-      set({ requests: response.data, isLoading: false });
-    } catch (err) {
-      console.error('Error fetching requests:', err);
-
-      if (err instanceof AxiosError) {
-        const errorMessage = err.response?.status === 403
-          ? '권한이 없습니다. 자녀 계정으로 로그인되어 있는지 확인해주세요.'
-          : '친구 요청 목록을 불러오는데 실패했습니다.';
-        set({ error: errorMessage, isLoading: false });
-      } else {
-        set({ error: '친구 요청 목록을 불러오는데 실패했습니다.', isLoading: false });
-      }
-    }
+    await fetchRequestsWithDebounce(childId, get(), set);
   },
 
   sendRequest: async (childId: number, code: string) => {

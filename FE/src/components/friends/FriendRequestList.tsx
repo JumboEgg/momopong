@@ -9,6 +9,7 @@ function FriendRequestList(): JSX.Element {
     fetchRequests,
     acceptRequest,
     rejectRequest,
+    isLoading,
   } = useFriendRequestStore();
   const { selectedAccount } = useSubAccountStore();
 
@@ -25,7 +26,7 @@ function FriendRequestList(): JSX.Element {
   const { childId } = selectedAccount;
 
   // 로딩 상태
-  const { isLoading } = useFriendRequestStore();
+  // const { isLoading } = useFriendRequestStore();
   if (isLoading) {
     return <div>요청 목록을 불러오는 중...</div>;
   }
