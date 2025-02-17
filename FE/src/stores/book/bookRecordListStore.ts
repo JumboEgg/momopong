@@ -2,16 +2,17 @@ import { create } from 'zustand';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { PageInfo, PageRecordData } from '@/types/book';
 import uploadStoryAudioToS3 from '@/utils/bookS3/pageAudioS3Upload';
-import { getAudioSrcPath, getImageSrcPath } from '@/utils/bookS3/s3PathTrimmer';
+import { getAudioSrcPath } from '@/utils/bookS3/s3PathTrimmer';
+import pageImageComposer from '@/utils/bookS3/pageImageComposer';
 
 interface RecordListStore {
   recordList: PageRecordData[];
   addRecord: (pageData: PageRecordData, audio: Blob | null) => void;
   clearRecordList: () => void;
   uploadRecord: () => void;
-  drawingResult: string | null;
-  setDrawingResult: (src: string) => void; // 그린 이미지 저장. S3 미등록
-  pageImage: string | null;
+  drawingResult: string | null; // 그린 이미지 저장. S3 미등록
+  setDrawingResult: (src: string) => void;
+  pageImage: string | null; // 그린 이미지를 동화 페이지와 합성. S3 등록
   setPageImage: (pageInfo: PageInfo) => void;
 }
 
@@ -26,6 +27,7 @@ const useRecordListStore = create<RecordListStore>()(
           if (pageData.role === 'narration') {
             const data = pageData;
             [data.audioPath] = getAudioSrcPath(pageData.audioPath);
+            data.pagePath = get().pageImage ?? data.pagePath;
             set({ recordList: [...get().recordList, pageData] });
             return;
           }
@@ -39,6 +41,7 @@ const useRecordListStore = create<RecordListStore>()(
 
           const data = pageData;
           data.audioPath = fileName;
+          data.pagePath = get().pageImage ?? data.pagePath;
 
             set({ recordList: [...get().recordList, data] });
         } catch (error) {
@@ -75,19 +78,14 @@ const useRecordListStore = create<RecordListStore>()(
           throw error;
         }
       },
+
       drawingResult: null,
       setDrawingResult: async (src) => set({ drawingResult: src }),
+
       pageImage: null,
       setPageImage: async (pageInfo) => {
-        if (!pageInfo.hasObject) {
-          set({ pageImage: pageInfo.pagePath });
-        } else {
-          // TODO : 저장된 이미지, 동화 이미지 합성하는 로직 작성
-          // 합성 후 S3 업로드
-          // 업로드 후 fileName을 pathImage에 저장
-          const path = getImageSrcPath(pageInfo.pagePath);
-          set({ pageImage: path });
-        }
+        const fileName = await pageImageComposer(pageInfo, get().drawingResult);
+        set({ pageImage: fileName });
       },
     }),
 );

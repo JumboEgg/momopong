@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { useDrawingHistory } from '@/stores/drawing/drawingHistoyStore';
 import useLetterStore from '@/stores/letter/letterStore';
+import { useReadingHistory } from '@/stores/book/readingHistoryStore';
 
 function MyHouse() {
   const navigate = useNavigate();
@@ -18,6 +19,10 @@ function MyHouse() {
     setLetterList,
   } = useLetterStore();
 
+  const {
+    setReadingList,
+  } = useReadingHistory();
+
   const handleBack = () => {
     navigate('/home');
   };
@@ -25,6 +30,7 @@ function MyHouse() {
   useEffect(() => {
     setDrawingList();
     setLetterList();
+    setReadingList();
   }, []);
 
   return (

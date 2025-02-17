@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { BookContentInfo } from '@/types/book';
 
@@ -9,7 +8,6 @@ interface ReadingHistoryContentStore {
 }
 
 const useReadingHistoryContentStore = create<ReadingHistoryContentStore>()(
-  persist(
     (set) => ({
         readingHistoryContent: null,
         setReadingHistoryContent: async (bookId) => {
@@ -32,7 +30,7 @@ const useReadingHistoryContentStore = create<ReadingHistoryContentStore>()(
             }
             const data = await response.json();
 
-            console.log(data);
+            console.log('reading history list: ', data);
 
             set({ readingHistoryContent: data });
         } catch (error) {
@@ -40,13 +38,7 @@ const useReadingHistoryContentStore = create<ReadingHistoryContentStore>()(
           throw error;
         }
       },
-    }),
-    {
-      name: 'reading-history-content-storage',
-      partialize: (state) => ({
-        bookContent: state.readingHistoryContent,
-      }),
-    },
+    }
   ),
 );
 
