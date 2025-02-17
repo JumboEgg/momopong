@@ -51,20 +51,20 @@ export const useRoleStore = create<RoleState>()(
       role2RecordId: null,
 
       setRoles: (inviterRole, inviteeRole, bookId, inviterId, inviteeId) => {
-        console.log('역할 배정 로그', {
-          inviterRole, // 로그에 이 값들도 추가
-          inviteeRole,
+        console.log('🚀역할 배정 로그🚀', {
+          inviterRole: STORY_ROLES.PRINCESS, // 로그에 이 값들도 추가
+          inviteeRole: STORY_ROLES.PRINCE,
           inviterId,
           inviteeId,
         });
 
         set({
           inviterId,
-          inviterRole: STORY_ROLES.PRINCESS, // 초대자는 항상 신데렐라📣📣📣
-          inviteeRole: STORY_ROLES.PRINCE, // 초대받은 사람은 항상 왕자📣📣📣
+          inviterRole: STORY_ROLES.PRINCESS, // 고정
+          inviteeRole: STORY_ROLES.PRINCE, // 고정
           bookId,
-          role1UserId: inviterRole === STORY_ROLES.PRINCESS ? inviterId : inviteeId,
-          role2UserId: inviterRole === STORY_ROLES.PRINCE ? inviterId : inviteeId,
+          role1UserId: inviterId, // 초대자는 항상 role1(PRINCESS)
+          role2UserId: inviteeId, // 초대받은 사람은 항상 role2(PRINCE)
         });
       },
 

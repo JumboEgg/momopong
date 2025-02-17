@@ -55,9 +55,9 @@ function StoryIllustration({
           다음
         </button>
       </div>
-      {/* 텍스트 오버레이📣📣📣 */}
-      <div className="absolute top-8 left-8">
-        <div className="bg-black bg-opacity-30 text-white p-6 rounded-lg max-w-xl">
+      {/* 텍스트 오버레이📣 */}
+      <div className="absolute top-8 left-8 font-[BMJUA]">
+        <div className="bg-black/60 text-white p-6 rounded-lg max-w-xl">
           {relatedContents.map((content) => {
             const isUserTurn = userRole === content.role;
 
@@ -69,11 +69,11 @@ function StoryIllustration({
                 }`}
               >
                 {content.role !== 'narration' && (
-                <div className="text-sm font-medium text-gray-300 mb-1">
+                <div className="text-xl font-medium text-gray-300 mb-1">
                   {getSpeakerName(content.role)}
                 </div>
                 )}
-                <p className={`text-xl font-bold tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}>
+                <p className={`text-4xl tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}>
                   {content.text}
                 </p>
               </div>
