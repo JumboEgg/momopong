@@ -25,6 +25,7 @@ import storyData from '../data/cinderella';
 interface LocationState {
   roomName: string;
   participantName: string;
+  userRole: 'role1' | 'role2';
 }
 
 interface RecordingState {
@@ -62,9 +63,9 @@ function TogetherMode() {
   // inviter/invitee 구분용 id 정보
   const { getCurrentRole } = useRoleStore();
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
+  const myRole = getCurrentRole(myId);
 
   // 상태 관리
-  const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [recordingStates, setRecordingStates] = useState<RecordingState>({});
   const [isWaitingForOther, setIsWaitingForOther] = useState(false);
@@ -118,24 +119,19 @@ function TogetherMode() {
   //   isRecording.current = true;
   //   saveReadingSession();
   // }, []);
-  useEffect(() => {
-    const myRole = getCurrentRole(myId);
-    if (myRole) {
-      setUserRole(myRole);
-      console.log('Current Role:', myRole); // 디버깅용
-    }
 
-    // 읽기 시작 시 도서 읽기 정보 저장
+  // 읽기 정보 저장을 위한 useEffect만 남김
+  useEffect(() => {
     if (isRecording.current) return;
     isRecording.current = true;
     saveReadingSession();
-  }, [myId, getCurrentRole]);
+  }, []);
 
   // 현재 사용자 차례 확인
   const isUserTurn = useMemo(() => {
-    if (!userRole || !currentContent) return false;
-    return currentContent.role === userRole;
-  }, [userRole, currentContent]);
+    if (!myRole || !currentContent) return false;
+    return currentContent.role === myRole;
+  }, [myRole, currentContent]);
 
   useEffect(() => {
     if (!currentPage) return;
@@ -266,7 +262,7 @@ function TogetherMode() {
           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
           <p className="text-gray-600">
             내 역할:
-            {getCurrentRole(myId) === 'role2' ? '왕자님' : '신데렐라'}
+            {myRole === 'role2' ? '왕자님' : '신데렐라'}
           </p>
           <p className="text-gray-600">
             함께 읽는 친구:
@@ -286,7 +282,7 @@ function TogetherMode() {
           onNext={handleNext}
           isFirst={currentIndex === 0}
           isLast={currentIndex === storyData.length - 1}
-          userRole={userRole || undefined}
+          userRole={myRole || undefined}
           currentContent={currentContent}
           illustration={currentPage?.pagePath ?? ''}
         />
@@ -315,11 +311,11 @@ function TogetherMode() {
       </div>
 
       {/* 화상 비디오 영역 */}
-      {userRole && (
+      {myRole && (
         <IntegratedRoom
           roomName={roomName}
           participantName={selectedAccount?.name || 'Anonymous'}
-          userRole={getCurrentRole(myId) || 'role1'}
+          userRole={myRole || 'role1'}
           isUserTurn={isUserTurn}
           onRecordingComplete={handleRecordingComplete}
           onRecordingStatusChange={(participantId: string, status) => {

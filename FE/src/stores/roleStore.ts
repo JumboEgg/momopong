@@ -72,10 +72,37 @@ export const useRoleStore = create<RoleState>()(
         role2UserId: null,
       }),
 
+      // getCurrentRole: (userId) => {
+      //   const state = get();
+      //   const currentChildId = tokenService.getCurrentChildId();
+      //   return userId === currentChildId ? state.inviterRole : state.inviteeRole;
+      // },
       getCurrentRole: (userId) => {
         const state = get();
         const currentChildId = tokenService.getCurrentChildId();
-        return userId === currentChildId ? state.inviterRole : state.inviteeRole;
+
+        console.log('역할 결정 디버그', {
+          userId,
+          currentChildId,
+          role1UserId: state.role1UserId,
+          role2UserId: state.role2UserId,
+          inviterRole: state.inviterRole,
+          inviteeRole: state.inviteeRole,
+        });
+
+        // 현재 로그인된 사용자의 ID를 먼저 확인
+        if (userId === currentChildId) {
+          // 로그인된 사용자가 role1UserId와 일치하면 PRINCESS
+          if (currentChildId === state.role1UserId) return STORY_ROLES.PRINCESS;
+          // 로그인된 사용자가 role2UserId와 일치하면 PRINCE
+          if (currentChildId === state.role2UserId) return STORY_ROLES.PRINCE;
+        }
+
+        // 그 외의 경우 기존 로직 유지
+        if (userId === state.role1UserId) return STORY_ROLES.PRINCESS;
+        if (userId === state.role2UserId) return STORY_ROLES.PRINCE;
+
+        return null;
       },
 
       getUserIdByRole: (role) => {
