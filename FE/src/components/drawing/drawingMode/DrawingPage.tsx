@@ -1,28 +1,24 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { DrawingParticipationRecordData } from '@/types/sketch';
-import makeDrawingRecord from '@/utils/drawingS3/drawingRecordCreate';
 import useSubAccountStore from '@/stores/subAccountStore';
 import DrawingCanvas from '../canvasComponents/DrawingCanvas';
 import Palette from '../canvasComponents/Color';
 import SaveButton from '../canvasComponents/SaveButton';
 
 function DrawingPage(): JSX.Element {
-  const { mode, sessionId, setSessionId } = useDrawing();
+  const { mode, setSessionId } = useDrawing();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
-
-  const startSketchSession = async (data: DrawingParticipationRecordData) => {
-    const id = await makeDrawingRecord(data);
-    setSessionId(id);
-  };
+  const isRecording = useRef(false);
 
   useEffect(() => {
-    if (sessionId) return;
+    if (isRecording.current) return;
     const data: DrawingParticipationRecordData = {
       childId: useSubAccountStore.getState().selectedAccount?.childId ?? 0,
       mode: mode === 'single' ? 'SINGLE' : 'MULTI',
     };
-    startSketchSession(data);
+    setSessionId(data);
+    isRecording.current = true;
   }, []);
 
   // 캔버스 크기 계산

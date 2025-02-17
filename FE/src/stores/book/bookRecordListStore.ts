@@ -1,13 +1,18 @@
 import { create } from 'zustand';
 import useSubAccountStore from '@/stores/subAccountStore';
-import { PageRecordData } from '@/types/book';
+import { PageInfo, PageRecordData } from '@/types/book';
 import uploadStoryAudioToS3 from '@/utils/bookS3/pageAudioS3Upload';
+import { getAudioSrcPath, getImageSrcPath } from '@/utils/bookS3/s3PathTrimmer';
 
 interface RecordListStore {
   recordList: PageRecordData[];
   addRecord: (pageData: PageRecordData, audio: Blob | null) => void;
   clearRecordList: () => void;
   uploadRecord: () => void;
+  drawingResult: string | null;
+  setDrawingResult: (src: string) => void; // 그린 이미지 저장. S3 미등록
+  pageImage: string | null;
+  setPageImage: (pageInfo: PageInfo) => void;
 }
 
 const useRecordListStore = create<RecordListStore>()(
@@ -20,7 +25,7 @@ const useRecordListStore = create<RecordListStore>()(
           // narration은 기존 S3를 저장
           if (pageData.role === 'narration') {
             const data = pageData;
-            [data.audioPath] = pageData.audioPath.split('?');
+            [data.audioPath] = getAudioSrcPath(pageData.audioPath);
             set({ recordList: [...get().recordList, pageData] });
             return;
           }
@@ -68,6 +73,20 @@ const useRecordListStore = create<RecordListStore>()(
         } catch (error) {
           console.error('Error uploading page audios:', error);
           throw error;
+        }
+      },
+      drawingResult: null,
+      setDrawingResult: async (src) => set({ drawingResult: src }),
+      pageImage: null,
+      setPageImage: async (pageInfo) => {
+        if (!pageInfo.hasObject) {
+          set({ pageImage: pageInfo.pagePath });
+        } else {
+          // TODO : 저장된 이미지, 동화 이미지 합성하는 로직 작성
+          // 합성 후 S3 업로드
+          // 업로드 후 fileName을 pathImage에 저장
+          const path = getImageSrcPath(pageInfo.pagePath);
+          set({ pageImage: path });
         }
       },
     }),

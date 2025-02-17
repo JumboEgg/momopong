@@ -26,6 +26,12 @@ function Parent() {
     setAnalysis, setHistory, setSketches, setLetters,
   } = useReportStore();
 
+  // index 초기화
+  useEffect(() => {
+    setChildIdx(0);
+    setReportTab('report');
+  }, []);
+
   // 로그아웃 핸들러
   const handleLogout = () => {
     logout();

@@ -17,8 +17,6 @@ const endDrawingSession = async (sessionId: number) => {
         if (!response.ok) {
             throw new Error(`Error ending sketch record: ${response.status}`);
         }
-
-        console.log('Ended drawing session: ', sessionId);
     } catch (error) {
         console.error(error);
         throw error;

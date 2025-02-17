@@ -4,6 +4,7 @@ import DialogModal from '@/components/common/modals/DialogModal';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useFriends } from '@/stores/friendStore';
 import { FrameInfo } from '@/types/frame';
+import endDrawingSession from '@/utils/drawingS3/drawingRecordEnd';
 import uploadImageToS3 from '../../../utils/drawingS3/drawingUpload';
 
 function ResultPage() {
@@ -16,6 +17,7 @@ function ResultPage() {
     setIsErasing,
     imageData,
     setImageData,
+    sessionId,
   } = useDrawing();
 
   const {
@@ -27,6 +29,8 @@ function ResultPage() {
   const [deleteModal, setDeleteModal] = useState<boolean>(false);
 
   useEffect(() => {
+    endDrawingSession(sessionId ?? 0);
+
     const updateSize = () => {
       setButtonSize(window.innerWidth >= 768 ? 'md' : 'sm'); // 768px(md) 기준 변경
     };
@@ -36,6 +40,16 @@ function ResultPage() {
 
     return () => window.removeEventListener('resize', updateSize); // 클린업
   }, []);
+
+  const resetAll = () => {
+    setFriend(null);
+    setIsConnected(false);
+    setPenColor('black');
+    setIsErasing(false);
+    setTemplate(null);
+    setMode(null);
+    setImageData('');
+  };
 
   const onSave = async () => {
     try {
@@ -47,27 +61,14 @@ function ResultPage() {
       };
 
       await uploadImageToS3(drawingResult);
-
-      setFriend(null);
-      setIsConnected(false);
-      setPenColor('black');
-      setIsErasing(false);
-      setTemplate(null);
-      setMode(null);
-      setImageData('');
+      resetAll();
     } catch (error) {
       console.error('Failed to save drawing:', error);
     }
   };
 
   const onDelete = () => {
-    setFriend(null);
-    setIsConnected(false);
-    setPenColor('black');
-    setIsErasing(false);
-    setTemplate(null);
-    setMode(null);
-    setImageData('');
+    resetAll();
   };
 
   return (

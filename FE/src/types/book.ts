@@ -13,11 +13,22 @@ export interface BookAudioInfo {
     path: string; // 오디오 S3 경로
 }
 
+interface PagePosition {
+    sketchPath: string;
+    x: number;
+    y: number;
+    ratio: number;
+    angle: number;
+}
+
 export interface PageInfo {
     pageId: number;
     pageNumber: number;
     pagePath: string; // 페이지 이미지 경로
     audios: BookAudioInfo[]
+    position: PagePosition;
+    hasDrawing: boolean;
+    hasObject: boolean;
 }
 
 export interface BookContentInfo {

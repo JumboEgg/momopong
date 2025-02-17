@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
 import { useBookSketch } from '@/stores/book/bookSketchStore';
-import endDrawingSession from '@/utils/drawingS3/drawingRecordEnd';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -31,15 +30,6 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
     bgImgSrc = getBackgroundPath(template.sketchPath);
     outlineImgSrc = getOutlinePath(template.sketchPath);
   }
-
-  // 그리기 세션 종료 서버에 전송
-  const endSketchSession = () => {
-    if (!sessionId) {
-      console.log('session id is null');
-      return;
-    }
-    endDrawingSession(sessionId);
-  };
 
   const saveCanvas = useCallback(() => {
     if (!canvasRef) return;
@@ -70,11 +60,11 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
 
           // TODO : story mode sketch 저장 테스트 코드 삭제
           setSketch(dataURL);
-          uploadSketch();
+          uploadSketch(sessionId ?? 0);
         };
       };
     } else {
-      endSketchSession();
+      // endSketchSession();
       tempCtx.fillStyle = 'white';
       tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);

@@ -23,8 +23,6 @@ const makeBookRecord = async (recordData: BookParticiPationRecordData) => {
 
         const data: BookParticipationRecordInfo = await response.json();
 
-        console.log('book record created: ', data);
-
         return data.bookRecordId;
     } catch (error) {
         console.error(error);

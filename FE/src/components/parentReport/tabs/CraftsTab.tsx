@@ -1,5 +1,5 @@
 import '@/components/common/scrollbar.css';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import ReportLetterModal from '@/components/common/modals/ReportLetterModal';
 import { useReportStore } from '@/stores/reportStore';
 import DrawingModal from '../../common/modals/DrawingModal';
@@ -49,7 +49,6 @@ function CraftsTab({ childName }: CraftsTabProps) {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
-  const [history, setHistory] = useState<JSX.Element[]>([]);
 
   const [modal, setModal] = useState<JSX.Element | null>(null);
 
@@ -114,12 +113,6 @@ function CraftsTab({ childName }: CraftsTabProps) {
     </button>
   ));
 
-  useEffect(() => {
-    if (selectedCraftsTab === 'reading') setHistory(readingHistory);
-    else if (selectedCraftsTab === 'drawing') setHistory(drawingHistory);
-    else setHistory(letterHistory);
-  }, [selectedCraftsTab, drawingHistory, letterHistory]);
-
   return (
     <div className="w-full h-full">
       <div className="flex flex-col w-full h-full gap-y-5">
@@ -154,7 +147,9 @@ function CraftsTab({ childName }: CraftsTabProps) {
             </button>
           </div>
           <div className="w-full h-full grid grid-cols-2 md:grid-cols-3 justify-center items-start customScrollbar yellow pe-4 gap-2">
-            {history}
+            {selectedCraftsTab === 'reading' && readingHistory}
+            {selectedCraftsTab === 'drawing' && drawingHistory}
+            {selectedCraftsTab === 'letter' && letterHistory}
           </div>
         </div>
       </div>

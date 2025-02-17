@@ -23,8 +23,6 @@ const makeDrawingRecord = async (recordData: DrawingParticipationRecordData) => 
 
         const data: DrawingParticipationRecordInfo = await response.json();
 
-        console.log('Sketch session: ', data);
-
         return data.sketchParticipationId;
     } catch (error) {
         console.error(error);

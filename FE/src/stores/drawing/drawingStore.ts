@@ -1,5 +1,6 @@
 import { DrawingMode } from '@/components/drawing/types/drawing';
-import { SketchInfo } from '@/types/sketch';
+import { DrawingParticipationRecordData, SketchInfo } from '@/types/sketch';
+import makeDrawingRecord from '@/utils/drawingS3/drawingRecordCreate';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
@@ -16,7 +17,7 @@ interface DrawingStore {
   imageData: string;
   setImageData: (data: string) => void;
   sessionId: number | null;
-  setSessionId: (id: number | null) => void;
+  setSessionId: (data: DrawingParticipationRecordData) => void;
 }
 
 // Zustand 상태 훅 생성
@@ -39,7 +40,10 @@ const useDrawingStore = create<DrawingStore>()(
       setImageData: (data) => set({ imageData: data }),
 
       sessionId: null,
-      setSessionId: (id) => set({ sessionId: id }),
+      setSessionId: async (data) => {
+        const id = await makeDrawingRecord(data);
+        set({ sessionId: id });
+      },
     }),
     {
       name: 'drawing-storage',
