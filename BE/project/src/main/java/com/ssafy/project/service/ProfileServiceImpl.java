@@ -47,7 +47,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         return bookRecordList.stream()
                 .map(recordBook -> {
-                    Book book = bookRepository.findById(recordBook.getId())
+                    Book book = bookRepository.findById(recordBook.getBook().getId())
                             .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
 
                     return BookDto.builder()

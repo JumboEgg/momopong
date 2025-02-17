@@ -13,7 +13,14 @@ import java.util.Optional;
 
 public interface BookRecordRepository extends JpaRepository<BookRecord, Long> {
     // 아이별 동화 참여 기록 조회
-    List<BookRecord> findAllByChild(Child child);
+    @Query(value = """
+        SELECT b from BookRecord b
+        WHERE b.child = :child
+        AND b.mode = 'MULTI'
+        AND b.earlyExit = false
+        AND b.endTime IS NOT NULL
+    """)
+    List<BookRecord> findAllByChild(@Param("child") Child child);
 
     // 아이별 & 기간별 BookParticipationRecord 조회
     @Query(value = """
