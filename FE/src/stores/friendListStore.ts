@@ -7,6 +7,13 @@ import { tokenService } from '@/services/tokenService';
 import useToastStore from './toastStore';
 import { useRoleStore, type StoryRole, STORY_ROLES } from './roleStore';
 
+// 에러 상태코드별 메시지 처리
+interface AxiosError {
+  response?: {
+    status: number;
+  };
+}
+
 const sortByOnlineStatus = (friends: Friend[]) => friends.sort((a, b) => {
   if (a.status === 'ONLINE') return -1;
   if (b.status === 'ONLINE') return 1;
@@ -177,10 +184,40 @@ export const useFriendListStore = create<FriendList>()((set, get) => ({
       // console.error('Failed to invite friend:', error);
       const errorMessage = error instanceof Error ? error.message : '친구 초대에 실패했습니다.';
       set({ error: errorMessage });
-      toastStore.showToast({
-        type: 'error',
-        message: '초대장을 보내지 못했어요',
-      });
+
+      const axiosError = error as AxiosError;
+      if (axiosError && axiosError.response && axiosError.response.status) {
+        switch (axiosError.response.status) {
+          case 400:
+            toastStore.showToast({
+              type: 'error',
+              message: '이미 보내 둔 초대장이 있어요',
+            });
+            break;
+          case 404:
+            toastStore.showToast({
+              type: 'error',
+              message: '친구가 지금은 초대를 받을 수 없어요',
+            });
+            break;
+          case 410:
+            toastStore.showToast({
+              type: 'error',
+              message: '앗, 오래된 초대장은 받을 수 없어요',
+            });
+            break;
+          default:
+            toastStore.showToast({
+              type: 'error',
+              message: '초대장을 보내지 못했어요',
+            });
+        }
+      } else {
+        toastStore.showToast({
+          type: 'error',
+          message: '초대장을 보내지 못했어요',
+        });
+      }
       throw error;
     } finally {
       set({ loading: false });
