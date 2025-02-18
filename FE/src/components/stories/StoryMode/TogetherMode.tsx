@@ -21,8 +21,6 @@
   import AudioPlayer from '../AudioPlayer';
   import StoryIllustration from './StoryIllustration';
   import storyData from '../data/cinderella';
-  // TogetherMode.tsx 최상단에 추가
-  // import { getAudioUrl } from '../utils/audioUtils';
 
   interface LocationState {
     roomName: string;
@@ -77,6 +75,7 @@
       });
       return userId === inviterId ? 'role1' : 'role2';
     };
+
     const myRole = useMemo(() => {
       const role = determineUserRole(myId);
       console.log('최종 결정된 역할:', {
@@ -278,6 +277,7 @@
             <p className="text-gray-600">
               함께 읽는 친구:
               {friend?.name || ''}
+              {friend && ` (${myRole === 'role1' ? '왕자님' : '신데렐라'})`}
             </p>
           </div>
 
