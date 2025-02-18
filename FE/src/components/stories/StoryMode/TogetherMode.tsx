@@ -60,7 +60,6 @@ function TogetherMode() {
     addRecord, uploadRecord,
   } = useRecordList();
 
- // TogetherMode.tsx
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
   const determineUserRole = (userId: number) => {
@@ -89,6 +88,7 @@ function TogetherMode() {
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [recordingStates, setRecordingStates] = useState<RecordingState>({});
   const [isWaitingForOther, setIsWaitingForOther] = useState(false);
+  const [isProcessingRecording, setIsProcessingRecording] = useState(false);
 
   // 현재 페이지 및 컨텐츠 계산
   const currentPage = bookContent?.pages[currentIndex];
@@ -127,22 +127,6 @@ function TogetherMode() {
     setRole2RecordId(role2Id);
   };
 
-  // useEffect(() => {
-  //   // 역할 초기 설정
-  //   // const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
-  //   // setUserRole(randomRole);
-
-  //   // roleStore에 저장된 역할 배정
-  //   if (role1UserId === myId) {
-  //     setUserRole('role1');
-  //   } else setUserRole('role2');
-
-  //   // 읽기 시작 시 도서 읽기 정보 저장
-  //   if (isRecording.current) return;
-  //   isRecording.current = true;
-  //   saveReadingSession();
-  // }, []);
-
   // 읽기 정보 저장을 위한 useEffect만 남김
   useEffect(() => {
     if (isRecording.current) return;
@@ -168,6 +152,7 @@ function TogetherMode() {
     // 녹음 상태 초기화
     setRecordingStates({});
     setIsWaitingForOther(false);
+    setIsProcessingRecording(false);
 
     if (currentContentIndex < currentPage.audios.length - 1) {
       setCurrentContentIndex((prev) => prev + 1);
@@ -178,22 +163,7 @@ function TogetherMode() {
       // 읽기 종료 시 읽기 기록 정보 갱신
       endBookRecordSession(bookRecordId ?? 0);
     }
-  }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
-
-  // 녹음 상태 변경 처리
-  const handleRecordingStateChange = useCallback(
-    (participantId: string, status: 'idle' | 'recording' | 'completed') => {
-      setRecordingStates((prev) => ({
-        ...prev,
-        [participantId]: {
-          isRecording: status === 'recording',
-          isCompleted: status === 'completed',
-          audio: null,
-        },
-      }));
-    },
-    [],
-  );
+  }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex, bookRecordId]);
 
   // 오디오 정보 저장
   const addAudioToList = (audioBlob: Blob | null) => {
@@ -214,29 +184,45 @@ function TogetherMode() {
 
   // 내레이션 오디오 완료 처리
   const handleNarrationComplete = useCallback(() => {
+    console.log('내레이션 완료 처리 시작', {
+      contentRole: currentContent?.role,
+      myRole,
+      hasRecordBlob: !!recordBlob.current,
+    });
+
     if (currentContent?.role === 'narration') {
       addAudioToList(null);
     } else if (currentContent?.role === myRole) {
       addAudioToList(recordBlob.current);
     }
-    handleNext();
-  }, [handleNext]);
+
+    setTimeout(() => {
+      handleNext();
+    }, 100);
+  }, [currentContent, myRole, addAudioToList, handleNext]);
 
   // 모든 참가자의 녹음 완료 여부 확인
   useEffect(() => {
+    console.log('녹음 상태 변경:', {
+      recordingStates,
+      isProcessingRecording,
+      participantCount: Object.keys(recordingStates).length,
+    });
+
     const allParticipantsCompleted = Object
-    .values(recordingStates)
-    .every((state) => state.isCompleted);
+      .values(recordingStates)
+      .every((state) => state.isCompleted);
 
-    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
-    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      handleNarrationComplete();
+    if (allParticipantsCompleted
+        && Object.keys(recordingStates).length > 0
+        && !isProcessingRecording) {
+      setIsProcessingRecording(true);
 
-      // 녹음 상태 초기화
-      setRecordingStates({});
-      setIsWaitingForOther(false);
+      setTimeout(() => {
+        handleNarrationComplete();
+      }, 100);
     }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+  }, [recordingStates, handleNarrationComplete, isProcessingRecording]);
 
   const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
     // 녹음된 오디오 blob 처리
@@ -256,41 +242,18 @@ function TogetherMode() {
       setIsWaitingForOther(true);
     }, []);
 
-  // eslint-disable-next-line consistent-return
-  useEffect(() => {
-    console.log('RecordingStates 변경됨:', recordingStates);
-
-    // 각 상태의 세부 정보 로깅
-    Object.entries(recordingStates).forEach(([key, value]) => {
-      console.log(
-        `참가자 ${key} 상태:`,
-        `녹음 중: ${value.isRecording}, 
-        완료: ${value.isCompleted}`,
-      );
-    });
-
-    const allParticipantsCompleted = Object
-      .values(recordingStates)
-      .every((state) => state.isCompleted);
-
-    const participantCount = Object.keys(recordingStates).length;
-
-    console.log(`모든 참가자 완료: ${allParticipantsCompleted}`);
-    console.log(`참가자 수: ${participantCount}`);
-
-    if (allParticipantsCompleted && participantCount > 0) {
-      console.log('페이지 넘어가기 시도');
-
-      // 안전장치 추가
-      const timeoutId = setTimeout(() => {
-        handleNarrationComplete();
-        setRecordingStates({});
-        setIsWaitingForOther(false);
-      }, 100); // 짧은 지연 추가
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+    const handleRecordingStateChange = useCallback(
+      (participantId: string, status: 'idle' | 'recording' | 'completed') => {
+        setRecordingStates((prev) => ({
+          ...prev,
+          [participantId]: {
+            isRecording: status === 'recording',
+            isCompleted: status === 'completed',
+          },
+        }));
+      },
+      [],
+    );
 
   return (
     <div className="w-full h-screen relative">
@@ -357,9 +320,7 @@ function TogetherMode() {
           userRole={myRole}
           isUserTurn={isUserTurn}
           onRecordingComplete={handleRecordingComplete}
-          onRecordingStatusChange={(participantId: string, status) => {
-            handleRecordingStateChange(participantId, status);
-          }}
+          onRecordingStatusChange={handleRecordingStateChange}
         />
       )}
     </div>
