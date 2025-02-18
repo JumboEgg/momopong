@@ -222,20 +222,46 @@ function TogetherMode() {
     handleNext();
   }, [handleNext]);
 
-  // 모든 참가자의 녹음 완료 여부 확인
+  // // 모든 참가자의 녹음 완료 여부 확인
+  // useEffect(() => {
+  //   const allParticipantsCompleted = Object
+  //   .values(recordingStates)
+  //   .every((state) => state.isCompleted);
+
+  //   // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
+  //   if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
+  //     handleNarrationComplete();
+
+  //     // 녹음 상태 초기화
+  //     setRecordingStates({});
+  //     setIsWaitingForOther(false);
+  //   }
+  // }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+
   useEffect(() => {
+    if (!currentContent) return undefined; // 명시적으로 undefined 반환
+
     const allParticipantsCompleted = Object
-    .values(recordingStates).every((state) => state.isCompleted);
+      .values(recordingStates)
+      .every((state) => state.isCompleted);
 
-    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
-    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      handleNarrationComplete();
+    const participantCount = Object.keys(recordingStates).length;
 
-      // 녹음 상태 초기화
-      setRecordingStates({});
-      setIsWaitingForOther(false);
+    if (allParticipantsCompleted && participantCount > 0) {
+      const timeoutId = setTimeout(() => {
+        handleNext();
+        setRecordingStates({});
+        setIsWaitingForOther(false);
+      }, 100);
+
+      // cleanup 함수만 반환
+      return () => {
+        clearTimeout(timeoutId);
+      };
     }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+
+    return undefined; // 명시적으로 undefined 반환
+  }, [recordingStates, currentContent, handleNext]);
 
   const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
     // 녹음된 오디오 blob 처리
