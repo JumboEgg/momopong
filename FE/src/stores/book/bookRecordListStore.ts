@@ -26,7 +26,8 @@ const useRecordListStore = create<RecordListStore>()(
           // narration은 기존 S3를 저장
           if (pageData.role === 'narration') {
             const data = pageData;
-            [data.audioPath] = getAudioSrcPath(pageData.audioPath);
+            [data.audioPath] = getAudioSrcPath(pageData.audioPath.split('?')[0]);
+            console.log(data.audioPath);
             data.pagePath = get().pageImage ?? data.pagePath;
             set({ recordList: [...get().recordList, pageData] });
             return;
