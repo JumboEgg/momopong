@@ -11,9 +11,10 @@ import useSocketStore from '../hooks/useSocketStore';
 
 interface StoryDrawingPageProps {
   roomName: string;
+  handleNext: () => void;
 }
 
-function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
+function StoryDrawingPage({ roomName, handleNext }: StoryDrawingPageProps): JSX.Element {
   const { setSessionId, setTemplate, setMode } = useDrawing();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const isRecording = useRef(false);
@@ -76,6 +77,7 @@ function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
         <span className="mt-4 ms-4">
           <SaveButton
             canvasRef={canvasRef}
+            handleNext={handleNext}
           />
         </span>
         <span className="content-end flex">

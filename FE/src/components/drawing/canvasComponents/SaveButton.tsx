@@ -1,26 +1,25 @@
+import { useState, useCallback, useEffect } from 'react';
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
-import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { useRecordList } from '@/stores/book/bookRecordListStore';
+import useSocketStore from '../hooks/useSocketStore';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
+  handleNext: () => void;
 }
 
-function SaveButton({ canvasRef }: SaveButtonProps) {
-  const {
-    mode, template, setImageData,
-  } = useDrawing();
-
-  const {
-    setDrawingResult,
-  } = useRecordList();
-
+function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
+  const { mode, template, setImageData } = useDrawing();
+  const { setDrawingResult } = useRecordList();
+  const { socket, isConnected } = useSocketStore();
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
+  const [drawingCompleted, setDrawingCompleted] = useState(false);
+  const [partnerCompleted, setPartnerCompleted] = useState(false);
 
   const canvasWidth = 1600;
   const canvasHeight = 1000;
@@ -57,12 +56,10 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
         outlineImg.onload = () => {
           tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
           const dataURL = tempCanvas.toDataURL('image/webp');
-
           setDrawingResult(dataURL);
         };
       };
     } else {
-      // endSketchSession();
       tempCtx.fillStyle = 'white';
       tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
@@ -75,7 +72,37 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
         setImageData(dataURL);
       };
     }
-  }, [canvasRef]);
+
+    // 버튼을 누르면 "대기 중.." 상태로 변경
+    setDrawingCompleted(true);
+
+    // 상대방에게 완료 신호 전송
+    if (socket && isConnected) {
+      socket.emit('drawing-complete');
+    }
+  }, [canvasRef, socket, isConnected]);
+
+  useEffect(() => {
+    // 상대방이 버튼을 눌렀을 때 이벤트 수신
+    if (!socket) return;
+
+    const handlePartnerComplete = () => {
+      setPartnerCompleted(true);
+    };
+
+    socket.on('drawing-complete', handlePartnerComplete);
+
+    return () => {
+      socket.off('drawing-complete', handlePartnerComplete);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    // 두 명 모두 버튼을 눌렀으면 handleNext 실행
+    if (drawingCompleted && partnerCompleted) {
+      handleNext();
+    }
+  }, [drawingCompleted, partnerCompleted, handleNext]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -92,8 +119,14 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
     <div>
       {
         buttonSize === 'md'
-        ? <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">다 그렸어!</TextButton>
-        : <IconCircleButton icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />} size="sm" variant="story" />
+          ? <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">
+              {drawingCompleted ? '대기 중..' : '다 그렸어!'}
+            </TextButton>
+          : <IconCircleButton
+              icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />}
+              size="sm"
+              variant="story"
+            />
       }
     </div>
   );

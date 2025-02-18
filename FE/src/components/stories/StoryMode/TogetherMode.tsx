@@ -157,13 +157,12 @@
    // 다음 페이지/컨텐츠로 이동
   const handleNext = useCallback(() => {
     if (!currentPage) return;
-
     // 모든 상태 초기화 추가
     setRecordingStates({});
     setIsWaitingForOther(false);
     setIsProcessingRecording(false);
     setIsDrawingMode(false); // 드로잉 모드도 초기화
-
+    
     if (currentContentIndex < currentPage.audios.length - 1) {
       setCurrentContentIndex((prev) => prev + 1);
     } else if (currentIndex < storyData.length - 1) {
@@ -345,9 +344,7 @@
         {/* 드로잉 모드 */}
         {isDrawingMode && (
           <div className="absolute inset-0 z-50">
-            <StoryDrawingPage
-              roomName={roomName}
-            />
+            <StoryDrawingPage roomName={roomName} handleNext={handleNext} />
           </div>
         )}
       </div>
