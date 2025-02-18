@@ -10,6 +10,7 @@ import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
 import useRecentLetterStore from '@/stores/letter/recentLetterStore';
 import { tokenService, checkTokenRegistration } from '@/services/tokenService';
+import { useRoleStore } from '@/stores/roleStore';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -19,6 +20,8 @@ function HomePage() {
      | '/test' | '/book/letter' | '/book/record'): void => {
     navigate(path);
   };
+  const clearRoles = useRoleStore((state) => state.clearRoles); // clearRoles 함수
+
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
@@ -48,6 +51,7 @@ function HomePage() {
     };
 
     registerFCMToken();
+    clearRoles();
   }, []);
 
   useEffect(() => {
