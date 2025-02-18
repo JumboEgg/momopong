@@ -146,8 +146,6 @@ function DrawingCanvas({
     status, color, width, prevX, prevY, curX, curY,
   }: DrawingData) {
     if (!ctx) return;
-    console.log(width);
-
     if (status === 'erase') {
       ctx.globalCompositeOperation = 'destination-out';
       const eraserWidth = width * canvasScale * 2;
@@ -170,10 +168,9 @@ function DrawingCanvas({
   }
 
   function sendStrokeData({
-    width, prevX, prevY, curX, curY,
+    prevX, prevY, curX, curY,
   }: LineData) {
     if (!socket) return;
-    console.log(width);
     if (isErasing) {
       socket.emit('message', {
         status: 'erase',
@@ -250,7 +247,6 @@ function DrawingCanvas({
     if (!socket) return;
     socket.on('message', (data: DrawingData) => {
       if (!ctx) return;
-      console.log(data);
       stroke({
         status: data.status,
         color: data.color,
