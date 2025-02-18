@@ -151,10 +151,11 @@
   const handleNext = useCallback(() => {
     if (!currentPage) return;
 
-    // 녹음 상태 초기화
+    // 모든 상태 초기화 추가
     setRecordingStates({});
     setIsWaitingForOther(false);
     setIsProcessingRecording(false);
+    setIsDrawingMode(false); // 드로잉 모드도 초기화
 
     if (currentContentIndex < currentPage.audios.length - 1) {
       setCurrentContentIndex((prev) => prev + 1);
@@ -198,15 +199,16 @@
       addAudioToList(recordBlob.current);
     }
 
-    setTimeout(() => {
-      handleNext();
-    }, 100);
-
-    // 현재 페이지에 드로잉이 있는 경우 드로잉 모드 활성화
+    // 현재 페이지에 드로잉이 있는 경우
     if (currentPage?.hasDrawing) {
-      setIsDrawingMode(true);
+      setTimeout(() => {
+        setIsDrawingMode(true);
+      }, 100);
     } else {
-      handleNext();
+      // 드로잉이 없는 경우에만 다음으로 진행
+      setTimeout(() => {
+        handleNext();
+      }, 100);
     }
   }, [currentContent, currentPage, myRole, addAudioToList, handleNext]);
 
