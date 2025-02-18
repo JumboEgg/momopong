@@ -5,12 +5,14 @@ import io.livekit.server.RoomJoin;
 import io.livekit.server.RoomName;
 import io.livekit.server.WebhookReceiver;
 import livekit.LivekitWebhook.WebhookEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api")
@@ -35,7 +37,7 @@ public class OpenViduController {
 		token.setName(participantName);
 		token.setIdentity(participantName);
 		token.addGrants(new RoomJoin(true), new RoomName(roomName));
-		System.out.println(token);
+		log.info("token={}", token);
 		return ResponseEntity.ok(Map.of("token", token.toJwt()));
 	}
 
@@ -45,9 +47,8 @@ public class OpenViduController {
 		try {
 			WebhookEvent event = webhookReceiver.receive(body, authHeader);
 		} catch (Exception e) {
-			System.err.println("Error validating webhook event: " + e.getMessage());
+			log.error("Error validating webhook event={}", e.getMessage());
 		}
 		return ResponseEntity.ok("ok");
 	}
-
 }

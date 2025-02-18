@@ -1,25 +1,19 @@
 package com.ssafy.project.controller;
 
-import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.LetterService;
 import com.ssafy.project.service.PresignedUrlService;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -40,6 +34,7 @@ public class LetterController {
         this.amazonS3 = amazonS3;
     }
 
+
     //편지 저장용 presigned-url 생성
     @GetMapping("/book/letter/presigned-url")
     public ResponseEntity<FileDto> getPresignedUrl() {
@@ -49,14 +44,11 @@ public class LetterController {
     }
 
 
-
     // gpt api 답장을 받고 편지 DB저장
     @PostMapping("/book/letter/gpt/{childId}")
     public ResponseEntity<Map<String, String>> getGPTResponse(
             @PathVariable("childId") Long childId,
             @RequestBody LetterDto request) {
-
-
 
         // GPT 응답 생성
         String gptResponse = letterService.getGPTResponse(
@@ -122,5 +114,4 @@ public class LetterController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
 }

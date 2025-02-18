@@ -26,10 +26,6 @@ public class Page {
     @OrderBy("audioNumber asc")
     private List<Audio> audioList = new ArrayList<>();
 
-//    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
-//    @OrderBy("page.id asc")
-//    private List<Position> positionList = new ArrayList<>();
-
     private int pageNumber; // 페이지 번호
     private String pagePath; // 페이지 이미지 경로
     private boolean hasDrawing; // 그림 그리기 여부

@@ -165,7 +165,7 @@ public class JwtTokenProvider {
                     .getBody();
 
             String auth = claims.get("auth", String.class);
-            System.out.println("auth = " + auth);
+            log.info("auth={}", auth);
             // 권한 정보가 있는지 확인
             return auth != null && (auth.contains(RoleType.PARENT.toString()) || auth.contains(RoleType.CHILD.toString()));
         } catch (SignatureException e) {

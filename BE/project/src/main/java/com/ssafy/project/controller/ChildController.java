@@ -1,6 +1,6 @@
 package com.ssafy.project.controller;
 
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.user.*;
 import com.ssafy.project.service.ChildService;
 import com.ssafy.project.service.PresignedUrlService;
@@ -92,5 +92,14 @@ public class ChildController {
         FileDto presignedUrl = presignedUrlService.getPresignedUrl("profile", "webp");
 
         return ResponseEntity.ok(presignedUrl);
+    }
+
+    @Operation(summary = "자식 상태 변경", description = "온라인으로 상태를 변경한다.")
+    @PreAuthorize("hasRole('CHILD')")
+    @GetMapping("/status/{childId}")
+    public ResponseEntity<ChildStatusDto> getStatus(@PathVariable("childId") Long childId) {
+        ChildStatusDto statusDto = childService.getStatus(childId);
+
+        return ResponseEntity.ok(statusDto);
     }
 }
