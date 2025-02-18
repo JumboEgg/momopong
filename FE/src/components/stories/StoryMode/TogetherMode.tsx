@@ -60,10 +60,30 @@ function TogetherMode() {
     addRecord, uploadRecord,
   } = useRecordList();
 
-  // inviter/invitee 구분용 id 정보
-  const { getCurrentRole } = useRoleStore();
+ // TogetherMode.tsx
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
-  const myRole = getCurrentRole(myId);
+
+  const determineUserRole = (userId: number) => {
+    // 디버깅을 위한 로그 추가
+    console.log('역할 결정 디버깅:', {
+      userId,
+      inviterId,
+      isInviter: userId === inviterId,
+      assignedRole: userId === inviterId ? 'role1' : 'role2',
+    });
+
+    return userId === inviterId ? 'role1' : 'role2';
+  };
+
+  const myRole = useMemo(() => {
+    const role = determineUserRole(myId);
+    console.log('최종 결정된 역할:', {
+      myId,
+      role,
+      inviterId,
+    });
+    return role;
+  }, [myId, inviterId]);
 
   // 상태 관리
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
@@ -267,7 +287,7 @@ function TogetherMode() {
           <p className="text-gray-600">
             함께 읽는 친구:
             {friend?.name || ''}
-            {friend && ` (${role2UserId === myId ? '신데렐라' : '왕자님'})`}
+            {friend && ` (${myRole === 'role1' ? '왕자님' : '신데렐라'})`}
           </p>
         </div>
 
@@ -316,7 +336,7 @@ function TogetherMode() {
         <IntegratedRoom
           roomName={roomName}
           participantName={selectedAccount?.name || 'Anonymous'}
-          userRole={myRole || 'role1'}
+          userRole={myRole}
           isUserTurn={isUserTurn}
           onRecordingComplete={handleRecordingComplete}
           onRecordingStatusChange={(participantId: string, status) => {

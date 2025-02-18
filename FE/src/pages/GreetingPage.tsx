@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { RoomEvent } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
 import { useLocation, useNavigate } from 'react-router-dom';
@@ -29,8 +29,31 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     setPartnerReady,
     room,
   } = useRoomStore();
-  const { role1UserId } = useRoleStore();
+
+  const { role1UserId, role2UserId } = useRoleStore();
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
+
+  const determineUserRole = (userId: number | null, r1UserId: number | null) => {
+    console.log('🎭 Role Determination Debug:', {
+      userId,
+      role1UserId: r1UserId,
+      calculatedRole: userId === r1UserId ? 'role1' : 'role2',
+    });
+
+    if (userId === null || r1UserId === null) return 'role1';
+    return userId === r1UserId ? 'role1' : 'role2';
+  };
+
+  const myRole = useMemo(() => {
+    const role = determineUserRole(myId, role1UserId);
+    console.log('✨ Final Role Assignment:', {
+      myId,
+      role1UserId,
+      role2UserId,
+      assignedRole: role,
+    });
+    return role;
+  }, [myId, role1UserId]);
 
   // 초대 수락으로 들어온 경우 추가 로직
   useEffect(() => {
@@ -41,36 +64,36 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
   }, [isInvitationAccepted]);
 
   // 데이터 리스너 추가
-// GreetingPage.tsx 내의 useEffect 훅에서
-useEffect(() => {
-  if (!room) return;
+  // GreetingPage.tsx 내의 useEffect 훅에서
+  useEffect(() => {
+    if (!room) return;
 
-  const handleDataReceived = (payload: Uint8Array) => {
-    try {
-      const message = JSON.parse(new TextDecoder().decode(payload));
-      console.log('🌈 Received Data Message:', message);
+    const handleDataReceived = (payload: Uint8Array) => {
+      try {
+        const message = JSON.parse(new TextDecoder().decode(payload));
+        console.log('🌈 Received Data Message:', message);
 
-      if (message.type === 'ready_status') {
-        console.log('📣 Received Ready Status', {
-          status: message.status,
-          sender: message.sender,
-        });
-        // 여기에 상대방 준비완료 메시지 추가
-        if (message.status) {
-          console.log('🎉 상대방 준비완료!!');
+        if (message.type === 'ready_status') {
+          console.log('📣 Received Ready Status', {
+            status: message.status,
+            sender: message.sender,
+          });
+          // 여기에 상대방 준비완료 메시지 추가
+          if (message.status) {
+            console.log('🎉 상대방 준비완료!!');
+          }
+          setPartnerReady(message.status);
+        } else if (message.type === 'start_story') {
+          console.log('🚀 Received Start Story', {
+            status: message.status,
+            sender: message.sender,
+          });
+          confirmReady(true);
         }
-        setPartnerReady(message.status);
-      } else if (message.type === 'start_story') {
-        console.log('🚀 Received Start Story', {
-          status: message.status,
-          sender: message.sender,
-        });
-        confirmReady(true);
+      } catch (error) {
+        console.error('데이터 처리 오류:', error);
       }
-    } catch (error) {
-      console.error('데이터 처리 오류:', error);
-    }
-  };
+    };
 
   room.on(RoomEvent.DataReceived, handleDataReceived);
 
@@ -173,12 +196,6 @@ useEffect(() => {
         participantName: selectedAccount?.name,
       });
 
-      const myRole = role1UserId === myId ? 'role1' : 'role2';
-      console.log('역할 결정 디버그 - GreetingPage', {
-        myId,
-        role1UserId,
-        calculatedRole: myRole,
-      });
       navigate(`/book/${contentId}/together`, {
         state: {
           roomName,
@@ -243,7 +260,7 @@ useEffect(() => {
       <IntegratedRoom
         roomName={roomName}
         participantName={selectedAccount?.name || 'Anonymous'}
-        userRole={useRoleStore.getState().getCurrentRole(myId) || 'role1'}
+        userRole={myRole}
         isUserTurn
         onRecordingComplete={() => {}}
         onRecordingStatusChange={() => {}}
