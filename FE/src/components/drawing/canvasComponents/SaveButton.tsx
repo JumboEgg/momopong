@@ -3,6 +3,10 @@ import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
 import { useBookSketch } from '@/stores/book/bookSketchStore';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSave } from '@fortawesome/free-solid-svg-icons';
+import { useRecordList } from '@/stores/book/bookRecordListStore';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -10,13 +14,17 @@ export interface SaveButtonProps {
 
 function SaveButton({ canvasRef }: SaveButtonProps) {
   const {
-    mode, template, setImageData, sessionId,
+    mode, template, setImageData,
   } = useDrawing();
 
   // TODO : story mode 저장 테스트 코드 삭제
   const {
-    setSketch, uploadSketch,
+    setSketch,
   } = useBookSketch();
+
+  const {
+    setDrawingResult,
+  } = useRecordList();
 
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
 
@@ -60,7 +68,7 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
 
           // TODO : story mode sketch 저장 테스트 코드 삭제
           setSketch(dataURL);
-          uploadSketch(sessionId ?? 0);
+          setDrawingResult(dataURL);
         };
       };
     } else {
@@ -90,7 +98,15 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
     return () => window.removeEventListener('resize', updateSize); // 클린업
   }, []);
 
-  return <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">다 그렸어!</TextButton>;
+  return (
+    <div>
+      {
+        buttonSize === 'md'
+        ? <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">다 그렸어!</TextButton>
+        : <IconCircleButton icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />} size="sm" variant="story" />
+      }
+    </div>
+  );
 }
 
 export default SaveButton;

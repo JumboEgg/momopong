@@ -14,8 +14,6 @@ function MyLetters(): React.JSX.Element {
     letterList: letters, selectedLetter, setSelectedLetter,
   } = useLetterStore();
 
-  // const [letterList, setLetterList] = useState<LetterInfo[]>([]);
-  // const [selectedLetter, setSelectedLetter] = useState<LetterInfo | null>(null);
   const [letterAudio, setLetterAudio] = useState<HTMLAudioElement>();
   const navigate = useNavigate();
   const myLetterAudio = new Audio();
@@ -113,6 +111,13 @@ function MyLetters(): React.JSX.Element {
             <div className="w-1/2 bg-yellow-200 rounded-2xl border-4 border-orange-300 overflow-hidden h-full p-2 md:p-4">
               <div className="p-2 md:p-4 font-[BMJUA] text-xl md:text-2xl">내가 받은 편지들</div>
               <div className="customScrollbar yellow overflow-y-auto h-[calc(100%-60px)]">
+                {letters.length === 0
+                  ? (
+                    <div className="w-full h-full font-[BMJUA] text-xl text-center">
+                      아직 친구와 함께 동화나라를 여행하지 않았어요
+                    </div>
+                    )
+                  : null}
                 {letters.map((letter) => (
                   <div
                     key={letter.letterFileName}
