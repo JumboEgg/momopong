@@ -51,9 +51,9 @@ function SubAccountForm(): JSX.Element {
       errors.gender = '성별을 선택해주세요';
     }
 
-    if (!formData.profile || formData.profile === '/images/default-profile.jpg') {
-      errors.profile = '프로필 이미지를 선택해주세요';
-    }
+    // if (!formData.profile || formData.profile === '/images/default-profile.jpg') {
+    //   errors.profile = '프로필 이미지를 선택해주세요';
+    // }
 
     if (!termsAgreed) {
       errors.terms = '[필수] 아이 정보 수집 및 이용에 동의해주세요';

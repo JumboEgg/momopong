@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import NumberPad from '@/components/common/numberpad/NumberPad';
-import useAuthStore from '@/stores/authStore';
+// import useAuthStore from '@/stores/authStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import useFriendRequestStore from '@/stores/friendRequestStore';
 import useSubAccountStore from '@/stores/subAccountStore';
+import useToastStore from '@/stores/toastStore';
 import PopText from '../PopText';
 
 interface AddFriendModalProps {
@@ -16,6 +17,7 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
   const [friendCode, setFriendCode] = useState<string>('');
   const [error, setError] = useState<string>('');
 
+  const toastStore = useToastStore();
   const { sendRequest } = useFriendRequestStore();
   const { selectedAccount } = useSubAccountStore(); // 현재 로그인한 자식 정보
 
@@ -42,13 +44,16 @@ function AddFriendModal({ onClose }: AddFriendModalProps): JSX.Element {
       return;
     }
 
-    console.log('Selected Account:', selectedAccount);
-    console.log('Current Token:', useAuthStore.getState().accessToken);
+    // console.log('Selected Account:', selectedAccount);
+    // console.log('Current Token:', useAuthStore.getState().accessToken);
 
     try {
       await sendRequest(selectedAccount.childId, friendCode);
       onClose();
-      alert('친구 요청을 보냈습니다!');
+      toastStore.showToast({
+        type: 'success',
+        message: '친구 요청을 보냈습니다.',
+      });
     } catch (err) {
       if (err instanceof Error) {
         setError(err.message);

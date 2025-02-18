@@ -71,8 +71,8 @@ const fetchRequestsWithDebounce = debounce(async (
         throw new Error('로그인이 필요합니다.');
       }
 
-      console.log('Active Token:', activeToken);
-      console.log('Request payload:', { childId, code });
+      // console.log('Active Token:', activeToken);
+      // console.log('Request payload:', { childId, code });
       await api.post(`/children/${childId}/friend-requests`, { code });
 
       set({ isLoading: false });
