@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
 import { useFriendListStore } from '@/stores/friendListStore';
@@ -14,6 +14,7 @@ import FriendListItem from '@/components/friends/FriendListItem';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 
 function FriendSelection() {
   const navigate = useNavigate();
@@ -21,6 +22,7 @@ function FriendSelection() {
   const { template, setTemplate } = useDrawing();
   const { bookContent } = useBookContent();
   const { setBookId, bookId } = useStory();
+  const [isWaitingResponse, setIsWaitingResponse] = useState(false);
 
   const {
     friends,
@@ -71,6 +73,9 @@ function FriendSelection() {
       return;
     }
 
+    // 대기 상태 설정
+    setIsWaitingResponse(true);
+
     try {
       const targetContentId = template?.sketchId || bookId;
 
@@ -93,7 +98,7 @@ function FriendSelection() {
       }
 
       await inviteFriend({
-        contentId: targetContentId, // 이제 targetContentId는 확실히 number 타입
+        contentId: targetContentId,
         inviterId: currentChildId,
         inviteeId,
         contentType: targetContentType,
@@ -102,44 +107,49 @@ function FriendSelection() {
         contentTitle,
       });
 
-      // Story 모드인지 확인
       const isStoryMode = location.pathname.startsWith('/story');
+      const path = isStoryMode ? '/story' : '/drawing';
 
-      if (isStoryMode) {
-        // Story 모드일 때는 현재 경로를 그대로 유지
-        const currentState = {
-          ...location.state,
+      // navigate 실행
+      navigate(path, {
+        state: {
           waitingForResponse: true,
-          contentId: targetContentId,
-          contentType: targetContentType,
-          contentTitle,
-        };
-
-        navigate(location.pathname, {
-          state: currentState,
-          replace: true,
-        });
-      } else {
-        // Drawing 모드일 때만 /drawing으로 이동
-        navigate('/drawing', {
-          state: {
-            waitingForResponse: true,
-            templateId: targetContentId,
-            templateName: contentTitle,
-          },
-          replace: true,
-        });
-      }
+          ...(isStoryMode
+            ? {
+                contentId: targetContentId,
+                contentType: targetContentType,
+                contentTitle,
+              }
+            : {
+                templateId: targetContentId,
+                templateName: contentTitle,
+                mode: 'together',
+              }
+          ),
+        },
+        replace: true,
+      });
     } catch (err) {
       console.error('친구 초대 실패:', err);
+      setIsWaitingResponse(false); // 에러 발생시 대기 상태 해제
     }
-};
+  };
 
-  if (loading) {
+  if (loading || isWaitingResponse) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500" />
-      </div>
+      <InvitationWaitPage
+        message="친구에게 초대장을 보내고 있어요"
+        showTimer
+        duration={10}
+        onComplete={() => {
+          setIsWaitingResponse(false);
+          const isStoryMode = location.pathname.startsWith('/story');
+          navigate(isStoryMode ? '/story' : '/drawing', {
+            state: { waitingForResponse: false },
+            replace: true,
+          });
+        }}
+      />
     );
   }
 

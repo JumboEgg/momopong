@@ -1,7 +1,7 @@
 import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
 import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/pages/FriendSelection';
@@ -34,6 +34,8 @@ function Drawing() {
   } = useFriends();
   const { socket, setConnect, isConnected: socketConnected } = useSocketStore();
   const location = useLocation();
+  const navigate = useNavigate();
+  console.log('Current location state:', location.state);
   const { waitingForResponse, isAccepted } = location.state || {};
 
   // socketStore의 연결 상태 변화를 friendStore에 동기화
@@ -65,9 +67,6 @@ function Drawing() {
       setImageData('');
     }
   }, [location.state]);
-
-  // 소켓 연결 관리
-  // 기본 초기화용 useEffect는 그대로 유지
 
   // 소켓 연결 관리
   useEffect(() => {
@@ -104,6 +103,28 @@ function Drawing() {
   }, [mode, isAccepted, location.state?.participantName, socket, template, friend]);
 
   const content = () => {
+    const hasWaitingResponse = Boolean(location.state?.waitingForResponse);
+    console.log('Has waiting response:', hasWaitingResponse);
+
+    if (hasWaitingResponse) {
+      return (
+        <InvitationWaitPage
+          message="친구에게 초대장을 보내고 있어요"
+          showTimer
+          duration={10}
+          onComplete={() => {
+            navigate(location.pathname, {
+              state: {
+                ...location.state,
+                waitingForResponse: false,
+              },
+              replace: true,
+            });
+          }}
+        />
+      );
+    }
+
     if (!template) {
       return <DrawingSelection />;
     }
@@ -111,13 +132,11 @@ function Drawing() {
     if (!mode) {
       return <DrawingModeSelection />;
     }
-
     // 함께하기 모드일 때
     if (mode === 'together') {
       // 초대자 대기 상태
-      if (waitingForResponse) {
-        return <InvitationWaitPage />;
-      }
+      console.log('Mode:', mode);
+      console.log('Waiting for response:', waitingForResponse);
 
       // 연결 준비 상태 (초대 수락 직후)
       if (isAccepted || location.state?.participantName) {
