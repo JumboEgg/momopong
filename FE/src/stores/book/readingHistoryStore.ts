@@ -15,10 +15,7 @@ const useReadingHistoryStore = create<ReadingHistoryStore>()(
     (set) => ({
       readingList: [],
       setReadingList: async () => {
-        // TODO : 읽기 기록 조회 기능 연결
-        // 현재 API 미연결 상태
         try {
-            // child token 얻기
             const { accessToken } = useSubAccountStore.getState().childToken;
             const account = useSubAccountStore.getState().selectedAccount;
 

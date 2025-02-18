@@ -12,6 +12,8 @@ interface DrawingStore {
   setTemplate: (data : SketchInfo | null) => void;
   penColor: string;
   setPenColor: (color: string) => void;
+  penWidth: number;
+  setPenWidth: (width: number) => void;
   isErasing: boolean;
   setIsErasing: (isErasing: boolean) => void;
   imageData: string;
@@ -32,6 +34,9 @@ const useDrawingStore = create<DrawingStore>()(
 
       penColor: 'black',
       setPenColor: (color) => set({ penColor: color }),
+
+      penWidth: 30,
+      setPenWidth: (width) => set({ penWidth: width }),
 
       isErasing: false,
       setIsErasing: (isErasing) => set({ isErasing }),

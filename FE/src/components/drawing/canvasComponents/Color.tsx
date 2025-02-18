@@ -16,7 +16,7 @@ function Color({ color }: { color: string }): JSX.Element {
         aria-label="eraser button"
       >
         <div
-          className="bg-pink-200 w-8 md:w-12 ms-auto me-auto self-start transition-all duration-200"
+          className="bg-pink-200 w-6 md:w-8 ms-auto me-auto self-start transition-all duration-200"
           style={{ height: isErasing ? '80%' : '60%' }}
         />
       </button>
@@ -34,11 +34,11 @@ function Color({ color }: { color: string }): JSX.Element {
       aria-label="color selection button"
     >
       <div
-        className="w-6 md:w-8 self-start transition-all duration-200 bg-gray-300 relative z-10"
+        className="w-4 md:w-6 lg:w-8 self-start transition-all duration-200 bg-gray-300 relative z-10"
         style={{ height: penColor === color && !isErasing ? '60%' : '40%' }}
       />
       <div
-        className="w-6 h-3 md:w-8 md:h-4 rounded-b-full z-0"
+        className="w-4 h-2 md:w-6 md:h-3 lg:w-8 lg:h-4 rounded-b-full z-0"
         style={{ background: color, bottom: '-30%' }}
       />
     </button>

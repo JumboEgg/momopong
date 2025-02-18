@@ -1,10 +1,10 @@
 const colors: string[] = [
-  'crimson', 'lightcoral', 'mistyrose',
+  'crimson', 'hotpink', 'lightcoral', 'mistyrose',
   'sandybrown', 'orange', 'peachpuff',
   'gold', 'yellow', 'cornsilk',
   'yellowgreen', 'olivedrab', 'darkolivegreen',
-  'cornflowerblue', 'steelblue',
-  'mediumslateblue', 'darkorchid',
+  'lightskyblue', 'cornflowerblue', 'steelblue',
+  'mediumslateblue', 'darkorchid', 'navy',
   'peru', 'sienna',
   'dimgray', 'black',
   'erase'];

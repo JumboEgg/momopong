@@ -6,7 +6,6 @@ import { getOutlinePath } from '@/utils/format/imgPath';
 import useSocketStore from '../hooks/useSocketStore';
 
 const baseWidth: number = 1600;
-const basePenWidth: number = 30;
 
 export interface DrawingCanvasProps {
   canvasHeight: number;
@@ -20,6 +19,7 @@ export interface Pos {
 }
 
 export interface LineData {
+  width: number;
   prevX: number;
   prevY: number;
   curX: number;
@@ -29,6 +29,7 @@ export interface LineData {
 export interface DrawingData {
   status: string;
   color: string;
+  width: number;
   prevX: number;
   prevY: number;
   curX: number;
@@ -39,7 +40,7 @@ function DrawingCanvas({
   canvasHeight, canvasWidth, setDrawingCanvasRef,
 }: DrawingCanvasProps): JSX.Element {
   const {
-    mode, template, isErasing, penColor,
+    mode, template, isErasing, penColor, penWidth,
   } = useDrawing();
 
   const {
@@ -55,8 +56,10 @@ function DrawingCanvas({
 
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const [newLine, setNewLine] = useState<LineData>({
-    prevX: -100, prevY: -100, curX: -100, curY: -100,
+    width: 0, prevX: -100, prevY: -100, curX: -100, curY: -100,
   });
+
+  let lineWidth = penWidth;
 
   useEffect(() => {
     const container = containerRef.current;
@@ -99,6 +102,10 @@ function DrawingCanvas({
     drawBackgroundImg();
   }, [drawBackgroundImg]);
 
+  useEffect(() => {
+    lineWidth = penWidth;
+  }, [penWidth]);
+
   // 드로잉 레이어 설정
   // Canvas에 focus 설정
   useEffect(() => {
@@ -108,19 +115,14 @@ function DrawingCanvas({
     if (!context) return;
 
     context.strokeStyle = penColor;
-    context.lineWidth = basePenWidth * canvasScale;
+    context.lineWidth = lineWidth * canvasScale;
     context.lineJoin = 'round';
     context.lineCap = 'round';
 
     setCtx(context);
 
     setDrawingCanvasRef(canvasRef.current);
-  }, [canvasScale, penColor, setDrawingCanvasRef]);
-
-  // 펜 색상 변경
-  useEffect(() => {
-    if (ctx) ctx.strokeStyle = penColor;
-  }, [penColor, ctx]);
+  }, [canvasScale, setDrawingCanvasRef]);
 
   // 클릭/터치 좌표 계산
   function getPosition(
@@ -141,13 +143,12 @@ function DrawingCanvas({
   }
 
   function stroke({
-    status, color, prevX, prevY, curX, curY,
+    status, color, width, prevX, prevY, curX, curY,
   }: DrawingData) {
     if (!ctx) return;
-
     if (status === 'erase') {
       ctx.globalCompositeOperation = 'destination-out';
-      const eraserWidth = basePenWidth * canvasScale * 2;
+      const eraserWidth = width * canvasScale * 2;
       ctx.lineWidth = eraserWidth;
 
       ctx.beginPath();
@@ -155,9 +156,9 @@ function DrawingCanvas({
       ctx.lineTo(curX, curY);
       ctx.stroke();
 
-      ctx.lineWidth = basePenWidth * canvasScale;
       ctx.globalCompositeOperation = 'source-over';
     } else if (status === 'draw') {
+      ctx.lineWidth = width * canvasScale;
       ctx.strokeStyle = color;
       ctx.beginPath();
       ctx.moveTo(prevX, prevY);
@@ -173,6 +174,7 @@ function DrawingCanvas({
     if (isErasing) {
       socket.emit('message', {
         status: 'erase',
+        width: lineWidth,
         prevX: prevX / canvasScale,
         prevY: prevY / canvasScale,
         curX: curX / canvasScale,
@@ -182,6 +184,7 @@ function DrawingCanvas({
       socket.emit('message', {
         status: 'draw',
         color: penColor,
+        width: lineWidth,
         prevX: prevX / canvasScale,
         prevY: prevY / canvasScale,
         curX: curX / canvasScale,
@@ -200,12 +203,13 @@ function DrawingCanvas({
     setIsDrawing(true);
     const { x, y }: Pos = getPosition(nativeEvent);
     setNewLine({
-      prevX: x, prevY: y, curX: x, curY: y,
+      width: lineWidth, prevX: x, prevY: y, curX: x, curY: y,
     });
     if (mode === 'single') {
       stroke({
         status: isErasing ? 'erase' : 'draw',
         color: penColor,
+        width: lineWidth,
         prevX: x,
         prevY: y,
         curX: x,
@@ -222,6 +226,7 @@ function DrawingCanvas({
       stroke({
         status: isErasing ? 'erase' : 'draw',
         color: penColor,
+        width: lineWidth,
         prevX: newLine.curX,
         prevY: newLine.curY,
         curX: x,
@@ -229,7 +234,7 @@ function DrawingCanvas({
       });
     }
     setNewLine({
-      prevX: newLine.curX, prevY: newLine.curY, curX: x, curY: y,
+      width: lineWidth, prevX: newLine.curX, prevY: newLine.curY, curX: x, curY: y,
     });
   }
 
@@ -245,6 +250,7 @@ function DrawingCanvas({
       stroke({
         status: data.status,
         color: data.color,
+        width: data.width,
         prevX: data.prevX * canvasScale,
         prevY: data.prevY * canvasScale,
         curX: data.curX * canvasScale,

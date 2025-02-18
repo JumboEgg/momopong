@@ -13,27 +13,22 @@ interface StoryDrawingPageProps {
   roomName: string;
 }
 
-function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element  {
+function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
   const { setSessionId, setTemplate, setMode } = useDrawing();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const isRecording = useRef(false);
-  
-  const { setConnect, setRoomId, isConnected} = useSocketStore();
+  const { setConnect, setRoomId, isConnected } = useSocketStore();
   const { currentIndex } = useStory();
   const { bookContent } = useBookContent();
-  
-  // 현재 페이지의 도안 가져오기
   const currentPage = bookContent?.pages[currentIndex];
   const sketchPath = currentPage?.position.sketchPath;
 
   useEffect(() => {
     setConnect(true);
-    setMode('story')
+    setMode('story');
     if (isConnected && roomName) {
       setRoomId(`drawing_${roomName}`);
     }
-
-    // 도안 설정
     if (sketchPath) {
       setTemplate({
         sketchId: currentPage?.pageId ?? 0,
@@ -41,20 +36,18 @@ function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element  {
         sketchPath,
       });
     }
-
-    // 세션 ID 설정
-    if (isRecording.current) return;
-    const data: DrawingParticipationRecordData = {
-      childId: useSubAccountStore.getState().selectedAccount?.childId ?? 0,
-      mode: 'STORY',
-    };
-    setSessionId(data);
-    isRecording.current = true;
-
+    if (!isRecording.current) {
+      const data: DrawingParticipationRecordData = {
+        childId: useSubAccountStore.getState().selectedAccount?.childId ?? 0,
+        mode: 'STORY',
+      };
+      setSessionId(data);
+      isRecording.current = true;
+    }
     return () => {
       setConnect(false);
-      setTemplate(null); // 컴포넌트 언마운트 시 도안 초기화
-      setMode(null); 
+      setTemplate(null);
+      setMode(null);
     };
   }, []);
 

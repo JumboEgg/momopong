@@ -23,13 +23,22 @@ function MyBookStory(): React.ReactNode {
         icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
         className="fixed top-5 left-5"
       />
-      <h1 className="text-3xl font-bold text-center mb-8">내가 읽은 동화</h1>
+      <h1 className="text-3xl text-center mb-8 font-[BMJUA]">내가 읽은 동화</h1>
 
       <div className="max-w-5xl mx-auto">
 
         <div className="bg-amber-800/20 rounded-lg p-8 shadow-xl">
+          {
+            readingList.length === 0
+            ? (
+              <div className="w-full min-h-[30vh] font-[BMJUA] text-xl text-center">
+                아직 친구와 함께 동화나라를 여행하지 않았어요
+              </div>
+              )
+            : null
+          }
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-3 gap-6">
             {readingList.map((book) => (
               <div
                 key={book.bookId}

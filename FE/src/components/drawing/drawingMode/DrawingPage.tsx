@@ -5,6 +5,7 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import DrawingCanvas from '../canvasComponents/DrawingCanvas';
 import Palette from '../canvasComponents/Color';
 import SaveButton from '../canvasComponents/SaveButton';
+import PenWidth from '../canvasComponents/PenWidth';
 
 function DrawingPage(): JSX.Element {
   const { mode, setSessionId } = useDrawing();
@@ -49,14 +50,17 @@ function DrawingPage(): JSX.Element {
   return (
     <div className="bg-yellow-600 w-full h-full flex flex-col items-center justify-between m-0 p-0">
       <div className="w-full h-20 flex justify-between m-0 p-0">
-        <span className="mt-4 ms-4">
+        <span className="fixed top-2 md:top-4 left-2 md:left-4 z-30">
           <SaveButton
             canvasRef={canvasRef}
           />
         </span>
-        <span className="content-end flex">
+        <span className="fixed top-0 right-0 flex">
           <Palette />
         </span>
+      </div>
+      <div className="fixed top-30 left-2 md:left-5 bg-gray-100 rounded-full p-2 md:p-5 z-10">
+        <PenWidth radius={canvasWidth / 1600} />
       </div>
       <div className="m-5 bg-white">
         <DrawingCanvas
