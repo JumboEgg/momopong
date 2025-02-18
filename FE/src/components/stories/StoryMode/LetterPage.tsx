@@ -11,7 +11,7 @@ function LetterPage() {
       <IconCircleButton
         size="sm"
         variant="action"
-        className="fixed top-5 left-5"
+        className="fixed top-5 left-5 z-10"
         onClick={() => navigate('/home')}
         icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
       />

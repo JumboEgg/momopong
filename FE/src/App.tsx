@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom'; // Router 제거
-// import ToastMessage from '@/components/common/Toast';
 import ToastContainer from '@/components/common/ToastContainer';
 import { useFirebaseMessaging } from './hooks/useFirebaseMessaging';
 
@@ -31,6 +30,7 @@ import LoadingPage from './components/common/LoadingPage';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
+import RecordReadingMode from './components/stories/StoryMode/RecordReadingMode';
 
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
@@ -210,6 +210,16 @@ function App(): JSX.Element {
           element={(
             <ProtectedRoute>
               <TogetherMode />
+            </ProtectedRoute>
+          )}
+        />
+
+        {/* 동화 다시 보기 */}
+        <Route
+          path="/house/mybookstory/record"
+          element={(
+            <ProtectedRoute>
+              <RecordReadingMode />
             </ProtectedRoute>
           )}
         />
