@@ -117,7 +117,7 @@ public class SketchServiceImpl implements SketchService {
                 .build();
 
         // 초대 Redis에 저장
-        redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(15));
+        redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
         // 초대 알림 전송
         FcmSendDto sendDto = FcmSendDto.builder()

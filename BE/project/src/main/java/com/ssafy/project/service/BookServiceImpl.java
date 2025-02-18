@@ -185,7 +185,7 @@ public class BookServiceImpl implements BookService {
         log.info("sendInvitation.notificationDto={}", notificationDto);
 
         // 초대장 Redis에 저장 (10초간 초대장 유효)
-        redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(15));
+        redisDao.setValues(key, jsonConverter.toJson(notificationDto), Duration.ofSeconds(10));
 
         // FCM으로 초대 알림 전송
         FcmSendDto sendDto = FcmSendDto.builder()
