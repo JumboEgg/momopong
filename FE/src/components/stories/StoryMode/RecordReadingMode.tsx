@@ -3,11 +3,9 @@ import {
   useCallback,
   useState,
   ReactElement,
-  useEffect,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
-import { BookContentInfo } from '@/types/book';
 import { useReadingHistoryContent } from '@/stores/book/readingHistoryContentStore';
 import StoryIllustration from './StoryIllustration';
 import AudioPlayer from '../AudioPlayer';
@@ -26,12 +24,6 @@ function RecordReadingMode(): ReactElement {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [showEndOverlay, setShowEndOverlay] = useState(false);
-  const [recordContent, setRecordContent] = useState<BookContentInfo | null>(null);
-
-  // 읽기 시작 시 읽기 저장 정보 정렬
-  useEffect(() => {
-    setRecordContent(readingHistoryContent);
-  }, []);
 
   const stopCurrentAudio = useCallback(() => {
     if (audioRef.current) {
@@ -41,12 +33,12 @@ function RecordReadingMode(): ReactElement {
   }, []);
 
   const handleNext = useCallback(() => {
-    const currentPage = recordContent?.pages[currentIndex];
+    const currentPage = readingHistoryContent?.pages[currentIndex];
 
     // 현재 페이지에 다음 콘텐츠가 있는 경우
     if (currentContentIndex < (currentPage?.audios.length ?? 0) - 1) {
       setCurrentContentIndex(currentContentIndex + 1);
-    } else if (currentIndex < (recordContent?.pages.length ?? 0) - 1) {
+    } else if (currentIndex < (readingHistoryContent?.pages.length ?? 0) - 1) {
       stopCurrentAudio();
       setCurrentIndex(currentIndex + 1);
       setCurrentContentIndex(0);
@@ -66,17 +58,17 @@ function RecordReadingMode(): ReactElement {
     if (currentIndex > 0) {
       stopCurrentAudio();
       setCurrentIndex(currentIndex - 1);
-      const prevPage = recordContent?.pages[currentIndex - 1];
+      const prevPage = readingHistoryContent?.pages[currentIndex - 1];
       setCurrentContentIndex((prevPage?.audios.length ?? 0) - 1);
     }
   }, [currentIndex, currentContentIndex, stopCurrentAudio, setCurrentIndex]);
 
   const handleContentEnd = useCallback(() => {
-    const currentPage = recordContent?.pages[currentIndex];
+    const currentPage = readingHistoryContent?.pages[currentIndex];
 
     // 현재 페이지의 다음 콘텐츠로 이동 또는 다음 페이지로 전환
     const hasNextContent = currentContentIndex < (currentPage?.audios.length ?? 0) - 1;
-    const hasNextPage = currentIndex < (recordContent?.pages.length ?? 0) - 1;
+    const hasNextPage = currentIndex < (readingHistoryContent?.pages.length ?? 0) - 1;
 
     if (hasNextContent) {
       setCurrentContentIndex(currentContentIndex + 1);
@@ -101,9 +93,9 @@ function RecordReadingMode(): ReactElement {
     navigate('/house/mybookstory');
   }, [navigate, stopCurrentAudio]);
 
-  const currentPage = recordContent?.pages[currentIndex];
+  const currentPage = readingHistoryContent?.pages[currentIndex];
   const currentContent = currentPage?.audios[currentContentIndex];
-  const isLastPage = currentIndex === (recordContent?.pages.length ?? 0) - 1;
+  const isLastPage = currentIndex === (readingHistoryContent?.pages.length ?? 0) - 1;
 
   const audioUrl = currentContent?.path ?? '';
 
@@ -111,12 +103,12 @@ function RecordReadingMode(): ReactElement {
     <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
       <div className="mb-6 flex justify-between items-center">
         <h2 className="text-2xl font-bold text-gray-800">
-          {recordContent?.bookTitle}
+          {readingHistoryContent?.bookTitle}
           {' '}
           <span className="text-base text-gray-600">
             {currentPage?.pageNumber}
             /
-            {recordContent?.totalPage ?? 0}
+            {readingHistoryContent?.totalPage ?? 0}
           </span>
           {' '}
           <span className="text-sm text-gray-500">
