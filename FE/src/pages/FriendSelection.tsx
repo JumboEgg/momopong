@@ -1,9 +1,6 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
-// import { saveFCMToken } from '@/api/storyApi';
-// import { HandleAllowNotification, messaging } from '@/services/firebaseService';
-// import { getToken } from 'firebase/messaging';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { ContentType } from '@/types/invitation';
@@ -14,48 +11,40 @@ import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
 import { useStory } from '@/stores/storyStore';
 import FriendListItem from '@/components/friends/FriendListItem';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft } from '@fortawesome/free-solid-svg-icons';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 
 function FriendSelection() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { template } = useDrawing();
+  const { template, setTemplate } = useDrawing();
   const { bookContent } = useBookContent();
-  const { bookId } = useStory();
+  const { setBookId, bookId } = useStory();
+  const [isWaitingResponse, setIsWaitingResponse] = useState(false);
 
   const {
     friends,
     loading,
-    error,
+    // error,
     inviteFriend,
     fetchOnlineFriends,
   } = useFriendListStore();
 
-  // // FCM 토큰 등록 (기존 코드와 동일)
-  // useEffect(() => {
-  //   const registerFCMToken = async () => {
-  //     try {
-  //       const currentChildId = tokenService.getCurrentChildId();
-  //       if (!currentChildId) {
-  //         throw new Error('로그인이 필요합니다.');
-  //       }
+  const handleBack = () => {
+    const isStoryMode = location.pathname.startsWith('/story');
 
-  //       await HandleAllowNotification();
-  //       const fcmToken = await getToken(messaging, {
-  //         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-  //       });
-
-  //       if (!fcmToken) {
-  //         throw new Error('FCM 토큰을 가져오지 못했습니다.');
-  //       }
-
-  //       await saveFCMToken(currentChildId, fcmToken);
-  //     } catch (err) {
-  //       console.error('FCM 토큰 등록 실패:', err);
-  //     }
-  //   };
-
-  //   registerFCMToken();
-  // }, []);
+    if (isStoryMode) {
+      // Story 모드일 때는 bookId를 초기화하고 뒤로가기
+      setBookId(null); // useStory에서 가져온 setBookId 필요
+      window.history.back();
+    } else {
+      // Drawing 모드일 때는 template을 초기화하고 drawing 페이지로
+      setTemplate(null); // useDrawing에서 가져온 setTemplate 필요
+      navigate('/drawing');
+    }
+};
 
   // 친구 목록 가져오기
   useEffect(() => {
@@ -83,6 +72,9 @@ function FriendSelection() {
       console.error('사용자 정보가 없습니다.');
       return;
     }
+
+    // 대기 상태 설정
+    setIsWaitingResponse(true);
 
     try {
       const targetContentId = template?.sketchId || bookId;
@@ -115,98 +107,107 @@ function FriendSelection() {
         contentTitle,
       });
 
-      // Story 모드인지 확인
       const isStoryMode = location.pathname.startsWith('/story');
+      const path = isStoryMode ? '/story' : '/drawing';
 
-      if (isStoryMode) {
-        // Story 모드일 때는 현재 경로를 그대로 유지
-        const currentState = {
-          ...location.state,
+      // navigate 실행
+      navigate(path, {
+        state: {
           waitingForResponse: true,
-          contentId: targetContentId,
-          contentType: targetContentType,
-          contentTitle,
-        };
-
-        navigate(location.pathname, {
-          state: currentState,
-          replace: true,
-        });
-      } else {
-        // Drawing 모드일 때만 /drawing으로 이동
-        navigate('/drawing', {
-          state: {
-            waitingForResponse: true,
-            templateId: targetContentId,
-            templateName: contentTitle,
-          },
-          replace: true,
-        });
-      }
+          ...(isStoryMode
+            ? {
+                contentId: targetContentId,
+                contentType: targetContentType,
+                contentTitle,
+              }
+            : {
+                templateId: targetContentId,
+                templateName: contentTitle,
+                mode: 'together',
+              }
+          ),
+        },
+        replace: true,
+      });
     } catch (err) {
       console.error('친구 초대 실패:', err);
+      setIsWaitingResponse(false); // 에러 발생시 대기 상태 해제
     }
-};
+  };
 
-  if (loading) {
+  if (loading || isWaitingResponse) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-purple-500" />
-      </div>
+      <InvitationWaitPage
+        message="친구에게 초대장을 보내고 있어요"
+        showTimer
+        duration={10}
+        onComplete={() => {
+          setIsWaitingResponse(false);
+          const isStoryMode = location.pathname.startsWith('/story');
+          navigate(isStoryMode ? '/story' : '/drawing', {
+            state: { waitingForResponse: false },
+            replace: true,
+          });
+        }}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
-        <div className="flex items-center mb-6">
-          <button
-            type="button"
-            onClick={() => navigate(-1)}
-            className="text-gray-600 hover:text-gray-800"
-          >
-            ← 뒤로
-          </button>
-          <h2 className="text-2xl font-bold text-center flex-1">
-            함께
-            {' '}
-            {template ? '그릴' : '읽을'}
-            {' '}
-            친구 선택
-          </h2>
+    <div className="min-h-screen bg-black/30 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="relative w-[95%] sm:w-[85%] md:w-[70%] lg:w-[60%] xl:w-1/2
+                    h-auto sm:h-[550px] md:h-[600px] min-h-[400px] max-h-[85vh]
+                    bg-broom-200 border-6 sm:border-8 md:border-10 border-tainoi-400
+                    rounded-[3vw] sm:rounded-[2.5vw] md:rounded-[2vw] flex flex-col
+                    px-3 sm:px-4 md:px-6 lg:px-8 pt-8 sm:pt-9 md:pt-10 pb-3 sm:pb-4 md:pb-6
+                    overflow-y-auto"
+      >
+        <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4">
+          <IconCircleButton
+            size="sm"
+            variant="action"
+            onClick={handleBack}
+            icon={<FontAwesomeIcon icon={faArrowLeft} size="lg" />}
+          />
         </div>
 
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded-lg mb-4">
-            {error}
-          </div>
-        )}
+        <h2 className="text-3xl font-[BMJUA] text-gray-800 text-center mb-6">
+          함께
+          {' '}
+          {location.pathname.startsWith('/story') ? '읽을' : '그릴'}
+          {' '}
+          친구 선택
+        </h2>
 
-        <div className="mb-4 text-sm text-gray-600">
+        <div className="mb-4 font-[BMJUA] text-sm text-gray-700 text-right">
           대기중인 친구 수:
           {' '}
           {friends.length}
         </div>
 
-        {friends.length === 0 ? (
-          <div className="text-center text-gray-500 py-8">
-            현재 온라인인 친구가 없습니다
+        <div className="flex-1 w-full overflow-y-auto customScrollbar yellow px-2 sm:px-3 md:px-4">
+          <div className="bg-witch-haze-100 rounded-lg shadow-sm p-4">
+            {friends.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                지금은 함께할 수 있는 친구가 없어요
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-200">
+                {friends.map((friend) => (
+                  <button
+                    key={friend.childId}
+                    type="button"
+                    onClick={() => handleInviteFriend(friend.childId, friend)}
+                    className="w-full transition-colors py-2"
+                    disabled={loading}
+                  >
+                    <FriendListItem friend={friend} />
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
-        ) : (
-          <div className="divide-y divide-gray-200">
-            {friends.map((friend) => (
-              <button
-                key={friend.childId}
-                type="button"
-                onClick={() => handleInviteFriend(friend.childId, friend)}
-                className="w-full hover:bg-gray-50 transition-colors"
-                disabled={loading}
-              >
-                <FriendListItem friend={friend} />
-              </button>
-            ))}
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );
