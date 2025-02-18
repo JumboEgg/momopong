@@ -10,6 +10,7 @@ import com.ssafy.project.dto.user.ChildSignUpRequestDto;
 import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.dto.user.ChildUpdateRequestDto;
 import com.ssafy.project.exception.ChildLimitExceededException;
+import com.ssafy.project.exception.NotFoundException;
 import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.ParentRepository;
@@ -156,5 +157,24 @@ public class ChildServiceImpl implements ChildService {
     @Transactional
     public void deleteChild(Long childId) {
         childRepository.deleteById(childId);
+    }
+
+    @Override
+    public ChildStatusDto getStatus(Long childId) {
+        Child child = childRepository.findById(childId)
+                .orElseThrow(() -> new NotFoundException("해당 자식 사용자를 찾을 수 없습니다"));
+
+        ChildStatusDto statusDto = ChildStatusDto.builder()
+                .childId(childId)
+                .name(child.getName())
+                .profile(cloudFrontService.getSignedUrl(child.getProfile()))
+                .status(StatusType.ONLINE)
+                .build();
+
+        String key = String.format(CHILD_STATUS_KEY, childId);
+
+        redisDao.setValues(key, jsonConverter.toJson(statusDto));
+
+        return statusDto;
     }
 }

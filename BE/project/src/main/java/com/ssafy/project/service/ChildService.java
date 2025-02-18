@@ -2,6 +2,7 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.dto.user.ChildDto;
 import com.ssafy.project.dto.user.ChildSignUpRequestDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.dto.user.ChildUpdateRequestDto;
 
 import java.util.Map;
@@ -25,4 +26,7 @@ public interface ChildService {
 
     // 자식 계정 삭제
     void deleteChild(Long childId);
+
+    // 자식 상태 조회
+    ChildStatusDto getStatus(Long childId);
 }

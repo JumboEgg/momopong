@@ -93,4 +93,12 @@ public class ChildController {
 
         return ResponseEntity.ok(presignedUrl);
     }
+
+    @Operation(summary = "자식 상태 변경", description = "온라인으로 상태를 변경한다.")
+    @GetMapping("/status/{childId}")
+    public ResponseEntity<ChildStatusDto> getStatus(@PathVariable("childId") Long childId) {
+        ChildStatusDto statusDto = childService.getStatus(childId);
+
+        return ResponseEntity.ok(statusDto);
+    }
 }
