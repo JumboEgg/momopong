@@ -95,6 +95,7 @@ public class ChildController {
     }
 
     @Operation(summary = "자식 상태 변경", description = "온라인으로 상태를 변경한다.")
+    @PreAuthorize("hasRole('CHILD')")
     @GetMapping("/status/{childId}")
     public ResponseEntity<ChildStatusDto> getStatus(@PathVariable("childId") Long childId) {
         ChildStatusDto statusDto = childService.getStatus(childId);
