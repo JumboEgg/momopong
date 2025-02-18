@@ -1,359 +1,361 @@
-// 수정한거임
-import {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-  useRef,
-} from 'react';
-import { useLocation } from 'react-router-dom';
-import { useStory } from '@/stores/storyStore';
-import { useFriends } from '@/stores/friendStore';
-import useSubAccountStore from '@/stores/subAccountStore';
-import { useBookContent } from '@/stores/book/bookContentStore';
-import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
-import { BookParticiPationRecordData, PageRecordData } from '@/types/book';
-import { useRoleStore } from '@/stores/roleStore';
-import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
-import { useRecordList } from '@/stores/book/bookRecordListStore';
-import IntegratedRoom from './IntegratedRoom';
-import AudioPlayer from '../AudioPlayer';
-import StoryIllustration from './StoryIllustration';
-import storyData from '../data/cinderella';
-import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
-// TogetherMode.tsx 최상단에 추가
-// import { getAudioUrl } from '../utils/audioUtils';
+  // 수정한거임
+  import {
+    useState,
+    useEffect,
+    useCallback,
+    useMemo,
+    useRef,
+  } from 'react';
+  import { useLocation } from 'react-router-dom';
+  import { useStory } from '@/stores/storyStore';
+  import { useFriends } from '@/stores/friendStore';
+  import useSubAccountStore from '@/stores/subAccountStore';
+  import { useBookContent } from '@/stores/book/bookContentStore';
+  import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
+  import { BookParticiPationRecordData, PageRecordData } from '@/types/book';
+  import { useRoleStore } from '@/stores/roleStore';
+  import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
+  import { useRecordList } from '@/stores/book/bookRecordListStore';
+  import IntegratedRoom from './IntegratedRoom';
+  import AudioPlayer from '../AudioPlayer';
+  import StoryIllustration from './StoryIllustration';
+  import storyData from '../data/cinderella';
+  import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
+  // TogetherMode.tsx 최상단에 추가
+  // import { getAudioUrl } from '../utils/audioUtils';
 
-interface LocationState {
-  roomName: string;
-  participantName: string;
-}
+  interface LocationState {
+    roomName: string;
+    participantName: string;
+  }
 
-interface RecordingState {
-  [participantId: string]: {
-    isRecording: boolean;
-    isCompleted: boolean;
-  };
-}
-
-function TogetherMode() {
-  const location = useLocation();
-  const { roomName } = location.state as LocationState;
-  const { friend } = useFriends();
-  const { bookContent } = useBookContent();
-  const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
-  const {
-    bookId,
-    currentIndex, setCurrentIndex,
-    audioEnabled,
-    bookRecordId, setBookRecordId,
-  } = useStory();
-
-  const {
-    inviterId,
-    role1UserId,
-    role2UserId,
-    role1RecordId, setRole1RecordId,
-    role2RecordId, setRole2RecordId,
-  } = useRoleStore();
-
-  const {
-    addRecord, uploadRecord,
-  } = useRecordList();
-
-  const [isDrawingMode, setIsDrawingMode] = useState(false);
-
-  
-
-  // inviter/invitee 구분용 id 정보
-  const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
-  const myRole = myId === role1UserId ? 'role1' : 'role2';
-
-  // 상태 관리
-  const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
-  const [currentContentIndex, setCurrentContentIndex] = useState(0);
-  const [recordingStates, setRecordingStates] = useState<RecordingState>({});
-  const [isWaitingForOther, setIsWaitingForOther] = useState(false);
-
-  // 현재 페이지 및 컨텐츠 계산
-  const currentPage = bookContent?.pages[currentIndex];
-  const currentContent = currentPage?.audios[currentContentIndex];
-
-  // 읽기 기록 생성 여부 확인
-  const isRecording = useRef(false);
-
-  // 녹음
-  const recordBlob = useRef<Blob | null>(null);
-
-  // 읽기 기록 저장
-  const saveReadingSession = async () => {
-    if (inviterId !== myId) return;
-
-    // role1 사용자의 DB 생성
-    const role1Data: BookParticiPationRecordData = {
-      childId: role1UserId ?? 0,
-      bookId: bookId ?? 0,
-      role: bookContent?.role1 ?? 'role1',
-      mode: 'MULTI',
+  interface RecordingState {
+    [participantId: string]: {
+      isRecording: boolean;
+      isCompleted: boolean;
     };
-    const role1Id = await makeBookRecord(role1Data);
-    if (role1UserId === myId) setBookRecordId(role1Id);
-    setRole1RecordId(role1Id);
+  }
 
-    // role2 사용자의 DB 생성
-    const role2Data: BookParticiPationRecordData = {
-      childId: role2UserId ?? 0,
-      bookId: bookId ?? 0,
-      role: bookContent?.role2 ?? 'role2',
-      mode: 'MULTI',
+  function TogetherMode() {
+    const location = useLocation();
+    const { roomName } = location.state as LocationState;
+    const { friend } = useFriends();
+    const { bookContent } = useBookContent();
+    const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
+    const {
+      bookId,
+      currentIndex, setCurrentIndex,
+      audioEnabled,
+      bookRecordId, setBookRecordId,
+    } = useStory();
+
+    const {
+      inviterId,
+      role1UserId,
+      role2UserId,
+      role1RecordId, setRole1RecordId,
+      role2RecordId, setRole2RecordId,
+    } = useRoleStore();
+
+    const {
+      addRecord, uploadRecord,
+    } = useRecordList();
+
+    const [isDrawingMode, setIsDrawingMode] = useState(false);
+
+    
+
+    // inviter/invitee 구분용 id 정보
+    const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
+    const myRole = myId === role1UserId ? 'role1' : 'role2';
+
+    // 상태 관리
+    const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
+    const [currentContentIndex, setCurrentContentIndex] = useState(0);
+    const [recordingStates, setRecordingStates] = useState<RecordingState>({});
+    const [isWaitingForOther, setIsWaitingForOther] = useState(false);
+
+    // 현재 페이지 및 컨텐츠 계산
+    const currentPage = bookContent?.pages[currentIndex];
+    const currentContent = currentPage?.audios[currentContentIndex];
+
+    // 읽기 기록 생성 여부 확인
+    const isRecording = useRef(false);
+
+    // 녹음
+    const recordBlob = useRef<Blob | null>(null);
+
+    // 읽기 기록 저장
+    const saveReadingSession = async () => {
+      if (inviterId !== myId) return;
+
+      // role1 사용자의 DB 생성
+      const role1Data: BookParticiPationRecordData = {
+        childId: role1UserId ?? 0,
+        bookId: bookId ?? 0,
+        role: bookContent?.role1 ?? 'role1',
+        mode: 'MULTI',
+      };
+      const role1Id = await makeBookRecord(role1Data);
+      if (role1UserId === myId) setBookRecordId(role1Id);
+      setRole1RecordId(role1Id);
+
+      // role2 사용자의 DB 생성
+      const role2Data: BookParticiPationRecordData = {
+        childId: role2UserId ?? 0,
+        bookId: bookId ?? 0,
+        role: bookContent?.role2 ?? 'role2',
+        mode: 'MULTI',
+      };
+      const role2Id = await makeBookRecord(role2Data);
+      if (role1UserId === myId) setBookRecordId(role2Id);
+      setRole2RecordId(role2Id);
     };
-    const role2Id = await makeBookRecord(role2Data);
-    if (role1UserId === myId) setBookRecordId(role2Id);
-    setRole2RecordId(role2Id);
-  };
 
-  useEffect(() => {
-    // roleStore에 저장된 역할 배정
-    if (role1UserId === myId) {
-      setUserRole('role1');
-    } else setUserRole('role2');
+    useEffect(() => {
+      // roleStore에 저장된 역할 배정
+      if (role1UserId === myId) {
+        setUserRole('role1');
+      } else setUserRole('role2');
 
-    // 읽기 시작 시 도서 읽기 정보 저장
-    if (isRecording.current) return;
-    isRecording.current = true;
-    saveReadingSession();
-  }, []);
+      // 읽기 시작 시 도서 읽기 정보 저장
+      if (isRecording.current) return;
+      isRecording.current = true;
+      saveReadingSession();
+    }, []);
 
-  // 현재 사용자 차례 확인
-  const isUserTurn = useMemo(() => {
-    if (!userRole || !currentContent) return false;
-    return currentContent.role === userRole;
-  }, [userRole, currentContent]);
+    // 현재 사용자 차례 확인
+    const isUserTurn = useMemo(() => {
+      if (!userRole || !currentContent) return false;
+      return currentContent.role === userRole;
+    }, [userRole, currentContent]);
 
-  useEffect(() => {
-    if (!currentPage) return;
-    uploadRecord();
-  }, [currentIndex]);
+    useEffect(() => {
+      if (!currentPage) return;
+      uploadRecord();
+    }, [currentIndex]);
 
-  // 다음 페이지/컨텐츠로 이동
-  const handleNext = useCallback(() => {
-    if (!currentPage) return;
-
-    // 녹음 상태 초기화
-    setRecordingStates({});
-    setIsWaitingForOther(false);
-
-    if (currentContentIndex < currentPage.audios.length - 1) {
-      setCurrentContentIndex((prev) => prev + 1);
-    } else if (currentIndex < storyData.length - 1) {
-      setCurrentIndex(currentIndex + 1);
-      setCurrentContentIndex(0);
-    } else {
-      // 읽기 종료 시 읽기 기록 정보 갱신
-      endBookRecordSession(bookRecordId ?? 0);
-    }
-  }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
-
-  // 녹음 상태 변경 처리
-  const handleRecordingStateChange = useCallback(
-    (participantId: string, status: 'idle' | 'recording' | 'completed') => {
-      setRecordingStates((prev) => ({
-        ...prev,
-        [participantId]: {
-          isRecording: status === 'recording',
-          isCompleted: status === 'completed',
-          audio: null,
-        },
-      }));
-    },
-    [],
-  );
-
-  // 오디오 정보 저장
-  const addAudioToList = (audioBlob: Blob | null) => {
-    console.log(`page: ${currentPage?.pageNumber ?? 1}, audio: ${currentContent?.order ?? 1}`);
-    // 저장할 데이터
-    const pageData: PageRecordData = {
-        bookRecordId: role1RecordId ?? 0,
-        partnerBookRecordId: role2RecordId ?? 0,
-        bookRecordPageNumber: currentPage?.pageNumber ?? 1,
-        pagePath: currentPage?.pagePath ?? '',
-        audioPath: currentContent?.path ?? '',
-        role: currentContent?.role ?? 'narration',
-        text: currentContent?.text ?? '',
-        audioNumber: currentContent?.order ?? 1,
-    };
-    addRecord(pageData, audioBlob);
-  };
-
-  // 내레이션 오디오 완료 처리
-  const handleNarrationComplete = useCallback(() => {
-    if (currentContent?.role === 'narration') {
-      addAudioToList(null);
-    } else if (currentContent?.role === myRole) {
-      addAudioToList(recordBlob.current);
-    }
-  
-    // 현재 페이지에 드로잉이 있는 경우 드로잉 모드 활성화
-    if (currentPage?.hasDrawing) {
-      setIsDrawingMode(true);
-    } else {
-      handleNext();
-    }
-  }, [handleNext, currentPage, currentContent]); // myRole과 addAudioToList도 의존성 배열에 추가 필요
-
-  const handleDrawingSave = useCallback(() => {
-    setIsDrawingMode(false);
-    handleNext();
-  }, [handleNext]); // setIsDrawingMode도 의존성 배열에 추가하는 것이 좋습니다
-
-  // 모든 참가자의 녹음 완료 여부 확인
-  useEffect(() => {
-    const allParticipantsCompleted = Object
-    .values(recordingStates).every((state) => state.isCompleted);
-
-    // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
-    if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
-      handleNarrationComplete();
+    // 다음 페이지/컨텐츠로 이동
+    const handleNext = useCallback(() => {
+      if (!currentPage) return;
 
       // 녹음 상태 초기화
       setRecordingStates({});
       setIsWaitingForOther(false);
-    }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
 
-  const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
-    // 녹음된 오디오 blob 처리
-    console.log('녹음 완료:', participantId, audioBlob);
-    recordBlob.current = audioBlob ?? null;
+      if (currentContentIndex < currentPage.audios.length - 1) {
+        setCurrentContentIndex((prev) => prev + 1);
+      } else if (currentIndex < storyData.length - 1) {
+        setCurrentIndex(currentIndex + 1);
+        setCurrentContentIndex(0);
+      } else {
+        // 읽기 종료 시 읽기 기록 정보 갱신
+        endBookRecordSession(bookRecordId ?? 0);
+      }
+    }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex]);
 
-    // 녹음 상태 업데이트
-    setRecordingStates((prev) => ({
-      ...prev,
-      [participantId]: {
-        isRecording: false,
-        isCompleted: true,
+    // 녹음 상태 변경 처리
+    const handleRecordingStateChange = useCallback(
+      (participantId: string, status: 'idle' | 'recording' | 'completed') => {
+        setRecordingStates((prev) => ({
+          ...prev,
+          [participantId]: {
+            isRecording: status === 'recording',
+            isCompleted: status === 'completed',
+            audio: null,
+          },
+        }));
       },
-    }));
+      [],
+    );
 
-      // 대기 상태 설정
-      setIsWaitingForOther(true);
-    }, []);
+    // 오디오 정보 저장
+    const addAudioToList = (audioBlob: Blob | null) => {
+      console.log(`page: ${currentPage?.pageNumber ?? 1}, audio: ${currentContent?.order ?? 1}`);
+      // 저장할 데이터
+      const pageData: PageRecordData = {
+          bookRecordId: role1RecordId ?? 0,
+          partnerBookRecordId: role2RecordId ?? 0,
+          bookRecordPageNumber: currentPage?.pageNumber ?? 1,
+          pagePath: currentPage?.pagePath ?? '',
+          audioPath: currentContent?.path ?? '',
+          role: currentContent?.role ?? 'narration',
+          text: currentContent?.text ?? '',
+          audioNumber: currentContent?.order ?? 1,
+      };
+      addRecord(pageData, audioBlob);
+    };
 
-  // eslint-disable-next-line consistent-return
-  useEffect(() => {
-    console.log('RecordingStates 변경됨:', recordingStates);
+    // 내레이션 오디오 완료 처리
+    const handleNarrationComplete = useCallback(() => {
+      if (currentContent?.role === 'narration') {
+        addAudioToList(null);
+      } else if (currentContent?.role === myRole) {
+        addAudioToList(recordBlob.current);
+      }
+    
+      // 현재 페이지에 드로잉이 있는 경우 드로잉 모드 활성화
+      if (currentPage?.hasDrawing) {
+        setIsDrawingMode(true);
+      } else {
+        handleNext();
+      }
+    }, [handleNext, currentPage, currentContent]); // myRole과 addAudioToList도 의존성 배열에 추가 필요
 
-    // 각 상태의 세부 정보 로깅
-    Object.entries(recordingStates).forEach(([key, value]) => {
-      console.log(
-        `참가자 ${key} 상태:`,
-        `녹음 중: ${value.isRecording}, 
-        완료: ${value.isCompleted}`,
-      );
-    });
+    const handleDrawingSave = useCallback(() => {
+      setIsDrawingMode(false);
+      handleNext();
+    }, [handleNext]); // setIsDrawingMode도 의존성 배열에 추가하는 것이 좋습니다
 
-    const allParticipantsCompleted = Object
-      .values(recordingStates)
-      .every((state) => state.isCompleted);
+    // 모든 참가자의 녹음 완료 여부 확인
+    useEffect(() => {
+      const allParticipantsCompleted = Object
+      .values(recordingStates).every((state) => state.isCompleted);
 
-    const participantCount = Object.keys(recordingStates).length;
-
-    console.log(`모든 참가자 완료: ${allParticipantsCompleted}`);
-    console.log(`참가자 수: ${participantCount}`);
-
-    if (allParticipantsCompleted && participantCount > 0) {
-      console.log('페이지 넘어가기 시도');
-
-      // 안전장치 추가
-      const timeoutId = setTimeout(() => {
+      // 최소한 한 명이 녹음을 완료했고, 모든 참가자가 완료했을 때
+      if (allParticipantsCompleted && Object.keys(recordingStates).length > 0) {
         handleNarrationComplete();
+
+        // 녹음 상태 초기화
         setRecordingStates({});
         setIsWaitingForOther(false);
-      }, 100); // 짧은 지연 추가
+      }
+    }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
 
-      return () => clearTimeout(timeoutId);
-    }
-  }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+    const handleRecordingComplete = useCallback((participantId: string, audioBlob?: Blob) => {
+      // 녹음된 오디오 blob 처리
+      console.log('녹음 완료:', participantId, audioBlob);
+      recordBlob.current = audioBlob ?? null;
 
-  return (
-    <div className="w-full h-screen relative">
-      {/* 동화 컨텐츠 영역 */}
-      <div className={`w-full h-full px-6 pb-48 pt-6 ${isDrawingMode ? 'hidden' : ''}`}>
-        <div className="mb-6 hidden">
-          <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
-          <p className="text-gray-600">
-            내 역할:
-            {userRole === 'role2' ? '왕자님' : '신데렐라'}
-          </p>
-          <p className="text-gray-600">
-            함께 읽는 친구:
-            {friend?.name || ''}
-          </p>
+      // 녹음 상태 업데이트
+      setRecordingStates((prev) => ({
+        ...prev,
+        [participantId]: {
+          isRecording: false,
+          isCompleted: true,
+        },
+      }));
+
+        // 대기 상태 설정
+        setIsWaitingForOther(true);
+      }, []);
+
+    // eslint-disable-next-line consistent-return
+    useEffect(() => {
+      console.log('RecordingStates 변경됨:', recordingStates);
+
+      // 각 상태의 세부 정보 로깅
+      Object.entries(recordingStates).forEach(([key, value]) => {
+        console.log(
+          `참가자 ${key} 상태:`,
+          `녹음 중: ${value.isRecording}, 
+          완료: ${value.isCompleted}`,
+        );
+      });
+
+      const allParticipantsCompleted = Object
+        .values(recordingStates)
+        .every((state) => state.isCompleted);
+
+      const participantCount = Object.keys(recordingStates).length;
+
+      console.log(`모든 참가자 완료: ${allParticipantsCompleted}`);
+      console.log(`참가자 수: ${participantCount}`);
+
+      if (allParticipantsCompleted && participantCount > 0) {
+        console.log('페이지 넘어가기 시도');
+
+        // 안전장치 추가
+        const timeoutId = setTimeout(() => {
+          handleNarrationComplete();
+          setRecordingStates({});
+          setIsWaitingForOther(false);
+        }, 100); // 짧은 지연 추가
+
+        return () => clearTimeout(timeoutId);
+      }
+    }, [recordingStates, currentIndex, currentContentIndex, currentPage]);
+
+    return (
+      <div className="w-full h-screen relative">
+        {/* 동화 컨텐츠 영역 */}
+        <div className={`w-full h-full px-6 pb-48 pt-6 ${isDrawingMode ? 'hidden' : ''}`}>
+          <div className="mb-6 hidden">
+            <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
+            <p className="text-gray-600">
+              내 역할:
+              {userRole === 'role2' ? '왕자님' : '신데렐라'}
+            </p>
+            <p className="text-gray-600">
+              함께 읽는 친구:
+              {friend?.name || ''}
+            </p>
+          </div>
+
+          <StoryIllustration
+            pageNumber={currentPage?.pageNumber ?? 0}
+            currentContentIndex={currentContentIndex}
+            onPrevious={() => {
+              if (currentIndex > 0) {
+                setCurrentIndex(currentIndex - 1);
+                setCurrentContentIndex(0);
+              }
+            }}
+            onNext={handleNext}
+            isFirst={currentIndex === 0}
+            isLast={currentIndex === storyData.length - 1}
+            userRole={userRole || undefined}
+            currentContent={currentContent}
+            illustration={currentPage?.pagePath ?? ''}
+          />
+
+          {/* 녹음 대기 상태 표시 */}
+          {isWaitingForOther && (
+            <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 px-6 py-3 rounded-full shadow-lg">
+              상대방의 녹음이 끝날 때까지 기다려주세요...
+            </div>
+          )}
+
+          {/* 오디오 플레이어 (내레이션) */}
+          {currentContent?.role === 'narration' && audioEnabled && currentContent.order && (
+            <div className="hidden">
+              <AudioPlayer
+                audioFiles={[currentContent.path ?? '']}
+                autoPlay
+                onEnded={handleNarrationComplete}
+                onError={() => {
+                  console.error('Audio playback failed');
+                  handleNext();
+                }}
+              />
+            </div>
+          )}
         </div>
 
-        <StoryIllustration
-          pageNumber={currentPage?.pageNumber ?? 0}
-          currentContentIndex={currentContentIndex}
-          onPrevious={() => {
-            if (currentIndex > 0) {
-              setCurrentIndex(currentIndex - 1);
-              setCurrentContentIndex(0);
-            }
-          }}
-          onNext={handleNext}
-          isFirst={currentIndex === 0}
-          isLast={currentIndex === storyData.length - 1}
-          userRole={userRole || undefined}
-          currentContent={currentContent}
-          illustration={currentPage?.pagePath ?? ''}
-        />
-
-        {/* 녹음 대기 상태 표시 */}
-        {isWaitingForOther && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 px-6 py-3 rounded-full shadow-lg">
-            상대방의 녹음이 끝날 때까지 기다려주세요...
-          </div>
+        {/* 화상 비디오 영역 */}
+        {userRole && !isDrawingMode && (
+          <IntegratedRoom
+            roomName={roomName}
+            participantName={selectedAccount?.name || 'Anonymous'}
+            userRole={userRole}
+            isUserTurn={isUserTurn}
+            onRecordingComplete={handleRecordingComplete}
+            onRecordingStatusChange={(participantId: string, status) => {
+              handleRecordingStateChange(participantId, status);
+            }}
+          />
         )}
 
-        {/* 오디오 플레이어 (내레이션) */}
-        {currentContent?.role === 'narration' && audioEnabled && currentContent.order && (
-          <div className="hidden">
-            <AudioPlayer
-              audioFiles={[currentContent.path ?? '']}
-              autoPlay
-              onEnded={handleNarrationComplete}
-              onError={() => {
-                console.error('Audio playback failed');
-                handleNext();
-              }}
+        {/* 드로잉 모드 */}
+        {isDrawingMode && (
+          <div className="absolute inset-0 z-50">
+            <StoryDrawingPage
+              roomName={roomName}
             />
           </div>
         )}
       </div>
+    );
+  }
 
-      {/* 화상 비디오 영역 */}
-      {userRole && !isDrawingMode && (
-        <IntegratedRoom
-          roomName={roomName}
-          participantName={selectedAccount?.name || 'Anonymous'}
-          userRole={userRole}
-          isUserTurn={isUserTurn}
-          onRecordingComplete={handleRecordingComplete}
-          onRecordingStatusChange={(participantId: string, status) => {
-            handleRecordingStateChange(participantId, status);
-          }}
-        />
-      )}
-
-      {/* 드로잉 모드 */}
-      {isDrawingMode && (
-        <div className="absolute inset-0 z-50">
-          <StoryDrawingPage/>
-        </div>
-      )}
-    </div>
-  );
-}
-
-export default TogetherMode;
+  export default TogetherMode;
