@@ -32,9 +32,9 @@ io.on('connection', (socket) => {
     socket.on('message', (data) => {
         // 그리기 정보를 room에 전달한다.
         // sendDataToRoom(socket.room, data);
-
+		console.log(data);
         // 임시 기능을 위해 연결된 모든 client에 전송
-        io.emit(data['status'], data);
+        io.emit('message', data);
     });
 
     socket.on('leave room', () => {
