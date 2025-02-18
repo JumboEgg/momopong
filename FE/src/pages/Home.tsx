@@ -1,11 +1,15 @@
 import FriendsModal from '@/components/common/modals/FriendsModal';
 import ProfileImage from '@/components/common/ProfileImage';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { saveFCMToken } from '@/api/storyApi';
+import { HandleAllowNotification, messaging } from '@/services/firebaseService';
+import { getToken } from 'firebase/messaging';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
 import useRecentLetterStore from '@/stores/letter/recentLetterStore';
+import { tokenService, checkTokenRegistration } from '@/services/tokenService';
 
 function HomePage() {
   const navigate = useNavigate();
@@ -20,6 +24,31 @@ function HomePage() {
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
   // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
   // console.log('Profile URL:', selectedAccount?.profile); // profile URL 확인
+
+  useEffect(() => {
+    const registerFCMToken = async () => {
+      try {
+        const currentChildId = tokenService.getCurrentChildId();
+        if (!currentChildId) return;
+
+        const isTokenRegistered = await checkTokenRegistration(currentChildId);
+        if (isTokenRegistered) return;
+
+        await HandleAllowNotification();
+        const fcmToken = await getToken(messaging, {
+          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+        });
+
+        if (fcmToken) {
+          await saveFCMToken(currentChildId, fcmToken);
+        }
+      } catch (err) {
+        console.error('FCM 토큰 등록 실패:', err);
+      }
+    };
+
+    registerFCMToken();
+  }, []);
 
   useEffect(() => {
     setRecentLetterList();

@@ -1,3 +1,6 @@
+import { getToken } from 'firebase/messaging';
+import { messaging } from '@/services/firebaseService';
+
 // services/tokenService.ts
 interface TokenState {
   parentToken: string | null;
@@ -95,3 +98,28 @@ class TokenService {
 }
 
 export const tokenService = new TokenService();
+
+export const checkTokenRegistration = async (currentChildId: number): Promise<boolean> => {
+  try {
+    // 1. 현재 브라우저의 FCM 토큰 가져오기
+    const currentToken = await getToken(messaging, {
+      vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+    });
+
+    if (!currentToken) return false;
+
+    // localStorage에 저장된 FCM 토큰과 사용자 ID 비교
+    const savedToken = localStorage.getItem(`fcm-token-${currentChildId}`);
+
+    // 토큰이 다르거나 저장된 토큰이 없으면
+    if (currentToken !== savedToken) {
+      localStorage.setItem(`fcm-token-${currentChildId}`, currentToken);
+      return false; // 새로 등록이 필요함
+    }
+
+    return true; // 이미 등록된 상태
+  } catch (error) {
+    console.error('토큰 확인 중 에러 발생:', error);
+    return false;
+  }
+};

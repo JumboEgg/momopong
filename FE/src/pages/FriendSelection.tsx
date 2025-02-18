@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { tokenService } from '@/services/tokenService';
-import { saveFCMToken } from '@/api/storyApi';
-import { HandleAllowNotification, messaging } from '@/services/firebaseService';
-import { getToken } from 'firebase/messaging';
+// import { saveFCMToken } from '@/api/storyApi';
+// import { HandleAllowNotification, messaging } from '@/services/firebaseService';
+// import { getToken } from 'firebase/messaging';
 import { useFriendListStore } from '@/stores/friendListStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { ContentType } from '@/types/invitation';
@@ -30,32 +30,32 @@ function FriendSelection() {
     fetchOnlineFriends,
   } = useFriendListStore();
 
-  // FCM 토큰 등록 (기존 코드와 동일)
-  useEffect(() => {
-    const registerFCMToken = async () => {
-      try {
-        const currentChildId = tokenService.getCurrentChildId();
-        if (!currentChildId) {
-          throw new Error('로그인이 필요합니다.');
-        }
+  // // FCM 토큰 등록 (기존 코드와 동일)
+  // useEffect(() => {
+  //   const registerFCMToken = async () => {
+  //     try {
+  //       const currentChildId = tokenService.getCurrentChildId();
+  //       if (!currentChildId) {
+  //         throw new Error('로그인이 필요합니다.');
+  //       }
 
-        await HandleAllowNotification();
-        const fcmToken = await getToken(messaging, {
-          vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
-        });
+  //       await HandleAllowNotification();
+  //       const fcmToken = await getToken(messaging, {
+  //         vapidKey: import.meta.env.VITE_FIREBASE_VAPID_KEY,
+  //       });
 
-        if (!fcmToken) {
-          throw new Error('FCM 토큰을 가져오지 못했습니다.');
-        }
+  //       if (!fcmToken) {
+  //         throw new Error('FCM 토큰을 가져오지 못했습니다.');
+  //       }
 
-        await saveFCMToken(currentChildId, fcmToken);
-      } catch (err) {
-        console.error('FCM 토큰 등록 실패:', err);
-      }
-    };
+  //       await saveFCMToken(currentChildId, fcmToken);
+  //     } catch (err) {
+  //       console.error('FCM 토큰 등록 실패:', err);
+  //     }
+  //   };
 
-    registerFCMToken();
-  }, []);
+  //   registerFCMToken();
+  // }, []);
 
   // 친구 목록 가져오기
   useEffect(() => {
@@ -106,7 +106,7 @@ function FriendSelection() {
       }
 
       await inviteFriend({
-        contentId: targetContentId, // 이제 targetContentId는 확실히 number 타입
+        contentId: targetContentId,
         inviterId: currentChildId,
         inviteeId,
         contentType: targetContentType,
