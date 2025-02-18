@@ -54,7 +54,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
     socket.emit('join-room', roomId);
     console.info(`join-room: ${roomId}`);
   },
-
+  // 소켓 연결
   connectSocket: (invitationId?: string) => {
     const { socket } = get();
     if (socket) return;

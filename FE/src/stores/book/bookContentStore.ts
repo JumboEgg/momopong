@@ -7,7 +7,7 @@ interface BookContentStore {
   bookContent: BookContentInfo | null;
   setBookContent: (id: number) => void;
 }
-
+// 음성등 받아오기
 const useBookContentStore = create<BookContentStore>()(
   persist(
     (set) => ({
