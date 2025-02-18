@@ -54,6 +54,14 @@ function IntegratedRoom({
     setPartnerReady,
   } = useRoomStore();
 
+  console.log('🎥 IntegratedRoom Received Props:', {
+    roomName,
+    participantName,
+    userRole,
+    isUserTurn,
+    variant,
+  });
+
   // 토큰 가져오기
   const getToken = useCallback(async () => {
     try {
@@ -454,7 +462,9 @@ function IntegratedRoom({
           `}
           >
             <span>{participant.name || participant.identity}</span>
-            {isLocal && <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>}
+            {isLocal
+              ? <span>{` (${userRole === 'role2' ? '왕자님' : '신데렐라'})`}</span>
+              : <span>{` (${userRole === 'role2' ? '신데렐라' : '왕자님'})`}</span>}
           </span>
           {isLocal && (
             <div
