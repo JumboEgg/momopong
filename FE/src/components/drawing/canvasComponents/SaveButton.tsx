@@ -17,11 +17,6 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
     mode, template, setImageData,
   } = useDrawing();
 
-  // TODO : story mode 저장 테스트 코드 삭제
-  const {
-    setSketch,
-  } = useBookSketch();
-
   const {
     setDrawingResult,
   } = useRecordList();
@@ -64,10 +59,6 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
           tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
           const dataURL = tempCanvas.toDataURL('image/webp');
 
-          setImageData(dataURL);
-
-          // TODO : story mode sketch 저장 테스트 코드 삭제
-          setSketch(dataURL);
           setDrawingResult(dataURL);
         };
       };
