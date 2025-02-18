@@ -11,9 +11,10 @@ import useSocketStore from '../hooks/useSocketStore';
 
 interface StoryDrawingPageProps {
   roomName: string;
+  onComplete?: () => void; // 모든 저장이 완료되었을 때 호출될 콜백
 }
 
-function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
+function StoryDrawingPage({ roomName, onComplete }: StoryDrawingPageProps): JSX.Element {
   const { setSessionId, setTemplate, setMode } = useDrawing();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const isRecording = useRef(false);
@@ -51,6 +52,12 @@ function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
     };
   }, []);
 
+  const handleAllSaved = () => {
+    if (onComplete) {
+      onComplete();
+    }
+  };
+
   const calculateCanvasDimensions = () => {
     const maxHeight = window.innerHeight * 0.9 - 80;
     const maxWidth = window.innerWidth * 0.9;
@@ -70,12 +77,13 @@ function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
 
   const { height: canvasHeight, width: canvasWidth } = calculateCanvasDimensions();
 
-  return (
+   return (
     <div className="bg-yellow-600 w-full h-full flex flex-col items-center justify-between m-0 p-0">
       <div className="w-full h-20 flex justify-between m-0 p-0">
         <span className="mt-4 ms-4">
           <SaveButton
             canvasRef={canvasRef}
+            onAllSaved={handleAllSaved}
           />
         </span>
         <span className="content-end flex">
