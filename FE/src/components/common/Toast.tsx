@@ -16,7 +16,7 @@ const toastBackgroundColors: Record<NotificationType, string> = {
 function ToastMessage({ toast }: ToastProps): JSX.Element {
   return (
     <div
-      className={`fixed top-4 right-4 p-4 rounded shadow-lg text-white min-w-[300px] 
+      className={`fixed top-4 right-4 p-4 rounded shadow-lg text-white min-w-[300px] z-90
       ${toastBackgroundColors[toast.type]}`}
     >
       {toast.message}

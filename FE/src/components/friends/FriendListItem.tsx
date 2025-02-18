@@ -5,6 +5,8 @@ interface FriendListItemProps {
   isLast?: boolean;
 }
 
+const DEFAULT_PROFILE = '/images/default-profile.jpg'; // public 폴더 내 경로
+
 const getStatusColor = (status: Friend['status']) => {
   switch (status) {
     case 'ONLINE':
@@ -38,15 +40,22 @@ const getStatusText = (status: Friend['status']) => {
 function FriendListItem({ friend, isLast }: FriendListItemProps): JSX.Element {
   const statusColor = getStatusColor(friend.status);
   const statusText = getStatusText(friend.status);
+
+  const profileImage = friend.profile || DEFAULT_PROFILE;
+
   return (
     <div className="flex items-center justify-between py-2">
       <div className={`flex items-center justify-between w-[95%] mx-auto ${!isLast && 'border-b border-gray-200'} pb-6`}>
         <div className="flex items-center space-x-3">
           <div className="relative">
             <img
-              src={friend.profile}
+              src={profileImage}
               alt={`${friend.name} profile`}
               className="w-12 h-12 rounded-full"
+              onError={(e) => {
+                console.error('Image load error:', e);
+                e.currentTarget.src = DEFAULT_PROFILE;
+              }}
             />
           </div>
           <span className="text-lg font-medium font-[BMJUA]">{friend.name}</span>

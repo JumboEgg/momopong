@@ -6,12 +6,15 @@ interface FriendRequestItemProps {
   onReject: (friendId: number) => Promise<void>;
 }
 
+const DEFAULT_PROFILE = '/images/default-profile.jpg';
+
 function FriendRequestItem({
   request,
   onAccept,
   onReject,
 }: FriendRequestItemProps): JSX.Element {
   const { friendId, fromProfile, fromName } = request;
+  const profileImage = fromProfile || DEFAULT_PROFILE;
 
   return (
     <div className="
@@ -28,9 +31,13 @@ function FriendRequestItem({
       <div className="flex items-center space-x-3">
         <div className="w-12 h-12 rounded-full bg-witch-haze-100 flex-shrink-0 overflow-hidden">
           <img
-            src={fromProfile}
+            src={profileImage}
             alt={`${fromName}의 프로필`}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              console.error('Image load error:', e);
+              e.currentTarget.src = DEFAULT_PROFILE;
+            }}
           />
         </div>
         <span className="text-gray-800 font-[BMJUA]">
