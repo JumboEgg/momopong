@@ -63,7 +63,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
     }
 
 
-
     // 클라이언트에게
     private void sendMessageToClient(WebSocketSession session, String message) {
         try {
@@ -80,7 +79,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        System.out.println("WebSocket connection established.");
+        log.info("WebSocket connection established");
 
         ApiStreamObserver<StreamingRecognizeResponse> responseObserver = new ApiStreamObserver<StreamingRecognizeResponse>() {
             @Override
@@ -116,7 +115,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
 
 
-
             @Override
             public void onError(Throwable t) {
                 log.error("Streaming error occurred", t);
@@ -135,12 +133,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             @Override
             public void onCompleted() {
-
-                System.out.println("Streaming completed.");
+                log.info("Streaming completed");
             }
         };
-
-
 
         requestObserver = speechClient.streamingRecognizeCallable().bidiStreamingCall(responseObserver);
 
@@ -171,11 +166,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        System.out.println("WebSocket connection closed.");
+        log.info("WebSocket connection closed");
         if (requestObserver != null) {
             requestObserver.onCompleted();
         }
     }
-
-
 }

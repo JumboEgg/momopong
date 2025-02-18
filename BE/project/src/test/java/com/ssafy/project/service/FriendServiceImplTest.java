@@ -116,8 +116,6 @@ class FriendServiceImplTest {
         // when, then
         List<FriendListDto> fromFriendList = friendService.friendList(fromChild.getId());
         List<FriendListDto> toFriendList = friendService.friendList(toChild.getId());
-        System.out.println("fromFriendList = " + fromFriendList);
-        System.out.println("toFriendList = " + toFriendList);
         assertThat(fromFriendList).hasSize(1);
         assertThat(toFriendList).hasSize(1);
     }

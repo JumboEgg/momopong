@@ -1,6 +1,6 @@
 package com.ssafy.project.controller;
 
-import com.ssafy.project.dto.*;
+import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.user.*;
 import com.ssafy.project.service.ChildService;
 import com.ssafy.project.service.PresignedUrlService;

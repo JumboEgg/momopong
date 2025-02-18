@@ -63,7 +63,6 @@ public class BookServiceImpl implements BookService {
     }
 
     // 동화 상세 페이지 조회 (동화 읽기)
-    // TODO: Query 조회로 변경?!
     @Override
     public BookListDto readBook(Long bookId) {
         Book book = bookRepository.findById(bookId)

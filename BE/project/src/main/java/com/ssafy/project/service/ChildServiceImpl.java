@@ -74,7 +74,6 @@ public class ChildServiceImpl implements ChildService {
 
         // 8자리 숫자 범위로 변환하기
         long numericCode = (last32BIts % 90000000L) + 10000000L;
-        System.out.println("numericCode = " + numericCode);
         return String.valueOf(numericCode);
     }
 

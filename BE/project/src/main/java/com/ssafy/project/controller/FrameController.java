@@ -1,26 +1,18 @@
 package com.ssafy.project.controller;
 
-import com.amazonaws.HttpMethod;
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GeneratePresignedUrlRequest;
 import com.ssafy.project.dto.FileDto;
 import com.ssafy.project.dto.FrameDto;
-import com.ssafy.project.dto.LetterDto;
 import com.ssafy.project.service.FrameService;
 import com.ssafy.project.service.PresignedUrlService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URL;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.UUID;
 
 
 @Tag(name = "서브컨텐츠 작품 컨트롤러", description = "아이의 작품을 조회, 저장")
@@ -73,8 +65,4 @@ public class FrameController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-
-
-
 }

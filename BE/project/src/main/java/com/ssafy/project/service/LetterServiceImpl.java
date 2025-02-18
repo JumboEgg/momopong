@@ -10,6 +10,7 @@ import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.LetterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,6 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 
 @Service
 @RequiredArgsConstructor
@@ -111,14 +113,6 @@ public class LetterServiceImpl implements LetterService {
         Child child = childRepository.findById(childId)
                 .orElseThrow(() -> new UserNotFoundException("자식 사용자를 찾을 수 없습니다"));
 
-
-//        System.out.println(child + content + reply + bookTitle + role + letterFileName);
-//        System.out.println(child);
-//        System.out.println(content);
-//        System.out.println(reply);
-//        System.out.println(bookTitle);
-//        System.out.println(role);
-//        System.out.println(letterFileName);
         Letter letter = Letter.builder()
                 .child(child)
                 .letter(content)
@@ -128,7 +122,7 @@ public class LetterServiceImpl implements LetterService {
                 .letterFileName(letterFileName)
                 .build();
 
-        System.out.println(letter);
+        log.info("letter={}", letter);
 
         letterRepository.save(letter);
     }

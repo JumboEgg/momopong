@@ -1,11 +1,11 @@
 package com.ssafy.project.controller;
 
-import com.ssafy.project.dto.user.ChildStatusDto;
+import com.ssafy.project.dto.book.BookDto;
+import com.ssafy.project.dto.book.BookListDto;
 import com.ssafy.project.dto.invitation.InviteeIdDto;
 import com.ssafy.project.dto.invitation.InviterIdDto;
 import com.ssafy.project.dto.invitation.NotificationDto;
-import com.ssafy.project.dto.book.BookDto;
-import com.ssafy.project.dto.book.BookListDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.service.BookService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -81,10 +81,6 @@ public class BookController {
 
         log.info("acceptInvitation.inviteeId={}", inviteeId);
 
-//        log.info("acceptInvitation.inviterIdDto={}", inviterIdDto);
-//        log.info("acceptInvitation.inviterId={}", inviterIdDto.getInviterId());
-
-//        Long inviterId = inviterIdDto.getInviterId();
         Long inviterId = Long.parseLong(map.get("inviterId"));
         log.info("rejectInvitation.map={}", map);
         log.info("rejectInvitation.inviterId={}", inviterId);
@@ -102,10 +98,6 @@ public class BookController {
 //                                                 @RequestBody InviterIdDto inviterIdDto) {
         log.info("rejectInvitation.inviteeId={}", inviteeId);
 
-//        log.info("rejectInvitation.inviterIdDto={}", inviterIdDto);
-//        log.info("rejectInvitation.inviterId={}", inviterIdDto.getInviterId());
-//
-//        Long inviterId = inviterIdDto.getInviterId();
         Long inviterId = Long.parseLong(map.get("inviterId"));
         log.info("rejectInvitation.map={}", map);
         log.info("rejectInvitation.inviterId={}", inviterId);
