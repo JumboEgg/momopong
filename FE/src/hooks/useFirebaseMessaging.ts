@@ -109,7 +109,7 @@ const handleInvitationAccept = async () => {
       } else if (contentType === 'BOOK') {
         navigate('/greeting', {
           state: {
-            roomName: `book-${contentId}`,
+            roomName: `book-${contentId}-${inviterId}`,
             participantName: inviterName,
             contentId,
             isInvitationAccepted: true,
@@ -296,7 +296,7 @@ const handleInvitationAccept = async () => {
             // 인사방으로 먼저 이동
             navigate('/greeting', {
               state: {
-                roomName: `book-${contentId}`,
+                roomName: `book-${contentId}-${inviterId}`,
                 participantName: inviterName,
                 contentId,
                 isInvitationAccepted: true,
