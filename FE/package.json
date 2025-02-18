@@ -17,6 +17,8 @@
     "@fortawesome/react-fontawesome": "^0.2.2",
     "@livekit/components-react": "^2.8.1",
     "@livekit/components-styles": "^1.1.4",
+    "@react-three/drei": "^9.121.5",
+    "@react-three/fiber": "^8.17.14",
     "@tailwindcss/vite": "^4.0.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
