@@ -3,6 +3,7 @@ import { ActivityAnalysisInfo, ActivityHistoryInfo } from '@/types/report';
 import { create } from 'zustand';
 import { LetterInfo } from '@/types/letter';
 import { FrameInfo } from '@/types/frame';
+import { BookItemInfo } from '@/types/book';
 import useAuthStore from './authStore';
 
 export type ReportType = 'report' | 'activities' | 'crafts';
@@ -17,6 +18,8 @@ interface ReportStore {
   setAnalysis: (id: number) => void;
   history: ActivityHistoryInfo[];
   setHistory: (id: number) => void;
+  books: BookItemInfo[];
+  setBooks: (id: number) => void;
   sketches: FrameInfo[];
   setSketches: (id: number) => void;
   letters: LetterInfo[];
@@ -86,6 +89,38 @@ export const useReportStore = create<ReportStore>((set) => ({
         set({ history: data });
     } catch (error) {
       console.error('Error loading history:', error);
+      throw error;
+    }
+  },
+
+  books: [],
+  setBooks: async (childId) => {
+    try {
+      const { accessToken } = useAuthStore.getState();
+
+      if (!accessToken) {
+        throw new Error('Failed to get accessToken');
+      }
+
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/profile/${childId}/book`,
+        {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+
+      if (!response.ok) {
+        throw new Error(`Loading failed: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      set({ sketches: data });
+    } catch (error) {
+      console.error('Error loading sketches:', error);
       throw error;
     }
   },

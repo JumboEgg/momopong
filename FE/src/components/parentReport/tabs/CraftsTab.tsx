@@ -4,46 +4,13 @@ import ReportLetterModal from '@/components/common/modals/ReportLetterModal';
 import { useReportStore } from '@/stores/reportStore';
 import DrawingModal from '../../common/modals/DrawingModal';
 
-const books = [
-  {
-    id: 1,
-    title: '신데렐라',
-    date: '2024-02-01',
-    color: 'bg-blue-400',
-  },
-  {
-    id: 2,
-    title: '백설공주',
-    date: '2024-01-28',
-    color: 'bg-red-400',
-  },
-  {
-    id: 3,
-    title: '인어공주',
-    date: '2024-01-25',
-    color: 'bg-green-400',
-  },
-  {
-    id: 4,
-    title: '라푼젤',
-    date: '2024-01-20',
-    color: 'bg-purple-400',
-  },
-  {
-    id: 5,
-    title: '잠자는 숲속의 공주',
-    date: '2024-01-15',
-    color: 'bg-yellow-400',
-  },
-];
-
 interface CraftsTabProps {
   childName: string;
 }
 
 function CraftsTab({ childName }: CraftsTabProps) {
   const {
-    letters, sketches,
+    books, letters, sketches,
   } = useReportStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -78,11 +45,11 @@ function CraftsTab({ childName }: CraftsTabProps) {
   const readingHistory = books.map((book, idx) => (
     <button
       type="button"
-      key={book.id}
+      key={book.bookId}
       className="w-full p-1"
       onClick={() => openModal(idx)}
     >
-      <div className={`${book.color} aspect-8/5`} />
+      <img src={book.bookPath} alt={book.title} className="w-full" />
       <div className="font-[BMJUA]">{book.title}</div>
     </button>
   ));
