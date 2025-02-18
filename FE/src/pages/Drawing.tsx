@@ -5,7 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
 import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/pages/FriendSelection';
-import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
+// import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
@@ -175,9 +175,9 @@ function Drawing() {
       return <DrawingPage />;
     }
 
-    if (mode === 'story' && !imageData) {
-      return <StoryDrawingPage />;
-    }
+    // if (mode === 'story' && !imageData) {
+    //   return <StoryDrawingPage />;
+    // }
 
     return <ResultPage />;
   };
