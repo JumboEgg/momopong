@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { RoomEvent } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
+import { useRoleStore } from '@/stores/roleStore';
 import IntegratedRoom from '../components/stories/StoryMode/IntegratedRoom';
 
 interface GreetingPageProps {
@@ -29,6 +30,31 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     room,
   } = useRoomStore();
 
+  const { role1UserId, role2UserId } = useRoleStore();
+  const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
+
+  const determineUserRole = (userId: number | null, r1UserId: number | null) => {
+    console.log('🎭 Role Determination Debug:', {
+      userId,
+      role1UserId: r1UserId,
+      calculatedRole: userId === r1UserId ? 'role1' : 'role2',
+    });
+
+    if (userId === null || r1UserId === null) return 'role1';
+    return userId === r1UserId ? 'role1' : 'role2';
+  };
+
+  const myRole = useMemo(() => {
+    const role = determineUserRole(myId, role1UserId);
+    console.log('✨ Final Role Assignment:', {
+      myId,
+      role1UserId,
+      role2UserId,
+      assignedRole: role,
+    });
+    return role;
+  }, [myId, role1UserId]);
+
   // 초대 수락으로 들어온 경우 추가 로직
   useEffect(() => {
     if (isInvitationAccepted) {
@@ -38,36 +64,36 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
   }, [isInvitationAccepted]);
 
   // 데이터 리스너 추가
-// GreetingPage.tsx 내의 useEffect 훅에서
-useEffect(() => {
-  if (!room) return;
+  // GreetingPage.tsx 내의 useEffect 훅에서
+  useEffect(() => {
+    if (!room) return;
 
-  const handleDataReceived = (payload: Uint8Array) => {
-    try {
-      const message = JSON.parse(new TextDecoder().decode(payload));
-      console.log('🌈 Received Data Message:', message);
+    const handleDataReceived = (payload: Uint8Array) => {
+      try {
+        const message = JSON.parse(new TextDecoder().decode(payload));
+        console.log('🌈 Received Data Message:', message);
 
-      if (message.type === 'ready_status') {
-        console.log('📣 Received Ready Status', {
-          status: message.status,
-          sender: message.sender,
-        });
-        // 여기에 상대방 준비완료 메시지 추가
-        if (message.status) {
-          console.log('🎉 상대방 준비완료!!');
+        if (message.type === 'ready_status') {
+          console.log('📣 Received Ready Status', {
+            status: message.status,
+            sender: message.sender,
+          });
+          // 여기에 상대방 준비완료 메시지 추가
+          if (message.status) {
+            console.log('🎉 상대방 준비완료!!');
+          }
+          setPartnerReady(message.status);
+        } else if (message.type === 'start_story') {
+          console.log('🚀 Received Start Story', {
+            status: message.status,
+            sender: message.sender,
+          });
+          confirmReady(true);
         }
-        setPartnerReady(message.status);
-      } else if (message.type === 'start_story') {
-        console.log('🚀 Received Start Story', {
-          status: message.status,
-          sender: message.sender,
-        });
-        confirmReady(true);
+      } catch (error) {
+        console.error('데이터 처리 오류:', error);
       }
-    } catch (error) {
-      console.error('데이터 처리 오류:', error);
-    }
-  };
+    };
 
   room.on(RoomEvent.DataReceived, handleDataReceived);
 
@@ -169,11 +195,13 @@ useEffect(() => {
         roomName,
         participantName: selectedAccount?.name,
       });
+
       navigate(`/book/${contentId}/together`, {
         state: {
           roomName,
           participantName: selectedAccount?.name,
           isStoryStarted: true,
+          userRole: myRole, // 역할 정보 추가
         },
       });
     }
@@ -232,7 +260,7 @@ useEffect(() => {
       <IntegratedRoom
         roomName={roomName}
         participantName={selectedAccount?.name || 'Anonymous'}
-        userRole={selectedAccount?.name?.includes('왕자') ? 'role2' : 'role1'}
+        userRole={myRole}
         isUserTurn
         onRecordingComplete={() => {}}
         onRecordingStatusChange={() => {}}

@@ -25,6 +25,7 @@ import storyData from '../data/cinderella';
 interface LocationState {
   roomName: string;
   participantName: string;
+  userRole: 'role1' | 'role2';
 }
 
 interface RecordingState {
@@ -59,12 +60,32 @@ function TogetherMode() {
     addRecord, uploadRecord,
   } = useRecordList();
 
-  // inviter/invitee 구분용 id 정보
+ // TogetherMode.tsx
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
-  const myRole = myId === role1UserId ? 'role1' : 'role2';
+
+  const determineUserRole = (userId: number) => {
+    // 디버깅을 위한 로그 추가
+    console.log('역할 결정 디버깅:', {
+      userId,
+      inviterId,
+      isInviter: userId === inviterId,
+      assignedRole: userId === inviterId ? 'role1' : 'role2',
+    });
+
+    return userId === inviterId ? 'role1' : 'role2';
+  };
+
+  const myRole = useMemo(() => {
+    const role = determineUserRole(myId);
+    console.log('최종 결정된 역할:', {
+      myId,
+      role,
+      inviterId,
+    });
+    return role;
+  }, [myId, inviterId]);
 
   // 상태 관리
-  const [userRole, setUserRole] = useState<'role2' | 'role1' | null>(null);
   const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [recordingStates, setRecordingStates] = useState<RecordingState>({});
   const [isWaitingForOther, setIsWaitingForOther] = useState(false);
@@ -106,13 +127,24 @@ function TogetherMode() {
     setRole2RecordId(role2Id);
   };
 
-  useEffect(() => {
-    // roleStore에 저장된 역할 배정
-    if (role1UserId === myId) {
-      setUserRole('role1');
-    } else setUserRole('role2');
+  // useEffect(() => {
+  //   // 역할 초기 설정
+  //   // const randomRole = Math.random() < 0.5 ? 'role2' : 'role1';
+  //   // setUserRole(randomRole);
 
-    // 읽기 시작 시 도서 읽기 정보 저장
+  //   // roleStore에 저장된 역할 배정
+  //   if (role1UserId === myId) {
+  //     setUserRole('role1');
+  //   } else setUserRole('role2');
+
+  //   // 읽기 시작 시 도서 읽기 정보 저장
+  //   if (isRecording.current) return;
+  //   isRecording.current = true;
+  //   saveReadingSession();
+  // }, []);
+
+  // 읽기 정보 저장을 위한 useEffect만 남김
+  useEffect(() => {
     if (isRecording.current) return;
     isRecording.current = true;
     saveReadingSession();
@@ -120,9 +152,9 @@ function TogetherMode() {
 
   // 현재 사용자 차례 확인
   const isUserTurn = useMemo(() => {
-    if (!userRole || !currentContent) return false;
-    return currentContent.role === userRole;
-  }, [userRole, currentContent]);
+    if (!myRole || !currentContent) return false;
+    return currentContent.role === myRole;
+  }, [myRole, currentContent]);
 
   useEffect(() => {
     if (!currentPage) return;
@@ -267,11 +299,12 @@ function TogetherMode() {
           <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
           <p className="text-gray-600">
             내 역할:
-            {userRole === 'role2' ? '왕자님' : '신데렐라'}
+            {myRole === 'role2' ? '왕자님' : '신데렐라'}
           </p>
           <p className="text-gray-600">
             함께 읽는 친구:
             {friend?.name || ''}
+            {friend && ` (${myRole === 'role1' ? '왕자님' : '신데렐라'})`}
           </p>
         </div>
 
@@ -287,7 +320,7 @@ function TogetherMode() {
           onNext={handleNext}
           isFirst={currentIndex === 0}
           isLast={currentIndex === storyData.length - 1}
-          userRole={userRole || undefined}
+          userRole={myRole || undefined}
           currentContent={currentContent}
           illustration={currentPage?.pagePath ?? ''}
         />
@@ -316,11 +349,11 @@ function TogetherMode() {
       </div>
 
       {/* 화상 비디오 영역 */}
-      {userRole && (
+      {myRole && (
         <IntegratedRoom
           roomName={roomName}
           participantName={selectedAccount?.name || 'Anonymous'}
-          userRole={userRole}
+          userRole={myRole}
           isUserTurn={isUserTurn}
           onRecordingComplete={handleRecordingComplete}
           onRecordingStatusChange={(participantId: string, status) => {
