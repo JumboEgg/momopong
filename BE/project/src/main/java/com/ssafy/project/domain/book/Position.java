@@ -28,14 +28,4 @@ public class Position {
     private Double y; // y좌표
     private Double ratio; // 비율
     private Double angle; // 각도
-
-    public PositionDto entityToDto() {
-        return PositionDto.builder()
-                .sketchPath(this.getSketchPath())
-                .x(this.getX())
-                .y(this.getY())
-                .ratio(this.getRatio())
-                .angle(this.getAngle())
-                .build();
-    }
 }

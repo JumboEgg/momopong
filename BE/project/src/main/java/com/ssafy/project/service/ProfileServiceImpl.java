@@ -51,7 +51,7 @@ public class ProfileServiceImpl implements ProfileService {
                             .orElseThrow(() -> new NotFoundException("해당 책을 찾을 수 없습니다"));
 
                     return BookDto.builder()
-                            .bookId(book.getId())
+                            .bookId(recordBook.getId())
                             .bookPath(book.getBookPath())
                             .title(book.getTitle())
                             .build();

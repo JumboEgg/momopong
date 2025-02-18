@@ -93,7 +93,13 @@ public class BookServiceImpl implements BookService {
                     if (page.isHasDrawing() || page.isHasObject()) {
                         Position position = positionRepository.findByPage(page).orElse(null);
                         if (position != null) { // null이 아닌 경우에만 오브젝트 정보 반환
-                            positionDto = position.entityToDto();
+                            positionDto = PositionDto.builder()
+                                    .sketchPath(position.getSketchPath())
+                                    .x(position.getX())
+                                    .y(position.getY())
+                                    .ratio(position.getRatio())
+                                    .angle(position.getAngle())
+                                    .build();
                         }
                     }
 
