@@ -235,7 +235,9 @@ function App(): JSX.Element {
         ? `${invitationModal.data.contentTitle}을(를) 같이 읽고 싶어해요`
         : `${invitationModal.data.contentTitle}을(를) 같이 그리고 싶어해요`
     }
-        onConfirm={handleInvitationAccept}
+        onConfirm={() => {
+          handleInvitationAccept();
+        }}
         onClose={handleInvitationReject}
       />
 )}

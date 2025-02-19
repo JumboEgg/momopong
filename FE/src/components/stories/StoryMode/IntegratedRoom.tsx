@@ -29,7 +29,7 @@ interface IntegratedRoomProps {
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
   variant?: VariantType; // 레이아웃 variant 추가
-  onRecordIdReceived: (recordData: { role1Id: number, role2Id: number }) => void;
+  onRecordIdReceived?: (recordData: { role1Id: number, role2Id: number }) => void;
   role1RecordId: number | null;
   role2RecordId: number | null;
   isHost: boolean;
@@ -295,6 +295,7 @@ function IntegratedRoom({
             } else if (message.type === 'start_story') {
               confirmReady(message.status);
             } else if (message.type === 'record_ids') {
+              if (!onRecordIdReceived) return;
               onRecordIdReceived(message.content);
             }
           } catch (error) {

@@ -4,6 +4,7 @@ import { useRoomStore } from '@/stores/roomStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useRoleStore } from '@/stores/roleStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
 import IntegratedRoom from '../components/stories/StoryMode/IntegratedRoom';
 
 interface GreetingPageProps {
@@ -29,7 +30,8 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     room,
   } = useRoomStore();
 
-  const { role1UserId, role2UserId } = useRoleStore();
+  const { setBookContent } = useBookContent();
+  const { bookId, role1UserId, role2UserId } = useRoleStore();
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
   const determineUserRole = (userId: number | null, r1UserId: number | null) => {
@@ -53,6 +55,11 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     });
     return role;
   }, [myId, role1UserId]);
+
+  useEffect(() => {
+    if (!bookId) return;
+    setBookContent(bookId);
+  }, []);
 
   // 초대 수락으로 들어온 경우 추가 로직
   useEffect(() => {
@@ -218,9 +225,12 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
             participantName={selectedAccount?.name || 'Anonymous'}
             userRole={myRole}
             isUserTurn
-            onRecordingComplete={() => {}}
-            onRecordingStatusChange={() => {}}
+            onRecordingComplete={() => { }}
+            onRecordingStatusChange={() => { }}
             variant="greeting"
+            role1RecordId={null}
+            role2RecordId={null}
+            isHost={false}
           />
         </div>
 
