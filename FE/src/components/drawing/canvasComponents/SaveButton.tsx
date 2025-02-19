@@ -2,7 +2,6 @@ import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
-import { useBookSketch } from '@/stores/book/bookSketchStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
@@ -16,11 +15,6 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
   const {
     mode, template, setImageData,
   } = useDrawing();
-
-  // TODO : story mode 저장 테스트 코드 삭제
-  const {
-    setSketch,
-  } = useBookSketch();
 
   const {
     setDrawingResult,
@@ -64,10 +58,6 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
           tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
           const dataURL = tempCanvas.toDataURL('image/webp');
 
-          setImageData(dataURL);
-
-          // TODO : story mode sketch 저장 테스트 코드 삭제
-          setSketch(dataURL);
           setDrawingResult(dataURL);
         };
       };

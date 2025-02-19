@@ -55,13 +55,13 @@ function IntegratedRoom({
     setPartnerReady,
   } = useRoomStore();
 
-  console.log('🎥 IntegratedRoom Received Props:', {
-    roomName,
-    participantName,
-    userRole,
-    isUserTurn,
-    variant,
-  });
+  // console.log('🎥 IntegratedRoom Received Props:', {
+  //   roomName,
+  //   participantName,
+  //   userRole,
+  //   isUserTurn,
+  //   variant,
+  // });
 
   // 토큰 가져오기
   const getToken = useCallback(async () => {

@@ -24,7 +24,7 @@ function StoryDrawingPage({ roomName }: StoryDrawingPageProps): JSX.Element {
   const sketchPath = currentPage?.position.sketchPath;
 
   useEffect(() => {
-    setConnect(true);
+    setConnect(true, roomName);
     setMode('story');
     if (isConnected && roomName) {
       setRoomId(`drawing_${roomName}`);
