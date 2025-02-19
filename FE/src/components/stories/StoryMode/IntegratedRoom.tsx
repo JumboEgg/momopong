@@ -35,7 +35,7 @@ interface ParticipantTrack {
   participant: LocalParticipant | RemoteParticipant;
   trackPublication?: Track;
 }
-const getRoleColor = (role: 'role1' | 'role2') => (role === 'role1' ? 'border-8 border-yellow-300' : 'border-8 border-green-300');
+const getRoleColor = (role: 'role1' | 'role2') => (role === 'role1' ? 'border-8 border-pink-500' : 'border-8 border-blue-600');
 
 function IntegratedRoom({
   roomName,
@@ -482,10 +482,14 @@ function IntegratedRoom({
   }
 
   return (
-    <div className="fixed max-h-[20vh] bottom-20 left-8 right-8 grid grid-cols-3 items-center justify-between">
-      {renderParticipantVideo(0)}
+    <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
+      <div className="w-96 h-72">
+        {renderParticipantVideo(0)}
+      </div>
       {renderRecordingButton()}
-      {renderParticipantVideo(1)}
+      <div className="w-96 h-72">
+        {renderParticipantVideo(1)}
+      </div>
     </div>
   );
 }
