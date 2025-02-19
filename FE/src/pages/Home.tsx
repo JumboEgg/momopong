@@ -102,7 +102,7 @@ function HomePage() {
           size="sm"
           shape="circle"
         />
-        <p className="text-xl mt-0.5">{selectedAccount?.name}</p>
+        <p className="text-sm font-[GeekbleMalang2WOFF2] md:text-xl mt-0.5">{selectedAccount?.name}</p>
       </button>
 
       <button
@@ -115,16 +115,16 @@ function HomePage() {
           alt="친구목록"
           className="w-[5vw] min-w-10 object-contain"
         />
-        <p className="text-sm md:text-xl mt-0.5">친구목록</p>
+        <p className="text-sm font-[GeekbleMalang2WOFF2] md:text-xl mt-0.5">친구목록</p>
       </button>
 
-      <button
+      {/* <button
         type="button"
         onClick={() => handleNavigation('/test')}
         className="cursor-pointer flex flex-col items-center"
       >
         <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
-      </button>
+      </button> */}
 
       {isModalOpen && (
         <FriendsModal
