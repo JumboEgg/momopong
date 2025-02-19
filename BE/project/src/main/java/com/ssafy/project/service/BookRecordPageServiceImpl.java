@@ -55,5 +55,5 @@ public class BookRecordPageServiceImpl implements BookRecordPageService{
                 .bookRecordPageId(savedPage.getId())
                 .partnerBookRecordPageId(savedPartnerPage.getId())
                 .build();
-    };
+    }
 }
