@@ -100,8 +100,8 @@ function RecordReadingMode(): ReactElement {
   const audioUrl = currentContent?.path ?? '';
 
   return (
-    <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
-      <div className="mb-6 flex justify-between items-center">
+    <div className="w-[100vw] h-[100vh] mx-auto relative">
+      <div className="mb-6 flex justify-between items-center hidden">
         <h2 className="text-2xl font-bold text-gray-800">
           {readingHistoryContent?.bookTitle}
           {' '}
@@ -120,16 +120,16 @@ function RecordReadingMode(): ReactElement {
             )
           </span>
         </h2>
-        <button
-          type="button"
-          onClick={toggleAudio}
-          className={`px-4 py-2 rounded ${audioEnabled ? 'bg-green-500' : 'bg-gray-500'} text-white`}
-        >
-          음성
-          {' '}
-          <span>{audioEnabled ? 'ON' : 'OFF'}</span>
-        </button>
       </div>
+      <button
+        type="button"
+        onClick={toggleAudio}
+        className={`fixed top-2 right-4 px-4 py-2 rounded ${audioEnabled ? 'bg-green-500' : 'bg-gray-500'} text-white`}
+      >
+        음성
+        {' '}
+        <span>{audioEnabled ? 'ON' : 'OFF'}</span>
+      </button>
 
       <StoryIllustration
         pageNumber={currentPage?.pageNumber ?? 0}

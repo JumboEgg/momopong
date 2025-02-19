@@ -1,3 +1,6 @@
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { StoryIllustrationProps, CharacterType } from '../types/story';
 
 function StoryIllustration({
@@ -30,30 +33,38 @@ function StoryIllustration({
   } as const;
 
   return (
-    <div style={{ height: '900px' }} className="relative w-full mx-auto mb-4">
+    <div className="relative w-[100vw] h-[100vh] mx-auto">
       <img
         src={illustration}
         alt={`Page ${pageNumber} illustration`}
-        className="absolute inset-0 w-full h-full object-cover rounded-lg"
+        className="absolute inset-0 w-full h-full object-cover"
       />
       {/* 이전, 다음 버튼 */}
-      <div className="absolute inset-0 flex items-center justify-between px-4">
-        <button
-          type="button"
-          onClick={onPrevious}
-          disabled={isFirst}
-          className="px-6 py-3 bg-black bg-opacity-30 text-white rounded-full hover:bg-opacity-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-        >
-          이전
-        </button>
-        <button
-          type="button"
-          onClick={onNext}
-          disabled={isLast}
-          className="px-6 py-3 bg-black bg-opacity-30 text-white rounded-full hover:bg-opacity-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-        >
-          다음
-        </button>
+      <div className="px-4">
+        {
+          !isFirst
+          ? (
+            <IconCircleButton
+              size="sm"
+              variant="action"
+              className="fixed top-1/2 left-5 z-10"
+              onClick={onPrevious}
+              icon={<FontAwesomeIcon icon={faCaretLeft} size="sm" />}
+            />
+          ) : null
+        }
+        {
+          !isLast
+          ? (
+            <IconCircleButton
+              size="sm"
+              variant="action"
+              className="fixed top-1/2 right-5 z-10"
+              onClick={onNext}
+              icon={<FontAwesomeIcon icon={faCaretRight} size="sm" />}
+            />
+          ) : null
+        }
       </div>
       {/* 텍스트 오버레이📣 */}
       <div className="absolute top-8 left-8 font-[BMJUA]">
@@ -73,7 +84,7 @@ function StoryIllustration({
                   {getSpeakerName(content.role)}
                 </div>
                 )}
-                <p className={`text-4xl tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}>
+                <p className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}>
                   {content.text}
                 </p>
               </div>

@@ -14,6 +14,10 @@ import {
   Track,
 } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import CircularTimer from '@/components/common/Timer';
 
 type VariantType = 'greeting' | 'story';
 
@@ -31,6 +35,7 @@ interface ParticipantTrack {
   participant: LocalParticipant | RemoteParticipant;
   trackPublication?: Track;
 }
+const getRoleColor = (role: 'role1' | 'role2') => (role === 'role1' ? 'border-8 border-yellow-300' : 'border-8 border-green-300');
 
 function IntegratedRoom({
   roomName,
@@ -135,6 +140,9 @@ function IntegratedRoom({
     if (!isUserTurn || isRecording || !room) return;
 
     try {
+      // 마이크 활성화
+      await room.localParticipant.setMicrophoneEnabled(true);
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -157,7 +165,7 @@ function IntegratedRoom({
         }
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
         if (audioBlob.size > 0 && room) {
@@ -167,6 +175,9 @@ function IntegratedRoom({
           // 상위 컴포넌트에 녹음 완료 알림
           onRecordingComplete(room.localParticipant.identity, audioBlob);
         }
+
+        // 마이크 비활성화
+        await room.localParticipant.setMicrophoneEnabled(false);
 
         // 스트림 정리
         stream.getTracks().forEach((track) => track.stop());
@@ -384,38 +395,24 @@ function IntegratedRoom({
 
     return (
       <div className="flex flex-col items-center gap-2">
-        {isRecording && (
-          <div className="w-32 h-2 bg-gray-200 rounded mb-2">
-            <div
-              className="h-full bg-red-500 rounded transition-all duration-1000"
-              style={{ width: `${(timeLeft / 20) * 100}%` }}
-            />
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          <button
-            type="button"
+        {!isRecording
+        ? (
+          <IconCircleButton
+            size="md"
+            variant="story"
+            className=""
+            hasFocus
+            icon={<FontAwesomeIcon icon={faMicrophone} />}
             onClick={startRecording}
-            disabled={!isUserTurn || isRecording}
-            className={`
-              px-4 py-2 rounded-full text-white font-medium transition-colors whitespace-nowrap
-              ${isRecording ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}
-            `}
-          >
-            {isRecording ? `${timeLeft}초` : '녹음 시작'}
-          </button>
-
-          {isRecording && (
-            <button
-              type="button"
-              onClick={stopRecording}
-              className="px-4 py-2 rounded-full text-white font-medium bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap"
-            >
-              완료
-            </button>
-          )}
-        </div>
+          />
+        ) : (
+          <CircularTimer
+            isActive
+            duration={20}
+            onComplete={stopRecording}
+            onClick={stopRecording}
+          />
+        )}
       </div>
     );
   };
@@ -435,7 +432,12 @@ function IntegratedRoom({
     const isLocal = participant === room?.localParticipant;
 
     return (
-      <div className="relative w-96 h-64 bg-gray-800 rounded-lg overflow-hidden">
+      <div
+        className={`
+        relative  max-h-[30vh] aspect-4/3 bg-gray-800 rounded-xl overflow-hidden
+        ${variant === 'story' && isLocal && isUserTurn ? getRoleColor(userRole) : 'border-transparent'}
+      `}
+      >
         <video
           ref={(element) => {
             if (element && trackPublication) {
@@ -479,20 +481,15 @@ function IntegratedRoom({
   // 방(화면)에 따른 레이아웃 변경
   if (variant === 'greeting') {
     return (
-      <div className="w-full max-w-4xl mx-auto mt-8">
-        <div className="grid grid-cols-2 gap-8 place-items-center">
-          {renderParticipantVideo(0)}
-          {renderParticipantVideo(1)}
-        </div>
-        <div className="mt-8 flex justify-center">
-          {renderRecordingButton()}
-        </div>
+      <div className="w-full h-full grid grid-cols-2 gap-2 p-4">
+        <div className="w-full h-full">{renderParticipantVideo(0)}</div>
+        <div className="w-full h-full">{renderParticipantVideo(1)}</div>
       </div>
     );
   }
 
   return (
-    <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
+    <div className="fixed max-h-[20vh] bottom-20 left-8 right-8 grid grid-cols-3 items-center justify-between">
       {renderParticipantVideo(0)}
       {renderRecordingButton()}
       {renderParticipantVideo(1)}

@@ -147,7 +147,7 @@ api.interceptors.response.use(
       tokenService.clearAllTokens();
       useAuthStore.getState().reset();
 
-      window.location.href = '/signin';
+      window.location.href = '/parents/login';
 
       return await Promise.reject(refreshError);
     } finally {
