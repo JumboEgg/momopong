@@ -52,6 +52,7 @@ const useRecordListStore = create<RecordListStore>()(
       },
       clearRecordList: () => set({ recordList: [] }),
       uploadRecord: async () => {
+        if (get().recordList.length === 0) return;
         try {
           const { accessToken } = useSubAccountStore.getState().childToken;
 

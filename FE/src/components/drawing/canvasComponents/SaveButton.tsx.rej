@@ -1,0 +1,12 @@
+diff a/FE/src/components/drawing/canvasComponents/SaveButton.tsx b/FE/src/components/drawing/canvasComponents/SaveButton.tsx	(rejected hunks)
+@@ -89,8 +89,8 @@
+     // 상대방에게 완료 신호 전송
+     if (socket && isConnected) {
+       const completeData = {
+-        status: 'drawing-complete', 
+-        sender: userRole
++        status: 'drawing-complete',
++        sender: userRole,
+       };
+       console.log('myRole:', userRole);
+       console.log('completeData', completeData);

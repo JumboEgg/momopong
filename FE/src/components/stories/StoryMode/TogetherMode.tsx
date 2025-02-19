@@ -15,7 +15,7 @@
   import { useRoleStore } from '@/stores/roleStore';
   import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
   import { useRecordList } from '@/stores/book/bookRecordListStore';
-  import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
+  import StoryDrawingPage from '@/components/drawing/drawingMode/StoryDrawingPage';
   import IntegratedRoom from './IntegratedRoom';
   import AudioPlayer from '../AudioPlayer';
   import StoryIllustration from './StoryIllustration';

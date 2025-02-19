@@ -426,7 +426,7 @@ function IntegratedRoom({
     return (
       <div
         className={`
-        relative  max-h-[30vh] aspect-4/3 bg-gray-800 rounded-xl overflow-hidden
+        relative w-full h-full bg-gray-800 rounded-xl overflow-hidden
         ${variant === 'story' && isLocal && isUserTurn ? getRoleColor(userRole) : 'border-transparent'}
       `}
       >
@@ -473,10 +473,13 @@ function IntegratedRoom({
   // 방(화면)에 따른 레이아웃 변경
   if (variant === 'greeting') {
     return (
-      <div className="w-full h-full grid grid-cols-2 gap-2 p-4">
-        <div className="w-full h-full">{renderParticipantVideo(0)}</div>
-        <div />
-        <div className="w-full h-full">{renderParticipantVideo(1)}</div>
+      <div className="w-full h-full flex">
+        <div className="w-1/2">
+          {renderParticipantVideo(0)}
+        </div>
+        <div className="w-1/2">
+          {renderParticipantVideo(1)}
+        </div>
       </div>
     );
   }

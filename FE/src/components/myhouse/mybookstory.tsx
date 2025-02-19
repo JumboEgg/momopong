@@ -31,7 +31,6 @@ function MyBookStory(): React.ReactNode {
   };
 
   const readMyBook = () => {
-    console.log(`${readingHistoryContent?.bookTitle} 다시 읽기`);
     navigate('/house/mybookstory/record');
   };
 
@@ -70,7 +69,7 @@ function MyBookStory(): React.ReactNode {
                 <img
                   src={getCoverPath(book.bookPath)}
                   alt={book.title}
-                  className="h-48 rounded shadow-lg
+                  className="w-full rounded shadow-lg
                    transform transition-all duration-300 group-hover:-translate-y-2
                    relative flex flex-col justify-between"
                 />
