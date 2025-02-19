@@ -7,7 +7,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { useRecordList } from '@/stores/book/bookRecordListStore';
 import useSocketStore from '../hooks/useSocketStore';
-import { data } from 'react-router-dom';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -18,7 +17,7 @@ export interface SaveButtonProps {
 interface DrawingMessageData {
   status: string;
   sender: string;
-  roomId?: string; 
+  roomId?: string;
 }
 
 function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
@@ -90,8 +89,8 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
     // 상대방에게 완료 신호 전송
     if (socket && isConnected) {
       const completeData = {
-        status: 'drawing-complete', 
-        sender: userRole
+        status: 'drawing-complete',
+        sender: userRole,
       };
       console.log('myRole:', userRole);
       console.log('completeData', completeData);
@@ -104,7 +103,7 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
 
-    if (!socket) return;
+    if (!socket) return undefined;
 
     // 상대방 그리기 완료 & 알림 보낸 사람이 상대방인 경우
     const handlePartnerComplete = (data: DrawingMessageData) => {
