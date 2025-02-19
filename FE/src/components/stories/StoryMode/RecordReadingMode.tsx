@@ -7,6 +7,9 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
 import { useReadingHistoryContent } from '@/stores/book/readingHistoryContentStore';
+import { IconCircleButton, TextCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faArrowLeft, faVolumeHigh, faVolumeMute } from '@fortawesome/free-solid-svg-icons';
 import StoryIllustration from './StoryIllustration';
 import AudioPlayer from '../AudioPlayer';
 
@@ -101,36 +104,26 @@ function RecordReadingMode(): ReactElement {
 
   return (
     <div className="w-[100vw] h-[100vh] mx-auto relative">
-      <div className="mb-6 flex justify-between items-center hidden">
-        <h2 className="text-2xl font-bold text-gray-800">
-          {readingHistoryContent?.bookTitle}
-          {' '}
-          <span className="text-base text-gray-600">
-            {currentPage?.pageNumber}
-            /
-            {readingHistoryContent?.totalPage ?? 0}
-          </span>
-          {' '}
-          <span className="text-sm text-gray-500">
-            (텍스트
-            {' '}
-            {currentContentIndex + 1}
-            /
-            {currentPage?.audios.length ?? 0}
-            )
-          </span>
-        </h2>
+      <div className="fixed top-2 left-2 z-20">
+        <IconCircleButton
+          size="sm"
+          variant="action"
+          onClick={handleGoHome}
+          icon={<FontAwesomeIcon icon={faArrowLeft} size="sm" />}
+          className=""
+        />
       </div>
-      <button
-        type="button"
-        onClick={toggleAudio}
-        className={`fixed top-2 right-4 px-4 py-2 rounded ${audioEnabled ? 'bg-green-500' : 'bg-gray-500'} text-white`}
-      >
-        음성
-        {' '}
-        <span>{audioEnabled ? 'ON' : 'OFF'}</span>
-      </button>
-
+      <div className="fixed top-2 right-2 z-20">
+        <TextCircleButton
+          text={audioEnabled ? '내가 읽기' : '읽어주기'}
+          icon={audioEnabled
+            ? <FontAwesomeIcon icon={faVolumeHigh} />
+            : <FontAwesomeIcon icon={faVolumeMute} />}
+          size="sm"
+          variant="story"
+          onClick={toggleAudio}
+        />
+      </div>
       <StoryIllustration
         pageNumber={currentPage?.pageNumber ?? 0}
         currentContentIndex={currentContentIndex}
@@ -165,7 +158,7 @@ function RecordReadingMode(): ReactElement {
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-lg font-medium"
+                className="w-full py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-lg font-medium"
               >
                 다시 읽기
               </button>
