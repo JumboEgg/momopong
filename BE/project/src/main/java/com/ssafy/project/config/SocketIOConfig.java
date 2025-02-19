@@ -4,7 +4,7 @@ import com.corundumstudio.socketio.Configuration;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.Transport;
 import com.ssafy.project.dto.DrawingDto;
-import com.ssafy.project.dto.book.StroyDrawingDto;
+import com.ssafy.project.dto.book.StoryDrawingDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 
@@ -86,7 +86,7 @@ public class SocketIOConfig {
         });
 
         // 동화 그림 데이터 전송
-        server.addEventListener("drawing-complete", StroyDrawingDto.class, (client, data, ackRequest) -> {
+        server.addEventListener("drawing-complete", StoryDrawingDto.class, (client, data, ackRequest) -> {
             log.info("Drawing data received from={}", client.getSessionId());
 
             String roomId = client.get("roomId");
