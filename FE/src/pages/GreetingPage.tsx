@@ -203,7 +203,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
   return (
     <div className="flex flex-col h-screen bg-gray-100">
       {/* 헤더 */}
-      <div className="w-full bg-white shadow-sm py-6">
+      <div className="w-full bg-witch-haze-200 shadow-sm py-6">
         <h1 className="text-center text-2xl font-semibold text-gray-800">
           함께 동화를 읽을 친구와 짧게 인사해 봅시다
         </h1>
