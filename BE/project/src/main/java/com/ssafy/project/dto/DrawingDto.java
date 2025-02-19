@@ -15,4 +15,5 @@ public class DrawingDto {
     private double curX;
     private double curY;
     private String roomId;
+    private String sender;
 }
