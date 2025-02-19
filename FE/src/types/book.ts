@@ -14,7 +14,7 @@ export interface BookAudioInfo {
 }
 
 interface PagePosition {
-    sketchPath: string;
+    sketchPath: string | undefined;
     x: number;
     y: number;
     ratio: number;

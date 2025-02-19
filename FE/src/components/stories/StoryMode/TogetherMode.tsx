@@ -1,4 +1,3 @@
-  // 수정한거임
   import {
     useState,
     useEffect,
@@ -6,7 +5,7 @@
     useMemo,
     useRef,
   } from 'react';
-  import { useLocation } from 'react-router-dom';
+  import { useLocation, useNavigate } from 'react-router-dom';
   import { useStory } from '@/stores/storyStore';
   import { useFriends } from '@/stores/friendStore';
   import useSubAccountStore from '@/stores/subAccountStore';
@@ -58,7 +57,10 @@
 
     const {
       addRecord, uploadRecord,
+      setPageImage,
     } = useRecordList();
+
+    const navigate = useNavigate();
 
     const [isDrawingMode, setIsDrawingMode] = useState(false);
 
@@ -125,7 +127,7 @@
         mode: 'MULTI',
       };
       const role2Id = await makeBookRecord(role2Data);
-      if (role1UserId === myId) setBookRecordId(role2Id);
+      if (role2UserId === myId) setBookRecordId(role2Id);
       setRole2RecordId(role2Id);
     };
 
@@ -134,6 +136,10 @@
     if (isRecording.current) return;
     isRecording.current = true;
     saveReadingSession();
+
+    // 첫 페이지 이미지 저장
+    if (!bookContent?.pages[0]) return;
+    setPageImage(bookContent?.pages[0]);
   }, []);
 
   // 현재 사용자 차례 확인
@@ -145,6 +151,7 @@
     useEffect(() => {
       if (!currentPage) return;
       uploadRecord();
+      setPageImage(currentPage);
     }, [currentIndex]);
 
    // 다음 페이지/컨텐츠로 이동
@@ -165,12 +172,12 @@
     } else {
       // 읽기 종료 시 읽기 기록 정보 갱신
       endBookRecordSession(bookRecordId ?? 0);
+      navigate('/book/letter');
     }
   }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex, bookRecordId]);
 
   // 오디오 정보 저장
   const addAudioToList = (audioBlob: Blob | null) => {
-    console.log(`page: ${currentPage?.pageNumber ?? 1}, audio: ${currentContent?.order ?? 1}`);
     // 저장할 데이터
     const pageData: PageRecordData = {
         bookRecordId: role1RecordId ?? 0,
