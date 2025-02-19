@@ -11,10 +11,11 @@ import useSocketStore from '../hooks/useSocketStore';
 
 interface StoryDrawingPageProps {
   roomName: string;
+  userRole: 'role1' | 'role2';
   handleNext: () => void;
 }
 
-function StoryDrawingPage({ roomName, handleNext }: StoryDrawingPageProps): JSX.Element {
+function StoryDrawingPage({ roomName, userRole, handleNext }: StoryDrawingPageProps): JSX.Element {
   const { setSessionId, setTemplate, setMode } = useDrawing();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
   const isRecording = useRef(false);
@@ -22,7 +23,7 @@ function StoryDrawingPage({ roomName, handleNext }: StoryDrawingPageProps): JSX.
   const { currentIndex } = useStory();
   const { bookContent } = useBookContent();
   const currentPage = bookContent?.pages[currentIndex];
-  const sketchPath = currentPage?.position.sketchPath;
+  const sketchPath = currentPage?.position?.sketchPath;
 
   useEffect(() => {
     setConnect(true, roomName);
@@ -78,6 +79,7 @@ function StoryDrawingPage({ roomName, handleNext }: StoryDrawingPageProps): JSX.
         <span className="mt-4 ms-4">
           <SaveButton
             canvasRef={canvasRef}
+            userRole={userRole}
             handleNext={handleNext}
           />
         </span>

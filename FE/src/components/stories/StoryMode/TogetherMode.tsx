@@ -344,7 +344,7 @@
         {/* 드로잉 모드 */}
         {isDrawingMode && (
           <div className="absolute inset-0 z-50">
-            <StoryDrawingPage roomName={roomName} handleNext={handleNext} />
+            <StoryDrawingPage roomName={roomName} userRole={myRole} handleNext={handleNext} />
           </div>
         )}
       </div>

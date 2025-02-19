@@ -11,20 +11,17 @@ import { data } from 'react-router-dom';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
+  userRole: 'role1' | 'role2';
   handleNext: () => void;
 }
 
 interface DrawingMessageData {
   status: string;
-  color: string;
-  prevX: number;
-  prevY: number;
-  curX: number; 
-  curY: number;
-  roomId?: string; // optional로 설정 (필요시에만 포함)
+  sender: string;
+  roomId?: string; 
 }
 
-function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
+function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
   const { mode, template, setImageData } = useDrawing();
   const { setDrawingResult } = useRecordList();
   const { socket, isConnected } = useSocketStore();
@@ -93,46 +90,39 @@ function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
     // 상대방에게 완료 신호 전송
     if (socket && isConnected) {
       const completeData = {
-        status: 'drawing-complete', // 이 필드가 중요합니다!
-        color: '',
-        prevX: 0,
-        prevY: 0,
-        curX: 0,
-        curY: 0
+        status: 'drawing-complete', 
+        sender: userRole
       };
-      console.log('@@@@@complete@@@@@', completeData);
-      socket.emit('message', completeData);
-      // socket.emit('drawing-complete');
+      console.log('myRole:', userRole);
+      console.log('completeData', completeData);
+      socket.emit('drawing-complete', completeData);
     }
   }, [canvasRef, socket, isConnected]);
 
   useEffect(() => {
     // 상대방이 버튼을 눌렀을 때 이벤트 수신
-    console.log('@@@@socket@@@@@', socket);
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
 
     if (!socket) return;
 
-    const handlePartnerComplete = (data: DrawingMessageData | null) => {
-      if (data && data.status === 'drawing-complete') {
+    // 상대방 그리기 완료 & 알림 보낸 사람이 상대방인 경우
+    const handlePartnerComplete = (data: DrawingMessageData) => {
+      if (data && data.status === 'drawing-complete' && data.sender !== userRole) {
         console.log('상대방 완료 신호 수신:', data);
         setPartnerCompleted(true);
       }
     };
 
-    socket.on('message', handlePartnerComplete);
-    // socket.on('drawing-complete', handlePartnerComplete);
+    socket.on('drawing-complete', handlePartnerComplete);
 
     return () => {
-      socket.off('message', handlePartnerComplete);
-      // socket.off('drawing-complete', handlePartnerComplete);
+      socket.off('drawing-complete', handlePartnerComplete);
     };
   }, [socket]);
 
   useEffect(() => {
     // 두 명 모두 버튼을 눌렀으면 handleNext 실행
-    console.log("drawingCompleted@@@@@@@@partnerCompleted");
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
 
