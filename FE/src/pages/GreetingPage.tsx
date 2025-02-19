@@ -201,41 +201,55 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
   ]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-6">
-      <div className="bg-white shadow-md rounded-lg p-8 text-center w-full max-w-md mb-4">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">인사 시간</h2>
-        <button
-          type="button"
-          onClick={handleReady}
-          disabled={isReady}
-          className={`
-            w-full py-3 rounded-lg font-semibold text-white transition-colors
-            ${isReady
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
-            }
-          `}
-        >
-          {isReady ? '대기 중...' : '시작하기'}
-        </button>
-
-        {isReady && partnerReady && (
-          <p className="mt-4 text-green-600 font-medium">
-            준비 완료! 곧 동화가 시작됩니다.
-          </p>
-        )}
+    <div className="flex flex-col h-screen bg-gray-100">
+      {/* 헤더 */}
+      <div className="w-full bg-white shadow-sm py-6">
+        <h1 className="text-center text-2xl font-semibold text-gray-800">
+          함께 동화를 읽을 친구와 짧게 인사해 봅시다
+        </h1>
       </div>
 
-      {/* 화상 비디오 영역 */}
-      <IntegratedRoom
-        roomName={roomName}
-        participantName={selectedAccount?.name || 'Anonymous'}
-        userRole={myRole}
-        isUserTurn
-        onRecordingComplete={() => {}}
-        onRecordingStatusChange={() => {}}
-        variant="greeting" // 이 prop 추가
-      />
+      {/* 메인 컨텐츠 영역 */}
+      <div className="flex-1 relative">
+        {/* 비디오 영역 */}
+        <div className="absolute inset-0">
+          <IntegratedRoom
+            roomName={roomName}
+            participantName={selectedAccount?.name || 'Anonymous'}
+            userRole={myRole}
+            isUserTurn
+            onRecordingComplete={() => {}}
+            onRecordingStatusChange={() => {}}
+            variant="greeting"
+          />
+        </div>
+
+        {/* 중앙 버튼 컨테이너 */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="bg-white/40 shadow-lg rounded-lg p-6 backdrop-blur-sm pointer-events-auto text-center">
+            <button
+              type="button"
+              onClick={handleReady}
+              disabled={isReady}
+              className={`
+                px-8 py-3 rounded-lg font-semibold text-white transition-colors
+                ${isReady
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
+                }
+              `}
+            >
+              {isReady ? '대기 중...' : '시작하기'}
+            </button>
+
+            {isReady && partnerReady && (
+              <p className="mt-4 text-green-600 font-medium">
+                준비 완료! 곧 동화가 시작됩니다.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
