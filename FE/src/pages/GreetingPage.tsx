@@ -258,7 +258,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
               className={`
                 px-8 py-3 rounded-lg font-semibold text-white transition-colors
                 ${isReady || timeLeft === 0
-                  ? 'bg-gray-400 cursor-not-allowed'
+                  ? 'bg-gray-400'
                   : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
                 }
               `}
