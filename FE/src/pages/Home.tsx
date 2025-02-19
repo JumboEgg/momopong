@@ -14,7 +14,7 @@ import { useRoleStore } from '@/stores/roleStore';
 
 function HomePage() {
   const navigate = useNavigate();
-  const { selectedAccount } = useSubAccountStore();
+  const { selectedAccount, updateChildStatus } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
      | '/test' | '/book/letter'): void => {
@@ -53,6 +53,22 @@ function HomePage() {
     registerFCMToken();
     clearRoles();
   }, []);
+
+  useEffect(() => {
+    if (!selectedAccount) {
+      return undefined;
+    }
+
+    // 초기 상태 업데이트
+    updateChildStatus();
+
+    // 주기적으로 상태 업데이트 (선택사항)
+    const intervalId = setInterval(() => {
+      updateChildStatus();
+    }, 60000); // 1분마다 업데이트
+
+    return () => clearInterval(intervalId);
+  }, [selectedAccount, updateChildStatus]);
 
   useEffect(() => {
     setRecentLetterList();
