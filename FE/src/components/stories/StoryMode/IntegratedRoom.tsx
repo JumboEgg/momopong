@@ -14,6 +14,10 @@ import {
   Track,
 } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import CircularTimer from '@/components/common/Timer';
 
 type VariantType = 'greeting' | 'story';
 
@@ -391,38 +395,24 @@ function IntegratedRoom({
 
     return (
       <div className="flex flex-col items-center gap-2">
-        {isRecording && (
-          <div className="w-32 h-2 bg-gray-200 rounded mb-2">
-            <div
-              className="h-full bg-red-500 rounded transition-all duration-1000"
-              style={{ width: `${(timeLeft / 20) * 100}%` }}
-            />
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          <button
-            type="button"
+        {!isRecording
+        ? (
+          <IconCircleButton
+            size="md"
+            variant="story"
+            className=""
+            hasFocus
+            icon={<FontAwesomeIcon icon={faMicrophone} />}
             onClick={startRecording}
-            disabled={!isUserTurn || isRecording}
-            className={`
-              px-4 py-2 rounded-full text-white font-medium transition-colors whitespace-nowrap
-              ${isRecording ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}
-            `}
-          >
-            {isRecording ? `${timeLeft}초` : '녹음 시작'}
-          </button>
-
-          {isRecording && (
-            <button
-              type="button"
-              onClick={stopRecording}
-              className="px-4 py-2 rounded-full text-white font-medium bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap"
-            >
-              완료
-            </button>
-          )}
-        </div>
+          />
+        ) : (
+          <CircularTimer
+            isActive
+            duration={20}
+            onComplete={stopRecording}
+            onClick={stopRecording}
+          />
+        )}
       </div>
     );
   };
@@ -444,7 +434,7 @@ function IntegratedRoom({
     return (
       <div
         className={`
-        relative w-full h-full bg-gray-800 rounded-xl overflow-hidden
+        relative  max-h-[30vh] aspect-4/3 bg-gray-800 rounded-xl overflow-hidden
         ${variant === 'story' && isLocal && isUserTurn ? getRoleColor(userRole) : 'border-transparent'}
       `}
       >
@@ -499,7 +489,7 @@ function IntegratedRoom({
   }
 
   return (
-    <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
+    <div className="fixed max-h-[20vh] bottom-20 left-8 right-8 grid grid-cols-3 items-center justify-between">
       {renderParticipantVideo(0)}
       {renderRecordingButton()}
       {renderParticipantVideo(1)}

@@ -148,6 +148,10 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       setTimeLeft((prevTime) => {
         if (prevTime <= 1) {
           clearInterval(timer);
+
+          // 테스트용 코드
+          setPartnerReady(true);
+
           return 0;
         }
         return prevTime - 1;
@@ -254,7 +258,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
             <button
               type="button"
               onClick={handleReady}
-              disabled={isReady || timeLeft === 0}
+              disabled={isReady}
               className={`
                 px-8 py-3 rounded-lg font-semibold text-white transition-colors
                 ${isReady || timeLeft === 0

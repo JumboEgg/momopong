@@ -221,11 +221,11 @@
 
   // 모든 참가자의 녹음 완료 여부 확인
   useEffect(() => {
-    console.log('녹음 상태 변경:', {
-      recordingStates,
-      isProcessingRecording,
-      participantCount: Object.keys(recordingStates).length,
-    });
+    // console.log('녹음 상태 변경:', {
+    //   recordingStates,
+    //   isProcessingRecording,
+    //   participantCount: Object.keys(recordingStates).length,
+    // });
 
     const allParticipantsCompleted = Object
       .values(recordingStates)
@@ -276,8 +276,8 @@
     return (
       <div className="w-full h-screen relative">
         {/* 동화 컨텐츠 영역 */}
-        <div className={`w-full h-full px-6 pb-48 pt-6 ${isDrawingMode ? 'hidden' : ''}`}>
-          <div className="mb-6 hidden">
+        <div className={`w-full h-full ${isDrawingMode ? 'hidden' : ''}`}>
+          <div className="mb-6 hidden px-6 pb-48 pt-6 ">
             <h2 className="text-2xl font-bold text-gray-800">함께 읽는 신데렐라</h2>
             <p className="text-gray-600">
               내 역할:
