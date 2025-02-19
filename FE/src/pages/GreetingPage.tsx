@@ -19,7 +19,6 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     contentId?: number;
   };
   const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
-  const [timeLeft, setTimeLeft] = useState(20);
   const [isReady, setIsReady] = useState(false);
   const {
     sendReadyStatus,
@@ -104,8 +103,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
 }, [room, setPartnerReady, confirmReady]);
 
   const handleReady = () => {
-    console.log('🎯 handleReady 호출', {
-      timeLeft,
+    console.log('🎯handleReady 호출', {
       isReady,
       partnerReady,
       currentRoom: room ? {
@@ -114,7 +112,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       } : 'null',
     });
 
-    if (timeLeft > 0 && !isReady) {
+    if (!isReady) {
       // 1. 먼저 자신의 ready 상태를 true로 설정
       setIsReady(true);
       sendReadyStatus(true);
@@ -142,20 +140,6 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       }
     }
   };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // 파트너의 준비 상태 및 스토리 시작 확인
   useEffect(() => {
@@ -243,21 +227,13 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
         {/* 중앙 버튼 컨테이너 */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <div className="bg-white/40 shadow-lg rounded-lg p-6 backdrop-blur-sm pointer-events-auto text-center">
-            <p className="text-lg mb-4 text-gray-600">
-              남은 시간:
-              <span className="font-bold text-blue-600 ml-2">
-                {timeLeft}
-                초
-              </span>
-            </p>
-
             <button
               type="button"
               onClick={handleReady}
-              disabled={isReady || timeLeft === 0}
+              disabled={isReady}
               className={`
                 px-8 py-3 rounded-lg font-semibold text-white transition-colors
-                ${isReady || timeLeft === 0
+                ${isReady
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
                 }
@@ -269,12 +245,6 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
             {isReady && partnerReady && (
               <p className="mt-4 text-green-600 font-medium">
                 준비 완료! 곧 동화가 시작됩니다.
-              </p>
-            )}
-
-            {timeLeft === 0 && !isReady && (
-              <p className="mt-4 text-red-600 font-medium">
-                시간이 초과되었습니다.
               </p>
             )}
           </div>
