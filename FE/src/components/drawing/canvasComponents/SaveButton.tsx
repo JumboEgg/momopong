@@ -128,7 +128,7 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
     console.log('두 사용자 상태 확인:', {
       drawingCompleted,
       partnerCompleted,
-      handleNext: !!handleNext
+      handleNext: !!handleNext,
     });
 
     if (drawingCompleted && partnerCompleted && handleNext) {

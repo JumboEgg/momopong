@@ -68,11 +68,11 @@ function IntegratedRoom({
   } = useRoomStore();
 
   const broadcastRecordIds = useCallback(() => {
-    console.log('Host status:', { 
-      isHost, 
-      role1RecordId, 
-      role2RecordId, 
-      roomState: room?.state 
+    console.log('Host status:', {
+      isHost,
+      role1RecordId,
+      role2RecordId,
+      roomState: room?.state,
     });
 
     if (!room || !isHost || !role1RecordId || !role2RecordId) return;
@@ -327,11 +327,11 @@ function IntegratedRoom({
 
         await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
 
-        console.log('Host status after connection:', { 
-          isHost, 
-          role1RecordId, 
-          role2RecordId, 
-          roomState: newRoom.state 
+        console.log('Host status after connection:', {
+          isHost,
+          role1RecordId,
+          role2RecordId,
+          roomState: newRoom.state,
         });
 
         if (isHost && role1RecordId && role2RecordId) {
@@ -394,11 +394,11 @@ function IntegratedRoom({
   );
 
   useEffect(() => {
-    console.log('Host status in effect:', { 
-      isHost, 
-      role1RecordId, 
-      role2RecordId, 
-      roomState: room?.state 
+    console.log('Host status in effect:', {
+      isHost,
+      role1RecordId,
+      role2RecordId,
+      roomState: room?.state,
     });
 
     if (isHost && role1RecordId && role2RecordId && room?.state === 'connected') {

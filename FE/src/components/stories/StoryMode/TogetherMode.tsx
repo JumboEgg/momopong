@@ -170,7 +170,7 @@ function TogetherMode() {
       currentContentIndex,
       hasDrawing: currentPage?.hasDrawing,
       totalStoryDataPages: storyData.length,
-      totalBookContentPages: bookContent?.pages.length
+      totalBookContentPages: bookContent?.pages.length,
     });
 
     if (!currentPage) return;
@@ -188,7 +188,7 @@ function TogetherMode() {
       hasDrawing: currentPage?.hasDrawing,
       totalStoryDataPages: storyData.length,
       totalBookContentPages: totalPages,
-      bookContentLoaded: !!bookContent
+      bookContentLoaded: !!bookContent,
     });
 
     if (!currentPage) return;
@@ -202,16 +202,12 @@ function TogetherMode() {
     if (currentContentIndex < currentPage.audios.length - 1) {
       console.log(`같은 페이지 내 다음 오디오로: ${currentContentIndex} → ${currentContentIndex + 1}`);
       setCurrentContentIndex((prev) => prev + 1);
-    }
-    // 다음 페이지로 - 함수형 업데이트 대신 직접 값 설정
-    else if (currentIndex < Math.min(totalPages, storyData.length) - 1) {
+    } else if (currentIndex < Math.min(totalPages, storyData.length) - 1) {
       const nextIndex = currentIndex + 1;
       console.log(`다음 페이지로 이동: ${currentIndex} → ${nextIndex}`);
       setCurrentIndex(nextIndex);
       setCurrentContentIndex(0);
-    }
-    // 모든 페이지 완료
-    else {
+    } else {
       console.log('모든 페이지 완료, 종료');
       endBookRecordSession(bookRecordId ?? 0);
       navigate('/book/letter');
@@ -262,7 +258,7 @@ function TogetherMode() {
     console.log('드로잉 모드 확인:', {
       pageNumber: currentPage?.pageNumber,
       hasDrawing: !!currentPage?.hasDrawing, // 명시적 boolean 변환
-      sketchPath: !!currentPage?.position?.sketchPath // 스케치 경로 존재 여부도 확인
+      sketchPath: !!currentPage?.position?.sketchPath, // 스케치 경로 존재 여부도 확인
     });
 
     // 현재 페이지에 드로잉이 있는 경우
