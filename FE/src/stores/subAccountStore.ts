@@ -13,6 +13,7 @@ interface SubAccount {
   daysSinceStart: number;
   code: string;
   firstLogin: boolean;
+  status?: 'OFFLINE' | 'ONLINE' | 'MATCHING' | 'READING' | 'DRAWING';
 }
 
 interface ChildLoginResponse {
@@ -30,6 +31,13 @@ interface CreateSubAccountRequest {
 
 interface CreateSubAccountResponse {
   id: number; // 서버에서 생성된 자식 계정의 ID만 반환
+}
+
+interface StatusResponse {
+  childId: number;
+  name: string;
+  profile: string;
+  status: 'ONLINE' | 'OFFLINE';
 }
 
 interface SubAccountState {
@@ -52,6 +60,7 @@ interface SubAccountState {
   loginSubAccount: (childId: number) => Promise<boolean>;
   logoutSubAccount: () => void;
   uploadProfileImage: (file: File) => Promise<string>;
+  updateChildStatus: () => Promise<void>;
 
   // 로컬 상태 관리
   setLoading: (status: boolean) => void;
@@ -117,11 +126,11 @@ const useSubAccountStore = create<SubAccountState>()(
             throw new Error('부모 계정 정보를 찾을 수 없습니다.');
           }
 
-          const parentToken = tokenService.getActiveToken(true);
-          console.log('Parent Token for request:', parentToken);
+          // const parentToken = tokenService.getActiveToken(true);
+          // console.log('Parent Token for request:', parentToken);
 
           const response = await api.get(`/parents/${user.parentId}/children`);
-          console.log('API Response:', response.data);
+          // console.log('API Response:', response.data);
 
           // 데이터 설정과 함께 로딩 상태 false로 변경
           set({
@@ -144,6 +153,36 @@ const useSubAccountStore = create<SubAccountState>()(
             error: errorMessage,
             isLoading: false, // 에러 발생시에도 로딩 상태 false로 변경
           });
+        }
+      },
+
+      // 자식 상태 업데이트
+      updateChildStatus: async () => {
+        const { selectedAccount } = get();
+
+        if (!selectedAccount) {
+          return;
+        }
+
+        try {
+          const response = await api.get<StatusResponse>(
+            `/children/status/${selectedAccount.childId}`,
+          );
+
+          // 현재 선택된 계정의 상태 업데이트
+          set((state) => ({
+            selectedAccount: {
+              ...state.selectedAccount!,
+              status: response.data.status,
+            },
+            // subAccounts 배열도 업데이트
+            subAccounts: state.subAccounts
+              .map((account) => (account.childId === selectedAccount.childId
+                ? { ...account, status: response.data.status }
+                : account)),
+          }));
+        } catch (error) {
+          console.error('Failed to update child status:', error);
         }
       },
 
