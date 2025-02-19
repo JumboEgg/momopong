@@ -74,7 +74,7 @@ function MyLetters(): React.JSX.Element {
             <div className="w-1/2 h-full">
               {selectedLetter ? (
                 <div
-                  className="bg-pink-200 p-3 md:p-6 rounded-2xl relative font-[BMJUA] h-full animate-slide-up"
+                  className="bg-pink-200 p-3 md:p-6 rounded-2xl relative font-[KCCChassam] h-full animate-slide-up"
                 >
                   <span className="absolute -top-10 right-3">
                     <TextCircleButton
@@ -90,7 +90,7 @@ function MyLetters(): React.JSX.Element {
                     { child ? `${child.name}(이)에게` : '나의 소중한 친구에게'}
                   </p>
                   <div className="h-[calc(100%-100px)] md:h-[calc(100%-160px)]">
-                    <div className="customScrollbar pink overflow-y-auto h-full text-lg md:text-2xl px-4">
+                    <div className="customScrollbar pink overflow-y-auto h-full text-lg/6 md:text-2xl/10 px-4">
                       <p>{selectedLetter.reply}</p>
                     </div>
                   </div>

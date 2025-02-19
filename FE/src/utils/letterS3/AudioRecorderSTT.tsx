@@ -12,7 +12,7 @@ import useSubAccountStore from '@/stores/subAccountStore';
 function AudioRecorderSTT() {
   const { bookContent } = useBookContent();
   const {
-    role1UserId,
+    role2UserId,
   } = useRoleStore();
 
   const [isRecording, setIsRecording] = useState(false);
@@ -163,7 +163,7 @@ function AudioRecorderSTT() {
 
     const letter: LetterInfo = {
       bookTitle: bookContent?.bookTitle ?? '',
-      role: role1UserId === myInfo?.childId ? bookContent?.role1 ?? '' : bookContent?.role2 ?? '',
+      role: role2UserId === myInfo?.childId ? bookContent?.role2 ?? '' : bookContent?.role1 ?? '',
       childName: myInfo?.name ?? '',
       content: voiceText,
       letterFileName: '',

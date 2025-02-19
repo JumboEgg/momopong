@@ -50,7 +50,7 @@ function RecentLetterModal({ data }: { data: LetterInfo }): JSX.Element {
       <div className="w-[500px] min-h-[350px] bg-[#FFF08E] border-8 border-[#ffa500]
         flex flex-col relative items-center justify-between p-8 rounded-3xl overflow-hidden"
       >
-        <div className="flex-grow flex flex-col items-center justify-center font-[BMJUA] w-full">
+        <div className="flex-grow flex flex-col items-center justify-center font-[KCCChassam] w-full">
           <div className="flex flex-col gap-4 w-full text-lg">
             <div>
               <TextCircleButton
@@ -64,7 +64,7 @@ function RecentLetterModal({ data }: { data: LetterInfo }): JSX.Element {
               {childName}
               (이)에게
             </div>
-            <p>{data.reply}</p>
+            <p className="text-lg/8">{data.reply}</p>
             <div className="text-end">
               {data.role}
               {' '}

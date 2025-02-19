@@ -86,7 +86,10 @@ function StoryIllustration({
                   {getSpeakerName(content.role)}
                 </div>
                 )}
-                <p className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}>
+                <p
+                  className={`text-xl sm:text-2xl md:text-3xl lg:text-4xl tracking-wide leading-relaxed ${ROLE_COLORS[content.role]}`}
+                  style={{ textShadow: '2px 2px 2px black' }}
+                >
                   {content.text}
                 </p>
               </div>

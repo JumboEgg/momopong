@@ -126,7 +126,7 @@ function ReadingMode(): ReactElement {
 
   const handleGoHome = useCallback(() => {
     stopCurrentAudio();
-    navigate('/home');
+    navigate('/book/letter');
   }, [navigate, stopCurrentAudio]);
 
   const currentPage = bookContent?.pages[currentIndex];
@@ -183,16 +183,16 @@ function ReadingMode(): ReactElement {
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-lg font-medium"
+                className="w-full py-3 bg-amber-300 text-white rounded-lg hover:bg-amber-400 transition-colors text-lg font-medium"
               >
-                다시 읽기
+                다시 읽을래
               </button>
               <button
                 type="button"
                 onClick={handleGoHome}
                 className="w-full py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-lg font-medium"
               >
-                홈으로 가기
+                다 읽었어!
               </button>
             </div>
           </div>
