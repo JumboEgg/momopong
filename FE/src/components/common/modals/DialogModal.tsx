@@ -47,7 +47,7 @@ function DialogModal({
               variant="rounded"
               onClick={handleConfirm}
             >
-              같이 하자
+              좋아!
             </TextButton>
             <TextButton
               size="md"

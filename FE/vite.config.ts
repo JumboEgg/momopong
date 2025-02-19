@@ -3,6 +3,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import eslint from 'vite-plugin-eslint'; 
 import { defineConfig } from "vite";
+import { visualizer } from 'rollup-plugin-visualizer';
 
 export default defineConfig({
   server: {
@@ -12,11 +13,25 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    // eslint(),
+    eslint(),
+    visualizer({
+      open: true,  // 빌드 후 자동으로 stats.html 열기
+      gzipSize: true,
+      brotliSize: true,
+    })
   ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'vendor': ['react', 'react-dom'],
+        }
+      }
+    }
+  }
 });

@@ -59,14 +59,6 @@ function IntegratedRoom({
     setPartnerReady,
   } = useRoomStore();
 
-  // console.log('🎥 IntegratedRoom Received Props:', {
-  //   roomName,
-  //   participantName,
-  //   userRole,
-  //   isUserTurn,
-  //   variant,
-  // });
-
   // 토큰 가져오기
   const getToken = useCallback(async () => {
     try {
@@ -387,10 +379,10 @@ function IntegratedRoom({
   const renderRecordingButton = () => {
     // greeting 모드에서는 녹음 버튼을 렌더링하지 않음
     if (variant === 'greeting') {
-      return null;
+      return <div />;
     }
     if (!isUserTurn) {
-      return null;
+      return <div />;
     }
 
     return (
@@ -483,6 +475,7 @@ function IntegratedRoom({
     return (
       <div className="w-full h-full grid grid-cols-2 gap-2 p-4">
         <div className="w-full h-full">{renderParticipantVideo(0)}</div>
+        <div />
         <div className="w-full h-full">{renderParticipantVideo(1)}</div>
       </div>
     );

@@ -1,6 +1,7 @@
 import base64ToBlob from '@/stores/drawing/base64ToBlob';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { PageInfo } from '@/types/book';
+import { getImageSrcPath } from './s3PathTrimmer';
 
 const imgWidth = 1472;
 const imgHeight = 832;
@@ -56,7 +57,8 @@ const uploadImageToS3 = async (dataUrl: string): Promise<string> => {
 // 이미지 합성
 const pageImageComposer = async (pageInfo: PageInfo, drawingResult: string | null) => {
     if (!pageInfo.hasObject || !drawingResult) {
-        return pageInfo.pagePath;
+      const path = getImageSrcPath(pageInfo.pagePath);
+      return path;
     }
     let dataUrl = '';
 

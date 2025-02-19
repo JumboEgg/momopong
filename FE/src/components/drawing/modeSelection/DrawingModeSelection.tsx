@@ -51,7 +51,7 @@ function DrawingModeSelection(): JSX.Element {
                   alt="single mode"
                 />
               </div>
-              <div className="self-center">혼자 그리기</div>
+              <div className="self-center text-3xl font-[BMJUA]">혼자 그리기</div>
             </button>
           </div>
         </div>
@@ -71,7 +71,7 @@ function DrawingModeSelection(): JSX.Element {
                   alt="single mode"
                 />
               </div>
-              <div className="self-center">함께 그리기</div>
+              <div className="self-center text-3xl font-[BMJUA]">함께 그리기</div>
             </button>
           </div>
         </div>

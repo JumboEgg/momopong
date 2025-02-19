@@ -46,10 +46,10 @@ class TokenService {
   syncWithAuth(tokens: { accessToken: string | null, refreshToken: string | null }) {
     this.state.parentToken = tokens.accessToken;
     this.state.refreshToken = tokens.refreshToken;
-    console.log('TokenService synced:', {
-      parentToken: !!this.state.parentToken,
-      refreshToken: !!this.state.refreshToken,
-    });
+    // console.log('TokenService synced:', {
+    //   parentToken: !!this.state.parentToken,
+    //   refreshToken: !!this.state.refreshToken,
+    // });
   }
 
   getActiveToken(forceParent: boolean = false): string | null {
