@@ -9,6 +9,10 @@ export interface LetterInfo {
     createdAt: string; // 편지 전송 시간
 }
 
+export interface LetterData extends LetterInfo {
+    bookPath: string;
+}
+
 export interface GPTRequest {
     fairyTale: string;
     role: string;

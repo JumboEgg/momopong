@@ -1,11 +1,7 @@
-// import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
 import { useEffect, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-// import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
-// import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/pages/FriendSelection';
-// import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';

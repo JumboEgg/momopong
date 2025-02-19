@@ -29,7 +29,7 @@ function RecentLetterList() {
             }}
           >
             <img
-              src="/public/images/bookcover/cover_thelittlematchgirl.webp"
+              src={letter.bookPath}
               alt="sender placeholder"
               className="w-10 aspect-square rounded-full me-4"
             />

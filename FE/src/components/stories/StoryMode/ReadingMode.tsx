@@ -183,7 +183,7 @@ function ReadingMode(): ReactElement {
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-lg font-medium"
+                className="w-full py-3 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-lg font-medium"
               >
                 다시 읽기
               </button>

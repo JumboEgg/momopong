@@ -2,59 +2,40 @@ import '@/components/common/scrollbar.css';
 import { useState } from 'react';
 import ReportLetterModal from '@/components/common/modals/ReportLetterModal';
 import { useReportStore } from '@/stores/reportStore';
+import { getCoverPath } from '@/utils/format/imgPath';
+import DialogModal from '@/components/common/modals/DialogModal';
+import { useNavigate } from 'react-router-dom';
 import DrawingModal from '../../common/modals/DrawingModal';
-
-const books = [
-  {
-    id: 1,
-    title: '신데렐라',
-    date: '2024-02-01',
-    color: 'bg-blue-400',
-  },
-  {
-    id: 2,
-    title: '백설공주',
-    date: '2024-01-28',
-    color: 'bg-red-400',
-  },
-  {
-    id: 3,
-    title: '인어공주',
-    date: '2024-01-25',
-    color: 'bg-green-400',
-  },
-  {
-    id: 4,
-    title: '라푼젤',
-    date: '2024-01-20',
-    color: 'bg-purple-400',
-  },
-  {
-    id: 5,
-    title: '잠자는 숲속의 공주',
-    date: '2024-01-15',
-    color: 'bg-yellow-400',
-  },
-];
 
 interface CraftsTabProps {
   childName: string;
 }
 
 function CraftsTab({ childName }: CraftsTabProps) {
+  const navigate = useNavigate();
   const {
-    letters, sketches,
+    books, letters, sketches,
   } = useReportStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
-
   const [modal, setModal] = useState<JSX.Element | null>(null);
+
+  const readMyBook = () => {
+    navigate('/house/mybookstory/record');
+  };
 
   const openModal = (idx: number) => {
     if (selectedCraftsTab === 'reading') {
-      setModal(null);
+      setModal(
+        <DialogModal
+          type="confirm"
+          message1={`${childName}(이)가 만든`}
+          message2={`${books[idx].title}`}
+          onConfirm={() => readMyBook()}
+          onClose={() => setIsModalOpen(false)}
+        />,
+      );
     } else if (selectedCraftsTab === 'drawing') {
       setModal(
         <DrawingModal
@@ -78,11 +59,15 @@ function CraftsTab({ childName }: CraftsTabProps) {
   const readingHistory = books.map((book, idx) => (
     <button
       type="button"
-      key={book.id}
+      key={book.bookId}
       className="w-full p-1"
       onClick={() => openModal(idx)}
     >
-      <div className={`${book.color} aspect-8/5`} />
+      <img
+        src={getCoverPath(book.bookPath)}
+        alt={book.title}
+        className="w-full rounded"
+      />
       <div className="font-[BMJUA]">{book.title}</div>
     </button>
   ));
