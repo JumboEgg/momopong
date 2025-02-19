@@ -162,7 +162,7 @@
     setIsWaitingForOther(false);
     setIsProcessingRecording(false);
     setIsDrawingMode(false); // 드로잉 모드도 초기화
-    
+
     if (currentContentIndex < currentPage.audios.length - 1) {
       setCurrentContentIndex((prev) => prev + 1);
     } else if (currentIndex < storyData.length - 1) {
