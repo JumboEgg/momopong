@@ -31,6 +31,7 @@ interface ParticipantTrack {
   participant: LocalParticipant | RemoteParticipant;
   trackPublication?: Track;
 }
+const getRoleColor = (role: 'role1' | 'role2') => (role === 'role1' ? 'border-8 border-yellow-300' : 'border-8 border-green-300');
 
 function IntegratedRoom({
   roomName,
@@ -135,6 +136,9 @@ function IntegratedRoom({
     if (!isUserTurn || isRecording || !room) return;
 
     try {
+      // 마이크 활성화
+      await room.localParticipant.setMicrophoneEnabled(true);
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -157,7 +161,7 @@ function IntegratedRoom({
         }
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
         if (audioBlob.size > 0 && room) {
@@ -167,6 +171,9 @@ function IntegratedRoom({
           // 상위 컴포넌트에 녹음 완료 알림
           onRecordingComplete(room.localParticipant.identity, audioBlob);
         }
+
+        // 마이크 비활성화
+        await room.localParticipant.setMicrophoneEnabled(false);
 
         // 스트림 정리
         stream.getTracks().forEach((track) => track.stop());
@@ -435,7 +442,12 @@ function IntegratedRoom({
     const isLocal = participant === room?.localParticipant;
 
     return (
-      <div className="relative w-96 h-64 bg-gray-800 rounded-lg overflow-hidden">
+      <div
+        className={`
+        relative w-full h-full bg-gray-800 rounded-xl overflow-hidden
+        ${variant === 'story' && isLocal && isUserTurn ? getRoleColor(userRole) : 'border-transparent'}
+      `}
+      >
         <video
           ref={(element) => {
             if (element && trackPublication) {
@@ -479,14 +491,9 @@ function IntegratedRoom({
   // 방(화면)에 따른 레이아웃 변경
   if (variant === 'greeting') {
     return (
-      <div className="w-full max-w-4xl mx-auto mt-8">
-        <div className="grid grid-cols-2 gap-8 place-items-center">
-          {renderParticipantVideo(0)}
-          {renderParticipantVideo(1)}
-        </div>
-        <div className="mt-8 flex justify-center">
-          {renderRecordingButton()}
-        </div>
+      <div className="w-full h-full grid grid-cols-2 gap-2 p-4">
+        <div className="w-full h-full">{renderParticipantVideo(0)}</div>
+        <div className="w-full h-full">{renderParticipantVideo(1)}</div>
       </div>
     );
   }

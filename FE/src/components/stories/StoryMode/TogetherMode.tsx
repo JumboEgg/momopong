@@ -332,14 +332,17 @@
 
         {/* 화상 비디오 영역 */}
         {myRole && !isDrawingMode && (
-          <IntegratedRoom
-            roomName={roomName}
-            participantName={selectedAccount?.name || 'Anonymous'}
-            userRole={myRole}
-            isUserTurn={isUserTurn}
-            onRecordingComplete={handleRecordingComplete}
-            onRecordingStatusChange={handleRecordingStateChange}
-          />
+          <div className="fixed bottom-4 w-64 h-48">
+            <IntegratedRoom
+              roomName={roomName}
+              participantName={selectedAccount?.name || 'Anonymous'}
+              userRole={myRole}
+              isUserTurn={isUserTurn}
+              onRecordingComplete={handleRecordingComplete}
+              onRecordingStatusChange={handleRecordingStateChange}
+            />
+
+          </div>
         )}
 
         {/* 드로잉 모드 */}
