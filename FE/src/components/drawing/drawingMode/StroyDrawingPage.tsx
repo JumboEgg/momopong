@@ -1,8 +1,6 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
-import { DrawingParticipationRecordData } from '@/types/sketch';
-import useSubAccountStore from '@/stores/subAccountStore';
 import { useStory } from '@/stores/storyStore';
 import DrawingCanvas from '../canvasComponents/DrawingCanvas';
 import Palette from '../canvasComponents/Color';
@@ -16,9 +14,8 @@ interface StoryDrawingPageProps {
 }
 
 function StoryDrawingPage({ roomName, userRole, handleNext }: StoryDrawingPageProps): JSX.Element {
-  const { setSessionId, setTemplate, setMode } = useDrawing();
+  const { setTemplate, setMode } = useDrawing();
   const [canvasRef, setCanvasRef] = useState<HTMLCanvasElement | null>(null);
-  const isRecording = useRef(false);
   const { setConnect, setRoomId, isConnected } = useSocketStore();
   const { currentIndex } = useStory();
   const { bookContent } = useBookContent();
@@ -37,14 +34,6 @@ function StoryDrawingPage({ roomName, userRole, handleNext }: StoryDrawingPagePr
         sketchTitle: `Page ${currentPage?.pageNumber}`,
         sketchPath,
       });
-    }
-    if (!isRecording.current) {
-      const data: DrawingParticipationRecordData = {
-        childId: useSubAccountStore.getState().selectedAccount?.childId ?? 0,
-        mode: 'STORY',
-      };
-      // setSessionId(data);
-      isRecording.current = true;
     }
     return () => {
       setConnect(false);
