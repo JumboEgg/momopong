@@ -94,42 +94,58 @@
   const [isWaitingForOther, setIsWaitingForOther] = useState(false);
   const [isProcessingRecording, setIsProcessingRecording] = useState(false);
 
-    // 현재 페이지 및 컨텐츠 계산
-    const currentPage = bookContent?.pages[currentIndex];
-    const currentContent = currentPage?.audios[currentContentIndex];
+  // 현재 페이지 및 컨텐츠 계산
+  const currentPage = bookContent?.pages[currentIndex];
+  const currentContent = currentPage?.audios[currentContentIndex];
 
-    // 읽기 기록 생성 여부 확인
-    const isRecording = useRef(false);
+  // 읽기 기록 생성 여부 확인
+  const isRecording = useRef(false);
 
-    // 녹음
-    const recordBlob = useRef<Blob | null>(null);
+  // 녹음
+  const recordBlob = useRef<Blob | null>(null);
 
-    // 읽기 기록 저장
-    const saveReadingSession = async () => {
-      if (inviterId !== myId) return;
+  const handleRecordIdReceived = useCallback((recordData: { role1Id: number, role2Id: number }) => {
+    console.log('Received record IDs:', recordData);
+    // 모든 참가자가 두 recordId를 모두 저장
+    setRole1RecordId(recordData.role1Id);
+    setRole2RecordId(recordData.role2Id);
 
-      // role1 사용자의 DB 생성
-      const role1Data: BookParticiPationRecordData = {
-        childId: role1UserId ?? 0,
-        bookId: bookId ?? 0,
-        role: bookContent?.role1 ?? 'role1',
-        mode: 'MULTI',
-      };
-      const role1Id = await makeBookRecord(role1Data);
-      if (role1UserId === myId) setBookRecordId(role1Id);
-      setRole1RecordId(role1Id);
+    // 자신의 역할에 맞는 bookRecordId 설정
+    if (myRole === 'role1') {
+      setBookRecordId(recordData.role1Id);
+    } else if (myRole === 'role2') {
+      setBookRecordId(recordData.role2Id);
+    }
+  }, [myRole, setBookRecordId, setRole1RecordId, setRole2RecordId]);
 
-      // role2 사용자의 DB 생성
-      const role2Data: BookParticiPationRecordData = {
-        childId: role2UserId ?? 0,
-        bookId: bookId ?? 0,
-        role: bookContent?.role2 ?? 'role2',
-        mode: 'MULTI',
-      };
-      const role2Id = await makeBookRecord(role2Data);
-      if (role2UserId === myId) setBookRecordId(role2Id);
-      setRole2RecordId(role2Id);
+  // 읽기 기록 저장
+  const saveReadingSession = async () => {
+    if (inviterId !== myId) {
+      return { role1Id: 0, role2Id: 0 };
+    }
+    // role1 사용자의 DB 생성
+    const role1Data: BookParticiPationRecordData = {
+      childId: role1UserId ?? 0,
+      bookId: bookId ?? 0,
+      role: bookContent?.role1 ?? 'role1',
+      mode: 'MULTI',
     };
+    const role1Id = await makeBookRecord(role1Data);
+    if (role1UserId === myId) setBookRecordId(role1Id);
+    setRole1RecordId(role1Id);
+
+    // role2 사용자의 DB 생성
+    const role2Data: BookParticiPationRecordData = {
+      childId: role2UserId ?? 0,
+      bookId: bookId ?? 0,
+      role: bookContent?.role2 ?? 'role2',
+      mode: 'MULTI',
+    };
+    const role2Id = await makeBookRecord(role2Data);
+    if (role2UserId === myId) setBookRecordId(role2Id);
+    setRole2RecordId(role2Id);
+    return { role1Id, role2Id };
+  };
 
   // 읽기 정보 저장을 위한 useEffect만 남김
   useEffect(() => {
@@ -331,18 +347,21 @@
 
         {/* 화상 비디오 영역 */}
         {myRole && !isDrawingMode && (
-          <div className="fixed bottom-4 w-64 h-48">
-            <IntegratedRoom
-              roomName={roomName}
-              participantName={selectedAccount?.name || 'Anonymous'}
-              userRole={myRole}
-              isUserTurn={isUserTurn}
-              onRecordingComplete={handleRecordingComplete}
-              onRecordingStatusChange={handleRecordingStateChange}
-            />
-
-          </div>
-        )}
+        <div className="fixed bottom-4 w-64 h-48">
+          <IntegratedRoom
+            roomName={roomName}
+            participantName={selectedAccount?.name || 'Anonymous'}
+            userRole={myRole}
+            isUserTurn={isUserTurn}
+            onRecordingComplete={handleRecordingComplete}
+            onRecordingStatusChange={handleRecordingStateChange}
+            onRecordIdReceived={handleRecordIdReceived}
+            role1RecordId={role1RecordId}
+            role2RecordId={role2RecordId}
+            isHost={inviterId === myId}
+          />
+        </div>
+      )}
 
         {/* 드로잉 모드 */}
         {isDrawingMode && (

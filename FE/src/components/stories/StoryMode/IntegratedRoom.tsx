@@ -29,6 +29,10 @@ interface IntegratedRoomProps {
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
   variant?: VariantType; // 레이아웃 variant 추가
+  onRecordIdReceived: (recordData: { role1Id: number, role2Id: number }) => void;
+  role1RecordId: number | null;
+  role2RecordId: number | null;
+  isHost: boolean;
 }
 
 interface ParticipantTrack {
@@ -45,6 +49,10 @@ function IntegratedRoom({
   onRecordingComplete,
   onRecordingStatusChange,
   variant = 'story',
+  onRecordIdReceived,
+  role1RecordId,
+  role2RecordId,
+  isHost,
 }: IntegratedRoomProps) {
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -58,6 +66,25 @@ function IntegratedRoom({
     confirmReady,
     setPartnerReady,
   } = useRoomStore();
+
+  const broadcastRecordIds = useCallback(() => {
+    if (!room || !isHost || !role1RecordId || !role2RecordId) return;
+
+    const message = {
+      type: 'record_ids',
+      content: {
+        role1Id: role1RecordId,
+        role2Id: role2RecordId,
+        timestamp: Date.now(), // 메시지 고유성을 위한 타임스탬프 추가
+      },
+    };
+
+    console.log('Broadcasting record IDs:', message);
+    room.localParticipant.publishData(
+      new TextEncoder().encode(JSON.stringify(message)),
+      { reliable: true },
+    );
+  }, [room, isHost, role1RecordId, role2RecordId]);
 
   // 토큰 가져오기
   const getToken = useCallback(async () => {
@@ -267,6 +294,8 @@ function IntegratedRoom({
               setPartnerReady(message.status);
             } else if (message.type === 'start_story') {
               confirmReady(message.status);
+            } else if (message.type === 'record_ids') {
+              onRecordIdReceived(message.content);
             }
           } catch (error) {
             console.error('데이터 처리 오류:', error);
@@ -289,6 +318,13 @@ function IntegratedRoom({
           });
 
         await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
+
+        if (isHost && role1RecordId && role2RecordId) {
+          setTimeout(() => {
+            broadcastRecordIds();
+          }, 1000); // 연결 안정화를 위한 약간의 지연
+        }
+
         if (!isMounted) {
           await newRoom.disconnect();
           return;
@@ -341,6 +377,12 @@ function IntegratedRoom({
     },
     [mediaRecorder],
   );
+
+  useEffect(() => {
+    if (isHost && role1RecordId && role2RecordId && room?.state === 'connected') {
+      broadcastRecordIds();
+    }
+  }, [isHost, role1RecordId, role2RecordId, room?.state, broadcastRecordIds]);
 
   // 타이머 effect 추가
   useEffect(() => {
