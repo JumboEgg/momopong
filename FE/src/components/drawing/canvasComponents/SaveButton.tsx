@@ -125,9 +125,21 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
 
-    if (drawingCompleted && partnerCompleted) {
+    console.log('두 사용자 상태 확인:', {
+      drawingCompleted,
+      partnerCompleted,
+      handleNext: !!handleNext,
+    });
+
+    if (drawingCompleted && partnerCompleted && handleNext) {
       if (!handleNext) return;
       handleNext();
+      setTimeout(() => {
+        if (handleNext) {
+          console.log('handleNext 함수 실행');
+          handleNext();
+        }
+      }, 1000);
     }
   }, [drawingCompleted, partnerCompleted, handleNext]);
 
