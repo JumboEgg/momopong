@@ -10,8 +10,8 @@ import useSocketStore from '../hooks/useSocketStore';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
-  userRole: 'role1' | 'role2';
-  handleNext: () => void;
+  userRole?: 'role1' | 'role2';
+  handleNext?: () => void;
 }
 
 interface DrawingMessageData {
@@ -126,6 +126,7 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
     console.log('partnerCompleted', partnerCompleted);
 
     if (drawingCompleted && partnerCompleted) {
+      if (!handleNext) return;
       handleNext();
     }
   }, [drawingCompleted, partnerCompleted, handleNext]);

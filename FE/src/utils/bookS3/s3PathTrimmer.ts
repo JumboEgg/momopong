@@ -5,7 +5,7 @@ export const getAudioSrcPath = (path: string) => {
 };
 
 export const getImageSrcPath = (path: string) => {
-    const regex = /image\/[^?]+\.webp/;
+    const regex = /book\/[^?]+\.webp/;
     const match = path.match(regex);
     return match ? match[0] : '';
 };
