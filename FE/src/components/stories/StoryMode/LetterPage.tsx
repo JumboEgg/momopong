@@ -10,10 +10,10 @@ import { useNavigate } from 'react-router-dom';
 function LetterPage() {
   const navigate = useNavigate();
   const { bookContent } = useBookContent();
-  const { role1UserId } = useRoleStore();
+  const { role2UserId } = useRoleStore();
 
   const myId = useSubAccountStore.getState().selectedAccount?.childId;
-  const myRole = role1UserId === myId ? bookContent?.role1 : bookContent?.role2;
+  const myRole = role2UserId === myId ? bookContent?.role2 : bookContent?.role1;
   return (
     <div className="w-screen h-screen bg-pink-200 relative">
       <IconCircleButton

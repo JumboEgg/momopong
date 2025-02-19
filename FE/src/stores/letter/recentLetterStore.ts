@@ -1,17 +1,17 @@
-import { LetterData } from '@/types/letter';
+import { LetterInfo } from '@/types/letter';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import useSubAccountStore from '../subAccountStore';
 
 interface RecentLetterState {
-  recentLetterList: LetterData[];
-  selectedLetter: LetterData | null;
+  recentLetterList: LetterInfo[];
+  selectedLetter: LetterInfo | null;
   isLoading: boolean;
   error: string | null;
 
   setRecentLetterList: () => void;
 
-  setSelectedLetter: (letter: LetterData | null) => void;
+  setSelectedLetter: (letter: LetterInfo | null) => void;
   setIsLoading: (status: boolean) => void;
   setError: (error: string | null) => void;
 }

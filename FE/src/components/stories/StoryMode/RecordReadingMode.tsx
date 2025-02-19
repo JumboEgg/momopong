@@ -158,16 +158,16 @@ function RecordReadingMode(): ReactElement {
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full py-3 bg-amber-500 text-white rounded-lg hover:bg-amber-600 transition-colors text-lg font-medium"
+                className="w-full py-3 bg-amber-300 text-white rounded-lg hover:bg-amber-400 transition-colors text-lg font-medium"
               >
-                다시 읽기
+                다시 읽을래
               </button>
               <button
                 type="button"
                 onClick={handleGoHome}
                 className="w-full py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-lg font-medium"
               >
-                돌아가기
+                돌아갈래
               </button>
             </div>
           </div>
