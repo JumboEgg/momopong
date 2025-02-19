@@ -42,7 +42,7 @@ function StoryDrawingPage({ roomName, handleNext }: StoryDrawingPageProps): JSX.
         childId: useSubAccountStore.getState().selectedAccount?.childId ?? 0,
         mode: 'STORY',
       };
-      setSessionId(data);
+      // setSessionId(data);
       isRecording.current = true;
     }
     return () => {
@@ -52,6 +52,7 @@ function StoryDrawingPage({ roomName, handleNext }: StoryDrawingPageProps): JSX.
     };
   }, []);
 
+  // 캔버스 크기 계산
   const calculateCanvasDimensions = () => {
     const maxHeight = window.innerHeight * 0.9 - 80;
     const maxWidth = window.innerWidth * 0.9;

@@ -13,6 +13,16 @@ export interface SaveButtonProps {
   handleNext: () => void;
 }
 
+interface DrawingMessageData {
+  status: string;
+  color: string;
+  prevX: number;
+  prevY: number;
+  curX: number; 
+  curY: number;
+  roomId?: string; // optional로 설정 (필요시에만 포함)
+}
+
 function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
   const { mode, template, setImageData } = useDrawing();
   const { setDrawingResult } = useRecordList();
@@ -73,32 +83,48 @@ function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
       };
     }
 
+    console.log('drawingCompleted', drawingCompleted);
+    console.log('partnerCompleted', partnerCompleted);
+
     // 버튼을 누르면 "대기 중.." 상태로 변경
     setDrawingCompleted(true);
 
     // 상대방에게 완료 신호 전송
     if (socket && isConnected) {
-      socket.emit('drawing-complete');
+      console.log('@@@@@complete@@@@@');
+      socket.emit('message');
+      // socket.emit('drawing-complete');
     }
   }, [canvasRef, socket, isConnected]);
 
   useEffect(() => {
     // 상대방이 버튼을 눌렀을 때 이벤트 수신
+    console.log('@@@@@socket@@@@@', socket)
+    console.log('drawingCompleted', drawingCompleted);
+    console.log('partnerCompleted', partnerCompleted);
     if (!socket) return;
 
-    const handlePartnerComplete = () => {
-      setPartnerCompleted(true);
+    const handlePartnerComplete = (data: DrawingMessageData) => {
+      if (data && data.status === 'drawing-complete') {
+        console.log('상대방 완료 신호 수신:', data);
+        setPartnerCompleted(true);
+      }
     };
 
-    socket.on('drawing-complete', handlePartnerComplete);
+    socket.on('message', handlePartnerComplete);
+    // socket.on('drawing-complete', handlePartnerComplete);
 
     return () => {
-      socket.off('drawing-complete', handlePartnerComplete);
+      socket.off('message', handlePartnerComplete);
+      // socket.off('drawing-complete', handlePartnerComplete);
     };
   }, [socket]);
 
   useEffect(() => {
     // 두 명 모두 버튼을 눌렀으면 handleNext 실행
+    console.log("drawingCompleted@@@@@@@@partnerCompleted");
+    console.log('drawingCompleted', drawingCompleted);
+    console.log('partnerCompleted', partnerCompleted);
     if (drawingCompleted && partnerCompleted) {
       handleNext();
     }
