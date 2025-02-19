@@ -116,6 +116,7 @@ public class BookServiceImpl implements BookService {
 
         return BookListDto.builder()
                 .bookId(bookId)
+                .bookPath(book.getBookPath())
                 .bookTitle(book.getTitle())
                 .role1(book.getRole1())
                 .role2(book.getRole2())

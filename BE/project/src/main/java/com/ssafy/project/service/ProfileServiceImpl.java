@@ -102,6 +102,7 @@ public class ProfileServiceImpl implements ProfileService {
 
         return BookListDto.builder()
                 .bookId(bookRecordId) // BookRecord ID (Book ID 아님!)
+                .bookPath(book.getBookPath())
                 .bookTitle(book.getTitle())
                 .totalPage(pages.size())
                 .role1(book.getRole1())
