@@ -105,7 +105,7 @@ public class BookServiceImpl implements BookService {
                     return PageDto.builder()
                             .pageId(page.getId())
                             .pageNumber(page.getPageNumber())
-                            .pagePath(page.getPagePath())
+                            .pagePath(cloudFrontService.getSignedUrl(page.getPagePath()))
                             .position(positionDto)
                             .hasDrawing(page.isHasDrawing())
                             .hasObject(page.isHasObject())
