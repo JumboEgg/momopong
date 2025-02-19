@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 public class BookListDto {
     private Long bookId;
+    private String bookPath;
     private String bookTitle;
     private Integer totalPage;
     private String role1;
