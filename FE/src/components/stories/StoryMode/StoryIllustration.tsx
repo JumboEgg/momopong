@@ -24,8 +24,8 @@ function StoryIllustration({
   };
 
   const ROLE_COLORS = {
-    role1: 'text-yellow-300', // 신데렐라
-    role2: 'text-green-300', // 왕자
+    role1: 'text-pink-500', // 신데렐라 - 핑크
+    role2: 'text-blue-600', // 왕자 - 파랑
     narration: 'text-white', // 내레이션
   } as const;
 
@@ -57,7 +57,7 @@ function StoryIllustration({
       </div>
       {/* 텍스트 오버레이📣 */}
       <div className="absolute top-8 left-8 font-[BMJUA]">
-        <div className="bg-black/60 text-white p-6 rounded-lg max-w-xl">
+        <div className="text-white p-6 rounded-lg max-w-xl">
           {relatedContents.map((content) => {
             const isUserTurn = userRole === content.role;
 
@@ -65,11 +65,13 @@ function StoryIllustration({
               <div
                 key={`${pageNumber}-${content.role}-${content.text.substring(0, 20)}`}
                 className={`mb-4 last:mb-0 ${
-                  isUserTurn ? 'border-l-4 border-yellow-400 pl-3' : ''
+                  isUserTurn && content.role !== 'narration'
+                    ? `border-l-4 border-${content.role === 'role1' ? 'pink' : 'blue'}-500 pl-3`
+                    : ''
                 }`}
               >
                 {content.role !== 'narration' && (
-                <div className="text-xl font-medium text-gray-300 mb-1">
+                <div className="text-xl font-medium text-white-700 mb-1 drop-shadow-sm">
                   {getSpeakerName(content.role)}
                 </div>
                 )}
