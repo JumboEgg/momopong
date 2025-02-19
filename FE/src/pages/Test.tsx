@@ -3,7 +3,7 @@
   필요시 참고하기 위해 남겨두었으니 말없이 지우지 말아주세요!
 */
 import { useState } from 'react';
-import ButtonDemo from '@/components/common/buttons/ButtonDemo';
+// import ButtonDemo from '@/components/common/buttons/ButtonDemo';
 import TextButton from '@/components/common/buttons/TextButton';
 // import ParentAuthModal from '@/components/common/modals/ParentAuthModal';
 import DialogModal from '@/components/common/modals/DialogModal';
@@ -26,7 +26,7 @@ function Test() {
   return (
     <div>
       컴포넌트 테스트 페이지
-      <ButtonDemo />
+      {/* <ButtonDemo /> */}
       {/* type="button" 추가 */}
       <button
         type="button"

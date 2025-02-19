@@ -15,7 +15,7 @@ import { useSketchList } from '@/stores/drawing/sketchListStore';
 
 function HomePage() {
   const navigate = useNavigate();
-  const { selectedAccount } = useSubAccountStore();
+  const { selectedAccount, updateChildStatus } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
   const { setSketchList } = useSketchList();
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'): void => {
@@ -55,6 +55,23 @@ function HomePage() {
 
   useEffect(() => {
     setSketchList();
+
+    if (!selectedAccount) {
+      return undefined;
+    }
+
+    // 초기 상태 업데이트
+    updateChildStatus();
+
+    // 주기적으로 상태 업데이트 (선택사항)
+    const intervalId = setInterval(() => {
+      updateChildStatus();
+    }, 60000); // 1분마다 업데이트
+
+    return () => clearInterval(intervalId);
+  }, [selectedAccount, updateChildStatus]);
+
+  useEffect(() => {
     setRecentLetterList();
   }, []);
 
@@ -86,7 +103,7 @@ function HomePage() {
           size="sm"
           shape="circle"
         />
-        <p className="text-xl mt-0.5">{selectedAccount?.name}</p>
+        <p className="text-sm font-[GeekbleMalang2WOFF2] md:text-xl mt-0.5">{selectedAccount?.name}</p>
       </button>
 
       <button
@@ -99,7 +116,7 @@ function HomePage() {
           alt="친구목록"
           className="w-[5vw] min-w-10 object-contain"
         />
-        <p className="text-sm md:text-xl mt-0.5">친구목록</p>
+        <p className="text-sm font-[GeekbleMalang2WOFF2] md:text-xl mt-0.5">친구목록</p>
       </button>
 
       {isModalOpen && (
