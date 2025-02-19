@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { useRecordList } from '@/stores/book/bookRecordListStore';
 import useSocketStore from '../hooks/useSocketStore';
+import { data } from 'react-router-dom';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
@@ -91,20 +92,29 @@ function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
 
     // 상대방에게 완료 신호 전송
     if (socket && isConnected) {
-      console.log('@@@@@complete@@@@@');
-      socket.emit('message');
+      const completeData = {
+        status: 'drawing-complete', // 이 필드가 중요합니다!
+        color: '',
+        prevX: 0,
+        prevY: 0,
+        curX: 0,
+        curY: 0
+      };
+      console.log('@@@@@complete@@@@@', completeData);
+      socket.emit('message', completeData);
       // socket.emit('drawing-complete');
     }
   }, [canvasRef, socket, isConnected]);
 
   useEffect(() => {
     // 상대방이 버튼을 눌렀을 때 이벤트 수신
-    console.log('@@@@@socket@@@@@', socket)
+    console.log('@@@@socket@@@@@', socket);
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
+
     if (!socket) return;
 
-    const handlePartnerComplete = (data: DrawingMessageData) => {
+    const handlePartnerComplete = (data: DrawingMessageData | null) => {
       if (data && data.status === 'drawing-complete') {
         console.log('상대방 완료 신호 수신:', data);
         setPartnerCompleted(true);
@@ -125,6 +135,7 @@ function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
     console.log("drawingCompleted@@@@@@@@partnerCompleted");
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
+
     if (drawingCompleted && partnerCompleted) {
       handleNext();
     }
@@ -143,17 +154,17 @@ function SaveButton({ canvasRef, handleNext }: SaveButtonProps) {
 
   return (
     <div>
-      {
-        buttonSize === 'md'
-          ? <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">
-              {drawingCompleted ? '대기 중..' : '다 그렸어!'}
-            </TextButton>
-          : <IconCircleButton
-              icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />}
-              size="sm"
-              variant="story"
-            />
-      }
+      {buttonSize === 'md' ? (
+        <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">
+          {drawingCompleted ? '대기 중..' : '다 그렸어!'}
+        </TextButton>
+      ) : (
+        <IconCircleButton
+          icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />}
+          size="sm"
+          variant="story"
+        />
+      )}
     </div>
   );
 }
