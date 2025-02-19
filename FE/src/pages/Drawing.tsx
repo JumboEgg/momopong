@@ -25,7 +25,7 @@ function Drawing() {
     setImageData,
   } = useDrawing();
 
-  const { sketchList, setSketchList } = useSketchList();
+  const { sketchList } = useSketchList();
   const {
     friend,
     setFriend,
@@ -61,7 +61,6 @@ function Drawing() {
     } else if (!location.state) {
       setMode(null);
       setTemplate(null);
-      setSketchList();
       setPenColor('black');
       setIsErasing(false);
       setImageData('');
@@ -165,7 +164,6 @@ function Drawing() {
       }
 
       if (!imageData) {
-        // console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
         return <DrawingPage />;
       }
     }
@@ -174,10 +172,6 @@ function Drawing() {
     if (mode === 'single' && !imageData) {
       return <DrawingPage />;
     }
-
-    // if (mode === 'story' && !imageData) {
-    //   return <StoryDrawingPage />;
-    // }
 
     return <ResultPage />;
   };

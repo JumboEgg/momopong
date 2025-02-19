@@ -11,13 +11,14 @@ import NotificationModal from '@/components/common/modals/NotificationModal';
 import useRecentLetterStore from '@/stores/letter/recentLetterStore';
 import { tokenService, checkTokenRegistration } from '@/services/tokenService';
 import { useRoleStore } from '@/stores/roleStore';
+import { useSketchList } from '@/stores/drawing/sketchListStore';
 
 function HomePage() {
   const navigate = useNavigate();
   const { selectedAccount } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
-     | '/test' | '/book/letter'): void => {
+  const { setSketchList } = useSketchList();
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'): void => {
     navigate(path);
   };
   const clearRoles = useRoleStore((state) => state.clearRoles); // clearRoles 함수
@@ -25,8 +26,6 @@ function HomePage() {
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
-  // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
-  // console.log('Profile URL:', selectedAccount?.profile); // profile URL 확인
 
   useEffect(() => {
     const registerFCMToken = async () => {
@@ -55,6 +54,7 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
+    setSketchList();
     setRecentLetterList();
   }, []);
 
@@ -100,14 +100,6 @@ function HomePage() {
           className="w-[5vw] min-w-10 object-contain"
         />
         <p className="text-sm md:text-xl mt-0.5">친구목록</p>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleNavigation('/test')}
-        className="cursor-pointer flex flex-col items-center"
-      >
-        <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
       </button>
 
       {isModalOpen && (

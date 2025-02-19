@@ -134,7 +134,7 @@ function ReadingMode(): ReactElement {
 
   return (
     <div className="w-[100vw] h-[100vh] mx-auto relative">
-      <div className="mb-6 flex justify-between items-center hidden">
+      <div className="mb-6 justify-between items-center hidden">
         <h2 className="text-2xl font-bold text-gray-800">
           신데렐라
           {' '}
