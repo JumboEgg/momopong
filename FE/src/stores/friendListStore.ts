@@ -137,6 +137,16 @@ export const useFriendListStore = create<FriendList>()((set, get) => ({
   },
 
   inviteFriend: async (invitation: FriendInvitation) => {
+    console.log('Invitation Debug:', {
+      invitation,
+      contentType: invitation.contentType,
+      endpoint: getInvitationEndpoint(
+        invitation.contentType,
+        invitation.contentId,
+        invitation,
+        'invitation',
+      ),
+    });
     const toastStore = useToastStore.getState();
     const roleStore = useRoleStore.getState();
     set({ loading: true, error: null });
