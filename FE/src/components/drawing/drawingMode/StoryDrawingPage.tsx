@@ -66,14 +66,14 @@ function StoryDrawingPage({ roomName, userRole, handleNext }: StoryDrawingPagePr
   return (
     <div className="bg-yellow-600 w-full h-full flex flex-col items-center justify-between m-0 p-0">
       <div className="w-full h-20 flex justify-between m-0 p-0">
-        <span className="mt-4 ms-4">
+        <span className="fixed top-2 md:top-4 left-2 md:left-4 z-30">
           <SaveButton
             canvasRef={canvasRef}
             userRole={userRole}
             endDrawing={handleNext}
           />
         </span>
-        <span className="content-end flex">
+        <span className="fixed top-0 right-0 flex">
           <Palette />
         </span>
       </div>
