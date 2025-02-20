@@ -158,6 +158,8 @@ function ReadingMode(): ReactElement {
         isLast={isLastPage && currentContentIndex === (currentPage?.audios.length ?? 0) - 1}
         currentContent={currentContent}
         illustration={currentPage?.pagePath ?? ''}
+        hasObject={currentPage?.hasObject ?? false}
+        position={currentPage?.position}
       />
 
       {audioEnabled && currentContent?.path && (

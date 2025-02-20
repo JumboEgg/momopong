@@ -1,4 +1,4 @@
-import { BookAudioInfo } from '@/types/book';
+import { BookAudioInfo, PagePosition } from '@/types/book';
 
 export type StoryMode = 'reading' | 'together';
 
@@ -63,6 +63,8 @@ export interface StoryIllustrationProps {
   userRole?: 'role1' | 'role2';
   currentContent: BookAudioInfo | undefined;
   illustration: string;
+  hasObject: boolean;
+  position?: PagePosition | null;
 }
 
 export interface Story {

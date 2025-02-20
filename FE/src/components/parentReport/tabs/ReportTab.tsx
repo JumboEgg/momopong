@@ -21,9 +21,7 @@ function ReportTab({ childName }: ReportTabProps) {
         {' '}
         어린이는 모모퐁에서
         {' '}
-        {/* <span className="text-[steelblue]">{TempTimeFormatte
-        r(analysis?.thisMonthMinutes ?? 0)}</span> */}
-        <span className="text-[steelblue]">{TempTimeFormatter(956709)}</span>
+        <span className="text-[steelblue]">{TempTimeFormatter(analysis?.thisMonthMinutes ?? 0)}</span>
         {' '}
         여행했어요.
       </div>
@@ -37,13 +35,9 @@ function ReportTab({ childName }: ReportTabProps) {
               독서 시간
             </div>
             <DonutChart
-              singleTime={635635}
-              multiTime={378764}
-            />
-            {/* <DonutChart
               singleTime={analysis?.readingMinutesSingle ?? 0}
               multiTime={analysis?.readingMinutesMulti ?? 0}
-            /> */}
+            />
           </div>
           <div>
             <div className="text-xl flex items-center">
@@ -51,13 +45,9 @@ function ReportTab({ childName }: ReportTabProps) {
               그린 시간
             </div>
             <DonutChart
-              singleTime={237388}
-              multiTime={268567}
-            />
-            {/* <DonutChart
               singleTime={analysis?.sketchingMinutesSingle ?? 0}
               multiTime={analysis?.sketchingMinutesMulti ?? 0}
-            /> */}
+            />
           </div>
           <div>
             <div className="text-xl">평균 이용 시간</div>
@@ -67,8 +57,7 @@ function ReportTab({ childName }: ReportTabProps) {
                 <div
                   className="text-2xl ps-5 text-pink-400"
                 >
-                  {/* {TempTimeFormatter(analysis?.thisWeekMinutes ?? 0)} */}
-                  {TempTimeFormatter(6340956)}
+                  {TempTimeFormatter(analysis?.thisWeekMinutes ?? 0)}
                 </div>
               </div>
               <div>
@@ -76,8 +65,7 @@ function ReportTab({ childName }: ReportTabProps) {
                 <div
                   className="text-2xl ps-5 text-blue-400"
                 >
-                  {/* {TempTimeFormatter(analysis?.lastWeekMinutes ?? 0)} */}
-                  {TempTimeFormatter(243)}
+                  {TempTimeFormatter(analysis?.lastWeekMinutes ?? 0)}
                 </div>
               </div>
             </div>

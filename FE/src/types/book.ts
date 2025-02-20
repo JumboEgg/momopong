@@ -13,7 +13,7 @@ export interface BookAudioInfo {
     path: string; // 오디오 S3 경로
 }
 
-interface PagePosition {
+export interface PagePosition {
     sketchPath: string | undefined;
     x: number;
     y: number;

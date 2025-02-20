@@ -13,6 +13,8 @@ function StoryIllustration({
   userRole,
   currentContent, // props로 받기
   illustration, // props로 받기
+  hasObject,
+  position,
 }: StoryIllustrationProps) {
   // currentContent가 없으면 일찍 반환
   if (!currentContent) return null;
@@ -39,6 +41,22 @@ function StoryIllustration({
         alt={`Page ${pageNumber} illustration`}
         className="absolute inset-0 w-full h-full object-cover"
       />
+      {/* 다른 이미지를 얹을지 여부를 확인 */}
+      {hasObject && position && (
+      <img
+        src={position.sketchPath} // position에 이미지 URL이 포함되어 있다고 가정
+        alt="Overlay Object"
+        className="absolute"
+        style={{
+            top: `${position.y / 10}%`, // %로 위치 지정
+            left: `${position.x / 16}%`,
+            width: `${position.ratio}%`, // %로 크기 지정
+            height: `${position.ratio}%`,
+            transform: `rotate(${position.angle}deg)`, // 각도 회전
+            transformOrigin: 'center', // 회전의 기준점
+          }}
+      />
+      )}
       {/* 이전, 다음 버튼 */}
       <div className="px-4">
         {

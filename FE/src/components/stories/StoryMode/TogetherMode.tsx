@@ -361,6 +361,8 @@ function TogetherMode() {
           userRole={myRole || undefined}
           currentContent={currentContent}
           illustration={currentPage?.pagePath ?? ''}
+          hasObject={currentPage?.hasObject ?? false}
+          position={currentPage?.position}
         />
 
         {/* 녹음 대기 상태 표시 */}
