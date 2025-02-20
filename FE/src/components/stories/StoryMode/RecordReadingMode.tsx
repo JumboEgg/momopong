@@ -3,7 +3,7 @@ import {
   useCallback,
   useState,
   ReactElement,
-  useEffect
+  useEffect,
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
