@@ -19,7 +19,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
 import CircularTimer from '@/components/common/Timer';
 
-type VariantType = 'greeting' | 'story';
+type VariantType = 'greeting' | 'story' | 'drawing';
 
 interface IntegratedRoomProps {
   roomName: string;
@@ -442,7 +442,7 @@ function IntegratedRoom({
 
   const renderRecordingButton = () => {
     // greeting 모드에서는 녹음 버튼을 렌더링하지 않음
-    if (variant === 'greeting') {
+    if (variant === 'greeting' || variant === 'drawing') {
       return <div />;
     }
     if (!isUserTurn) {
@@ -475,7 +475,8 @@ function IntegratedRoom({
 
   useEffect(() => {
     if (room) {
-      room.localParticipant.setMicrophoneEnabled(variant === 'greeting');
+      const shouldEnableMic = variant === 'greeting' || variant === 'drawing';
+      room.localParticipant.setMicrophoneEnabled(shouldEnableMic);
     }
   }, [variant, room]);
 
@@ -547,7 +548,15 @@ function IntegratedRoom({
       </div>
     );
   }
-
+//   <div className="w-96 h-72 fixed bottom-8 left-8">
+//   {renderParticipantVideo(0)}
+// </div>
+// <div className="left-1/2 bottom-8">
+//   {renderRecordingButton()}
+// </div>
+// <div className="w-96 h-72 fixed bottom-8 right-8">
+//   {renderParticipantVideo(1)}
+// </div>
   return (
     <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
       <div className="w-96 h-72">

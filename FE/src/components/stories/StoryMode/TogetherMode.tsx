@@ -264,7 +264,7 @@ function TogetherMode() {
     // 현재 페이지에 드로잉이 있는 경우
     if (currentPage?.hasDrawing && currentContentIndex === currentPage.audios.length - 1) {
       setTimeout(() => {
-        setIsDrawingMode(true);
+      setIsDrawingMode(true);
       }, 100);
     } else {
       // 드로잉이 없는 경우에만 다음으로 진행
@@ -389,8 +389,8 @@ function TogetherMode() {
       </div>
 
       {/* 화상 비디오 영역 */}
-      {myRole && !isDrawingMode && (
-        <div className="fixed bottom-4 w-64 h-48">
+      {myRole && (
+        <div className="fixed bottom-4 w-64 h-48 z-[60]">
           <IntegratedRoom
             roomName={roomName}
             participantName={selectedAccount?.name || 'Anonymous'}
@@ -402,6 +402,7 @@ function TogetherMode() {
             role1RecordId={role1RecordId}
             role2RecordId={role2RecordId}
             isHost={inviterId === myId}
+            variant={isDrawingMode ? 'drawing' : 'story'}
           />
         </div>
       )}
