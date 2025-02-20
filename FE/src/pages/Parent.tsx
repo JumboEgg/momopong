@@ -133,8 +133,7 @@ function Parent() {
                 <div className="text-sm sm:text-lg md:text-xl">
                   가입 후
                   {' '}
-                  {/* {subAccounts[childIdx].daysSinceStart} */}
-                  {867}
+                  {subAccounts[childIdx].daysSinceStart}
                   일
                 </div>
               </div>
