@@ -43,6 +43,7 @@ function TogetherMode() {
   const {
     bookId,
     currentIndex, setCurrentIndex,
+    currentAudioIndex, setCurrentAudioIndex,
     audioEnabled,
     bookRecordId, setBookRecordId,
   } = useStory();
@@ -89,14 +90,14 @@ function TogetherMode() {
   }, [myId, inviterId]);
 
   // 상태 관리
-  const [currentContentIndex, setCurrentContentIndex] = useState(0);
+  // const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [recordingStates, setRecordingStates] = useState<RecordingState>({});
   // const [isWaitingForOther, setIsWaitingForOther] = useState(false);
   const [isProcessingRecording, setIsProcessingRecording] = useState(false);
 
   // 현재 페이지 및 컨텐츠 계산
   const currentPage = bookContent?.pages[currentIndex];
-  const currentContent = currentPage?.audios[currentContentIndex];
+  const currentContent = currentPage?.audios[currentAudioIndex];
 
   // 읽기 기록 생성 여부 확인
   const isRecording = useRef(false);
@@ -167,7 +168,7 @@ function TogetherMode() {
   useEffect(() => {
     console.log('handleNext 호출됨', {
       currentIndex,
-      currentContentIndex,
+      currentAudioIndex,
       hasDrawing: currentPage?.hasDrawing,
       totalStoryDataPages: storyData.length,
       totalBookContentPages: bookContent?.pages.length,
@@ -184,7 +185,7 @@ function TogetherMode() {
 
     console.log('handleNext 실행 상세 정보:', {
       currentIndex,
-      currentContentIndex,
+      currentAudioIndex,
       hasDrawing: currentPage?.hasDrawing,
       totalStoryDataPages: storyData.length,
       totalBookContentPages: totalPages,
@@ -199,14 +200,14 @@ function TogetherMode() {
     setIsDrawingMode(false); // 드로잉 모드도 초기화
 
     // 페이지 내 다음 오디오로
-    if (currentContentIndex < currentPage.audios.length - 1) {
-      console.log(`같은 페이지 내 다음 오디오로: ${currentContentIndex} → ${currentContentIndex + 1}`);
-      setCurrentContentIndex((prev) => prev + 1);
+    if (currentAudioIndex < currentPage.audios.length - 1) {
+      console.log(`같은 페이지 내 다음 오디오로: ${currentAudioIndex} → ${currentAudioIndex + 1}`);
+      setCurrentAudioIndex(currentAudioIndex + 1);
     } else if (currentIndex < Math.min(totalPages, storyData.length) - 1) {
       const nextIndex = currentIndex + 1;
       console.log(`다음 페이지로 이동: ${currentIndex} → ${nextIndex}`);
       setCurrentIndex(nextIndex);
-      setCurrentContentIndex(0);
+      setCurrentAudioIndex(0);
     } else {
       console.log('모든 페이지 완료, 종료');
       endBookRecordSession(bookRecordId ?? 0);
@@ -223,7 +224,7 @@ function TogetherMode() {
     //   endBookRecordSession(bookRecordId ?? 0);
     //   navigate('/book/letter');
     // }
-  }, [currentIndex, currentContentIndex, currentPage, setCurrentIndex, bookRecordId]);
+  }, [currentIndex, currentAudioIndex, currentPage, setCurrentIndex, bookRecordId]);
 
   // 오디오 정보 저장
   const addAudioToList = (audioBlob: Blob | null) => {
@@ -262,7 +263,7 @@ function TogetherMode() {
     });
 
     // 현재 페이지에 드로잉이 있는 경우
-    if (currentPage?.hasDrawing && currentContentIndex === currentPage.audios.length - 1) {
+    if (currentPage?.hasDrawing && currentAudioIndex === currentPage.audios.length - 1) {
       setTimeout(() => {
       setIsDrawingMode(true);
       }, 100);
@@ -347,11 +348,11 @@ function TogetherMode() {
 
         <StoryIllustration
           pageNumber={currentPage?.pageNumber ?? 0}
-          currentContentIndex={currentContentIndex}
+          currentContentIndex={currentAudioIndex}
           onPrevious={() => {
             if (currentIndex > 0) {
               setCurrentIndex(currentIndex - 1);
-              setCurrentContentIndex(0);
+              setCurrentAudioIndex(0);
             }
           }}
           onNext={handleNext}
