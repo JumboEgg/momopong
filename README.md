@@ -1,19 +1,258 @@
-# 동화누리
-## 0️⃣ Introduction
-### 소개
+# 모모퐁
+## 프로젝트 진행 기간
+### 2025.01.13 ~ 2025.02.20(6주)
+
+## 🏝️ Introduction
+### 모험 가득한 "동화나라"로 퐁당!
+친구와 읽고, 그리고, 소통하는 **정서교육** 플랫폼, <span style="color:orange">**모모퐁**</span>입니다!
+
+### 기획 배경
+> **유아의 주중 유튜브 1일 사용시간에 대해서 분석한 결과, 평균적으로 주중100-130분 사이로 1시간 이상을 시청하는 것으로 나타났다.** <br><br>전진호, 「유튜브(YouTube) 이용 형태가유아 보호자의 미디어 교육 경험과필요성 차이 연구」, 유아교육ㆍ보육복지 연구, 26권 3호, p30
+
+> **미디어 이용 시간이 증가할수록 아동의 학교적응 수준이 낮아지는 것으로 드러났다.** <br><br>이민지; 송주현 , 「코로나19로 인한 아동의 미디어 이용 및 신체활동이 인지적, 정서적 집행기능을 매개로 학교적응에 미치는 영향」,
+육아정책연구, 17권 1호, p183 
+
+
+**_하지만 지금, 우리는 아동을 미디어와 완벽히 분리시킬 수 없지 않나요?_**
+흐름을 피할 수 없다면, 그것을 교육적으로 활용해야만 합니다.
+
+#### 🦊<span style="color:orange">**모모퐁**</span>은 이렇습니다.
+-  동화 속 인물에 대한 이해와 공감을 바탕으로 아이의 정서 발달에 도움이 됩니다!
+- 친구와 함께 읽고 그리는 경험을 통해 협동심을 길러요
+- 동화 속에 등장하는 오브젝트를 상상해 보며 창의력을 발달시켜요
+- 가족과 함께 동화 나라를 여행할 수도 있어요!
 
 
 ### 1) 페르소나
-
+![Persona](./ETC/persona.png)
 
 ### 2) 고객 여정 지도
+![ClientMap](./ETC/clientmap.png)
 
 
 ### 3) 시장 조사
+- 시장 조사 결과 동화 구연 서비스는 다양하게 서비스되고 있었지만 RTC를 활용한 서비스는 확인하지 못함
+- 그림을 '함께'그리고 동화 속에 등장시키는 서비스 X
 
 ### 4) 차별점
+- 친구와의 실시간 소통 ✔️
+- 동화 속, 동화 밖 그림판 이용 ✔️
+- 동화 속 등장인물에게 편지 보내기 ✔️
 
 ### 5) 기대효과
+#### 🧒아이 측면
+- 동화 대사 읽기를 통한 언어 발달 촉진
+- 등장인물에게 몰입하고 친구와의 교류를 통한 정서 발달
+- 협력을 통한 사회성 발달
+
+#### 👫부모 측면
+- 효과적인 교육 도구로써 활용 가능
+- 아이의 독서 경향성 파악 가능
+- 부모와 자녀의 새로운 소통 창구
+
+
+
+## 1️⃣ 프로젝트 구조
+### 사용한 기술 스택
+- **Front-end** <br>
+![React](https://img.shields.io/badge/React-61DAFB?style=flat-square&logo=React&logoColor=black)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=TypeScript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-06B6D4?style=flat-square&logo=TailwindCSS&logoColor=white)
+![React Router](https://img.shields.io/badge/React_Router-CA4245?style=flat-square&logo=reactrouter&logoColor=white)
+![Zustand](https://img.shields.io/badge/Zustand-brown?style=flat-square&logo=npm&logoColor=white)
+![WebSocket](https://img.shields.io/badge/WebSocket-010101?style=flat-square&logo=socketdotio&logoColor=white)
+![WebRTC](https://img.shields.io/badge/WebRTC-333333?style=flat-square&logo=webrtc&logoColor=white)
+![Axios](https://img.shields.io/badge/Axios-5A29E4?style=flat-square&logo=axios&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat-square&logo=eslint&logoColor=white)
+
+- **Back-end** <br>
+
+- **Infra** <br>
+
+---
+
+### Back-end
+```
+src
+├─main
+│  ├─generated
+│  ├─java
+│  │  └─com
+│  │      └─ssafy
+│  │          └─project
+│  │              ├─common
+│  │              ├─config
+│  │              ├─controller
+│  │              ├─dao
+│  │              ├─domain
+│  │              │  ├─book
+│  │              │  ├─record
+│  │              │  └─type
+│  │              ├─dto
+│  │              │  ├─book
+│  │              │  ├─friend
+│  │              │  ├─invitation
+│  │              │  ├─record
+│  │              │  ├─report
+│  │              │  └─user
+│  │              ├─exception
+│  │              │  └─friend
+│  │              ├─firebase
+│  │              ├─handler
+│  │              ├─repository
+│  │              ├─security
+│  │              └─service
+│  └─resources
+└─test
+    └─java
+        └─com
+            └─ssafy
+                └─project
+                    ├─security
+                    └─service
+```
+### Front-end
+```
+ ├── src
+ ├──  │   api
+ ├──  │    │   axios.ts
+ ├──  │    │   storyApi.ts
+ ├──  │   App.css
+ ├──  │   App.tsx
+ ├──  │   components
+ ├──  │    │   auth
+ ├──  │    │    │   CustomInput.tsx
+ ├──  │    │   BackgroundMusic.tsx
+ ├──  │    │   common
+ ├──  │    │    │   buttons
+ ├──  │    │    │    │   ...
+ ├──  │    │    │   LoadingPage.tsx
+ ├──  │    │    │   modals
+ ├──  │    │    │    │   AddFriendModal.tsx
+ ├──  │    │    │    │   ...
+ ├──  │    │    │   multiplayPages
+ ├──  │    │    │    │   InvitationWaitPage.tsx
+ ├──  │    │    │    │   NetworkerrorPage.tsx
+ ├──  │    │    │   numberpad
+ ├──  │    │    │    │   NumberPad.tsx
+ ├──  │    │    │   PopText.tsx
+ ├──  │    │    │   ...
+ ├──  │    │   drawing
+ ├──  │    │    │   canvasComponents
+ ├──  │    │    │    │   Color.tsx
+ ├──  │    │    │    │   ...
+ ├──  │    │    │   data
+ ├──  │    │    │    │   colorList.ts
+ ├──  │    │    │   drawingMode
+ ├──  │    │    │    │   DrawingPage.tsx
+ ├──  │    │    │    │   ...
+ ├──  │    │    │   hooks
+ ├──  │    │    │    │   useSocketStore.ts
+ ├──  │    │    │   modeSelection
+ ├──  │    │    │    │   DrawingModeSelection.tsx
+ ├──  │    │    │    │   DrawingTemplateSelection.tsx
+ ├──  │    │    │   types
+ ├──  │    │    │    │   custom.d.ts
+ ├──  │    │    │    │   drawing.d.ts
+ ├──  │    │    │    │   socket.d.ts
+ ├──  │    │   friends
+ ├──  │    │    │   FriendList.tsx
+ ├──  │    │    │   ...
+ ├──  │    │   ImageUpload.tsx
+ ├──  │    │   myhouse
+ ├──  │    │    │   mybookstory.tsx
+ ├──  │    │    │   ...
+ ├──  │    │   parentReport
+ ├──  │    │    │   components
+ ├──  │    │    │    │   DonutChart.tsx
+ ├──  │    │    │   tabs
+ ├──  │    │    │    │   ...
+ ├──  │    │   ProtectedRoute.tsx
+ ├──  │    │   stories
+ ├──  │    │    │   AudioPlayer.tsx
+ ├──  │    │    │   data
+ ├──  │    │    │    │   cinderella.ts
+ ├──  │    │    │   ModeSelection
+ ├──  │    │    │    │   ModeSelection.tsx
+ ├──  │    │    │   StoryContainer.tsx
+ ├──  │    │    │   StoryMode
+ ├──  │    │    │    │   IntegratedRoom.tsx
+ ├──  │    │    │    │   ...
+ ├──  │    │    │   types
+ ├──  │    │    │    │   story.ts
+ ├──  │    │    │   utils
+ ├──  │    │    │    │   audioHelper.ts
+ ├──  │    │    │    │   audioUtils.ts
+ ├──  │    │   video
+ ├──  │    │    │   AudioComponent.tsx
+ ├──  │    │    │   ...
+ ├──  │   env.d.ts
+ ├──  │   hooks
+ ├──  │    │   useFirebaseMessaging.ts
+ ├──  │   index.css
+ ├──  │   lib
+ ├──  │    │   utils.ts
+ ├──  │   main.tsx
+ ├──  │   pages
+ ├──  │    │   auth
+ ├──  │    │    │   Login.tsx
+ ├──  │    │    │   SignUp.tsx
+ ├──  │    │   Drawing.tsx
+ ├──  │    │   ...
+ ├──  │    │   subAccount
+ ├──  │    │    │   SubAccountForm.tsx
+ ├──  │    │    │   ...
+ ├──  │    │   Test.tsx
+ ├──  │   services
+ ├──  │    │   firebaseService.ts
+ ├──  │    │   tokenService.ts
+ ├──  │   stores
+ ├──  │    │   authStore.ts
+ ├──  │    │   book
+ ├──  │    │    │   bookContentStore.ts
+ ├──  │    │    │   ...
+ ├──  │    │   drawing
+ ├──  │    │    │   base64ToBlob.ts
+ ├──  │    │    │   ...
+ ├──  │    │   friendListStore.ts
+ ├──  │    │   friendRequestStore.ts
+ ├──  │    │   friendStore.ts
+ ├──  │    │   letter
+ ├──  │    │    │   letterStore.ts
+ ├──  │    │    │   recentLetterStore.ts
+ ├──  │    │   loginStore.ts
+ ├──  │    │   ...
+ ├──  │   types
+ ├──  │    │   auth.ts
+ ├──  │    │   ...
+ ├──  │   utils
+ ├──  │    │   auth.ts
+ ├──  │    │   bookS3
+ ├──  │    │    │   bookRecordCreate.ts
+ ├──  │    │    │   ...
+ ├──  │    │   drawingS3
+ ├──  │    │    │   drawingLoad.ts
+ ├──  │    │    │   ...
+ ├──  │    │   letterS3
+ ├──  │    │    │   audioLoad.ts
+ ├──  │    │    │   ...
+ ├── tailwind.config.js
+ ├── tsconfig.json
+ ├── tsconfig.node.json
+ ├── vite.config.ts
+
+```
+
+## 2️⃣ 산출물
+### 📌 ERD
+![ERD](./ETC/ERD.png)
+
+### 📌 시스템 아키텍처
+![architecture](./ETC/architecture.png)
+
+### Figma
+[🍬Figma로 이동](https://www.figma.com/design/PbHZbvgzpNscVgBcnAUBdU/%EC%82%BC%EC%A1%B0%ED%95%91-%EA%B3%B5%ED%86%B5?node-id=231-460&t=PIwqd8sr5L64774w-1)
+
 
 ## 1️⃣ Jira Sprint
 ### Step1. Sub-PTJ 1
