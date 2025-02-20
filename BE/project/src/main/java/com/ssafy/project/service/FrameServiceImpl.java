@@ -33,7 +33,7 @@ public class FrameServiceImpl implements FrameService {
 
     private final AmazonS3 amazonS3;
 
-    private final PresignedUrlService presignedUrlService;
+    private final CloudFrontService cloudFrontService;
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
@@ -63,7 +63,8 @@ public class FrameServiceImpl implements FrameService {
         return frames.stream()
                 .map(frame -> {
                     FrameDto frameDto = Frame.entityToDto(frame);
-                    frameDto.updateFrameUrl(presignedUrlService.getFile(frameDto.getFrameFileName()));
+                    frameDto.updateFrameUrl(cloudFrontService.getSignedUrl(frameDto.getFrameFileName()));
+//                    frameDto.updateFrameUrl(presignedUrlService.getFile(frameDto.getFrameFileName()));
 
                     return frameDto;
                 })
