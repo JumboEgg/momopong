@@ -23,7 +23,7 @@ function Parent() {
   const {
     childIdx, setChildIdx,
     reportTab, setReportTab,
-    setAnalysis, setHistory, setSketches, setLetters,
+    setAnalysis, setHistory, setBooks, setSketches, setLetters,
   } = useReportStore();
 
   // index 초기화
@@ -47,6 +47,7 @@ function Parent() {
     if (!subAccounts) return;
     setAnalysis(subAccounts[childIdx].childId);
     setHistory(subAccounts[childIdx].childId);
+    setBooks(subAccounts[childIdx].childId);
     setSketches(subAccounts[childIdx].childId);
     setLetters(subAccounts[childIdx].childId);
   }, [childIdx]);
