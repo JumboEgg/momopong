@@ -73,17 +73,32 @@ function SaveButton({ canvasRef, userRole, endDrawing }: SaveButtonProps) {
         };
       };
     } else {
-      tempCtx.fillStyle = 'white';
-      tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
-      tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
+      // TODO: 촬영용 이미지 생성용. 추후 제거
+      const bgImg = new Image();
+      bgImg.src = bgImgSrc;
+      bgImg.onload = () => {
+        tempCtx.drawImage(bgImg, 0, 0, canvasWidth, canvasHeight);
+        tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
 
-      const outlineImg = new Image();
-      outlineImg.src = outlineImgSrc;
-      outlineImg.onload = () => {
-        tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
-        const dataURL = tempCanvas.toDataURL('image/webp');
-        setImageData(dataURL);
+        const outlineImg = new Image();
+        outlineImg.src = outlineImgSrc;
+        outlineImg.onload = () => {
+          tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
+          const dataURL = tempCanvas.toDataURL('image/webp');
+          setImageData(dataURL);
+        };
       };
+      // tempCtx.fillStyle = 'white';
+      // tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+      // tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
+
+      // const outlineImg = new Image();
+      // outlineImg.src = outlineImgSrc;
+      // outlineImg.onload = () => {
+      //   tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
+      //   const dataURL = tempCanvas.toDataURL('image/webp');
+      //   setImageData(dataURL);
+      // };
     }
 
     console.log('drawingCompleted', drawingCompleted);
