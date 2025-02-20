@@ -250,7 +250,7 @@ function TogetherMode() {
       hasRecordBlob: !!recordBlob.current,
     });
 
-    if (currentContent?.role === 'narration') {
+    if (inviterId === myId && currentContent?.role === 'narration') {
       addAudioToList(null);
     } else if (currentContent?.role === myRole) {
       addAudioToList(recordBlob.current);

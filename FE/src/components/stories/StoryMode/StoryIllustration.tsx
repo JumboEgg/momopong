@@ -45,7 +45,7 @@ function StoryIllustration({
       {hasObject && position && (
       <img
         src={position.sketchPath} // position에 이미지 URL이 포함되어 있다고 가정
-        alt="Overlay Object"
+        alt="Overlay Object" // TODO : 정상 동작 테스트. 안 되면 합성한 이미지로 대체
         className="absolute"
         style={{
             top: `${position.y / 10}%`, // %로 위치 지정

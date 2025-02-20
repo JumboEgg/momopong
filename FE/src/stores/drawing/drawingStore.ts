@@ -4,7 +4,6 @@ import makeDrawingRecord from '@/utils/drawingS3/drawingRecordCreate';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// Drawing 상태 관리 스토어
 interface DrawingStore {
   mode: DrawingMode | null;
   setMode: (mode: DrawingMode | null) => void;
@@ -22,7 +21,6 @@ interface DrawingStore {
   setSessionId: (data: DrawingParticipationRecordData) => void;
 }
 
-// Zustand 상태 훅 생성
 const useDrawingStore = create<DrawingStore>()(
   persist(
     (set) => ({
@@ -53,8 +51,6 @@ const useDrawingStore = create<DrawingStore>()(
     {
       name: 'drawing-storage',
       partialize: (state) => Object.fromEntries(
-        // TODO : 새로고침 시 페이지 생성 시 초기화 설정 때문에 의미가 없다
-        // 개선 방안 고려
         Object.entries(state)
           .filter(([key]) => ['mode', 'template', 'imageData', 'sessionId']
             .includes(key)),
@@ -63,5 +59,4 @@ const useDrawingStore = create<DrawingStore>()(
   ),
 );
 
-// Zustand에서 상태를 가져오는 커스텀 훅
 export const useDrawing = (): DrawingStore => useDrawingStore();
