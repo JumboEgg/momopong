@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 public class LetterServiceImpl implements LetterService {
 
     private final AmazonS3 amazonS3;
-    private final PresignedUrlService presignedUrlService;
+    private final CloudFrontService cloudFrontService;
 
     @Value("${openai.api.key}")
     private String apiKey;
@@ -134,7 +134,8 @@ public class LetterServiceImpl implements LetterService {
         return letters.stream()
                 .map(letter -> {
                     LetterDto letterDto = Letter.entityToDto(letter);
-                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
+                    letterDto.updateletterUrl(cloudFrontService.getSignedUrl(letterDto.getLetterFileName()));
+//                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
 
                     return letterDto;
                 })
@@ -160,7 +161,8 @@ public class LetterServiceImpl implements LetterService {
         return todayLetters.stream()
                 .map(letter -> {
                     LetterDto letterDto = Letter.entityToDto(letter);
-                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
+                    letterDto.updateletterUrl(cloudFrontService.getSignedUrl(letterDto.getLetterFileName()));
+//                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
                     return letterDto;
                 })
                 .collect(Collectors.toList());
