@@ -60,7 +60,7 @@ function StoryIllustration({
       {/* 이전, 다음 버튼 */}
       <div className="px-4">
         {
-          !isFirst
+          !isFirst && !userRole
           ? (
             <IconCircleButton
               size="sm"
@@ -72,7 +72,7 @@ function StoryIllustration({
           ) : null
         }
         {
-          !isLast
+          !isLast && !userRole
           ? (
             <IconCircleButton
               size="sm"

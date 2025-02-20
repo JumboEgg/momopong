@@ -10,6 +10,7 @@ import { useReadingHistoryContent } from '@/stores/book/readingHistoryContentSto
 import { IconCircleButton, TextCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faArrowLeft, faVolumeHigh, faVolumeMute } from '@fortawesome/free-solid-svg-icons';
+import useSubAccountStore from '@/stores/subAccountStore';
 import StoryIllustration from './StoryIllustration';
 import AudioPlayer from '../AudioPlayer';
 
@@ -94,7 +95,11 @@ function RecordReadingMode(): ReactElement {
   const handleGoHome = useCallback(() => {
     stopCurrentAudio();
     setCurrentIndex(0);
-    navigate('/house/mybookstory');
+    if (useSubAccountStore.getState().selectedAccount) {
+      navigate('/house/mybookstory');
+    } else {
+      navigate('/parent');
+    }
   }, [navigate, stopCurrentAudio]);
 
   const currentPage = readingHistoryContent?.pages[currentIndex];

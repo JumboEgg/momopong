@@ -142,7 +142,7 @@ function Landing(): JSX.Element {
                     <img
                       src="/images/pageImg/bookListImg.png"
                       alt="모모퐁 보유 동화책 목록"
-                      className="w-[30vw] mt-2"
+                      className="h-[30vh] mt-2"
                     />
                   </div>
                   <div className="text-3xl font-[BMJUA] flex flex-col items-center justify-center">
@@ -150,7 +150,7 @@ function Landing(): JSX.Element {
                     <img
                       src="/images/pageImg/templateListImg.png"
                       alt="모모퐁 보유 동화책 목록"
-                      className="w-[30vw] mt-2"
+                      className="h-[30vh] mt-2"
                     />
                   </div>
                 </div>
@@ -159,7 +159,7 @@ function Landing(): JSX.Element {
                   <img
                     src="/images/pageImg/reportImg.png"
                     alt="어린이 활동 리포트 화면"
-                    className="w-[30vw] mt-2"
+                    className="h-[30vh] mt-2"
                   />
                 </div>
               </div>

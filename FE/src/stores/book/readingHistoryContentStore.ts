@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { BookContentInfo } from '@/types/book';
 import sortContent from '@/utils/bookS3/bookRecordSort';
+import { persist } from 'zustand/middleware';
 
 interface ReadingHistoryContentStore {
   readingHistoryContent: BookContentInfo | null;
@@ -9,9 +10,10 @@ interface ReadingHistoryContentStore {
 }
 
 const useReadingHistoryContentStore = create<ReadingHistoryContentStore>()(
+  persist(
     (set) => ({
-        readingHistoryContent: null,
-        setReadingHistoryContent: async (bookId) => {
+      readingHistoryContent: null,
+      setReadingHistoryContent: async (bookId) => {
         try {
           const { accessToken } = useSubAccountStore.getState().childToken;
           const account = useSubAccountStore.getState().selectedAccount;
@@ -39,7 +41,13 @@ const useReadingHistoryContentStore = create<ReadingHistoryContentStore>()(
           throw error;
         }
       },
-    }
+    }),
+    {
+      name: 'reading-history-content-storage',
+      partialize: (state) => ({
+        readingHistoryContent: state.readingHistoryContent,
+      }),
+    },
   ),
 );
 
