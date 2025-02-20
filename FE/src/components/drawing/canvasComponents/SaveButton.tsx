@@ -1,4 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import {
+ useState, useCallback, useEffect, useRef,
+} from 'react';
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
@@ -6,12 +8,13 @@ import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { useRecordList } from '@/stores/book/bookRecordListStore';
+import { useStory } from '@/stores/storyStore';
 import useSocketStore from '../hooks/useSocketStore';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
   userRole?: 'role1' | 'role2';
-  handleNext?: () => void;
+  endDrawing?: () => void;
 }
 
 interface DrawingMessageData {
@@ -20,13 +23,16 @@ interface DrawingMessageData {
   roomId?: string;
 }
 
-function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
+function SaveButton({ canvasRef, userRole, endDrawing }: SaveButtonProps) {
   const { mode, template, setImageData } = useDrawing();
   const { setDrawingResult } = useRecordList();
   const { socket, isConnected } = useSocketStore();
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
   const [drawingCompleted, setDrawingCompleted] = useState(false);
   const [partnerCompleted, setPartnerCompleted] = useState(false);
+
+  const { currentIndex, currentAudioIndex } = useStory();
+  const isEnded = useRef<boolean>(false);
 
   const canvasWidth = 1600;
   const canvasHeight = 1000;
@@ -121,6 +127,7 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
   }, [socket]);
 
   useEffect(() => {
+    if (isEnded.current) return; // 한 번 실행 후 막기
     // 두 명 모두 버튼을 눌렀으면 handleNext 실행
     console.log('drawingCompleted', drawingCompleted);
     console.log('partnerCompleted', partnerCompleted);
@@ -128,20 +135,18 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
     console.log('두 사용자 상태 확인:', {
       drawingCompleted,
       partnerCompleted,
-      handleNext: !!handleNext,
+      handleNext: !!endDrawing,
     });
 
-    if (drawingCompleted && partnerCompleted && handleNext) {
-      if (!handleNext) return;
-      // handleNext();
-      setTimeout(() => {
-        if (handleNext) {
-          console.log('handleNext 함수 실행');
-          handleNext();
-        }
-      }, 1000);
+    if (drawingCompleted && partnerCompleted && endDrawing) {
+      if (!endDrawing) return;
+      isEnded.current = true;
+        console.log('handleNext 함수 실행');
+        console.log('현재 page index: ', currentIndex);
+        console.log('현재 audio index: ', currentAudioIndex);
+        endDrawing();
     }
-  }, [drawingCompleted, partnerCompleted, handleNext]);
+  }, [drawingCompleted, partnerCompleted, endDrawing]);
 
   useEffect(() => {
     const updateSize = () => {
