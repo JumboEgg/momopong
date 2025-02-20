@@ -19,6 +19,8 @@ public interface BookRecordRepository extends JpaRepository<BookRecord, Long> {
         AND b.mode = 'MULTI'
         AND b.earlyExit = false
         AND b.endTime IS NOT NULL
+        ORDER BY b.startTime DESC
+        LIMIT 3
     """)
     List<BookRecord> findAllByChild(@Param("child") Child child);
 
