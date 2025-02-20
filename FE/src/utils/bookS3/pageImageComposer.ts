@@ -68,10 +68,12 @@ const pageImageComposer = async (pageInfo: PageInfo, drawingResult: string | nul
     tempCanvas.height = imgHeight;
 
     const pageImg = new Image();
+    pageImg.crossOrigin = 'anonymous';
     pageImg.src = pageInfo.pagePath;
     pageImg.onload = () => {
         tempCtx?.drawImage(pageImg, 0, 0, imgWidth, imgHeight);
         const objectImg = new Image();
+        objectImg.crossOrigin = 'anonymous';
         objectImg.src = drawingResult ?? '';
         objectImg.onload = () => {
             // 회전 처리

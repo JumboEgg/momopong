@@ -13,7 +13,7 @@ function DrawingModal({
 }: DrawingModalProps): JSX.Element {
   const handleConvert = () => {
     const img = new Image();
-    img.crossOrigin = 'Anonymous';
+    img.crossOrigin = 'anonymous';
     img.src = data.frameUrl;
 
     img.onload = () => {
