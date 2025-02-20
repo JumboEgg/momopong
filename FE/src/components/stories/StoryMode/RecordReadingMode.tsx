@@ -93,6 +93,7 @@ function RecordReadingMode(): ReactElement {
 
   const handleGoHome = useCallback(() => {
     stopCurrentAudio();
+    setCurrentIndex(0);
     navigate('/house/mybookstory');
   }, [navigate, stopCurrentAudio]);
 

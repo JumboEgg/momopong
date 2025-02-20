@@ -43,7 +43,7 @@ function App(): JSX.Element {
   } = useFirebaseMessaging();
 
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div className="fixed inset-0 overflow-hidden select-none">
       {' '}
       {/* 내부 스크롤을 위한 컨테이너 추가 */}
       <Routes>
