@@ -14,8 +14,12 @@ import {
   Track,
 } from 'livekit-client';
 import { useRoomStore } from '@/stores/roomStore';
+import { IconCircleButton } from '@/components/common/buttons/CircleButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
+import CircularTimer from '@/components/common/Timer';
 
-type VariantType = 'greeting' | 'story';
+type VariantType = 'greeting' | 'story' | 'drawing';
 
 interface IntegratedRoomProps {
   roomName: string;
@@ -25,12 +29,17 @@ interface IntegratedRoomProps {
   onRecordingComplete: (participantId: string, audioBlob?: Blob) => void;
   onRecordingStatusChange: (participantId: string, status: 'idle' | 'recording' | 'completed') => void;
   variant?: VariantType; // 레이아웃 variant 추가
+  onRecordIdReceived?: (recordData: { role1Id: number, role2Id: number }) => void;
+  role1RecordId: number | null;
+  role2RecordId: number | null;
+  isHost: boolean;
 }
 
 interface ParticipantTrack {
   participant: LocalParticipant | RemoteParticipant;
   trackPublication?: Track;
 }
+const getRoleColor = (role: 'role1' | 'role2') => (role === 'role1' ? 'border-8 border-pink-500' : 'border-8 border-blue-600');
 
 function IntegratedRoom({
   roomName,
@@ -40,6 +49,10 @@ function IntegratedRoom({
   onRecordingComplete,
   onRecordingStatusChange,
   variant = 'story',
+  onRecordIdReceived,
+  role1RecordId,
+  role2RecordId,
+  isHost,
 }: IntegratedRoomProps) {
   const [participants, setParticipants] = useState<ParticipantTrack[]>([]);
   const [isRecording, setIsRecording] = useState(false);
@@ -54,13 +67,31 @@ function IntegratedRoom({
     setPartnerReady,
   } = useRoomStore();
 
-  console.log('🎥 IntegratedRoom Received Props:', {
-    roomName,
-    participantName,
-    userRole,
-    isUserTurn,
-    variant,
-  });
+  const broadcastRecordIds = useCallback(() => {
+    console.log('Host status:', {
+      isHost,
+      role1RecordId,
+      role2RecordId,
+      roomState: room?.state,
+    });
+
+    if (!room || !isHost || !role1RecordId || !role2RecordId) return;
+
+    const message = {
+      type: 'record_ids',
+      content: {
+        role1Id: role1RecordId,
+        role2Id: role2RecordId,
+        timestamp: Date.now(), // 메시지 고유성을 위한 타임스탬프 추가
+      },
+    };
+
+    console.log('Broadcasting record IDs:', message);
+    room.localParticipant.publishData(
+      new TextEncoder().encode(JSON.stringify(message)),
+      { reliable: true },
+    );
+  }, [room, isHost, role1RecordId, role2RecordId]);
 
   // 토큰 가져오기
   const getToken = useCallback(async () => {
@@ -135,6 +166,9 @@ function IntegratedRoom({
     if (!isUserTurn || isRecording || !room) return;
 
     try {
+      // 마이크 활성화
+      await room.localParticipant.setMicrophoneEnabled(true);
+
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
           echoCancellation: true,
@@ -157,7 +191,7 @@ function IntegratedRoom({
         }
       };
 
-      recorder.onstop = () => {
+      recorder.onstop = async () => {
         const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
 
         if (audioBlob.size > 0 && room) {
@@ -167,6 +201,9 @@ function IntegratedRoom({
           // 상위 컴포넌트에 녹음 완료 알림
           onRecordingComplete(room.localParticipant.identity, audioBlob);
         }
+
+        // 마이크 비활성화
+        await room.localParticipant.setMicrophoneEnabled(false);
 
         // 스트림 정리
         stream.getTracks().forEach((track) => track.stop());
@@ -264,6 +301,9 @@ function IntegratedRoom({
               setPartnerReady(message.status);
             } else if (message.type === 'start_story') {
               confirmReady(message.status);
+            } else if (message.type === 'record_ids') {
+              if (!onRecordIdReceived) return;
+              onRecordIdReceived(message.content);
             }
           } catch (error) {
             console.error('데이터 처리 오류:', error);
@@ -286,6 +326,20 @@ function IntegratedRoom({
           });
 
         await newRoom.connect(import.meta.env.VITE_LIVEKIT_URL, token);
+
+        console.log('Host status after connection:', {
+          isHost,
+          role1RecordId,
+          role2RecordId,
+          roomState: newRoom.state,
+        });
+
+        if (isHost && role1RecordId && role2RecordId) {
+          setTimeout(() => {
+            broadcastRecordIds();
+          }, 1000); // 연결 안정화를 위한 약간의 지연
+        }
+
         if (!isMounted) {
           await newRoom.disconnect();
           return;
@@ -339,6 +393,19 @@ function IntegratedRoom({
     [mediaRecorder],
   );
 
+  useEffect(() => {
+    console.log('Host status in effect:', {
+      isHost,
+      role1RecordId,
+      role2RecordId,
+      roomState: room?.state,
+    });
+
+    if (isHost && role1RecordId && role2RecordId && room?.state === 'connected') {
+      broadcastRecordIds();
+    }
+  }, [isHost, role1RecordId, role2RecordId, room?.state, broadcastRecordIds]);
+
   // 타이머 effect 추가
   useEffect(() => {
     let timerId: NodeJS.Timeout;
@@ -375,54 +442,41 @@ function IntegratedRoom({
 
   const renderRecordingButton = () => {
     // greeting 모드에서는 녹음 버튼을 렌더링하지 않음
-    if (variant === 'greeting') {
-      return null;
+    if (variant === 'greeting' || variant === 'drawing') {
+      return <div />;
     }
     if (!isUserTurn) {
-      return null;
+      return <div />;
     }
 
     return (
       <div className="flex flex-col items-center gap-2">
-        {isRecording && (
-          <div className="w-32 h-2 bg-gray-200 rounded mb-2">
-            <div
-              className="h-full bg-red-500 rounded transition-all duration-1000"
-              style={{ width: `${(timeLeft / 20) * 100}%` }}
-            />
-          </div>
-        )}
-
-        <div className="flex gap-2">
-          <button
-            type="button"
+        {!isRecording
+        ? (
+          <IconCircleButton
+            size="md"
+            variant="story"
+            className=""
+            hasFocus
+            icon={<FontAwesomeIcon icon={faMicrophone} />}
             onClick={startRecording}
-            disabled={!isUserTurn || isRecording}
-            className={`
-              px-4 py-2 rounded-full text-white font-medium transition-colors whitespace-nowrap
-              ${isRecording ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-600'}
-            `}
-          >
-            {isRecording ? `${timeLeft}초` : '녹음 시작'}
-          </button>
-
-          {isRecording && (
-            <button
-              type="button"
-              onClick={stopRecording}
-              className="px-4 py-2 rounded-full text-white font-medium bg-green-500 hover:bg-green-600 transition-colors whitespace-nowrap"
-            >
-              완료
-            </button>
-          )}
-        </div>
+          />
+        ) : (
+          <CircularTimer
+            isActive
+            duration={20}
+            onComplete={stopRecording}
+            onClick={stopRecording}
+          />
+        )}
       </div>
     );
   };
 
   useEffect(() => {
     if (room) {
-      room.localParticipant.setMicrophoneEnabled(variant === 'greeting');
+      const shouldEnableMic = variant === 'greeting' || variant === 'drawing';
+      room.localParticipant.setMicrophoneEnabled(shouldEnableMic);
     }
   }, [variant, room]);
 
@@ -435,7 +489,12 @@ function IntegratedRoom({
     const isLocal = participant === room?.localParticipant;
 
     return (
-      <div className="relative w-96 h-64 bg-gray-800 rounded-lg overflow-hidden">
+      <div
+        className={`
+        relative w-full h-full bg-gray-800 rounded-xl overflow-hidden font-[BMJUA]
+        ${variant === 'story' && isLocal && isUserTurn ? getRoleColor(userRole) : 'border-transparent'}
+      `}
+      >
         <video
           ref={(element) => {
             if (element && trackPublication) {
@@ -458,7 +517,7 @@ function IntegratedRoom({
         >
           <span className={`
             text-white truncate
-            ${variant === 'greeting' ? 'text-base' : 'text-sm'}
+            ${variant === 'greeting' ? 'text-3xl' : 'text-sm'}
           `}
           >
             <span>{participant.name || participant.identity}</span>
@@ -479,13 +538,26 @@ function IntegratedRoom({
   // 방(화면)에 따른 레이아웃 변경
   if (variant === 'greeting') {
     return (
-      <div className="w-full max-w-4xl mx-auto mt-8">
-        <div className="grid grid-cols-2 gap-8 place-items-center">
+      <div className="w-full h-full flex">
+        <div className="w-1/2">
           {renderParticipantVideo(0)}
+        </div>
+        <div className="w-1/2">
           {renderParticipantVideo(1)}
         </div>
-        <div className="mt-8 flex justify-center">
-          {renderRecordingButton()}
+      </div>
+    );
+  }
+
+  if (variant === 'drawing') {
+    return (
+      <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
+        <div className="w-48 h-36 fixed bottom-8 left-8">
+          {renderParticipantVideo(0)}
+        </div>
+        {renderRecordingButton()}
+        <div className="w-48 h-36 fixed bottom-8 right-8">
+          {renderParticipantVideo(1)}
         </div>
       </div>
     );
@@ -493,9 +565,13 @@ function IntegratedRoom({
 
   return (
     <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
-      {renderParticipantVideo(0)}
+      <div className="w-96 h-72">
+        {renderParticipantVideo(0)}
+      </div>
       {renderRecordingButton()}
-      {renderParticipantVideo(1)}
+      <div className="w-96 h-72">
+        {renderParticipantVideo(1)}
+      </div>
     </div>
   );
 }

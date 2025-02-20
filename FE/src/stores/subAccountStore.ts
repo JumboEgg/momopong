@@ -13,6 +13,7 @@ interface SubAccount {
   daysSinceStart: number;
   code: string;
   firstLogin: boolean;
+  status?: 'OFFLINE' | 'ONLINE' | 'MATCHING' | 'READING' | 'DRAWING';
 }
 
 interface ChildLoginResponse {
@@ -30,6 +31,13 @@ interface CreateSubAccountRequest {
 
 interface CreateSubAccountResponse {
   id: number; // 서버에서 생성된 자식 계정의 ID만 반환
+}
+
+interface StatusResponse {
+  childId: number;
+  name: string;
+  profile: string;
+  status: 'ONLINE' | 'OFFLINE';
 }
 
 interface SubAccountState {
@@ -52,6 +60,7 @@ interface SubAccountState {
   loginSubAccount: (childId: number) => Promise<boolean>;
   logoutSubAccount: () => void;
   uploadProfileImage: (file: File) => Promise<string>;
+  updateChildStatus: () => Promise<void>;
 
   // 로컬 상태 관리
   setLoading: (status: boolean) => void;
@@ -111,17 +120,17 @@ const useSubAccountStore = create<SubAccountState>()(
           }
 
           const { user } = useAuthStore.getState();
-          console.log('Current User:', user);
+          // console.log('Current User:', user);
 
           if (!user?.parentId) {
             throw new Error('부모 계정 정보를 찾을 수 없습니다.');
           }
 
-          const parentToken = tokenService.getActiveToken(true);
-          console.log('Parent Token for request:', parentToken);
+          // const parentToken = tokenService.getActiveToken(true);
+          // console.log('Parent Token for request:', parentToken);
 
           const response = await api.get(`/parents/${user.parentId}/children`);
-          console.log('API Response:', response.data);
+          // console.log('API Response:', response.data);
 
           // 데이터 설정과 함께 로딩 상태 false로 변경
           set({
@@ -147,6 +156,36 @@ const useSubAccountStore = create<SubAccountState>()(
         }
       },
 
+      // 자식 상태 업데이트
+      updateChildStatus: async () => {
+        const { selectedAccount } = get();
+
+        if (!selectedAccount) {
+          return;
+        }
+
+        try {
+          const response = await api.get<StatusResponse>(
+            `/children/status/${selectedAccount.childId}`,
+          );
+
+          // 현재 선택된 계정의 상태 업데이트
+          set((state) => ({
+            selectedAccount: {
+              ...state.selectedAccount!,
+              status: response.data.status,
+            },
+            // subAccounts 배열도 업데이트
+            subAccounts: state.subAccounts
+              .map((account) => (account.childId === selectedAccount.childId
+                ? { ...account, status: response.data.status }
+                : account)),
+          }));
+        } catch (error) {
+          // console.error('Failed to update child status:', error);
+        }
+      },
+
       createSubAccount: async (data: CreateSubAccountRequest) => {
         const state = get();
 
@@ -158,27 +197,27 @@ const useSubAccountStore = create<SubAccountState>()(
         set({ isLoading: true, error: null });
 
         try {
-          console.log('Sending data to server:', data);
+          // console.log('Sending data to server:', data);
 
           const response = await api.post<CreateSubAccountResponse>(
             '/children/signup',
             data,
           );
 
-          console.log('Server response:', response);
+          // console.log('Server response:', response);
 
           await get().fetchSubAccounts();
           return response.data.id;
         } catch (error) {
           // AxiosError 타입 체크
           if (error instanceof AxiosError) {
-            console.error('Error response:', {
-              status: error.response?.status,
-              data: error.response?.data,
-              headers: error.response?.headers,
-            });
+            // console.error('Error response:', {
+            //   status: error.response?.status,
+            //   data: error.response?.data,
+            //   headers: error.response?.headers,
+            // });
           } else {
-            console.error('Non-Axios error:', error);
+            // console.error('Non-Axios error:', error);
           }
 
           const errorMessage = error instanceof Error
@@ -330,15 +369,17 @@ const useSubAccountStore = create<SubAccountState>()(
         try {
           const { selectedAccount } = get();
           if (selectedAccount?.childId) {
-            const token = tokenService.getActiveToken(true);
-            console.log('Logout 요청 전 토큰:', token);
-            console.log('Logout 요청 childId:', selectedAccount.childId);
+            tokenService.getActiveToken(true);
+            // const token = tokenService.getActiveToken(true);
+            // console.log('Logout 요청 전 토큰:', token);
+            // console.log('Logout 요청 childId:', selectedAccount.childId);
 
-            const response = await api.post('/children/logout', {
+            // const response = await api.post('/children/logout', {
+            await api.post('/children/logout', {
               childId: selectedAccount.childId.toString(),
             });
 
-            console.log('Logout 응답:', response);
+            // console.log('Logout 응답:', response);
           }
 
           // tokenService 초기화

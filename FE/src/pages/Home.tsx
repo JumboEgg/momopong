@@ -4,20 +4,21 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 import { getToken } from 'firebase/messaging';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
 import useRecentLetterStore from '@/stores/letter/recentLetterStore';
 import { tokenService, checkTokenRegistration } from '@/services/tokenService';
 import { useRoleStore } from '@/stores/roleStore';
+import { useSketchList } from '@/stores/drawing/sketchListStore';
 
 function HomePage() {
   const navigate = useNavigate();
-  const { selectedAccount } = useSubAccountStore();
+  const { selectedAccount, updateChildStatus } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
-  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'
-     | '/test' | '/book/letter'): void => {
+  const { setSketchList } = useSketchList();
+  const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'): void => {
     navigate(path);
   };
   const clearRoles = useRoleStore((state) => state.clearRoles); // clearRoles 함수
@@ -25,8 +26,18 @@ function HomePage() {
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
-  // console.log('Selected Account:', selectedAccount); // 선택된 계정 정보 확인
-  // console.log('Profile URL:', selectedAccount?.profile); // profile URL 확인
+
+  // updateChildStatus를 메모이제이션
+  const updateStatus = useCallback(() => {
+    if (selectedAccount) {
+      updateChildStatus();
+    }
+  }, [selectedAccount, updateChildStatus]);
+
+  // 상태 초기화는 마운트시 한 번만 실행
+  useEffect(() => {
+    updateStatus();
+  }, [updateStatus]);
 
   useEffect(() => {
     const registerFCMToken = async () => {
@@ -54,8 +65,25 @@ function HomePage() {
     clearRoles();
   }, []);
 
+  // useEffect(() => {
+  //   if (!selectedAccount) {
+  //     return undefined;
+  //   }
+
+  //   // 초기 상태 업데이트
+  //   updateChildStatus();
+
+  //   // 주기적으로 상태 업데이트 (선택사항)
+  //   const intervalId = setInterval(() => {
+  //     updateChildStatus();
+  //   }, 60000); // 1분마다 업데이트
+
+  //   return () => clearInterval(intervalId);
+  // }, [selectedAccount, updateChildStatus]);
+
   useEffect(() => {
     setRecentLetterList();
+    setSketchList();
   }, []);
 
   const handleOpenModal = () => {
@@ -86,7 +114,7 @@ function HomePage() {
           size="sm"
           shape="circle"
         />
-        <p className="text-xl mt-0.5">{selectedAccount?.name}</p>
+        <p className="text-sm font-[GeekbleMalang2WOFF2] md:text-xl mt-0.5">{selectedAccount?.name}</p>
       </button>
 
       <button
@@ -99,15 +127,7 @@ function HomePage() {
           alt="친구목록"
           className="w-[5vw] min-w-10 object-contain"
         />
-        <p className="text-sm md:text-xl mt-0.5">친구목록</p>
-      </button>
-
-      <button
-        type="button"
-        onClick={() => handleNavigation('/test')}
-        className="cursor-pointer flex flex-col items-center"
-      >
-        <p className="fixed top-5 left-[40%] text-xs mt-1 border-2">테스트</p>
+        <p className="text-sm font-[GeekbleMalang2WOFF2] md:text-xl mt-0.5">친구목록</p>
       </button>
 
       {isModalOpen && (

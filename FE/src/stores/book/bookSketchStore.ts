@@ -10,7 +10,6 @@ interface BookSketchStore {
   uploadSketch: (recordId: number) => void; // 자신의 bookRecordId 전달
 }
 
-// TODO : 그림 여러 개 사용 시 리스트로 변경
 // Zustand 상태 훅 생성
 const useBookSketchStore = create<BookSketchStore>()(
   persist(

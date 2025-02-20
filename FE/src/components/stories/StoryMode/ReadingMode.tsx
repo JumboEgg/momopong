@@ -12,8 +12,11 @@ import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
 import { BookParticiPationRecordData } from '@/types/book';
 import useSubAccountStore from '@/stores/subAccountStore';
 import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
-import StoryIllustration from './StoryIllustration';
+import { TextCircleButton } from '@/components/common/buttons/CircleButton';
+import { faVolumeHigh, faVolumeMute } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import AudioPlayer from '../AudioPlayer';
+import StoryIllustration from './StoryIllustration';
 
 function ReadingMode(): ReactElement {
   const navigate = useNavigate();
@@ -123,7 +126,7 @@ function ReadingMode(): ReactElement {
 
   const handleGoHome = useCallback(() => {
     stopCurrentAudio();
-    navigate('/home');
+    navigate('/book/letter');
   }, [navigate, stopCurrentAudio]);
 
   const currentPage = bookContent?.pages[currentIndex];
@@ -133,35 +136,17 @@ function ReadingMode(): ReactElement {
   const audioUrl = currentContent?.path ?? '';
 
   return (
-    <div className="w-[1600px] h-[1000px] mx-auto p-6 relative">
-      <div className="mb-6 flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-gray-800">
-          신데렐라
-          {' '}
-          <span className="text-base text-gray-600">
-            {currentPage?.pageNumber}
-            /
-            {bookContent?.totalPage ?? 0}
-          </span>
-          {' '}
-          <span className="text-sm text-gray-500">
-            (텍스트
-            {' '}
-            {currentContentIndex + 1}
-            /
-            {currentPage?.audios.length ?? 0}
-            )
-          </span>
-        </h2>
-        <button
-          type="button"
+    <div className="w-[100vw] h-[100vh] mx-auto relative">
+      <div className="fixed top-2 right-2 z-20">
+        <TextCircleButton
+          text={audioEnabled ? '내가 읽기' : '읽어주기'}
+          icon={audioEnabled
+            ? <FontAwesomeIcon icon={faVolumeHigh} />
+            : <FontAwesomeIcon icon={faVolumeMute} />}
+          size="sm"
+          variant="story"
           onClick={toggleAudio}
-          className={`px-4 py-2 rounded ${audioEnabled ? 'bg-green-500' : 'bg-gray-500'} text-white`}
-        >
-          음성
-          {' '}
-          <span>{audioEnabled ? 'ON' : 'OFF'}</span>
-        </button>
+        />
       </div>
 
       <StoryIllustration
@@ -173,6 +158,8 @@ function ReadingMode(): ReactElement {
         isLast={isLastPage && currentContentIndex === (currentPage?.audios.length ?? 0) - 1}
         currentContent={currentContent}
         illustration={currentPage?.pagePath ?? ''}
+        hasObject={currentPage?.hasObject ?? false}
+        position={currentPage?.position}
       />
 
       {audioEnabled && currentContent?.path && (
@@ -198,16 +185,16 @@ function ReadingMode(): ReactElement {
               <button
                 type="button"
                 onClick={handleRestart}
-                className="w-full py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-lg font-medium"
+                className="w-full py-3 bg-amber-300 text-white rounded-lg hover:bg-amber-400 transition-colors text-lg font-medium"
               >
-                다시 읽기
+                다시 읽을래
               </button>
               <button
                 type="button"
                 onClick={handleGoHome}
                 className="w-full py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-lg font-medium"
               >
-                홈으로 가기
+                다 읽었어!
               </button>
             </div>
           </div>

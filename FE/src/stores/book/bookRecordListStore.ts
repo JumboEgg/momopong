@@ -26,7 +26,8 @@ const useRecordListStore = create<RecordListStore>()(
           // narration은 기존 S3를 저장
           if (pageData.role === 'narration') {
             const data = pageData;
-            [data.audioPath] = getAudioSrcPath(pageData.audioPath);
+            const path = getAudioSrcPath(pageData.audioPath.split('?')[0]);
+            data.audioPath = path;
             data.pagePath = get().pageImage ?? data.pagePath;
             set({ recordList: [...get().recordList, pageData] });
             return;
@@ -51,6 +52,7 @@ const useRecordListStore = create<RecordListStore>()(
       },
       clearRecordList: () => set({ recordList: [] }),
       uploadRecord: async () => {
+        if (get().recordList.length === 0) return;
         try {
           const { accessToken } = useSubAccountStore.getState().childToken;
 

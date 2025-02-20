@@ -113,14 +113,14 @@ export const useReportStore = create<ReportStore>((set) => ({
       );
 
       if (!response.ok) {
-        throw new Error(`Loading failed: ${response.status}`);
+        throw new Error(`Upload failed: ${response.status}`);
       }
 
       const data = await response.json();
 
-      set({ sketches: data });
+      set({ books: data });
     } catch (error) {
-      console.error('Error loading sketches:', error);
+      console.error('Error uploading image:', error);
       throw error;
     }
   },

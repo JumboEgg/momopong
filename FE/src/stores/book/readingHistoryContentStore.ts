@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { BookContentInfo } from '@/types/book';
+import sortContent from '@/utils/bookS3/bookRecordSort';
 
 interface ReadingHistoryContentStore {
   readingHistoryContent: BookContentInfo | null;
@@ -32,7 +33,7 @@ const useReadingHistoryContentStore = create<ReadingHistoryContentStore>()(
 
             console.log('reading history list: ', data);
 
-            set({ readingHistoryContent: data });
+            set({ readingHistoryContent: sortContent(data) });
         } catch (error) {
           console.error('Error loading book content:', error);
           throw error;

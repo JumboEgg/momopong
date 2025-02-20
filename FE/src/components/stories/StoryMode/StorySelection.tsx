@@ -10,6 +10,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import { getCoverPath } from '@/utils/format/imgPath';
 import { useBookContent } from '@/stores/book/bookContentStore';
+import DialogModal from '@/components/common/modals/DialogModal';
 
 function StorySelection(): JSX.Element {
   const { bookList } = useBookList();
@@ -20,6 +21,7 @@ function StorySelection(): JSX.Element {
   const [startIndex, setStartIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
   const showPrevious = () => {
     setStartIndex((current) => Math.max(0, current - 6));
@@ -30,6 +32,10 @@ function StorySelection(): JSX.Element {
   };
 
   const handleStorySelect = (bookId: number) => { // storyId: string -> bookId: number
+    if (bookId > 2) {
+      setIsModalOpen(true);
+      return;
+    }
     try {
       setIsLoading(true);
       setError(null);
@@ -131,6 +137,16 @@ function StorySelection(): JSX.Element {
           </div>
         )}
       </div>
+      {isModalOpen
+      ? (
+        <DialogModal
+          type="info"
+          message1="아직 준비되지 않은 책이에요."
+          message2="다음에 다시 만나요!"
+          onConfirm={() => setIsModalOpen(false)}
+          onClose={() => setIsModalOpen(false)}
+        />
+      ) : null}
     </div>
   );
 }

@@ -23,6 +23,11 @@ function FriendSelection() {
   const { bookContent } = useBookContent();
   const { setBookId, bookId } = useStory();
   const [isWaitingResponse, setIsWaitingResponse] = useState(false);
+  // const [previousPath, setPreviousPath] = useState<string>(''); // 이전 경로 저장하는 state
+
+  const isStoryMode = location.pathname.startsWith('/story');
+  const targetContentId = isStoryMode ? bookId : template?.sketchId;
+  const targetContentType: ContentType = isStoryMode ? 'BOOK' : 'SKETCH';
 
   const {
     friends,
@@ -33,28 +38,46 @@ function FriendSelection() {
   } = useFriendListStore();
 
   const handleBack = () => {
-    const isStoryMode = location.pathname.startsWith('/story');
-
     if (isStoryMode) {
-      // Story 모드일 때는 bookId를 초기화하고 뒤로가기
-      setBookId(null); // useStory에서 가져온 setBookId 필요
-      window.history.back();
+      setBookId(null);
+      navigate('/story');
     } else {
-      // Drawing 모드일 때는 template을 초기화하고 drawing 페이지로
-      setTemplate(null); // useDrawing에서 가져온 setTemplate 필요
+      setTemplate(null);
       navigate('/drawing');
     }
-};
+  };
 
-  // 친구 목록 가져오기
+  // // 컴포넌트 마운트시 패스 저장
+  // useEffect(() => {
+  //   setPreviousPath(location.pathname);
+  // }, []);
+
+  // 잘못된 상태일 때만 초기화
+  useEffect(() => {
+    // 드로잉 모드인데 bookId가 있는 경우만 초기화
+    if (!isStoryMode && bookId) {
+      setBookId(null);
+    }
+    // 스토리 모드인데 template이 있는 경우만 초기화
+    if (isStoryMode && template) {
+      setTemplate(null);
+    }
+  }, [isStoryMode]);
+  // 친구 목록 페칭을 위한 useEffect
+
   useEffect(() => {
     const fetchFriends = async () => {
-      const targetContentId = template?.sketchId || bookId;
-      if (!targetContentId) return;
+      if (!targetContentId) {
+        console.log('No targetContentId:', {
+          template,
+          bookId,
+          pathname: location.pathname,
+          isStoryMode,
+        });
+        return;
+      }
 
       try {
-        const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK'; // template 유무로 구분
-
         await fetchOnlineFriends(targetContentId, targetContentType);
       } catch (err) {
         console.error('친구 목록 가져오기 실패:', err);
@@ -62,7 +85,7 @@ function FriendSelection() {
     };
 
     fetchFriends();
-  }, [template, bookId, fetchOnlineFriends]);
+  }, [targetContentId, targetContentType, fetchOnlineFriends]);
 
   const handleInviteFriend = async (inviteeId: number, friend: Friend) => {
     const currentChildId = tokenService.getCurrentChildId();
@@ -73,25 +96,16 @@ function FriendSelection() {
       return;
     }
 
-    // 대기 상태 설정
     setIsWaitingResponse(true);
 
     try {
-      const targetContentId = template?.sketchId || bookId;
-
-      // null 체크 추가
       if (!targetContentId) {
         throw new Error('콘텐츠 ID가 없습니다.');
       }
 
-      const targetContentType: ContentType = template ? 'SKETCH' : 'BOOK';
-
-      let contentTitle;
-      if (template) {
-        contentTitle = `함께 그리기: ${template.sketchTitle}`;
-      } else {
-        contentTitle = bookContent?.bookTitle;
-      }
+      const contentTitle = template
+        ? `함께 그리기: ${template.sketchTitle}`
+        : bookContent?.bookTitle;
 
       if (!contentTitle) {
         throw new Error('콘텐츠 제목이 없습니다.');
@@ -107,11 +121,7 @@ function FriendSelection() {
         contentTitle,
       });
 
-      const isStoryMode = location.pathname.startsWith('/story');
-      const path = isStoryMode ? '/story' : '/drawing';
-
-      // navigate 실행
-      navigate(path, {
+      navigate(isStoryMode ? '/story' : '/drawing', {
         state: {
           waitingForResponse: true,
           ...(isStoryMode
@@ -131,7 +141,7 @@ function FriendSelection() {
       });
     } catch (err) {
       console.error('친구 초대 실패:', err);
-      setIsWaitingResponse(false); // 에러 발생시 대기 상태 해제
+      setIsWaitingResponse(false);
     }
   };
 
@@ -143,7 +153,6 @@ function FriendSelection() {
         duration={10}
         onComplete={() => {
           setIsWaitingResponse(false);
-          const isStoryMode = location.pathname.startsWith('/story');
           navigate(isStoryMode ? '/story' : '/drawing', {
             state: { waitingForResponse: false },
             replace: true,

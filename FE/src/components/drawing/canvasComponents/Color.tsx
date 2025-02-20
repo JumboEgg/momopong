@@ -1,5 +1,5 @@
 import { useDrawing } from '@/stores/drawing/drawingStore';
-import colors, { simpleColors } from '../data/colorList';
+import colors from '../data/colorList';
 
 function Color({ color }: { color: string }): JSX.Element {
   const {
@@ -49,20 +49,9 @@ function Color({ color }: { color: string }): JSX.Element {
 function Palette() {
   const palette: JSX.Element[] = [];
 
-  const {
-    mode,
-  } = useDrawing();
-
-  if (mode === 'story') {
-    simpleColors.forEach((color) => {
-      palette.push(<Color key={color} color={color} />);
-    });
-  } else {
-    colors.forEach((color) => {
-      palette.push(<Color key={color} color={color} />);
-    });
-  }
-
+  colors.forEach((color) => {
+    palette.push(<Color key={color} color={color} />);
+  });
   return <span className="flex h-20 md:h-24 items-start self-start me-2">{palette}</span>;
 }
 

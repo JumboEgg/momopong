@@ -109,7 +109,7 @@ const handleInvitationAccept = async () => {
       } else if (contentType === 'BOOK') {
         navigate('/greeting', {
           state: {
-            roomName: `book-${contentId}`,
+            roomName: `book-${contentId}-${inviterId}`,
             participantName: inviterName,
             contentId,
             isInvitationAccepted: true,
@@ -186,19 +186,19 @@ const handleInvitationAccept = async () => {
           });
 
           if (token) {
-            console.log('FCM Token:', token);
+            // console.log('FCM Token:', token);
             const currentChildId = tokenService.getCurrentChildId();
             if (currentChildId) {
               await setFCMToken(currentChildId, token);
             }
           } else {
-            console.error('토큰 등록이 불가능합니다.');
+            // console.error('토큰 등록이 불가능합니다.');
           }
         } else if (permission === 'denied') {
-          console.error('web push 권한이 차단되었습니다.');
+          // console.error('web push 권한이 차단되었습니다.');
         }
       } catch (error) {
-        console.error('푸시 토큰 가져오는 중에 에러 발생', error);
+        // console.error('푸시 토큰 가져오는 중에 에러 발생', error);
       }
     };
 
@@ -293,10 +293,9 @@ const handleInvitationAccept = async () => {
               replace: true,
             });
           } else if (contentType === 'BOOK') {
-            // 인사방으로 먼저 이동
             navigate('/greeting', {
               state: {
-                roomName: `book-${contentId}`,
+                roomName: `book-${contentId}-${inviterId}`,
                 participantName: inviterName,
                 contentId,
                 isInvitationAccepted: true,

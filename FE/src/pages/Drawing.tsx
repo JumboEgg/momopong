@@ -1,17 +1,17 @@
-import DrawingSelection from '@/components/drawing/modeSelection/DrawingTemplateSelection';
 import DrawingModeSelection from '@/components/drawing/modeSelection/DrawingModeSelection';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import DrawingPage from '@/components/drawing/drawingMode/DrawingPage';
-import ResultPage from '@/components/drawing/drawingMode/ResultPage';
 import FriendSelection from '@/pages/FriendSelection';
-// import StoryDrawingPage from '@/components/drawing/drawingMode/StroyDrawingPage';
 import InvitationWaitPage from '@/components/common/multiplayPages/InvitationWaitPage';
 import NetworkErrorPage from '@/components/common/multiplayPages/NetworkerrorPage';
 import useSocketStore from '@/components/drawing/hooks/useSocketStore';
 import { useFriends } from '@/stores/friendStore';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { useSketchList } from '@/stores/drawing/sketchListStore';
+
+const DrawingSelection = lazy(() => import('@/components/drawing/modeSelection/DrawingTemplateSelection'));
+const DrawingPage = lazy(() => import('@/components/drawing/drawingMode/DrawingPage'));
+const ResultPage = lazy(() => import('@/components/drawing/drawingMode/ResultPage'));
 
 function Drawing() {
   const {
@@ -25,7 +25,7 @@ function Drawing() {
     setImageData,
   } = useDrawing();
 
-  const { sketchList, setSketchList } = useSketchList();
+  const { sketchList } = useSketchList();
   const {
     friend,
     setFriend,
@@ -35,8 +35,8 @@ function Drawing() {
   const { socket, setConnect, isConnected: socketConnected } = useSocketStore();
   const location = useLocation();
   const navigate = useNavigate();
-  console.log('Current location state:', location.state);
-  const { waitingForResponse, isAccepted } = location.state || {};
+  // console.log('Current location state:', location.state);
+  const { isAccepted } = location.state || {};
 
   // socketStore의 연결 상태 변화를 friendStore에 동기화
   useEffect(() => {
@@ -61,7 +61,6 @@ function Drawing() {
     } else if (!location.state) {
       setMode(null);
       setTemplate(null);
-      setSketchList();
       setPenColor('black');
       setIsErasing(false);
       setImageData('');
@@ -79,7 +78,7 @@ function Drawing() {
         if (socket && template) {
           const roomId = `drawing_${template.sketchId}`;
           socket.emit('join-room', roomId);
-          console.log(`Joining room: ${roomId}`);
+          // console.log(`Joining room: ${roomId}`);
 
           // friend 정보 설정
           if (location.state?.participantName && !friend) {
@@ -104,7 +103,6 @@ function Drawing() {
 
   const content = () => {
     const hasWaitingResponse = Boolean(location.state?.waitingForResponse);
-    console.log('Has waiting response:', hasWaitingResponse);
 
     if (hasWaitingResponse) {
       return (
@@ -126,7 +124,26 @@ function Drawing() {
     }
 
     if (!template) {
-      return <DrawingSelection />;
+      return (
+        <Suspense fallback={(
+          <div className="w-screen h-screen animate-fade-in">
+            <div className="w-screen h-screen">
+              <div className="fixed bottom-0 w-full h-[30%] min-h-20 bg-gradient-to-t from-black to-transparent" />
+              <img
+                src="/images/loadingImages/background.jpeg"
+                alt="loading"
+                className="w-full h-full object-cover object-center"
+              />
+              <div className="fixed bottom-10 right-10 text-white text-2xl md:text-3xl font-[BMJUA]">
+                <span>도화지를 준비하고 있어요</span>
+              </div>
+            </div>
+          </div>
+        )}
+        >
+          <DrawingSelection />
+        </Suspense>
+      );
     }
 
     if (!mode) {
@@ -135,8 +152,8 @@ function Drawing() {
     // 함께하기 모드일 때
     if (mode === 'together') {
       // 초대자 대기 상태
-      console.log('Mode:', mode);
-      console.log('Waiting for response:', waitingForResponse);
+      // console.log('Mode:', mode);
+      // console.log('Waiting for response:', waitingForResponse);
 
       // 연결 준비 상태 (초대 수락 직후)
       if (isAccepted || location.state?.participantName) {
@@ -165,21 +182,71 @@ function Drawing() {
       }
 
       if (!imageData) {
-        // console.log('Template data when rendering DrawingPage:', template); // template 데이터 확인
-        return <DrawingPage />;
+        return (
+          <Suspense fallback={(
+            <div className="w-screen h-screen">
+              <div className="fixed bottom-0 w-full h-[30%] min-h-20 bg-gradient-to-t from-black to-transparent" />
+              <img
+                src="/images/loadingImages/background.webp"
+                alt="loading"
+                className="w-full h-full object-cover object-center"
+              />
+              <div className="fixed bottom-10 right-10 text-white text-2xl md:text-3xl font-[BMJUA]">
+                <span>그림 도구를 준비하고 있어요</span>
+              </div>
+            </div>
+          )}
+          >
+            <DrawingPage />
+          </Suspense>
+        );
       }
     }
 
     // 싱글모드
     if (mode === 'single' && !imageData) {
-      return <DrawingPage />;
+      return (
+        <Suspense fallback={(
+          <div className="w-screen h-screen">
+            <div className="fixed bottom-0 w-full h-[30%] min-h-20 bg-gradient-to-t from-black to-transparent" />
+            <img
+              src="/images/loadingImages/background.webp"
+              alt="loading"
+              className="w-full h-full object-cover object-center"
+            />
+            <div className="fixed bottom-10 right-10 text-white text-2xl md:text-3xl font-[BMJUA]">
+              <span>그림 도구를 준비하고 있어요</span>
+            </div>
+          </div>
+        )}
+        >
+          <DrawingPage />
+        </Suspense>
+      );
     }
 
     // if (mode === 'story' && !imageData) {
     //   return <StoryDrawingPage />;
     // }
 
-    return <ResultPage />;
+    return (
+      <Suspense fallback={(
+        <div className="w-screen h-screen">
+          <div className="fixed bottom-0 w-full h-[30%] min-h-20 bg-gradient-to-t from-black to-transparent" />
+          <img
+            src="/images/loadingImages/background.webp"
+            alt="loading"
+            className="w-full h-full object-cover object-center"
+          />
+          <div className="fixed bottom-10 right-10 text-white text-2xl md:text-3xl font-[BMJUA]">
+            <span>작품을 옮기고 있어요</span>
+          </div>
+        </div>
+      )}
+      >
+        <ResultPage />
+      </Suspense>
+    );
   };
 
   return <div className="w-screen h-screen">{content()}</div>;

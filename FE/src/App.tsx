@@ -1,5 +1,4 @@
 import { Routes, Route } from 'react-router-dom'; // Router 제거
-// import ToastMessage from '@/components/common/Toast';
 import ToastContainer from '@/components/common/ToastContainer';
 import { useFirebaseMessaging } from './hooks/useFirebaseMessaging';
 
@@ -31,6 +30,7 @@ import LoadingPage from './components/common/LoadingPage';
 
 // 모달 컴포넌트
 import DialogModal from './components/common/modals/DialogModal';
+import RecordReadingMode from './components/stories/StoryMode/RecordReadingMode';
 
 function App(): JSX.Element {
   // 토스트 알림 추가할시 활성화하여 사용
@@ -43,7 +43,9 @@ function App(): JSX.Element {
   } = useFirebaseMessaging();
 
   return (
-    <div className="fixed inset-0 overflow-auto">
+    <div className="fixed inset-0 overflow-hidden select-none">
+      {' '}
+      {/* 내부 스크롤을 위한 컨테이너 추가 */}
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<Landing />} />
@@ -214,20 +216,32 @@ function App(): JSX.Element {
           )}
         />
 
+        {/* 동화 다시 보기 */}
+        <Route
+          path="/house/mybookstory/record"
+          element={(
+            <ProtectedRoute>
+              <RecordReadingMode />
+            </ProtectedRoute>
+          )}
+        />
+
       </Routes>
 
       {invitationModal.isOpen && invitationModal.data && (
-      <DialogModal
-        type="confirm"
-        message1={`${invitationModal.data.inviterName}이(가)`}
-        message2={
+        <DialogModal
+          type="confirm"
+          message1={`${invitationModal.data.inviterName}이(가)`}
+          message2={
       invitationModal.data.contentType === 'BOOK'
         ? `${invitationModal.data.contentTitle}을(를) 같이 읽고 싶어해요`
         : `${invitationModal.data.contentTitle}을(를) 같이 그리고 싶어해요`
     }
-        onConfirm={handleInvitationAccept}
-        onClose={handleInvitationReject}
-      />
+          onConfirm={() => {
+          handleInvitationAccept();
+        }}
+          onClose={handleInvitationReject}
+        />
 )}
       <ToastContainer />
     </div>

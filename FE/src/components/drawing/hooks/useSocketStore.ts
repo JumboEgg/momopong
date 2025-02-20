@@ -52,7 +52,7 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     set({ roomId });
     socket.emit('join-room', roomId);
-    console.info(`join-room: ${roomId}`);
+    // console.info(`join-room: ${roomId}`);
   },
   // 소켓 연결
   connectSocket: (invitationId?: string) => {
@@ -67,19 +67,19 @@ const useSocketStore = create<SocketStore>((set, get) => ({
     newSocket.connect();
 
     newSocket.on('connect', () => {
-      console.info('WebSocket 연결 성공!');
+      // console.info('WebSocket 연결 성공!');
       set({ isConnected: true }); // 소켓 store 자체에서 상태 관리
 
       const roomId = invitationId ? `drawing_${invitationId}` : null;
       if (roomId) {
         set({ roomId });
         newSocket.emit('join-room', roomId);
-        console.info(`join-room: ${roomId}`);
+        // console.info(`join-room: ${roomId}`);
       }
     });
 
     newSocket.on('disconnect', () => {
-      console.warn(' WebSocket 연결 종료');
+      // console.warn(' WebSocket 연결 종료');
       set({ socket: null, roomId: null, isConnected: false });
     });
 
@@ -92,12 +92,12 @@ const useSocketStore = create<SocketStore>((set, get) => ({
 
     if (roomId) {
       socket.emit('leave-room', roomId);
-      console.info(`leave-room: ${roomId}`);
+      // console.info(`leave-room: ${roomId}`);
     }
 
     socket.disconnect();
     set({ socket: null, roomId: null, isConnected: false });
-    console.warn('WebSocket 연결 종료');
+    // console.warn('WebSocket 연결 종료');
   },
 }));
 

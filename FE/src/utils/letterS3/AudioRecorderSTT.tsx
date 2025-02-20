@@ -5,10 +5,15 @@ import { useNavigate } from 'react-router-dom';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faMicrophone } from '@fortawesome/free-solid-svg-icons';
-// import { useBookContent } from '@/stores/book/bookContentStore';
+import { useRoleStore } from '@/stores/roleStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
+import useSubAccountStore from '@/stores/subAccountStore';
 
 function AudioRecorderSTT() {
-  // const { bookContent } = useBookContent();
+  const { bookContent } = useBookContent();
+  const {
+    role2UserId,
+  } = useRoleStore();
 
   const [isRecording, setIsRecording] = useState(false);
   const [voiceText, setVoiceText] = useState('');
@@ -29,7 +34,7 @@ function AudioRecorderSTT() {
   const setupWebSocket = async () => {
     if (webSocket.current) webSocket.current.close();
 
-    const base_url = 'ws://localhost:8081/api/book/letter/stt';
+    const base_url = 'wss://i12d103.p.ssafy.io/api/book/letter/stt';
     webSocket.current = new WebSocket(base_url);
 
     webSocket.current.onopen = async () => {
@@ -154,22 +159,12 @@ function AudioRecorderSTT() {
 
   useEffect(() => {
     if (!recordingBlob) return;
-
-    // const letter: LetterInfo = {
-    //   bookTitle: bookContent?.bookTitle ?? '',
-    //   role: bookContent?.role1 ?? '',
-    //   childName: '',
-    //   content: voiceText,
-    //   letterFileName: '',
-    //   letterUrl: '',
-    //   reply: '',
-    //   createdAt: '',
-    // };
+    const myInfo = useSubAccountStore.getState().selectedAccount;
 
     const letter: LetterInfo = {
-      bookTitle: '신데렐라',
-      role: '신데렐라',
-      childName: '',
+      bookTitle: bookContent?.bookTitle ?? '',
+      role: role2UserId === myInfo?.childId ? bookContent?.role2 ?? '' : bookContent?.role1 ?? '',
+      childName: myInfo?.name ?? '',
       content: voiceText,
       letterFileName: '',
       letterUrl: '',

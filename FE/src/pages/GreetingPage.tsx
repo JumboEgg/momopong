@@ -4,6 +4,8 @@ import { useRoomStore } from '@/stores/roomStore';
 import { useLocation, useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useRoleStore } from '@/stores/roleStore';
+import { useBookContent } from '@/stores/book/bookContentStore';
+import TextButton from '@/components/common/buttons/TextButton';
 import IntegratedRoom from '../components/stories/StoryMode/IntegratedRoom';
 
 interface GreetingPageProps {
@@ -19,7 +21,6 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     contentId?: number;
   };
   const selectedAccount = useSubAccountStore((state) => state.selectedAccount);
-  const [timeLeft, setTimeLeft] = useState(20);
   const [isReady, setIsReady] = useState(false);
   const {
     sendReadyStatus,
@@ -30,7 +31,8 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     room,
   } = useRoomStore();
 
-  const { role1UserId, role2UserId } = useRoleStore();
+  const { setBookContent } = useBookContent();
+  const { bookId, role1UserId, role2UserId } = useRoleStore();
   const myId = useSubAccountStore.getState().selectedAccount?.childId ?? 0;
 
   const determineUserRole = (userId: number | null, r1UserId: number | null) => {
@@ -54,6 +56,11 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     });
     return role;
   }, [myId, role1UserId]);
+
+  useEffect(() => {
+    if (!bookId) return;
+    setBookContent(bookId);
+  }, []);
 
   // 초대 수락으로 들어온 경우 추가 로직
   useEffect(() => {
@@ -104,8 +111,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
 }, [room, setPartnerReady, confirmReady]);
 
   const handleReady = () => {
-    console.log('🎯 handleReady 호출', {
-      timeLeft,
+    console.log('🎯handleReady 호출', {
       isReady,
       partnerReady,
       currentRoom: room ? {
@@ -114,7 +120,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       } : 'null',
     });
 
-    if (timeLeft > 0 && !isReady) {
+    if (!isReady) {
       // 1. 먼저 자신의 ready 상태를 true로 설정
       setIsReady(true);
       sendReadyStatus(true);
@@ -142,20 +148,6 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
       }
     }
   };
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setTimeLeft((prevTime) => {
-        if (prevTime <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prevTime - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   // 파트너의 준비 상태 및 스토리 시작 확인
   useEffect(() => {
@@ -217,55 +209,67 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
   ]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-screen bg-gray-100 p-6">
-      <div className="bg-white shadow-md rounded-lg p-8 text-center w-full max-w-md mb-4">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">인사 시간</h2>
-        <p className="text-lg mb-6 text-gray-600">
-          남은 시간:
-          <span className="font-bold text-blue-600 ml-2">
-            {timeLeft}
-            초
-          </span>
-        </p>
-
-        <button
-          type="button"
-          onClick={handleReady}
-          disabled={isReady || timeLeft === 0}
-          className={`
-            w-full py-3 rounded-lg font-semibold text-white transition-colors
-            ${isReady || timeLeft === 0
-              ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
-            }
-          `}
-        >
-          {isReady ? '대기 중...' : '시작하기'}
-        </button>
-
-        {isReady && partnerReady && (
-          <p className="mt-4 text-green-600 font-medium">
-            준비 완료! 곧 동화가 시작됩니다.
-          </p>
-        )}
-
-        {timeLeft === 0 && !isReady && (
-          <p className="mt-4 text-red-600 font-medium">
-            시간이 초과되었습니다.
-          </p>
-        )}
+    <div className="flex flex-col h-screen bg-gray-100">
+      {/* 헤더 */}
+      <div className="w-full bg-witch-haze-200 shadow-sm py-6">
+        <h1 className="text-center text-4xl font-semibold text-gray-800 font-[BMJUA]">
+          함께 동화를 읽을 친구와 짧게 인사해 봅시다
+        </h1>
       </div>
 
-      {/* 화상 비디오 영역 */}
-      <IntegratedRoom
-        roomName={roomName}
-        participantName={selectedAccount?.name || 'Anonymous'}
-        userRole={myRole}
-        isUserTurn
-        onRecordingComplete={() => {}}
-        onRecordingStatusChange={() => {}}
-        variant="greeting" // 이 prop 추가
-      />
+      {/* 메인 컨텐츠 영역 */}
+      <div className="flex-1 relative">
+        {/* 비디오 영역 */}
+        <div className="absolute inset-0">
+          <IntegratedRoom
+            roomName={roomName}
+            participantName={selectedAccount?.name || 'Anonymous'}
+            userRole={myRole}
+            isUserTurn
+            onRecordingComplete={() => { }}
+            onRecordingStatusChange={() => { }}
+            variant="greeting"
+            role1RecordId={null}
+            role2RecordId={null}
+            isHost={false}
+          />
+        </div>
+
+        {/* 중앙 버튼 컨테이너 */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <div className="rounded-lg p-6 pointer-events-auto text-center">
+            {/* 움직이는 GIF 이미지 */}
+            <div className="mb-1">
+              <img
+                src="/images/hiFox.gif"
+                alt="Waiting animation"
+                className="w-100 h-100 mx-auto"
+              />
+            </div>
+            <TextButton
+              size="lg"
+              variant="rounded"
+              onClick={handleReady}
+              disabled={isReady}
+              className={`
+                px-8 py-3 rounded-lg font-semibold text-black transition-colors
+                ${isReady
+                  ? 'bg-gray-400'
+                  : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
+                }
+              `}
+            >
+              {isReady ? '대기 중...' : '시작하기'}
+            </TextButton>
+
+            {isReady && partnerReady && (
+              <p className="mt-4 text-green-600 font-medium">
+                준비 완료! 곧 동화가 시작됩니다.
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

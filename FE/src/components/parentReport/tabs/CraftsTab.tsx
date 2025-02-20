@@ -2,6 +2,9 @@ import '@/components/common/scrollbar.css';
 import { useState } from 'react';
 import ReportLetterModal from '@/components/common/modals/ReportLetterModal';
 import { useReportStore } from '@/stores/reportStore';
+import { getCoverPath } from '@/utils/format/imgPath';
+import DialogModal from '@/components/common/modals/DialogModal';
+import { useNavigate } from 'react-router-dom';
 import DrawingModal from '../../common/modals/DrawingModal';
 
 interface CraftsTabProps {
@@ -9,19 +12,30 @@ interface CraftsTabProps {
 }
 
 function CraftsTab({ childName }: CraftsTabProps) {
+  const navigate = useNavigate();
   const {
     books, letters, sketches,
   } = useReportStore();
 
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-
   const [selectedCraftsTab, setSelectedCraftsTab] = useState<string>('reading');
-
   const [modal, setModal] = useState<JSX.Element | null>(null);
+
+  const readMyBook = () => {
+    navigate('/house/mybookstory/record');
+  };
 
   const openModal = (idx: number) => {
     if (selectedCraftsTab === 'reading') {
-      setModal(null);
+      setModal(
+        <DialogModal
+          type="confirm"
+          message1={`${childName}(이)가 만든`}
+          message2={`${books[idx].title}`}
+          onConfirm={() => readMyBook()}
+          onClose={() => setIsModalOpen(false)}
+        />,
+      );
     } else if (selectedCraftsTab === 'drawing') {
       setModal(
         <DrawingModal
@@ -49,7 +63,11 @@ function CraftsTab({ childName }: CraftsTabProps) {
       className="w-full p-1"
       onClick={() => openModal(idx)}
     >
-      <img src={book.bookPath} alt={book.title} className="w-full" />
+      <img
+        src={getCoverPath(book.bookPath)}
+        alt={book.title}
+        className="w-full rounded"
+      />
       <div className="font-[BMJUA]">{book.title}</div>
     </button>
   ));
@@ -73,10 +91,16 @@ function CraftsTab({ childName }: CraftsTabProps) {
     <button
       type="button"
       key={letter.letterFileName}
-      className="w-full aspect-square p-1 bg-pink-100 "
+      className="w-full aspect-4/3 p-1 bg-pink-100 text-xl font-[KyoboHandwriting2023wsa]"
       onClick={() => openModal(idx)}
     >
+      {'<'}
+      {letter.bookTitle}
+      {'>'}
+      의
+      {' '}
       {letter.role}
+      가 보낸 편지
     </button>
   ));
 

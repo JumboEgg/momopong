@@ -22,26 +22,21 @@ function RecentLetterList() {
           <button
             key={letter.letterFileName}
             type="button"
-            className="flex items-center m-1 p-3 bg-amber-200 rounded-2xl"
+            className="flex w-full items-center m-1 p-3 bg-amber-200 rounded-2xl"
             onClick={() => {
               setIsModalOpen(true);
               setSelectedLetter(letter);
             }}
           >
-            <img
-              src="/public/images/bookcover/cover_thelittlematchgirl.webp"
-              alt="sender placeholder"
-              className="w-10 aspect-square rounded-full me-4"
-            />
-            <div>
-              <div className="break-keep text-start">
-                <strong>{letter.bookTitle}</strong>
+            <div className="w-full font-[GeekbleMalang2WOFF2]">
+              <div className="break-keep text-start text-xl">
+                {letter.bookTitle}
                 의
                 {' '}
-                <strong>{letter.role}</strong>
+                {letter.role}
                 (이)가 편지를 보냈어요
               </div>
-              <div className="text-end text-sm">{letter.createdAt.substring(0, 10)}</div>
+              <div className="text-end text-md">{letter.createdAt.substring(0, 10)}</div>
             </div>
           </button>
         ))

@@ -29,7 +29,7 @@ function LoadingPage() {
     <div className="w-screen h-screen">
       <div className="fixed bottom-0 w-full h-[30%] min-h-20 bg-gradient-to-t from-black to-transparent" />
       <img
-        src="/images/loadingImages/background.jpeg"
+        src="/images/loadingImages/background.webp"
         alt="loading"
         className="w-full h-full object-cover object-center"
       />

@@ -1,32 +1,38 @@
+import {
+ useState, useCallback, useEffect, useRef,
+} from 'react';
 import TextButton, { ButtonSize } from '@/components/common/buttons/TextButton';
-import { useCallback, useEffect, useState } from 'react';
 import { useDrawing } from '@/stores/drawing/drawingStore';
 import { getBackgroundPath, getOutlinePath } from '@/utils/format/imgPath';
-import { useBookSketch } from '@/stores/book/bookSketchStore';
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSave } from '@fortawesome/free-solid-svg-icons';
 import { useRecordList } from '@/stores/book/bookRecordListStore';
+import { useStory } from '@/stores/storyStore';
+import useSocketStore from '../hooks/useSocketStore';
 
 export interface SaveButtonProps {
   canvasRef: HTMLCanvasElement | null;
+  userRole?: 'role1' | 'role2';
+  endDrawing?: () => void;
 }
 
-function SaveButton({ canvasRef }: SaveButtonProps) {
-  const {
-    mode, template, setImageData,
-  } = useDrawing();
+interface DrawingMessageData {
+  status: string;
+  sender: string;
+  roomId?: string;
+}
 
-  // TODO : story mode 저장 테스트 코드 삭제
-  const {
-    setSketch,
-  } = useBookSketch();
-
-  const {
-    setDrawingResult,
-  } = useRecordList();
-
+function SaveButton({ canvasRef, userRole, endDrawing }: SaveButtonProps) {
+  const { mode, template, setImageData } = useDrawing();
+  const { setDrawingResult } = useRecordList();
+  const { socket, isConnected } = useSocketStore();
   const [buttonSize, setButtonSize] = useState<ButtonSize>('sm');
+  const [drawingCompleted, setDrawingCompleted] = useState(false);
+  const [partnerCompleted, setPartnerCompleted] = useState(false);
+
+  const { currentIndex, currentAudioIndex } = useStory();
+  const isEnded = useRef<boolean>(false);
 
   const canvasWidth = 1600;
   const canvasHeight = 1000;
@@ -63,16 +69,10 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
         outlineImg.onload = () => {
           tempCtx.drawImage(outlineImg, 0, 0, canvasWidth, canvasHeight);
           const dataURL = tempCanvas.toDataURL('image/webp');
-
-          setImageData(dataURL);
-
-          // TODO : story mode sketch 저장 테스트 코드 삭제
-          setSketch(dataURL);
           setDrawingResult(dataURL);
         };
       };
     } else {
-      // endSketchSession();
       tempCtx.fillStyle = 'white';
       tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
       tempCtx.drawImage(currentCanvas, 0, 0, canvasWidth, canvasHeight);
@@ -85,7 +85,68 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
         setImageData(dataURL);
       };
     }
-  }, [canvasRef]);
+
+    console.log('drawingCompleted', drawingCompleted);
+    console.log('partnerCompleted', partnerCompleted);
+
+    // 버튼을 누르면 "대기 중.." 상태로 변경
+    setDrawingCompleted(true);
+
+    // 상대방에게 완료 신호 전송
+    if (socket && isConnected) {
+      const completeData = {
+        status: 'drawing-complete',
+        sender: userRole,
+      };
+      console.log('myRole:', userRole);
+      console.log('completeData', completeData);
+      socket.emit('drawing-complete', completeData);
+    }
+  }, [canvasRef, socket, isConnected]);
+
+  useEffect(() => {
+    // 상대방이 버튼을 눌렀을 때 이벤트 수신
+    console.log('drawingCompleted', drawingCompleted);
+    console.log('partnerCompleted', partnerCompleted);
+
+    if (!socket) return undefined;
+
+    // 상대방 그리기 완료 & 알림 보낸 사람이 상대방인 경우
+    const handlePartnerComplete = (data: DrawingMessageData) => {
+      if (data && data.status === 'drawing-complete' && data.sender !== userRole) {
+        console.log('상대방 완료 신호 수신:', data);
+        setPartnerCompleted(true);
+      }
+    };
+
+    socket.on('drawing-complete', handlePartnerComplete);
+
+    return () => {
+      socket.off('drawing-complete', handlePartnerComplete);
+    };
+  }, [socket]);
+
+  useEffect(() => {
+    if (isEnded.current) return; // 한 번 실행 후 막기
+    // 두 명 모두 버튼을 눌렀으면 handleNext 실행
+    console.log('drawingCompleted', drawingCompleted);
+    console.log('partnerCompleted', partnerCompleted);
+
+    console.log('두 사용자 상태 확인:', {
+      drawingCompleted,
+      partnerCompleted,
+      handleNext: !!endDrawing,
+    });
+
+    if (drawingCompleted && partnerCompleted && endDrawing) {
+      if (!endDrawing) return;
+      isEnded.current = true;
+        console.log('handleNext 함수 실행');
+        console.log('현재 page index: ', currentIndex);
+        console.log('현재 audio index: ', currentAudioIndex);
+        endDrawing();
+    }
+  }, [drawingCompleted, partnerCompleted, endDrawing]);
 
   useEffect(() => {
     const updateSize = () => {
@@ -100,11 +161,17 @@ function SaveButton({ canvasRef }: SaveButtonProps) {
 
   return (
     <div>
-      {
-        buttonSize === 'md'
-        ? <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">다 그렸어!</TextButton>
-        : <IconCircleButton icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />} size="sm" variant="story" />
-      }
+      {buttonSize === 'md' ? (
+        <TextButton className="ps-6 pe-6" onClick={saveCanvas} size={buttonSize} variant="rounded">
+          {drawingCompleted ? '대기 중..' : '다 그렸어!'}
+        </TextButton>
+      ) : (
+        <IconCircleButton
+          icon={<FontAwesomeIcon icon={faSave} onClick={saveCanvas} size="lg" />}
+          size="sm"
+          variant="story"
+        />
+      )}
     </div>
   );
 }
