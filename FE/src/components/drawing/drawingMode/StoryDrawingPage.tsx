@@ -70,7 +70,7 @@ function StoryDrawingPage({ roomName, userRole, handleNext }: StoryDrawingPagePr
           <SaveButton
             canvasRef={canvasRef}
             userRole={userRole}
-            handleNext={handleNext}
+            endDrawing={handleNext}
           />
         </span>
         <span className="content-end flex">
