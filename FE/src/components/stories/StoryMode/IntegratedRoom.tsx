@@ -490,7 +490,7 @@ function IntegratedRoom({
     return (
       <div
         className={`
-        relative w-full h-full bg-gray-800 rounded-xl overflow-hidden
+        relative w-full h-full bg-gray-800 rounded-xl overflow-hidden font-[BMJUA]
         ${variant === 'story' && isLocal && isUserTurn ? getRoleColor(userRole) : 'border-transparent'}
       `}
       >
@@ -516,7 +516,7 @@ function IntegratedRoom({
         >
           <span className={`
             text-white truncate
-            ${variant === 'greeting' ? 'text-base' : 'text-sm'}
+            ${variant === 'greeting' ? 'text-3xl' : 'text-sm'}
           `}
           >
             <span>{participant.name || participant.identity}</span>
