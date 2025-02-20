@@ -11,6 +11,7 @@ import { useFriends } from '@/stores/friendStore';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
 import makeBookRecord from '@/utils/bookS3/bookRecordCreate';
+import { useRoomStore } from '@/stores/roomStore';
 import { BookParticiPationRecordData, PageRecordData } from '@/types/book';
 import { useRoleStore } from '@/stores/roleStore';
 import endBookRecordSession from '@/utils/bookS3/bookRecordEnd';
@@ -60,6 +61,8 @@ function TogetherMode() {
     addRecord, uploadRecord,
     setPageImage,
   } = useRecordList();
+
+  const { room, setRoom } = useRoomStore();
 
   const navigate = useNavigate();
 
@@ -118,6 +121,19 @@ function TogetherMode() {
       setBookRecordId(recordData.role2Id);
     }
   }, [myRole, setBookRecordId, setRole1RecordId, setRole2RecordId]);
+
+  const handleBookCompletion = useCallback(async () => {
+    await endBookRecordSession(bookRecordId ?? 0);
+
+    if (room) {
+      console.log('Disconnecting from room');
+      await room.disconnect();
+      setRoom(null);
+    }
+
+    console.log('Navigating to letter page');
+    navigate('/book/letter');
+  }, [bookRecordId, room, setRoom, navigate]);
 
   // 읽기 기록 저장
   const saveReadingSession = async () => {
@@ -210,8 +226,7 @@ function TogetherMode() {
       setCurrentAudioIndex(0);
     } else {
       console.log('모든 페이지 완료, 종료');
-      endBookRecordSession(bookRecordId ?? 0);
-      navigate('/book/letter');
+      handleBookCompletion();
     }
 
     // if (currentContentIndex < currentPage.audios.length - 1) {
