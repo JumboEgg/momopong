@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import useSubAccountStore from '@/stores/subAccountStore';
 import { useRoleStore } from '@/stores/roleStore';
 import { useBookContent } from '@/stores/book/bookContentStore';
+import TextButton from '@/components/common/buttons/TextButton';
 import IntegratedRoom from '../components/stories/StoryMode/IntegratedRoom';
 
 interface GreetingPageProps {
@@ -211,7 +212,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
     <div className="flex flex-col h-screen bg-gray-100">
       {/* 헤더 */}
       <div className="w-full bg-witch-haze-200 shadow-sm py-6">
-        <h1 className="text-center text-2xl font-semibold text-gray-800">
+        <h1 className="text-center text-4xl font-semibold text-gray-800 font-[BMJUA]">
           함께 동화를 읽을 친구와 짧게 인사해 봅시다
         </h1>
       </div>
@@ -236,13 +237,22 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
 
         {/* 중앙 버튼 컨테이너 */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="bg-white/40 shadow-lg rounded-lg p-6 backdrop-blur-sm pointer-events-auto text-center">
-            <button
-              type="button"
+          <div className="rounded-lg p-6 pointer-events-auto text-center">
+            {/* 움직이는 GIF 이미지 */}
+            <div className="mb-1">
+              <img
+                src="/images/hiFox.gif"
+                alt="Waiting animation"
+                className="w-100 h-100 mx-auto"
+              />
+            </div>
+            <TextButton
+              size="lg"
+              variant="rounded"
               onClick={handleReady}
               disabled={isReady}
               className={`
-                px-8 py-3 rounded-lg font-semibold text-white transition-colors
+                px-8 py-3 rounded-lg font-semibold text-black transition-colors
                 ${isReady
                   ? 'bg-gray-400'
                   : 'bg-blue-500 hover:bg-blue-600 active:bg-blue-700'
@@ -250,7 +260,7 @@ function GreetingPage({ onBothReady }: GreetingPageProps) {
               `}
             >
               {isReady ? '대기 중...' : '시작하기'}
-            </button>
+            </TextButton>
 
             {isReady && partnerReady && (
               <p className="mt-4 text-green-600 font-medium">
