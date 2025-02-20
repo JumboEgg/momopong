@@ -120,7 +120,7 @@ const useSubAccountStore = create<SubAccountState>()(
           }
 
           const { user } = useAuthStore.getState();
-          console.log('Current User:', user);
+          // console.log('Current User:', user);
 
           if (!user?.parentId) {
             throw new Error('부모 계정 정보를 찾을 수 없습니다.');
@@ -182,7 +182,7 @@ const useSubAccountStore = create<SubAccountState>()(
                 : account)),
           }));
         } catch (error) {
-          console.error('Failed to update child status:', error);
+          // console.error('Failed to update child status:', error);
         }
       },
 
@@ -197,27 +197,27 @@ const useSubAccountStore = create<SubAccountState>()(
         set({ isLoading: true, error: null });
 
         try {
-          console.log('Sending data to server:', data);
+          // console.log('Sending data to server:', data);
 
           const response = await api.post<CreateSubAccountResponse>(
             '/children/signup',
             data,
           );
 
-          console.log('Server response:', response);
+          // console.log('Server response:', response);
 
           await get().fetchSubAccounts();
           return response.data.id;
         } catch (error) {
           // AxiosError 타입 체크
           if (error instanceof AxiosError) {
-            console.error('Error response:', {
-              status: error.response?.status,
-              data: error.response?.data,
-              headers: error.response?.headers,
-            });
+            // console.error('Error response:', {
+            //   status: error.response?.status,
+            //   data: error.response?.data,
+            //   headers: error.response?.headers,
+            // });
           } else {
-            console.error('Non-Axios error:', error);
+            // console.error('Non-Axios error:', error);
           }
 
           const errorMessage = error instanceof Error
@@ -369,15 +369,17 @@ const useSubAccountStore = create<SubAccountState>()(
         try {
           const { selectedAccount } = get();
           if (selectedAccount?.childId) {
-            const token = tokenService.getActiveToken(true);
-            console.log('Logout 요청 전 토큰:', token);
-            console.log('Logout 요청 childId:', selectedAccount.childId);
+            tokenService.getActiveToken(true);
+            // const token = tokenService.getActiveToken(true);
+            // console.log('Logout 요청 전 토큰:', token);
+            // console.log('Logout 요청 childId:', selectedAccount.childId);
 
-            const response = await api.post('/children/logout', {
+            // const response = await api.post('/children/logout', {
+            await api.post('/children/logout', {
               childId: selectedAccount.childId.toString(),
             });
 
-            console.log('Logout 응답:', response);
+            // console.log('Logout 응답:', response);
           }
 
           // tokenService 초기화

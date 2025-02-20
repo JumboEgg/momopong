@@ -92,7 +92,7 @@ function TogetherMode() {
   // 상태 관리
   // const [currentContentIndex, setCurrentContentIndex] = useState(0);
   const [recordingStates, setRecordingStates] = useState<RecordingState>({});
-  const [isWaitingForOther, setIsWaitingForOther] = useState(false);
+  // const [isWaitingForOther, setIsWaitingForOther] = useState(false);
   const [isProcessingRecording, setIsProcessingRecording] = useState(false);
 
   // 현재 페이지 및 컨텐츠 계산
@@ -195,7 +195,7 @@ function TogetherMode() {
     if (!currentPage) return;
     // 모든 상태 초기화 추가
     setRecordingStates({});
-    setIsWaitingForOther(false);
+    // setIsWaitingForOther(false);
     setIsProcessingRecording(false);
     setIsDrawingMode(false); // 드로잉 모드도 초기화
 
@@ -314,7 +314,7 @@ function TogetherMode() {
     }));
 
     // 대기 상태 설정
-    setIsWaitingForOther(true);
+    // setIsWaitingForOther(true);
   }, []);
 
   const handleRecordingStateChange = useCallback(
@@ -365,11 +365,14 @@ function TogetherMode() {
         />
 
         {/* 녹음 대기 상태 표시 */}
-        {isWaitingForOther && (
-          <div className="fixed top-4 left-1/2 transform -translate-x-1/2 bg-blue-100 text-blue-800 px-6 py-3 rounded-full shadow-lg">
+        {/* {isWaitingForOther && (
+          <div className="fixed
+           top-4 left-1/2 transform -translate-x-1/2
+           bg-blue-100 text-blue-800 px-6 py-3 rounded-full shadow-lg"
+          >
             상대방의 녹음이 끝날 때까지 기다려주세요...
           </div>
-        )}
+        )} */}
 
         {/* 오디오 플레이어 (내레이션) */}
         {currentContent?.role === 'narration' && audioEnabled && currentContent.order && (

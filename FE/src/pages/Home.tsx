@@ -4,7 +4,7 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 import { getToken } from 'firebase/messaging';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
@@ -26,6 +26,18 @@ function HomePage() {
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
+
+  // updateChildStatus를 메모이제이션
+  const updateStatus = useCallback(() => {
+    if (selectedAccount) {
+      updateChildStatus();
+    }
+  }, [selectedAccount, updateChildStatus]);
+
+  // 상태 초기화는 마운트시 한 번만 실행
+  useEffect(() => {
+    updateStatus();
+  }, [updateStatus]);
 
   useEffect(() => {
     const registerFCMToken = async () => {
@@ -53,21 +65,21 @@ function HomePage() {
     clearRoles();
   }, []);
 
-  useEffect(() => {
-    if (!selectedAccount) {
-      return undefined;
-    }
+  // useEffect(() => {
+  //   if (!selectedAccount) {
+  //     return undefined;
+  //   }
 
-    // 초기 상태 업데이트
-    updateChildStatus();
+  //   // 초기 상태 업데이트
+  //   updateChildStatus();
 
-    // 주기적으로 상태 업데이트 (선택사항)
-    const intervalId = setInterval(() => {
-      updateChildStatus();
-    }, 60000); // 1분마다 업데이트
+  //   // 주기적으로 상태 업데이트 (선택사항)
+  //   const intervalId = setInterval(() => {
+  //     updateChildStatus();
+  //   }, 60000); // 1분마다 업데이트
 
-    return () => clearInterval(intervalId);
-  }, [selectedAccount, updateChildStatus]);
+  //   return () => clearInterval(intervalId);
+  // }, [selectedAccount, updateChildStatus]);
 
   useEffect(() => {
     setRecentLetterList();

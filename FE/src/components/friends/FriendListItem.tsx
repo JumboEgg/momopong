@@ -53,7 +53,7 @@ function FriendListItem({ friend, isLast }: FriendListItemProps): JSX.Element {
               alt={`${friend.name} profile`}
               className="w-12 h-12 rounded-full"
               onError={(e) => {
-                console.error('Image load error:', e);
+                // console.error('Image load error:', e);
                 e.currentTarget.src = DEFAULT_PROFILE;
               }}
             />
