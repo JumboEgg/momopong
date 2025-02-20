@@ -548,15 +548,21 @@ function IntegratedRoom({
       </div>
     );
   }
-//   <div className="w-96 h-72 fixed bottom-8 left-8">
-//   {renderParticipantVideo(0)}
-// </div>
-// <div className="left-1/2 bottom-8">
-//   {renderRecordingButton()}
-// </div>
-// <div className="w-96 h-72 fixed bottom-8 right-8">
-//   {renderParticipantVideo(1)}
-// </div>
+
+  if (variant === 'drawing') {
+    return (
+      <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
+        <div className="w-48 h-36 fixed bottom-8 left-8">
+          {renderParticipantVideo(0)}
+        </div>
+        {renderRecordingButton()}
+        <div className="w-48 h-36 fixed bottom-8 right-8">
+          {renderParticipantVideo(1)}
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="fixed bottom-8 left-8 right-8 flex items-center justify-between">
       <div className="w-96 h-72">
