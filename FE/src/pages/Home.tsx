@@ -4,7 +4,7 @@ import useSubAccountStore from '@/stores/subAccountStore';
 import { saveFCMToken } from '@/api/storyApi';
 import { HandleAllowNotification, messaging } from '@/services/firebaseService';
 import { getToken } from 'firebase/messaging';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import BackgroundMusic from '@/components/BackgroundMusic';
 import NotificationModal from '@/components/common/modals/NotificationModal';
@@ -15,7 +15,7 @@ import { useSketchList } from '@/stores/drawing/sketchListStore';
 
 function HomePage() {
   const navigate = useNavigate();
-  const { selectedAccount } = useSubAccountStore();
+  const { selectedAccount, updateChildStatus } = useSubAccountStore();
   const { setRecentLetterList } = useRecentLetterStore();
   const { setSketchList } = useSketchList();
   const handleNavigation = (path: '/profile' | '/friends' | '/drawing' | '/story' | '/house'): void => {
@@ -26,6 +26,18 @@ function HomePage() {
   const [hoveredItem, setHoveredItem] = useState<'drawing' | 'story' | 'house' | 'post' | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false); // 친구목록 모달
   const [isLettersModalOpen, setIsLettersModalOpen] = useState<boolean>(false);
+
+  // updateChildStatus를 메모이제이션
+  const updateStatus = useCallback(() => {
+    if (selectedAccount) {
+      updateChildStatus();
+    }
+  }, [selectedAccount, updateChildStatus]);
+
+  // 상태 초기화는 마운트시 한 번만 실행
+  useEffect(() => {
+    updateStatus();
+  }, [updateStatus]);
 
   useEffect(() => {
     const registerFCMToken = async () => {
