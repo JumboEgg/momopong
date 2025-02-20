@@ -5,8 +5,8 @@ self.addEventListener('install', (event) => {
         return cache.addAll([
           '/', 
           '/index.html', 
-          '/images/favicon.ico', 
-          '/images/apple-touch-icon-180x180.png', 
+          '/favicon.ico', 
+          '/apple-touch-icon-180x180.png', 
           // 필요한 리소스 추가
         ]);
       })
