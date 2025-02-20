@@ -34,7 +34,7 @@ function AudioRecorderSTT() {
   const setupWebSocket = async () => {
     if (webSocket.current) webSocket.current.close();
 
-    const base_url = 'ws://localhost:8081/api/book/letter/stt';
+    const base_url = 'wss://i12d103.p.ssafy.io/api/book/letter/stt';
     webSocket.current = new WebSocket(base_url);
 
     webSocket.current.onopen = async () => {
