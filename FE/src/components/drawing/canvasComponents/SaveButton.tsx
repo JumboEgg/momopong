@@ -133,7 +133,7 @@ function SaveButton({ canvasRef, userRole, handleNext }: SaveButtonProps) {
 
     if (drawingCompleted && partnerCompleted && handleNext) {
       if (!handleNext) return;
-      handleNext();
+      // handleNext();
       setTimeout(() => {
         if (handleNext) {
           console.log('handleNext 함수 실행');

@@ -54,8 +54,6 @@ function HomePage() {
   }, []);
 
   useEffect(() => {
-    setSketchList();
-
     if (!selectedAccount) {
       return undefined;
     }
@@ -73,6 +71,7 @@ function HomePage() {
 
   useEffect(() => {
     setRecentLetterList();
+    setSketchList();
   }, []);
 
   const handleOpenModal = () => {
