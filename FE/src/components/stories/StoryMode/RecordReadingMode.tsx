@@ -3,6 +3,7 @@ import {
   useCallback,
   useState,
   ReactElement,
+  useEffect
 } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStory } from '@/stores/storyStore';
@@ -35,6 +36,13 @@ function RecordReadingMode(): ReactElement {
       audioRef.current.currentTime = 0;
     }
   }, []);
+
+  useEffect(() => {
+    if (readingHistoryContent?.pages && currentIndex >= readingHistoryContent.pages.length) {
+      console.log('Invalid currentIndex detected, resetting to 0');
+      setCurrentIndex(0);
+    }
+  }, [readingHistoryContent, currentIndex]);
 
   const handleNext = useCallback(() => {
     const currentPage = readingHistoryContent?.pages[currentIndex];
