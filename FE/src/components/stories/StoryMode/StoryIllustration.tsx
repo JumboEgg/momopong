@@ -1,6 +1,9 @@
 import { IconCircleButton } from '@/components/common/buttons/CircleButton';
 import { faCaretLeft, faCaretRight } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { getBackgroundPath } from '@/utils/format/imgPath';
+import { useStory } from '@/stores/storyStore';
+import { useRecordList } from '@/stores/book/bookRecordListStore';
 import { StoryIllustrationProps, CharacterType } from '../types/story';
 
 function StoryIllustration({
@@ -18,6 +21,9 @@ function StoryIllustration({
 }: StoryIllustrationProps) {
   // currentContent가 없으면 일찍 반환
   if (!currentContent) return null;
+
+  const { mode } = useStory();
+  const { drawingResult } = useRecordList();
 
   const relatedContents = [currentContent];
 
@@ -44,14 +50,17 @@ function StoryIllustration({
       {/* 다른 이미지를 얹을지 여부를 확인 */}
       {hasObject && position && (
       <img
-        src={position.sketchPath} // position에 이미지 URL이 포함되어 있다고 가정
+        src={
+          mode === 'reading'
+          ? getBackgroundPath(position.sketchPath ?? '')
+          : drawingResult ?? getBackgroundPath('pumbkinmagic.webp')
+        } // position에 이미지 URL이 포함되어 있다고 가정
         alt="Overlay Object" // TODO : 정상 동작 테스트. 안 되면 합성한 이미지로 대체
         className="absolute"
         style={{
-            top: `${position.y / 10}%`, // %로 위치 지정
-            left: `${position.x / 16}%`,
-            width: `${position.ratio}%`, // %로 크기 지정
-            height: `${position.ratio}%`,
+            top: `${position.y - position.ratio * 50}px`, // %로 위치 지정
+            left: `${position.x - position.ratio * 80}px`,
+            width: `${position.ratio * 160}px`, // %로 크기 지정
             transform: `rotate(${position.angle}deg)`, // 각도 회전
             transformOrigin: 'center', // 회전의 기준점
           }}
