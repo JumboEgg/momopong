@@ -2,10 +2,10 @@ package com.ssafy.project.service;
 
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Parent;
-import com.ssafy.project.dto.ChildListDto;
-import com.ssafy.project.dto.LoginRequestDto;
-import com.ssafy.project.dto.ParentDto;
-import com.ssafy.project.dto.ParentSignUpRequestDto;
+import com.ssafy.project.dto.user.ChildListDto;
+import com.ssafy.project.dto.user.LoginRequestDto;
+import com.ssafy.project.dto.user.ParentDto;
+import com.ssafy.project.dto.user.ParentSignUpRequestDto;
 import com.ssafy.project.exception.DuplicateException;
 import com.ssafy.project.exception.InvalidTokenException;
 import com.ssafy.project.exception.UserNotFoundException;
@@ -35,7 +35,7 @@ public class ParentServiceImpl implements ParentService {
     private final PasswordEncoder passwordEncoder;
     private final TokenBlacklistService tokenBlacklistService;
     private final ChildService childService;
-    private final PresignedUrlService presignedUrlService;
+    private final CloudFrontService cloudFrontService;
 
     // 부모 회원가입
     @Override
@@ -63,6 +63,7 @@ public class ParentServiceImpl implements ParentService {
         return parentRepository.findByEmail(email).isPresent();
     }
 
+    // 부모 로그인
     @Override
     public JwtToken login(LoginRequestDto loginDto) {
         // Authentication 객체 생성
@@ -75,6 +76,7 @@ public class ParentServiceImpl implements ParentService {
         return jwtTokenProvider.generateTokenWithAuthentication(authentication);
     }
 
+    // 부모 사용자 조회
     @Override
     public ParentDto readParentById(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
@@ -118,6 +120,7 @@ public class ParentServiceImpl implements ParentService {
         return parent.entityToDto();
     }
 
+    // 전체 자식 목록
     @Override
     public List<ChildListDto> childrenList(Long parentId) {
         Parent parent = parentRepository.findById(parentId)
@@ -128,10 +131,13 @@ public class ParentServiceImpl implements ParentService {
                 .map(child -> ChildListDto.builder()
                         .childId(child.getId())
                         .name(child.getName())
-                        .profile(presignedUrlService.getProfile(child.getProfile()))
+                        .profile(cloudFrontService.getSignedUrl(child.getProfile()))
+                        .age(child.getAge())
+                        .daysSinceStart(child.getDaysSinceStart())
                         .build())
                 .collect(Collectors.toList());
     }
+
     @Override
     public void deleteParent(Long parentId) {
         // 논리적 삭제

@@ -11,7 +11,6 @@ public interface LetterService {
     // 편지저장
     void saveLetter(Long childId, String content, String reply, String bookTitle, String role, String letterFileName);
 
-    Map<String, String> getPresignedUrl();
 
     // GPT 답장
     String getGPTResponse(String fairyTale, String role, String childName, String content);
@@ -20,4 +19,6 @@ public interface LetterService {
     List<LetterDto> getLettersByChildId(Long childId);
     // 편지 상세 조회
     LetterDto getLetter(Long childId, Long letterId);
+    // 아이의 오늘 편지 조회
+    List<LetterDto> getTodayLettersByChildId(Long childId);
 }

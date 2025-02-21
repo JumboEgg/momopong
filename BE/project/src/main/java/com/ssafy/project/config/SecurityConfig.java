@@ -3,10 +3,8 @@ package com.ssafy.project.config;
 import com.ssafy.project.security.JwtAuthenticationFilter;
 import com.ssafy.project.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -42,8 +40,11 @@ public class SecurityConfig {
                 mvc.pattern("/token"),
                 mvc.pattern("/api/book/letter/**"),
                 mvc.pattern("/api/profile/**"),
+                mvc.pattern(("/api/token")),
                 mvc.pattern("/ws/**"),
-                mvc.pattern("/api/children/presigned-url")
+                mvc.pattern("/wss/**"),
+                mvc.pattern("/api/children/presigned-url"),
+                mvc.pattern("/api/audio/**")
         };
 
 

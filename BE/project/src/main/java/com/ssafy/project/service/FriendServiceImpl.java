@@ -5,7 +5,7 @@ import com.ssafy.project.dao.RedisDao;
 import com.ssafy.project.domain.Child;
 import com.ssafy.project.domain.Friend;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.ChildStatusDto;
+import com.ssafy.project.dto.user.ChildStatusDto;
 import com.ssafy.project.dto.friend.FriendDto;
 import com.ssafy.project.dto.friend.FriendListDto;
 import com.ssafy.project.exception.friend.AlreadyAcceptedException;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class FriendServiceImpl implements FriendService {
     private final FriendRepository friendRepository;
     private final ChildRepository childRepository;
-    private final PresignedUrlService presignedUrlService;
+    private final CloudFrontService cloudFrontService;
     private final RedisDao redisDao;
     private final JsonConverter jsonConverter;
 
@@ -47,7 +47,7 @@ public class FriendServiceImpl implements FriendService {
 
                     // Redis에서 상태 가져오기
                     StatusType status;
-                    String key = String.format(CHILD_STATUS_KEY, friend.getId());
+                    String key = String.format(CHILD_STATUS_KEY, toChild.getId());
                     Object json = redisDao.getValues(key);
                     if (json == null) status = StatusType.OFFLINE;
                     else status = jsonConverter.fromJson((String) json, ChildStatusDto.class).getStatus();
@@ -55,7 +55,7 @@ public class FriendServiceImpl implements FriendService {
                     return  FriendListDto.builder()
                             .childId(toChild.getId())
                             .name(toChild.getName())
-                            .profile(presignedUrlService.getProfile(toChild.getProfile()))
+                            .profile(cloudFrontService.getSignedUrl(toChild.getProfile()))
                             .status(status).build();
                 })
                 .collect(Collectors.toList());
@@ -89,7 +89,7 @@ public class FriendServiceImpl implements FriendService {
                         .friendId(request.getId())
                         .fromId(request.getFrom().getId())
                         .fromName(request.getFrom().getName())
-                        .fromProfile(presignedUrlService.getProfile(request.getFrom().getProfile()))
+                        .fromProfile(cloudFrontService.getSignedUrl(request.getFrom().getProfile()))
                         .toId(request.getTo().getId()).build())
                 .collect(Collectors.toList());
     }
@@ -129,7 +129,7 @@ public class FriendServiceImpl implements FriendService {
                 .friendId(saved.getId())
                 .fromId(fromChild.getId())
                 .fromName(fromChild.getName())
-                .fromProfile(presignedUrlService.getProfile(fromChild.getProfile()))
+                .fromProfile(cloudFrontService.getSignedUrl(fromChild.getProfile()))
                 .toId(toChild.getId()).build();
     }
 

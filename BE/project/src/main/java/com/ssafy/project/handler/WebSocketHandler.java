@@ -7,6 +7,7 @@ import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
 import com.ssafy.project.config.GoogleCloudConfig;
 import com.ssafy.project.service.LetterService;
+import jakarta.annotation.PreDestroy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -48,6 +49,20 @@ public class WebSocketHandler extends TextWebSocketHandler {
             throw new RuntimeException("Could not initialize SpeechClient", e);
         }
     }
+
+    @PreDestroy
+    public void cleanup() {
+        if (speechClient != null) {
+            try {
+                speechClient.close();  // gRPC 채널을 명시적으로 종료
+            } catch (Exception e) {
+                // 로그만 남기고 다른 정리 작업은 계속 진행
+                log.error("Error closing SpeechClient", e);
+            }
+        }
+    }
+
+
     // 클라이언트에게
     private void sendMessageToClient(WebSocketSession session, String message) {
         try {
@@ -64,7 +79,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) {
-        System.out.println("WebSocket connection established.");
+        log.info("WebSocket connection established");
 
         ApiStreamObserver<StreamingRecognizeResponse> responseObserver = new ApiStreamObserver<StreamingRecognizeResponse>() {
             @Override
@@ -100,7 +115,6 @@ public class WebSocketHandler extends TextWebSocketHandler {
             }
 
 
-
             @Override
             public void onError(Throwable t) {
                 log.error("Streaming error occurred", t);
@@ -119,12 +133,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             @Override
             public void onCompleted() {
-
-                System.out.println("Streaming completed.");
+                log.info("Streaming completed");
             }
         };
-
-
 
         requestObserver = speechClient.streamingRecognizeCallable().bidiStreamingCall(responseObserver);
 
@@ -155,11 +166,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) {
-        System.out.println("WebSocket connection closed.");
+        log.info("WebSocket connection closed");
         if (requestObserver != null) {
             requestObserver.onCompleted();
         }
     }
-
-
 }

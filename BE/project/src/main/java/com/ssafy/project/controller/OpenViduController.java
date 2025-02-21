@@ -5,14 +5,17 @@ import io.livekit.server.RoomJoin;
 import io.livekit.server.RoomName;
 import io.livekit.server.WebhookReceiver;
 import livekit.LivekitWebhook.WebhookEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
+@Slf4j
 @CrossOrigin(origins = "*")
 @RestController
+@RequestMapping("/api")
 public class OpenViduController {
 
 	@Value("${livekit.api.key}")
@@ -21,10 +24,6 @@ public class OpenViduController {
 	@Value("${livekit.api.secret}")
 	private String LIVEKIT_API_SECRET;
 
-	/**
-	 * @param params JSON object with roomName and participantName
-	 * @return JSON object with the JWT token
-	 */
 	@PostMapping(value = "/token")
 	public ResponseEntity<Map<String, String>> createToken(@RequestBody Map<String, String> params) {
 		String roomName = params.get("roomName");
@@ -38,7 +37,7 @@ public class OpenViduController {
 		token.setName(participantName);
 		token.setIdentity(participantName);
 		token.addGrants(new RoomJoin(true), new RoomName(roomName));
-
+		log.info("token={}", token);
 		return ResponseEntity.ok(Map.of("token", token.toJwt()));
 	}
 
@@ -47,11 +46,9 @@ public class OpenViduController {
 		WebhookReceiver webhookReceiver = new WebhookReceiver(LIVEKIT_API_KEY, LIVEKIT_API_SECRET);
 		try {
 			WebhookEvent event = webhookReceiver.receive(body, authHeader);
-			System.out.println("LiveKit Webhook: " + event.toString());
 		} catch (Exception e) {
-			System.err.println("Error validating webhook event: " + e.getMessage());
+			log.error("Error validating webhook event={}", e.getMessage());
 		}
 		return ResponseEntity.ok("ok");
 	}
-
 }

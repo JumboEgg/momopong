@@ -3,6 +3,9 @@ package com.ssafy.project.domain.book;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Builder
@@ -19,7 +22,17 @@ public class Page {
     @JoinColumn(name = "book_id")
     private Book book;
 
-    private int pageNum; // 페이지 번호
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL)
+    @OrderBy("audioNumber asc")
+    private List<Audio> audioList = new ArrayList<>();
 
-    private String imageUrl; // 동화 이미지 URL
+    private int pageNumber; // 페이지 번호
+    private String pagePath; // 페이지 이미지 경로
+    private boolean hasDrawing; // 그림 그리기 여부
+    private boolean hasObject; // 오브젝트 존재 여부
+
+    public void addPage(Book book) {
+        this.book = book;
+        book.getPageList().add(this);
+    }
 }

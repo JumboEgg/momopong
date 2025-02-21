@@ -10,6 +10,7 @@ import com.ssafy.project.exception.UserNotFoundException;
 import com.ssafy.project.repository.ChildRepository;
 import com.ssafy.project.repository.LetterRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -24,12 +25,14 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Slf4j
 
 @Service
 @RequiredArgsConstructor
 public class LetterServiceImpl implements LetterService {
 
     private final AmazonS3 amazonS3;
+    private final CloudFrontService cloudFrontService;
 
     @Value("${openai.api.key}")
     private String apiKey;
@@ -41,51 +44,51 @@ public class LetterServiceImpl implements LetterService {
     private final LetterRepository letterRepository;
     private final ChildRepository childRepository;
 
-    // 편지 음성 저장용 S3 presignedUrl 생성하고 return
-    @Override
-    public Map<String, String> getPresignedUrl() {
-        String fileName = "letters/" + UUID.randomUUID().toString() + ".wav";
 
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, fileName)
-                        .withMethod(HttpMethod.PUT)
-                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("presignedUrl", url.toString());   //파일 업로드를 위한 임시 권한용
-        response.put("fileName", fileName);     // 파일 이름
-
-        return response;
-    }
 
     //gpt 응답 받아서 return
     @Override
     public String getGPTResponse(String fairyTale, String role, String childName, String content) {
         // GPT 프롬프트 생성
+//        String prompt = String.format(
+//                "너는 동화 속 주인공이야. 아래의 지시사항을 따르고 정보에 맞게 8세 아이가 주인공에게 쓴 편지에 답장을 해줘. 편지가 음성녹음을 stt로 변환한거라서 잘못된 내용이 들어갈수도있는것을 감안해줘.  " +
+//                        "###지시사항### " +
+//                        "1. 아이의 편지와 맥락이 맞는 답장을 작성해줘 " +
+//                        "2. 8세 아이가 받을 거니까 말투를 상냥하고 이야기를 잘 풀어서 이야기 해줘 " +
+//                        "3. 4줄로 적어줘 " +
+//                        "4. 보낸사람의 이름을 답장에 넣어줘 " +
+//                        "5. 답장만 작성해줘. 끝에 누가 줬는지 적지마 " +
+//                        "###정보### " +
+//                        "동화: \"%s\" " +
+//                        "역할: \"%s\" " +
+//                        "아이 이름: \"%s\" " +
+//                        "편지 내용: \"%s\"",
+//                fairyTale, role, childName, content
+//        );
+
         String prompt = String.format(
-                "너는 동화 속 주인공이야. 아래의 지시를 따라서 8세 아이가 주인공에게 쓴 편지에 답장을 해줘. " +
+                "너는 동화 속 주인공이야. 아래의 지시사항을 따르고 정보에 맞게 8세 아이가 주인공에게 쓴 편지에 답장을 해줘. 편지가 음성녹음을 stt로 변환한거라서 잘못된 내용이 들어갈수도있는것을 감안해줘.  " +
                         "###지시사항### " +
                         "1. 아이의 편지와 맥락이 맞는 답장을 작성해줘 " +
                         "2. 8세 아이가 받을 거니까 말투를 상냥하고 이야기를 잘 풀어서 이야기 해줘 " +
                         "3. 4줄로 적어줘 " +
-                        "4. 끝인사를 넣어줘 " +
-                        "5. 보낸사람의 이름도 답장에 넣어줘 " +
+                        "4. 보낸사람의 이름을 답장에 넣어줘 " +
+                        "5. 답장만 작성해줘. 끝에 누가 줬는지 적지마 " +
                         "###정보### " +
-                        "동화: \"%s\" " +
+                        "동화: 신데렐라 " +
                         "역할: \"%s\" " +
                         "아이 이름: \"%s\" " +
                         "편지 내용: \"%s\"",
-                fairyTale, role, childName, content
+                role, childName, content
         );
+
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setBearerAuth(apiKey);
 
         Map<String, Object> requestBody = new HashMap<>();
-        requestBody.put("model", "gpt-4");
+        requestBody.put("model", "gpt-4o");
         requestBody.put("messages", Arrays.asList(
                 Map.of("role", "user", "content", prompt)
         ));
@@ -101,7 +104,23 @@ public class LetterServiceImpl implements LetterService {
         Map body = response.getBody();
         List<Map<String, Object>> choices = (List<Map<String, Object>>) body.get("choices");
         Map<String, Object> message = (Map<String, Object>) choices.get(0).get("message");
-        return (String) message.get("content");
+        String fullResponse = (String) message.get("content");
+
+        // "편지 내용:" 이후의 텍스트를 찾아서 추출
+        String[] parts = fullResponse.split("편지 내용: ");
+        if (parts.length > 1) {
+            String tempResponse = parts[1];
+            // 다음 줄바꿈 이후의 텍스트가 실제 답장
+            String[] responseParts = tempResponse.split("\n", 2);
+            if (responseParts.length > 1) {
+                return responseParts[1]
+                        .replaceAll("---", "")  // --- 제거
+                        .replaceAll("^\n+|\n+$", "")  // 시작과 끝의 개행문자 제거
+                        .trim();  // 앞뒤 공백 제거
+            }
+        }
+
+        return fullResponse; // 파싱 실패시 전체 응답 반환
     }
 
     // 편지 DB에 저장
@@ -118,8 +137,11 @@ public class LetterServiceImpl implements LetterService {
                 .bookTitle(bookTitle)
                 .role(role)
                 .letterFileName(letterFileName)
-                .createdAt(LocalDateTime.now())
                 .build();
+
+        log.info("letter={}", letter);
+
+        letterRepository.save(letter);
     }
 
     // 아이의 편지를 dto를 list에 담아서 return
@@ -129,7 +151,8 @@ public class LetterServiceImpl implements LetterService {
         return letters.stream()
                 .map(letter -> {
                     LetterDto letterDto = Letter.entityToDto(letter);
-                    letterDto.updateletterUrl(getLetterUrl(letterDto.getLetterFileName()));
+                    letterDto.updateletterUrl(cloudFrontService.getSignedUrl(letterDto.getLetterFileName()));
+//                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
 
                     return letterDto;
                 })
@@ -148,15 +171,18 @@ public class LetterServiceImpl implements LetterService {
         return Letter.entityToDto(letter);
     }
 
-
-    // 편지 조회용 S3 presignedUrl 생성
-    private String getLetterUrl(String fileName) {  //여기서만 사용해서 private이다
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
-                .withMethod(HttpMethod.GET)
-                .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        System.out.println("url.toString() = " + url.toString());
-        return url.toString();
+    //아이의 오늘쓴 편지 dto 담은 list return
+    @Override
+    public List<LetterDto> getTodayLettersByChildId(Long childId) {
+        List<Letter> todayLetters = letterRepository.findTodayLettersByChildId(childId);
+        return todayLetters.stream()
+                .map(letter -> {
+                    LetterDto letterDto = Letter.entityToDto(letter);
+                    letterDto.updateletterUrl(cloudFrontService.getSignedUrl(letterDto.getLetterFileName()));
+//                    letterDto.updateletterUrl(presignedUrlService.getFile(letterDto.getLetterFileName()));
+                    return letterDto;
+                })
+                .collect(Collectors.toList());
     }
+
 }

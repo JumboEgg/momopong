@@ -2,7 +2,7 @@ package com.ssafy.project.domain;
 
 import com.ssafy.project.domain.type.GenderType;
 import com.ssafy.project.domain.type.StatusType;
-import com.ssafy.project.dto.ChildDto;
+import com.ssafy.project.dto.user.ChildDto;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Past;

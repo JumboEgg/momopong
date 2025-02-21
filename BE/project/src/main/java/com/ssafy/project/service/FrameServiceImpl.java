@@ -33,29 +33,11 @@ public class FrameServiceImpl implements FrameService {
 
     private final AmazonS3 amazonS3;
 
+    private final CloudFrontService cloudFrontService;
+
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
-    //그림(서브컨텐츠) 저장용 s3 presigned url 생성 및 파일이름 생성
-    @Override
-    public Map<String, String> getPresignedUrl() {
-        String fileName = "frames/" + UUID.randomUUID().toString() + ".webp";
-
-        GeneratePresignedUrlRequest generatePresignedUrlRequest =
-                new GeneratePresignedUrlRequest(bucket, fileName)
-                        .withMethod(HttpMethod.PUT)
-                        .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-
-        Map<String, String> response = new HashMap<>();
-        response.put("presignedUrl", url.toString());
-        response.put("fileName", fileName);
-
-
-
-        return response;
-    }
 
     //그림(서브 컨텐츠) DB에 저장
     @Override
@@ -81,21 +63,12 @@ public class FrameServiceImpl implements FrameService {
         return frames.stream()
                 .map(frame -> {
                     FrameDto frameDto = Frame.entityToDto(frame);
-                    frameDto.updateFrameUrl(getFrameUrl(frameDto.getFrameFileName()));
+                    frameDto.updateFrameUrl(cloudFrontService.getSignedUrl(frameDto.getFrameFileName()));
+//                    frameDto.updateFrameUrl(presignedUrlService.getFile(frameDto.getFrameFileName()));
 
                     return frameDto;
                 })
                 .collect(Collectors.toList());
     }
 
-    // 편지 조회용 S3 presignedUrl 생성
-    private String getFrameUrl(String fileName) {  //여기서만 사용해서 private이다
-        GeneratePresignedUrlRequest generatePresignedUrlRequest = new GeneratePresignedUrlRequest(bucket, fileName)
-                .withMethod(HttpMethod.GET)
-                .withExpiration(DateTime.now().plusMinutes(5).toDate());
-
-        URL url = amazonS3.generatePresignedUrl(generatePresignedUrlRequest);
-        System.out.println("url.toString() = " + url.toString());
-        return url.toString();
-    }
 }

@@ -46,12 +46,8 @@ dependencies {
 	implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
 	implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-	// Web Socket
-	implementation 'org.springframework.boot:spring-boot-starter-websocket'
-
 	//openvidu
 	implementation 'io.livekit:livekit-server:0.8.2'
-
 
 	// stt
 	implementation 'org.springframework.boot:spring-boot-configuration-processor'
@@ -68,10 +64,15 @@ dependencies {
 	implementation 'com.corundumstudio.socketio:netty-socketio:2.0.3'
 
 	// Swagger UI
-// Swagger UI 의존성 업데이트
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.2.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-common:2.2.0'
 	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-api:2.2.0'
+
+	// Firebase 설정 (FCM을 위해 추가)
+	implementation 'com.google.firebase:firebase-admin:9.4.3'
+
+	// CloudFront
+	implementation 'software.amazon.awssdk:cloudfront:2.25.11'
 }
 
 tasks.named('test') {
