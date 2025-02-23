@@ -181,7 +181,7 @@ function TogetherMode() {
     return currentContent.role === myRole;
   }, [myRole, currentContent]);
 
-  useEffect(() => {
+  const handleNextPage = () => {
     console.log('handleNext 호출됨', {
       currentIndex,
       currentAudioIndex,
@@ -193,7 +193,11 @@ function TogetherMode() {
     if (!currentPage) return;
     uploadRecord();
     setPageImage(currentPage);
-  }, [currentIndex]);
+  };
+
+  useEffect(() => {
+    handleNextPage();
+  }, [currentPage]);
 
   // 다음 페이지/컨텐츠로 이동
   const handleNext = useCallback(() => {
@@ -226,19 +230,9 @@ function TogetherMode() {
       setCurrentAudioIndex(0);
     } else {
       console.log('모든 페이지 완료, 종료');
+      uploadRecord();
       handleBookCompletion();
     }
-
-    // if (currentContentIndex < currentPage.audios.length - 1) {
-    //   setCurrentContentIndex((prev) => prev + 1);
-    // } else if (currentIndex < storyData.length - 1) {
-    //   setCurrentIndex(currentIndex + 1);
-    //   setCurrentContentIndex(0);
-    // } else {
-    //   // 읽기 종료 시 읽기 기록 정보 갱신
-    //   endBookRecordSession(bookRecordId ?? 0);
-    //   navigate('/book/letter');
-    // }
   }, [currentIndex, currentAudioIndex, currentPage, setCurrentIndex, bookRecordId]);
 
   // 오디오 정보 저장
@@ -292,12 +286,6 @@ function TogetherMode() {
 
   // 모든 참가자의 녹음 완료 여부 확인
   useEffect(() => {
-    // console.log('녹음 상태 변경:', {
-    //   recordingStates,
-    //   isProcessingRecording,
-    //   participantCount: Object.keys(recordingStates).length,
-    // });
-
     const allParticipantsCompleted = Object
       .values(recordingStates)
       .every((state) => state.isCompleted);

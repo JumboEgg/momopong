@@ -58,6 +58,31 @@ function ScrollContainer({ children }: ScrollContainerProps) {
     [page, isScrolling],
   );
 
+  // Swipe logic
+  const [touchStart, setTouchStart] = useState<number>(0);
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touchStartY = event.touches[0].clientY;
+    setTouchStart(touchStartY);
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    const touchEndY = event.changedTouches[0].clientY;
+
+    if (isScrolling) return;
+
+    setIsScrolling(true);
+    // 페이지 이동 로직
+    setTimeout(() => setIsScrolling(false), 1000);
+
+    let nextPage = page;
+    if (touchStart - touchEndY > 50) nextPage += 1; // swipe down
+    else if (touchEndY - touchStart > 50) nextPage -= 1; // swipe up
+
+    nextPage = getCurrentPage(nextPage);
+    moveToPage(nextPage);
+  };
+
   useEffect(() => {
     if (containerRef.current) {
       const pages = [...containerRef.current.querySelectorAll('.scroll-page')];
@@ -69,6 +94,8 @@ function ScrollContainer({ children }: ScrollContainerProps) {
     <div
       ref={containerRef}
       onWheel={handleWheel}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       className="relative w-[100vw] h-[100vh] top-0 transition-700 scroll-smooth scroll-container"
     >
       {children}

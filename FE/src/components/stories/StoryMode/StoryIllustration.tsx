@@ -52,17 +52,17 @@ function StoryIllustration({
       <img
         src={
           mode === 'reading'
-          ? getBackgroundPath(position.sketchPath ?? '')
-          : drawingResult ?? getBackgroundPath('pumbkinmagic.webp')
-        } // position에 이미지 URL이 포함되어 있다고 가정
-        alt="Overlay Object" // TODO : 정상 동작 테스트. 안 되면 합성한 이미지로 대체
+          ? getBackgroundPath(position.sketchPath ?? 'pumpkinmagic.webp')
+          : drawingResult ?? getBackgroundPath(position.sketchPath ?? 'pumpkinmagic.webp')
+        }
+        alt="Overlay Object"
         className="absolute"
         style={{
-            top: `${position.y - position.ratio * 50}px`, // %로 위치 지정
+            top: `${position.y - position.ratio * 50}px`,
             left: `${position.x - position.ratio * 80}px`,
-            width: `${position.ratio * 160}px`, // %로 크기 지정
-            transform: `rotate(${position.angle}deg)`, // 각도 회전
-            transformOrigin: 'center', // 회전의 기준점
+            width: `${position.ratio * 160}px`,
+            transform: `rotate(${position.angle}deg)`,
+            transformOrigin: 'center',
           }}
       />
       )}
