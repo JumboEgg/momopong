@@ -266,12 +266,12 @@ src
 #### 2. 리포트
 - 서브 계정 페이지에서 간단한 계산식으로 접근 가능
 - 아이의 주간 활동 통계 및 활동 결과물 확인/다운로드 가능
-    ![report](./ETC/report.gif)
-    ![report2](./ETC/report2.gif)
+![report](./ETC/report.gif)
+![report2](./ETC/report2.gif)
 
 #### 3. 친구 목록 조회 및 추가
 - radis를 통해 관리되는 친구의 활동 상태 확인 가능
-- 내부 키패드 통해 친구 추가 가능
+- 내부 키패드 및 코드 통해 친구 추가 가능
 ![friend_list](./ETC/friend_list.gif)
 ![friend_request](./ETC/friend_request.gif)
 ![friend_request2](./ETC/friend_request2.gif)
