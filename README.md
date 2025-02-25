@@ -271,7 +271,7 @@ src
 
 #### 3. 친구 목록 조회 및 추가
 - radis를 통해 관리되는 친구의 활동 상태 확인 가능
-- 내부 키패드 및 코드 통해 친구 추가 가능
+- 내부 키패드 및 코드 통해 친구 추가 가능<br>
 ![friend_list](./ETC/friend_list.gif)
 ![friend_request](./ETC/friend_request.gif)
 ![friend_request2](./ETC/friend_request2.gif)
